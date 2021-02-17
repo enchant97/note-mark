@@ -33,6 +33,9 @@ class CommonModel(Model):
 
 
 class User(CommonModel):
+    """
+    the user model, inherits from CommonModel
+    """
     username = CharField(25, unique=True)
     password_hash = BinaryField()
 
@@ -49,6 +52,9 @@ class User(CommonModel):
 
 
 class Notebook(CommonModel):
+    """
+    the notebook model, inherits from CommonModel
+    """
     prefix = CharField(100)
     owner: ForeignKeyRelation[User] = ForeignKeyField("models.User", "owned_notebooks")
 
@@ -61,6 +67,9 @@ class Notebook(CommonModel):
 
 
 class NotebookUserShare(CommonModel):
+    """
+    the notebook_user_share model, inherits from CommonModel
+    """
     notebook: ForeignKeyRelation[Notebook] = ForeignKeyField("models.Notebook", "shared_users")
     has_write = BooleanField(default=False)
 
@@ -69,6 +78,9 @@ class NotebookUserShare(CommonModel):
 
 
 class NotebookLinkShare(CommonModel):
+    """
+    the notebook_link_share model, inherits from CommonModel
+    """
     notebook: ForeignKeyRelation[Notebook] = ForeignKeyField("models.Notebook", "shared_links")
     has_write = BooleanField(default=False)
 
@@ -77,6 +89,9 @@ class NotebookLinkShare(CommonModel):
 
 
 class Note(CommonModel):
+    """
+    the note model, inherits from CommonModel
+    """
     prefix = CharField(100)
     notebook: ForeignKeyRelation[Notebook] = ForeignKeyField("models.Notebook", "notes")
 
@@ -85,6 +100,9 @@ class Note(CommonModel):
 
 
 class Upload(CommonModel):
+    """
+    the upload model, inherits from CommonModel
+    """
     prefix = CharField(100)
     note: ForeignKeyRelation[Note] = ForeignKeyField("models.Note", "uploads")
 
