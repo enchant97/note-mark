@@ -10,7 +10,7 @@ blueprint = Blueprint("auth", __name__)
 @blueprint.route("/login", methods=["GET", "POST"])
 async def login():
     if await current_user.is_authenticated:
-        return redirect(url_for("home.index"))
+        return redirect(url_for("personal_home.index"))
 
     if request.method == "POST":
         username = (await request.form)['username']
@@ -18,7 +18,7 @@ async def login():
         user = await crud.check_user(username, password)
         if user:
             login_user(AuthUser(user.uuid.hex))
-            return redirect(url_for("home.index"))
+            return redirect(url_for("personal_home.index"))
         await flash("username or password incorrect", "red")
 
     return await render_template("/auth/login.jinja2")

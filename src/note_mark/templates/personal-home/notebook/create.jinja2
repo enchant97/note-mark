@@ -1,0 +1,9 @@
+{% extends "/shared/base.jinja2" %}
+{% block title %}New Notebook{% endblock %}
+{% block main %}
+<form action="{{ url_for('personal_home.new_notebook') }}" method="post">
+<label for="notebook-name">Name</label>
+<input type="text" name="prefix" id="notebook-name" required placeholder="name...">
+<button type="submit">Save</button>
+</form>
+{% endblock %}

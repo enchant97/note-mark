@@ -1,0 +1,19 @@
+{% extends "/shared/base.jinja2" %}
+{% block title %}My Home{% endblock %}
+{% block main %}
+
+<a href="{{ url_for('personal_home.new_notebook') }}">New Notebook</a>
+
+<div id="personal-notebooks">
+{% for notebook in owned_notebooks %}
+    <a href="{{ url_for('personal_home.get_notebook', notebook_uuid=notebook.uuid) }}">{{ notebook.prefix }}</a>
+{% endfor %}
+</div>
+
+<div id="shared-notebooks">
+    {% for notebook in shared_notebooks %}
+    <a href="{{ url_for('personal_home.get_shared_notebook', notebook_uuid=notebook.uuid) }}">{{ notebook.prefix }}</a>
+    {% endfor %}
+</div>
+
+{% endblock %}

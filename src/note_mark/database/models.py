@@ -70,11 +70,13 @@ class NotebookUserShare(CommonModel):
     """
     the notebook_user_share model, inherits from CommonModel
     """
-    notebook: ForeignKeyRelation[Notebook] = ForeignKeyField("models.Notebook", "shared_users")
+    notebook: ForeignKeyRelation[Notebook] = ForeignKeyField("models.Notebook")
+    shared_with: ForeignKeyRelation[User] = ForeignKeyField("models.User", "shared_users")
     has_write = BooleanField(default=False)
 
     class Meta:
         table = "notebook_user_shares"
+        unique_together = ("notebook", "shared_with")
 
 
 class NotebookLinkShare(CommonModel):
