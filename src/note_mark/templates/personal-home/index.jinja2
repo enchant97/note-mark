@@ -12,7 +12,7 @@
 
 <div id="shared-notebooks">
     {% for notebook in shared_notebooks %}
-    <a href="{{ url_for('personal_home.get_shared_notebook', notebook_uuid=notebook.uuid) }}">{{ notebook.prefix }}</a>
+    <a href="{{ url_for('personal_home.get_notebook', notebook_uuid=notebook.uuid) }}">{{ notebook.prefix }}</a>
     {% endfor %}
 </div>
 

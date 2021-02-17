@@ -2,10 +2,50 @@
 functions to allow easy access
 to the database models(tables) for the app
 """
-from typing import Generator, List, Tuple
+from typing import Generator, List, Tuple, Union
 from uuid import UUID
 
-from .models import Note, Notebook, NotebookUserShare, User
+from tortoise.exceptions import DoesNotExist
+
+from .models import Note, Notebook, NotebookLinkShare, NotebookUserShare, User
+
+## notebook auth check ##
+
+async def check_user_notebook_access(
+    user_uuid: UUID,
+    notebook_uuid: UUID,
+    scopes_required : Union[None, tuple] = None) -> Union[str, None]:
+    """
+    checks whether the user has access to the notebook,
+    if so what level ('write', 'read', 'owner').
+
+        :param user_uuid: the user to check for
+        :param notebook_uuid: the notebook to check for
+        :return: the access level, or None
+    """
+    scope = None
+    # check whether they are the owner
+    if await Notebook.filter(
+        uuid=notebook_uuid,
+        owner_id=user_uuid).get_or_none() is not None:
+        scope = "owner"
+    # not owner, so check if it's shared with the user
+    shared = await NotebookUserShare.filter(
+        notebook_id=notebook_uuid,
+        shared_with_id=user_uuid).get_or_none()
+    # notebook may exist or they do not have access
+    if shared is not None:
+        if shared.has_write:
+            # user has access, check what level
+            scope = "write"
+        else:
+            # user has read access
+            scope = "read"
+    if scopes_required:
+        if scope not in scopes_required:
+            # raise if user does not have scopes required
+            raise DoesNotExist()
+    return scope
 
 ## User CRUD ##
 
@@ -71,8 +111,8 @@ async def create_notebook(owner_uuid: UUID, prefix: str) -> Notebook:
     return notebook
 
 
-async def get_personal_notebook(owner_uuid: UUID, notebook_uuid: UUID) -> Notebook:
-    return await Notebook.filter(owner_id=owner_uuid, uuid=notebook_uuid).get()
+async def get_personal_notebook(notebook_uuid: UUID) -> Notebook:
+    return await Notebook.filter(uuid=notebook_uuid).get()
 
 
 async def get_all_personal_notebooks(owner_uuid: UUID) -> List[Notebook]:
@@ -90,22 +130,48 @@ async def get_shared_notebooks(curr_user_uuid: UUID) -> Generator:
         yield await row.notebook.get()
 
 
-async def delete_notebook(owner_uuid: UUID, notebook_uuid: UUID):
-    notebook = await get_personal_notebook(owner_uuid, notebook_uuid)
+async def delete_notebook(notebook_uuid: UUID):
+    notebook = await get_personal_notebook(notebook_uuid)
     await notebook.delete()
 
 ## NotebookUserShare CRUD ##
 
 async def create_notebook_user_share(
-    owner_uuid: UUID,
     notebook_uuid: UUID,
     user_uuid: UUID,
     write_access=False) -> NotebookUserShare:
-    # check if user has that notebook
-    await get_personal_notebook(owner_uuid, notebook_uuid)
     share = NotebookUserShare(
         notebook_id=notebook_uuid,
         shared_with_id=user_uuid,
         has_write=write_access)
     await share.save()
     return share
+
+## NotebookLinkShare CRUD ##
+
+async def create_notebook_link_share(
+    notebook_uuid: UUID,
+    write_access=False) -> NotebookLinkShare:
+    share = NotebookLinkShare(notebook_id=notebook_uuid, has_write=write_access)
+    await share.save()
+    return share
+
+## Note CRUD ##
+
+async def create_note(notebook_uuid: UUID, prefix: str) -> Note:
+    note = Note(prefix=prefix, notebook_id=notebook_uuid)
+    await note.save()
+    return note
+
+
+async def get_note(note_uuid: UUID) -> Note:
+    return await Note.filter(uuid=note_uuid).get()
+
+
+async def get_notes(notebook_uuid: UUID) -> List[Note]:
+    return await Note.filter(notebook_id=notebook_uuid).all()
+
+
+async def delete_note(note_uuid: UUID):
+    note = await Note.filter(uuid=note_uuid).get()
+    await note.delete()
