@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 from uuid import UUID
 
@@ -54,3 +55,13 @@ async def read_note_file_html(notebook: UUID, note: UUID) -> str:
         extensions=[
             "extra", "sane_lists", "smarty",
             "toc", "admonition", "codehilite"])
+
+
+def delete_note_file(notebook: UUID, note: UUID):
+    fn = get_settings().DATA_PATH / Path("notebooks") / Path(notebook.hex) / Path(note.hex + ".md")
+    fn.unlink(missing_ok=True)
+
+
+def delete_notebook_folder(notebook: UUID):
+    notebook_path = get_settings().DATA_PATH / Path("notebooks") / Path(notebook.hex)
+    shutil.rmtree(notebook_path)

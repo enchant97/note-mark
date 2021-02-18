@@ -45,6 +45,7 @@ async def signup():
             username = (await request.form)["username"]
             password = (await request.form)["password"]
             await crud.create_user(username, password)
+            await flash("account created", "ok")
             return redirect(url_for("home.index"))
         except IntegrityError:
             await flash("username already exists", "error")

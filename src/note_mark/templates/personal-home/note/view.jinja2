@@ -2,8 +2,10 @@
 {% block title %}View Note{% endblock %}
 {% block main %}
 <h2>{{ note.prefix }}</h2>
+<a href="{{ url_for('personal_home.get_notebook', notebook_uuid=note.notebook_id) }}">Back To Notebook</a>
 {% if scope in ("write", "owner") %}
 <a href="{{ url_for('personal_home.edit_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}">Edit</a>
+<a href="{{ url_for('personal_home.delete_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}">Delete</a>
 {% endif %}
 <div id="note-content">{{ content|safe }}</div>
 {% endblock %}
