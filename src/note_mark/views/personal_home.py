@@ -5,6 +5,7 @@ from quart_auth import current_user, login_required
 from tortoise.exceptions import DoesNotExist, IntegrityError
 
 from ..database import crud
+from ..helpers import read_note_file_html, read_note_file_md, write_note_file_md
 
 blueprint = Blueprint("personal_home", __name__)
 
@@ -114,6 +115,7 @@ async def new_note(notebook_uuid):
             prefix = (await request.form)["prefix"]
             await crud.check_user_notebook_access(owner_id, notebook_uuid, ("write", "owner"))
             note = await crud.create_note(notebook_uuid, prefix)
+            await write_note_file_md(notebook_uuid, note.uuid)
             await flash("note create", "ok")
             return redirect(
                 url_for(
@@ -137,11 +139,14 @@ async def view_note(notebook_uuid, note_uuid):
         notebook_uuid = UUID(notebook_uuid)
         note_uuid = UUID(note_uuid)
         owner_id = UUID(current_user.auth_id)
-        await crud.check_user_notebook_access(owner_id, notebook_uuid, ("read", "owner"))
+        scope = await crud.check_user_notebook_access(owner_id, notebook_uuid, ("read", "owner"))
         note = await crud.get_note(note_uuid)
+        content = await read_note_file_html(notebook_uuid, note_uuid)
         return await render_template(
             "/personal-home/note/view.jinja2",
-            note=note)
+            note=note,
+            content=content,
+            scope=scope)
     except DoesNotExist:
         await flash("notebook does not exist, or you don't have access to it", "error")
     except ValueError:
@@ -151,16 +156,22 @@ async def view_note(notebook_uuid, note_uuid):
 
 @blueprint.route("/notebook/<notebook_uuid>/notes/<note_uuid>/edit", methods=["GET", "POST"])
 @login_required
-async def edit_mode(notebook_uuid, note_uuid):
+async def edit_note(notebook_uuid, note_uuid):
     try:
         notebook_uuid = UUID(notebook_uuid)
         note_uuid = UUID(note_uuid)
         owner_id = UUID(current_user.auth_id)
-        if request.method == "POST":
-            pass
         await crud.check_user_notebook_access(owner_id, notebook_uuid, ("write", "owner"))
+        if request.method == "POST":
+            # TODO mark the note edited in database
+            updated_content = (await request.form)["content"]
+            await write_note_file_md(notebook_uuid, note_uuid, updated_content)
         note = await crud.get_note(note_uuid)
-        return await render_template("/personal-home/note/edit.jinja2", note=note)
+        content = await read_note_file_md(notebook_uuid, note_uuid)
+        return await render_template(
+            "/personal-home/note/edit.jinja2",
+            note=note,
+            content=content)
     except DoesNotExist:
         await flash("notebook does not exist, or you don't have access to it", "error")
     except ValueError:

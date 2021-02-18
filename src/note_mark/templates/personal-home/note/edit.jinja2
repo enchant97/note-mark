@@ -2,4 +2,9 @@
 {% block title %}Edit Note{% endblock %}
 {% block main %}
 <h2>{{ note.prefix }}</h2>
+<a href="{{ url_for('personal_home.view_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}">View</a>
+<form action="" method="post">
+    <button type="submit">Save</button>
+    <textarea name="content" id="edit-note-content" cols="30" rows="10" placeholder="enter content...">{{ content }}</textarea>
+</form>
 {% endblock %}
