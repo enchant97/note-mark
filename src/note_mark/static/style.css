@@ -1,0 +1,220 @@
+:root {
+    --font-dark: black;
+    --font-light: #f0f0f0;
+    --bg-bnt: #adadad;
+    --bg-body: #9299a5;
+    --bg-body2: #9096a1;
+    --bg-body3: #767d8a;
+    --font-family-title: 'Roboto', sans-serif;
+    --font-family-main: 'Open Sans', sans-serif;
+    --font-family-code: 'Roboto Mono', monospace;
+}
+
+div,
+span,
+applet,
+object,
+iframe,
+p,
+blockquote,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+section,
+summary,
+time,
+mark,
+button {
+    font-family: var(--font-family-main);
+    font-size: 1em;
+}
+
+code,
+code span {
+    font-family: var(--font-family-code);
+    font-size: 0.9em;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-family-title);
+}
+
+h1 {
+    font-size: 2em;
+}
+
+body {
+    background-color: var(--bg-body);
+}
+
+/* header styles */
+header {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+header h1 {
+    margin-right: auto;
+}
+
+header nav {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* button styles */
+button,
+.button {
+    border: none;
+    text-decoration: none;
+    color: var(--font-dark);
+    padding: 10px 20px;
+    background-color: var(--bg-bnt);
+    border-radius: 10px;
+}
+
+button:hover,
+.button:hover {
+    cursor: pointer;
+    transition-duration: 400ms;
+    background-color: black;
+    color: var(--font-light);
+}
+
+/* flash styles */
+.flashes {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: var(--font-light);
+}
+
+.flashes div {
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 5px;
+}
+
+.flashes div span {
+    margin-left: 15px;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.flashes div span:hover {
+    color: black;
+}
+
+.flashes .ok {
+    background-color: #3c9630;
+}
+
+.flashes .error {
+    background-color: #c24141;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    width: 100%;
+    align-items: center;
+    gap: 10px;
+}
+
+
+#note-content {
+    width: 100%;
+    background-color: var(--bg-body2);
+}
+
+#note-content .codehilite {
+    border-radius: 10px;
+    color: var(--font-light);
+    padding: 4px 10px;
+    background-color: var(--bg-body3);
+}
+
+#note-content .codehilite pre {
+    margin: 0;
+}
+
+textarea {
+    background-color: var(--bg-body2);
+    resize: none;
+    width: 100%;
+    overflow-y: hidden;
+}
+
+/* footer styles */
+footer {
+    text-align: center;
+    margin-top: 100px;
+    border-top-style: solid;
+    padding-top: 10px;
+}

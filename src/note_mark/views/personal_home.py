@@ -97,7 +97,7 @@ async def add_user_share(notebook_uuid):
             notebook_uuid,
             user_uuid,
             write_access)
-        await flash("shared notebook")
+        await flash("shared notebook", "ok")
         return redirect(url_for(".get_notebook", notebook_uuid=notebook_uuid.hex))
     except DoesNotExist:
         await flash("notebook does not exist, or you don't have access to it", "error")

@@ -4,6 +4,6 @@
 <form action="{{ url_for('personal_home.new_note', notebook_uuid=notebook_uuid) }}" method="post">
     <label for="new-note-prefix">Name</label>
     <input type="text" name="prefix" id="new-note-prefix" required placeholder="name...">
-    <button type="submit">Create</button>
+    <button class="button" type="submit">Create</button>
 </form>
 {% endblock %}

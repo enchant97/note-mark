@@ -3,10 +3,10 @@
 {% block main %}
 <h2>{{notebook.prefix }}</h2>
 {% if scope in ("write", "owner") %}
-<a href="{{ url_for('personal_home.new_note', notebook_uuid=notebook.uuid) }}">Create Note</a>
+<a class="button" href="{{ url_for('personal_home.new_note', notebook_uuid=notebook.uuid) }}">Create Note</a>
 {% endif %}
 {% if scope == "owner" %}
-<a href="{{ url_for('personal_home.delete_notebook', notebook_uuid=notebook.uuid) }}">Delete Notebook</a>
+<a class="button" href="{{ url_for('personal_home.delete_notebook', notebook_uuid=notebook.uuid) }}">Delete Notebook</a>
 <form action="{{ url_for('personal_home.add_user_share', notebook_uuid=notebook.uuid) }}" method="post">
     <h3>Add User Share Notebook</h3>
     <label for="notebook-share-user-uuid">Users</label>
@@ -23,9 +23,10 @@
     <button type="submit">Add</button>
 </form>
 {% endif %}
-<div id="notes">
+<div class="container" id="notes">
+<h3>Notes</h3>
 {% for note in notes %}
-    <a href="{{ url_for('personal_home.view_note', notebook_uuid=notebook.uuid, note_uuid=note.uuid) }}">{{ note.prefix }}</a>
+    <a class="button" href="{{ url_for('personal_home.view_note', notebook_uuid=notebook.uuid, note_uuid=note.uuid) }}">{{ note.prefix }}</a>
 {% endfor %}
 </div>
 {% endblock %}

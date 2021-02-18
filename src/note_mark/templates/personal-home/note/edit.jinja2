@@ -2,11 +2,17 @@
 {% block title %}Edit Note{% endblock %}
 {% block main %}
 <h2>{{ note.prefix }}</h2>
-<a href="{{ url_for('personal_home.get_notebook', notebook_uuid=note.notebook_id) }}">Back To Notebook</a>
-<a href="{{ url_for('personal_home.view_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}">View</a>
-<a href="{{ url_for('personal_home.delete_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}">Delete</a>
-<form action="" method="post">
+<a class="button" href="{{ url_for('personal_home.get_notebook', notebook_uuid=note.notebook_id) }}">Back To Notebook</a>
+<a class="button" href="{{ url_for('personal_home.view_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}">View</a>
+<a class="button" href="{{ url_for('personal_home.delete_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}">Delete</a>
+<form class="container" id="form-edit-note" action="" method="post">
     <button type="submit">Save</button>
-    <textarea name="content" id="edit-note-content" cols="30" rows="10" placeholder="enter content...">{{ content }}</textarea>
+    <textarea name="content" id="edit-note-content" placeholder="enter content...">{{ content }}</textarea>
 </form>
+<script>
+    // script to control auto resize of text-area
+    const text_area = document.getElementById("edit-note-content");
+    text_area.style.height = (text_area.scrollHeight + "px");
+    text_area.addEventListener("input", evn => { auto_resize_elem(text_area); });
+</script>
 {% endblock %}

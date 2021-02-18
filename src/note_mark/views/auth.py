@@ -19,7 +19,7 @@ async def login():
         if user:
             login_user(AuthUser(user.uuid.hex))
             return redirect(url_for("personal_home.index"))
-        await flash("username or password incorrect", "red")
+        await flash("username or password incorrect", "error")
 
     return await render_template("/auth/login.jinja2")
 

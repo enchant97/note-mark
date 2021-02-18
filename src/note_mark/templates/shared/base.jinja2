@@ -7,8 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&family=Roboto+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 
 <body>
@@ -16,16 +17,16 @@
         <h1>{{ self.title() }}</h1>
         <nav>
             {% if current_user.is_authenticated %}
-            <a href="{{ url_for('personal_home.index') }}">My Home</a>
-            <a href="{{ url_for('auth.logout') }}">Logout</a>
+            <a class="button" href="{{ url_for('personal_home.index') }}">My Home</a>
+            <a class="button" href="{{ url_for('auth.logout') }}">Logout</a>
             {% else %}
-            <a href="{{ url_for('home.index') }}">Home</a>
-            <a href="{{ url_for('auth.login') }}">Login</a>
+            <a class="button" href="{{ url_for('home.index') }}">Home</a>
+            <a class="button" href="{{ url_for('auth.login') }}">Login</a>
             {% endif %}
         </nav>
     </header>
-    <main>
-        {% include "/shared/includes/flashed-messages.jinja2" %}
+    {% include "/shared/includes/flashed-messages.jinja2" %}
+    <main class="container">
         {% block main %}
         {% endblock %}
     </main>

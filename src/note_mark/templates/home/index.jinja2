@@ -1,5 +1,11 @@
 {% extends "/shared/base.jinja2" %}
 {% block title %}Home{% endblock %}
 {% block main %}
-
+<p>
+    Welcome to Note-Mark the web-based note taking
+    program that renders your markdown notes in beautiful HTML.
+</p>
+<p>
+    To get started create an account <a href="{{ url_for('auth.signup') }}">here</a>.
+</p>
 {% endblock %}
