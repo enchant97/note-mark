@@ -218,3 +218,28 @@ footer {
     border-top-style: solid;
     padding-top: 10px;
 }
+
+/* code lang colors */
+.s2,
+.cpf,
+.sc,
+.s {
+    color: #00fd9c;
+}
+
+.k,
+.cp,
+.kt,
+.o {
+    color: #3cc92a;
+}
+
+.mi,
+.mf {
+    color: #ff93aa;
+}
+
+.cm,
+.c1{
+    color: #cecece;
+}
