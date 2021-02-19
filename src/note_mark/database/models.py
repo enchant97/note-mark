@@ -85,6 +85,7 @@ class NotebookLinkShare(CommonModel):
     """
     notebook: ForeignKeyRelation[Notebook] = ForeignKeyField("models.Notebook", "shared_links")
     has_write = BooleanField(default=False)
+    expires = DatetimeField(null=True)
 
     class Meta:
         table = "notebook_link_shares"

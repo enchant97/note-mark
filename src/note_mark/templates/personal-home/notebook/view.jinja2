@@ -22,6 +22,14 @@
     <input type="checkbox" name="write_access" id="notebook-share-user-writeaccess" value="1">
     <button type="submit">Add</button>
 </form>
+<form action="{{ url_for('personal_home.add_share_link', notebook_uuid=notebook.uuid) }}" method="post">
+    <h3>Add Link Share</h3>
+    <label for="notebook-share-link-writeaccess">Write Access</label>
+    <input type="checkbox" name="write_access" id="notebook-share-link-writeaccess" value="1">
+    <label for="notebook-share-link-expiry">Expiry</label>
+    <input type="datetime-local" name="expiry" id="notebook-share-link-expiry">
+    <button type="submit">Add</button>
+</form>
 {% endif %}
 <div class="container" id="notes">
 <h3>Notes</h3>

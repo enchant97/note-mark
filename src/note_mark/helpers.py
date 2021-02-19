@@ -1,5 +1,7 @@
 import shutil
+from datetime import datetime
 from pathlib import Path
+from typing import Union
 from uuid import UUID
 
 import aiofiles
@@ -58,10 +60,34 @@ async def read_note_file_html(notebook: UUID, note: UUID) -> str:
 
 
 def delete_note_file(notebook: UUID, note: UUID):
+    """
+    delete a notebook file in a notebook
+
+        :param notebook: the notebook uuid
+        :param note: the note uuid
+    """
     fn = get_settings().DATA_PATH / Path("notebooks") / Path(notebook.hex) / Path(note.hex + ".md")
     fn.unlink(missing_ok=True)
 
 
 def delete_notebook_folder(notebook: UUID):
+    """
+    delete a notebook folder
+
+        :param notebook: the notebook uuid
+    """
     notebook_path = get_settings().DATA_PATH / Path("notebooks") / Path(notebook.hex)
     shutil.rmtree(notebook_path)
+
+
+def datetime_input_type(datetime_str: Union[str, None]) -> Union[datetime, None]:
+    """
+    convert a HTML datetime-local
+    input into a python datetime obj
+
+        :param datetime_str: the input datetime str
+        :return: the converted datetime obj or None
+    """
+    if datetime_str is None or datetime_str == "":
+        return None
+    return datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M")

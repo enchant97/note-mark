@@ -5,9 +5,9 @@ from quart_auth import current_user, login_required
 from tortoise.exceptions import DoesNotExist, IntegrityError
 
 from ..database import crud
-from ..helpers import (delete_note_file, delete_notebook_folder,
-                       read_note_file_html, read_note_file_md,
-                       write_note_file_md)
+from ..helpers import (datetime_input_type, delete_note_file,
+                       delete_notebook_folder, read_note_file_html,
+                       read_note_file_md, write_note_file_md)
 
 blueprint = Blueprint("personal_home", __name__)
 
@@ -103,6 +103,28 @@ async def add_user_share(notebook_uuid):
         await flash("notebook does not exist, or you don't have access to it", "error")
     except IntegrityError:
         await flash("notebook already shared with that user", "error")
+    except ValueError:
+        await flash("invalid notebook/user uuid", "error")
+    return redirect(url_for(".index"))
+
+
+@blueprint.route("/notebook/<notebook_uuid>/share-link", methods=["POST"])
+@login_required
+async def add_share_link(notebook_uuid):
+    try:
+        notebook_uuid = UUID(notebook_uuid)
+        owner_id = UUID(current_user.auth_id)
+        write_access = (await request.form).get("write_access", False, bool)
+        await crud.check_user_notebook_access(owner_id, notebook_uuid, ("owner",))
+        expiry = (await request.form).get("expiry", None, datetime_input_type)
+        share = await crud.create_notebook_link_share(
+            notebook_uuid,
+            write_access,
+            expiry)
+        await flash(f"shared notebook: {share.uuid}", "ok")
+        return redirect(url_for(".get_notebook", notebook_uuid=notebook_uuid.hex))
+    except DoesNotExist:
+        await flash("notebook does not exist, or you don't have access to it", "error")
     except ValueError:
         await flash("invalid notebook/user uuid", "error")
     return redirect(url_for(".index"))

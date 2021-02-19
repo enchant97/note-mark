@@ -2,6 +2,7 @@
 functions to allow easy access
 to the database models(tables) for the app
 """
+from datetime import datetime, timezone
 from typing import Generator, List, Tuple, Union
 from uuid import UUID
 
@@ -44,6 +45,36 @@ async def check_user_notebook_access(
     if scopes_required:
         if scope not in scopes_required:
             # raise if user does not have scopes required
+            raise DoesNotExist()
+    return scope
+
+
+async def check_share_link_access(
+    link_uuid: UUID,
+    scopes_required : Union[None, tuple] = None) -> Union[str, None]:
+    """
+    checks whether the share-link has access to the notebook,
+    if so what level ('write', 'read'),
+    will also check for expired links.
+
+        :param user_uuid: the user to check for
+        :return: the access level, or None
+    """
+    link = await NotebookLinkShare.filter(uuid=link_uuid).get_or_none()
+    scope = None
+    if link is not None and link.expires is not None:
+        # check expiry
+        if link.expires < datetime.now(timezone.utc):
+            await link.delete()
+            link = None
+    if link is not None:
+        if link.has_write:
+            scope = "write"
+        else:
+            scope = "read"
+    if scopes_required:
+        if scope not in scopes_required:
+            # if link does not have required scopes
             raise DoesNotExist()
     return scope
 
@@ -151,10 +182,36 @@ async def create_notebook_user_share(
 
 async def create_notebook_link_share(
     notebook_uuid: UUID,
-    write_access=False) -> NotebookLinkShare:
-    share = NotebookLinkShare(notebook_id=notebook_uuid, has_write=write_access)
+    write_access=False,
+    expires=None) -> NotebookLinkShare:
+    """
+    creates a notebook share link
+
+        :param notebook_uuid: the notebook uuid
+        :param write_access: whether the link allows write
+                             access, defaults to False
+        :param expires: what datetime the link expires
+                        (or no expiry), defaults to None
+        :return: the created row
+    """
+    share = NotebookLinkShare(
+        notebook_id=notebook_uuid,
+        has_write=write_access,
+        expires=expires)
     await share.save()
     return share
+
+
+async def get_notebook_by_link_share(link_uuid: UUID) -> UUID:
+    """
+    gets a returned notebook link share, if one exists
+
+        :param link_uuid: the link uuid
+        :return: the share link uuid
+    """
+    link = await NotebookLinkShare.filter(uuid=link_uuid).get()
+    return await link.notebook.get()
+
 
 ## Note CRUD ##
 

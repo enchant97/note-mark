@@ -7,7 +7,7 @@ from tortoise.contrib.quart import register_tortoise
 from . import __version__
 from .config import get_settings
 from .database import models
-from .views import auth, home, personal_home
+from .views import auth, home, personal_home, share_link
 
 BASE_URL = get_settings().BASE_URL
 if BASE_URL == "/":
@@ -35,6 +35,7 @@ def create_app():
     app.register_blueprint(home.blueprint, url_prefix=BASE_URL+ "/")
     app.register_blueprint(auth.blueprint, url_prefix=BASE_URL+"/auth")
     app.register_blueprint(personal_home.blueprint, url_prefix=BASE_URL+"/home")
+    app.register_blueprint(share_link.blueprint, url_prefix=BASE_URL+"/share-link")
     # database setup
     register_tortoise(
         app,
