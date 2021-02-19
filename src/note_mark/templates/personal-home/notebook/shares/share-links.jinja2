@@ -10,4 +10,22 @@
     <input type="datetime-local" name="expiry" id="notebook-share-link-expiry">
     <button type="submit">Add</button>
 </form>
+<table>
+    <thead>
+        <tr>
+            <th>Code (UUID4)</th>
+            <th>Has Write</th>
+            <th>Expires</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for share in link_shares %}
+        <tr>
+            <td>{{ share.uuid }}</td>
+            <td>{{ share.has_write }}</td>
+            <td>{{ share.expires }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

@@ -1,5 +1,9 @@
 {% extends "/shared/base.jinja2" %}
 {% block title %}Use Share Link{% endblock %}
 {% block main %}
-
+<form action="{{ url_for('share_link.use_code') }}" method="post">
+    <label for="use-share-code-uuid">Code</label>
+    <input type="text" name="code-uuid" id="use-share-code-uuid" required placeholder="uuid4 hex..." minlength="36" maxlength="36">
+    <button type="submit">Use</button>
+</form>
 {% endblock %}

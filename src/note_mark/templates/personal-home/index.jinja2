@@ -3,7 +3,7 @@
 {% block main %}
 
 <a class="button" href="{{ url_for('personal_home.new_notebook') }}">New Notebook</a>
-
+<a class="button" href="{{ url_for('share_link.index') }}">Use Share Link</a>
 <div class="container" id="personal-notebooks">
 <h3>My Notebooks</h3>
 {% for notebook in owned_notebooks %}

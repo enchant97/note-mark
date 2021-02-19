@@ -98,10 +98,12 @@ async def user_share(notebook_uuid):
                 write_access)
             await flash("shared notebook", "ok")
         users = await crud.get_users()
+        user_shares = await crud.get_user_shares_by_notebook(notebook_uuid)
         return await render_template(
             "/personal-home/notebook/shares/share-users.jinja2",
             users=users,
-            notebook_uuid=notebook_uuid)
+            notebook_uuid=notebook_uuid,
+            user_shares=user_shares)
     except DoesNotExist:
         await flash("notebook does not exist, or you don't have access to it", "error")
     except IntegrityError:
@@ -126,9 +128,11 @@ async def share_link(notebook_uuid):
                 write_access,
                 expiry)
             await flash(f"shared notebook: {share.uuid}", "ok")
+        link_shares = await crud.get_link_shares_by_notebook(notebook_uuid)
         return await render_template(
             "/personal-home/notebook/shares/share-links.jinja2",
-            notebook_uuid=notebook_uuid)
+            notebook_uuid=notebook_uuid,
+            link_shares=link_shares)
     except DoesNotExist:
         await flash("notebook does not exist, or you don't have access to it", "error")
     except ValueError:

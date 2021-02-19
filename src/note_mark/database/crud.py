@@ -178,6 +178,16 @@ async def create_notebook_user_share(
     await share.save()
     return share
 
+
+async def get_user_shares_by_notebook(notebook_uuid: UUID) -> List[NotebookUserShare]:
+    """
+    returns all user shares by the notebook
+
+        :param notebook_uuid: the notebook uuid
+        :return: list of notebook share rows
+    """
+    return await NotebookUserShare.filter(notebook_id=notebook_uuid).all()
+
 ## NotebookLinkShare CRUD ##
 
 async def create_notebook_link_share(
@@ -200,6 +210,16 @@ async def create_notebook_link_share(
         expires=expires)
     await share.save()
     return share
+
+
+async def get_link_shares_by_notebook(notebook_uuid: UUID) -> List[NotebookLinkShare]:
+    """
+    returns all link shares by the notebook
+
+        :param notebook_uuid: the notebook uuid
+        :return: list of notebook share link rows
+    """
+    return await NotebookLinkShare.filter(notebook_id=notebook_uuid).all()
 
 
 async def get_notebook_by_link_share(link_uuid: UUID) -> UUID:

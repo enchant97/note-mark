@@ -7,5 +7,7 @@
 </p>
 <p>
     To get started create an account <a href="{{ url_for('auth.signup') }}">here</a>.
+    Or use a share link if you have been given one.
 </p>
+<a class="button" href="{{ url_for('share_link.index') }}">Use Share Link</a>
 {% endblock %}

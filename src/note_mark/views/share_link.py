@@ -13,6 +13,13 @@ blueprint = Blueprint("share_link", __name__)
 async def index():
     return await render_template("/share-link/index.jinja2")
 
+
+@blueprint.route("/use_code", methods=["POST"])
+async def use_code():
+    share_link_uuid = (await request.form)["code-uuid"]
+    return redirect(url_for(".get_notebook", share_link_uuid=share_link_uuid))
+
+
 @blueprint.route("/<share_link_uuid>/notebook")
 async def get_notebook(share_link_uuid):
     try:

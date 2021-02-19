@@ -6,7 +6,7 @@
     <h3>Add User Share Notebook</h3>
     <label for="notebook-share-user-uuid">Users</label>
     <select name="user_uuid" id="notebook-share-user-uuid" required>
-        <option value=""></option>
+        <option value="">** SELECT USER **</option>
         {% for user in users %}
         {% if current_user.auth_id != user.uuid.hex %}
         <option value="{{ user.uuid }}">{{ user.username }}</option>
@@ -17,4 +17,20 @@
     <input type="checkbox" name="write_access" id="notebook-share-user-writeaccess" value="1">
     <button type="submit">Add</button>
 </form>
+<table>
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Has Write</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for share in user_shares %}
+        <tr>
+            <td>{{ share.shared_with.username }}</td>
+            <td>{{ share.has_write }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
