@@ -7,29 +7,8 @@
 {% endif %}
 {% if scope == "owner" %}
 <a class="button" href="{{ url_for('personal_home.delete_notebook', notebook_uuid=notebook.uuid) }}">Delete Notebook</a>
-<form action="{{ url_for('personal_home.add_user_share', notebook_uuid=notebook.uuid) }}" method="post">
-    <h3>Add User Share Notebook</h3>
-    <label for="notebook-share-user-uuid">Users</label>
-    <select name="user_uuid" id="notebook-share-user-uuid" required>
-        <option value=""></option>
-        {% for user in users %}
-        {% if current_user.auth_id != user.uuid.hex %}
-        <option value="{{ user.uuid }}">{{ user.username }}</option>
-        {% endif %}
-        {% endfor %}
-    </select>
-    <label for="notebook-share-user-writeaccess">Write Access</label>
-    <input type="checkbox" name="write_access" id="notebook-share-user-writeaccess" value="1">
-    <button type="submit">Add</button>
-</form>
-<form action="{{ url_for('personal_home.add_share_link', notebook_uuid=notebook.uuid) }}" method="post">
-    <h3>Add Link Share</h3>
-    <label for="notebook-share-link-writeaccess">Write Access</label>
-    <input type="checkbox" name="write_access" id="notebook-share-link-writeaccess" value="1">
-    <label for="notebook-share-link-expiry">Expiry</label>
-    <input type="datetime-local" name="expiry" id="notebook-share-link-expiry">
-    <button type="submit">Add</button>
-</form>
+<a href="{{ url_for('personal_home.user_share', notebook_uuid=notebook.uuid) }}" class="button">Manage User Shares</a>
+<a href="{{ url_for('personal_home.share_link', notebook_uuid=notebook.uuid) }}" class="button">Manage Link Shares</a>
 {% endif %}
 <div class="container" id="notes">
 <h3>Notes</h3>

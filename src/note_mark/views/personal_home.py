@@ -45,7 +45,6 @@ async def get_notebook(notebook_uuid):
         notebook_uuid = UUID(notebook_uuid)
         owner_id = UUID(current_user.auth_id)
         notebook = await crud.get_personal_notebook(notebook_uuid)
-        users = await crud.get_users()
         scope = await crud.check_user_notebook_access(
             owner_id,
             notebook_uuid,
@@ -55,7 +54,6 @@ async def get_notebook(notebook_uuid):
             "/personal-home/notebook/view.jinja2",
             scope=scope,
             notebook=notebook,
-            users=users,
             notes=notes)
     except DoesNotExist:
         await flash("notebook does not exist, or you don't have access to it", "error")
@@ -84,50 +82,58 @@ async def delete_notebook(notebook_uuid):
     return redirect(url_for(".index"))
 
 
-@blueprint.route("/notebook/<notebook_uuid>/share-user", methods=["POST"])
+@blueprint.route("/notebook/<notebook_uuid>/share-user", methods=["GET", "POST"])
 @login_required
-async def add_user_share(notebook_uuid):
+async def user_share(notebook_uuid):
     try:
         notebook_uuid = UUID(notebook_uuid)
         owner_id = UUID(current_user.auth_id)
-        user_uuid = UUID((await request.form)["user_uuid"])
-        write_access = (await request.form).get("write_access", False, bool)
         await crud.check_user_notebook_access(owner_id, notebook_uuid, ("owner",))
-        await crud.create_notebook_user_share(
-            notebook_uuid,
-            user_uuid,
-            write_access)
-        await flash("shared notebook", "ok")
-        return redirect(url_for(".get_notebook", notebook_uuid=notebook_uuid.hex))
+        if request.method == "POST":
+            user_uuid = UUID((await request.form)["user_uuid"])
+            write_access = (await request.form).get("write_access", False, bool)
+            await crud.create_notebook_user_share(
+                notebook_uuid,
+                user_uuid,
+                write_access)
+            await flash("shared notebook", "ok")
+        users = await crud.get_users()
+        return await render_template(
+            "/personal-home/notebook/shares/share-users.jinja2",
+            users=users,
+            notebook_uuid=notebook_uuid)
     except DoesNotExist:
         await flash("notebook does not exist, or you don't have access to it", "error")
     except IntegrityError:
         await flash("notebook already shared with that user", "error")
     except ValueError:
         await flash("invalid notebook/user uuid", "error")
-    return redirect(url_for(".index"))
+    return redirect(url_for(".get_notebook", notebook_uuid=notebook_uuid))
 
 
-@blueprint.route("/notebook/<notebook_uuid>/share-link", methods=["POST"])
+@blueprint.route("/notebook/<notebook_uuid>/share-link", methods=["GET", "POST"])
 @login_required
-async def add_share_link(notebook_uuid):
+async def share_link(notebook_uuid):
     try:
         notebook_uuid = UUID(notebook_uuid)
         owner_id = UUID(current_user.auth_id)
-        write_access = (await request.form).get("write_access", False, bool)
         await crud.check_user_notebook_access(owner_id, notebook_uuid, ("owner",))
-        expiry = (await request.form).get("expiry", None, datetime_input_type)
-        share = await crud.create_notebook_link_share(
-            notebook_uuid,
-            write_access,
-            expiry)
-        await flash(f"shared notebook: {share.uuid}", "ok")
-        return redirect(url_for(".get_notebook", notebook_uuid=notebook_uuid.hex))
+        if request.method == "POST":
+            write_access = (await request.form).get("write_access", False, bool)
+            expiry = (await request.form).get("expiry", None, datetime_input_type)
+            share = await crud.create_notebook_link_share(
+                notebook_uuid,
+                write_access,
+                expiry)
+            await flash(f"shared notebook: {share.uuid}", "ok")
+        return await render_template(
+            "/personal-home/notebook/shares/share-links.jinja2",
+            notebook_uuid=notebook_uuid)
     except DoesNotExist:
         await flash("notebook does not exist, or you don't have access to it", "error")
     except ValueError:
         await flash("invalid notebook/user uuid", "error")
-    return redirect(url_for(".index"))
+    return redirect(url_for(".get_notebook", notebook_uuid=notebook_uuid))
 
 
 @blueprint.route("/notebook/<notebook_uuid>/notes/new", methods=["GET", "POST"])

@@ -77,7 +77,8 @@ section,
 summary,
 time,
 mark,
-button {
+button,
+textarea {
     font-family: var(--font-family-main);
     font-size: 1em;
 }
@@ -95,6 +96,7 @@ h4,
 h5,
 h6 {
     font-family: var(--font-family-title);
+    text-align: center;
 }
 
 h1 {
@@ -198,6 +200,7 @@ button:hover,
     color: var(--font-light);
     padding: 4px 10px;
     background-color: var(--bg-body3);
+    margin: 4px 0px;
 }
 
 #note-content .codehilite pre {
@@ -240,6 +243,6 @@ footer {
 }
 
 .cm,
-.c1{
+.c1 {
     color: #cecece;
 }

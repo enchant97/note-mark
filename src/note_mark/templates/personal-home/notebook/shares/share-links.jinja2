@@ -1,0 +1,13 @@
+{% extends "/shared/base.jinja2" %}
+{% block title %}Notebook Link Shares{% endblock %}
+{% block main %}
+<a class="button" href="{{ url_for('personal_home.get_notebook', notebook_uuid=notebook_uuid) }}">Back To Notebook</a>
+<form action="{{ url_for('personal_home.share_link', notebook_uuid=notebook_uuid) }}" method="post">
+    <h3>Add Link Share</h3>
+    <label for="notebook-share-link-writeaccess">Write Access</label>
+    <input type="checkbox" name="write_access" id="notebook-share-link-writeaccess" value="1">
+    <label for="notebook-share-link-expiry">Expiry</label>
+    <input type="datetime-local" name="expiry" id="notebook-share-link-expiry">
+    <button type="submit">Add</button>
+</form>
+{% endblock %}
