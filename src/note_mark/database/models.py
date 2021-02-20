@@ -9,7 +9,7 @@ __all__ = [
     "NotebookUserShare",
     "NotebookLinkShare",
     "Note",
-    "Uploads"]
+    "Upload"]
 
 from tortoise.fields.data import (BinaryField, BooleanField, CharField,
                                   DatetimeField, UUIDField)
