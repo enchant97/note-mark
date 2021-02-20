@@ -4,8 +4,8 @@ from quart import Blueprint, flash, redirect, render_template, request, url_for
 from tortoise.exceptions import DoesNotExist
 
 from ..database import crud
-from ..helpers import (read_note_file_html, read_note_file_md,
-                       write_note_file_md)
+from ..helpers import (datetime_input_type, read_note_file_html,
+                       read_note_file_md, write_note_file_md)
 
 blueprint = Blueprint("share_link", __name__)
 
@@ -107,13 +107,28 @@ async def edit_note(share_link_uuid, note_uuid):
 
         note_uuid = UUID(note_uuid)
         notebook_uuid = (await crud.get_notebook_by_link_share(share_link_uuid)).uuid
+        note = await crud.get_note(note_uuid)
 
         if request.method == "POST":
-            # TODO mark the note edited in database
             updated_content = (await request.form)["content"]
-            await write_note_file_md(notebook_uuid, note_uuid, updated_content)
-            await flash("note saved", "ok")
-        note = await crud.get_note(note_uuid)
+            updated_at = (await request.form)["updated_at"]
+            updated_at = datetime_input_type(updated_at, "%Y-%m-%d %H:%M:%S.%f%z")
+
+            if updated_at < note.updated_at:
+                # conflict was detected
+                conflict_dt = note.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+                note_backup = await crud.create_note(notebook_uuid, note.prefix + conflict_dt)
+                conflict_data = await read_note_file_md(notebook_uuid, note_uuid)
+                await write_note_file_md(notebook_uuid, note_backup.uuid, conflict_data)
+                await write_note_file_md(notebook_uuid, note_uuid, updated_content)
+                await crud.mark_note_updated(note_uuid)
+                await flash("note saved, but conflict was detected", "ok")
+            else:
+                # no conflict detected
+                await write_note_file_md(notebook_uuid, note_uuid, updated_content)
+                await crud.mark_note_updated(note_uuid)
+                await flash("note saved", "ok")
+
         content = await read_note_file_md(notebook_uuid, note_uuid)
         return await render_template(
             "/share-link/note/edit.jinja2",

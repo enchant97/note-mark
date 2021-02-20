@@ -269,6 +269,15 @@ async def rename_note(note_uuid: UUID, new_prefix: str):
     await Note.filter(uuid=note_uuid).update(prefix=new_prefix)
 
 
+async def mark_note_updated(note_uuid: UUID):
+    """
+    mark a note row as updated
+
+    :param note_uuid: the note's uuid
+    """
+    await Note.filter(uuid=note_uuid).update(updated_at=datetime.now(timezone.utc))
+
+
 async def delete_note(note_uuid: UUID):
     note = await Note.filter(uuid=note_uuid).get()
     await note.delete()

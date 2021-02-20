@@ -8,6 +8,7 @@
 <form class="container" id="form-edit-note" action="" method="post">
     <button type="submit">Save</button>
     <textarea name="content" id="edit-note-content" placeholder="enter content...">{{ content }}</textarea>
+    <input type="hidden" name="updated_at" value="{{ note.updated_at }}">
 </form>
 <script>
     // script to control auto resize of text-area
