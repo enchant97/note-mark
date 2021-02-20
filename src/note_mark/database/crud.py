@@ -161,6 +161,16 @@ async def get_shared_notebooks(curr_user_uuid: UUID) -> Generator:
         yield await row.notebook.get()
 
 
+async def rename_notebook(notebook_uuid: UUID, new_prefix: str):
+    """
+    change the prefix of a notebook row
+
+        :param notebook_uuid: the notebook's uuid
+        :param new_prefix: the new prefix
+    """
+    await Notebook.filter(uuid=notebook_uuid).update(prefix=new_prefix)
+
+
 async def delete_notebook(notebook_uuid: UUID):
     notebook = await get_personal_notebook(notebook_uuid)
     await notebook.delete()
@@ -247,6 +257,16 @@ async def get_note(note_uuid: UUID) -> Note:
 
 async def get_notes(notebook_uuid: UUID) -> List[Note]:
     return await Note.filter(notebook_id=notebook_uuid).all()
+
+
+async def rename_note(note_uuid: UUID, new_prefix: str):
+    """
+    change the prefix of a note row
+
+        :param note_uuid: the note's uuid
+        :param new_prefix: the new prefix
+    """
+    await Note.filter(uuid=note_uuid).update(prefix=new_prefix)
 
 
 async def delete_note(note_uuid: UUID):

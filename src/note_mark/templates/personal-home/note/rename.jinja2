@@ -1,0 +1,9 @@
+{% extends "/shared/base.jinja2" %}
+{% block title %}Rename Note{% endblock %}
+{% block main %}
+<form action="{{ url_for('personal_home.rename_note', notebook_uuid=notebook_uuid, note_uuid=note_uuid) }}" method="post">
+<label for="note-name">Name</label>
+<input type="text" name="prefix" id="note-name" required placeholder="name...">
+<button class="button" type="submit">Save</button>
+</form>
+{% endblock %}

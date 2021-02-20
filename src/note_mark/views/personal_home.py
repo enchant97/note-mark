@@ -48,13 +48,38 @@ async def get_notebook(notebook_uuid):
         scope = await crud.check_user_notebook_access(
             owner_id,
             notebook_uuid,
-            ("read", "owner"))
+            ("read", "write", "owner"))
         notes = await crud.get_notes(notebook_uuid)
         return await render_template(
             "/personal-home/notebook/view.jinja2",
             scope=scope,
             notebook=notebook,
             notes=notes)
+    except DoesNotExist:
+        await flash("notebook does not exist, or you don't have access to it", "error")
+    except ValueError:
+        await flash("invalid notebook uuid", "error")
+    return redirect(url_for(".index"))
+
+
+@blueprint.route("/notebook/<notebook_uuid>/rename", methods=["GET", "POST"])
+@login_required
+async def rename_notebook(notebook_uuid):
+    try:
+        notebook_uuid = UUID(notebook_uuid)
+        owner_id = UUID(current_user.auth_id)
+        await crud.check_user_notebook_access(
+            owner_id,
+            notebook_uuid,
+            ("owner",))
+        if request.method == "POST":
+            new_prefix = (await request.form)["prefix"]
+            await crud.rename_notebook(notebook_uuid, new_prefix)
+            await flash("notebook renamed", "ok")
+            return redirect(url_for(".get_notebook", notebook_uuid=notebook_uuid))
+        return await render_template(
+            "personal-home/notebook/rename.jinja2",
+            notebook_uuid=notebook_uuid)
     except DoesNotExist:
         await flash("notebook does not exist, or you don't have access to it", "error")
     except ValueError:
@@ -71,7 +96,7 @@ async def delete_notebook(notebook_uuid):
         await crud.check_user_notebook_access(
             owner_id,
             notebook_uuid,
-            ("write", "owner"))
+            ("owner",))
         await crud.delete_notebook(notebook_uuid)
         delete_notebook_folder(notebook_uuid)
         await flash("notebook deleted", "ok")
@@ -174,7 +199,7 @@ async def view_note(notebook_uuid, note_uuid):
         notebook_uuid = UUID(notebook_uuid)
         note_uuid = UUID(note_uuid)
         owner_id = UUID(current_user.auth_id)
-        scope = await crud.check_user_notebook_access(owner_id, notebook_uuid, ("read", "owner"))
+        scope = await crud.check_user_notebook_access(owner_id, notebook_uuid, ("read", "write", "owner"))
         note = await crud.get_note(note_uuid)
         content = await read_note_file_html(notebook_uuid, note_uuid)
         return await render_template(
@@ -186,6 +211,33 @@ async def view_note(notebook_uuid, note_uuid):
         await flash("notebook does not exist, or you don't have access to it", "error")
     except ValueError:
         await flash("invalid notebook/user/note", "error")
+    return redirect(url_for(".index"))
+
+
+@blueprint.route("/notebook/<notebook_uuid>/notes/<note_uuid>/rename", methods=["GET", "POST"])
+@login_required
+async def rename_note(notebook_uuid, note_uuid):
+    try:
+        notebook_uuid = UUID(notebook_uuid)
+        note_uuid = UUID(note_uuid)
+        owner_id = UUID(current_user.auth_id)
+        await crud.check_user_notebook_access(
+            owner_id,
+            notebook_uuid,
+            ("owner",))
+        if request.method == "POST":
+            new_prefix = (await request.form)["prefix"]
+            await crud.rename_note(note_uuid, new_prefix)
+            await flash("note renamed", "ok")
+            return redirect(url_for(".get_notebook", notebook_uuid=notebook_uuid))
+        return await render_template(
+            "personal-home/note/rename.jinja2",
+            notebook_uuid=notebook_uuid,
+            note_uuid=note_uuid)
+    except DoesNotExist:
+        await flash("notebook does not exist, or you don't have access to it", "error")
+    except ValueError:
+        await flash("invalid notebook uuid", "error")
     return redirect(url_for(".index"))
 
 
@@ -214,6 +266,7 @@ async def edit_note(notebook_uuid, note_uuid):
         await flash("invalid notebook/user/note", "error")
     return redirect(url_for(".index"))
 
+
 @blueprint.route("/notebook/<notebook_uuid>/notes/<note_uuid>/delete", methods=["GET"])
 @login_required
 async def delete_note(notebook_uuid, note_uuid):
@@ -224,7 +277,7 @@ async def delete_note(notebook_uuid, note_uuid):
         await crud.check_user_notebook_access(
             owner_id,
             notebook_uuid,
-            ("write", "owner"))
+            ("owner",))
         await crud.delete_note(note_uuid)
         delete_note_file(notebook_uuid, note_uuid)
         await flash("note deleted", "ok")

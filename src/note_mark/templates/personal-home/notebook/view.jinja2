@@ -6,6 +6,7 @@
 <a class="button" href="{{ url_for('personal_home.new_note', notebook_uuid=notebook.uuid) }}">Create Note</a>
 {% endif %}
 {% if scope == "owner" %}
+<a class="button" href="{{ url_for('personal_home.rename_notebook', notebook_uuid=notebook.uuid) }}">Rename Notebook</a>
 <a class="button" href="{{ url_for('personal_home.delete_notebook', notebook_uuid=notebook.uuid) }}">Delete Notebook</a>
 <a href="{{ url_for('personal_home.user_share', notebook_uuid=notebook.uuid) }}" class="button">Manage User Shares</a>
 <a href="{{ url_for('personal_home.share_link', notebook_uuid=notebook.uuid) }}" class="button">Manage Link Shares</a>
