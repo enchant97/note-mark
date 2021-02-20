@@ -1,0 +1,22 @@
+version: "3.3"
+
+services:
+  note-mark:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - ./.env:/.env:ro
+      - note-mark:/data
+    ports:
+      - 8080:8000
+    environment:
+      - BINDS=["0.0.0.0:8000"]
+      - DATA_PATH=/data
+    healthcheck:
+      test: "curl --fail http://127.0.0.1:8000/is-healthy || exit 1"
+      timeout: 20s
+      interval: 1m
+      retries: 3
+
+volumes:
+  note-mark:
