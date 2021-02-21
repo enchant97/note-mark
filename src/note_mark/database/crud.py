@@ -10,12 +10,13 @@ from tortoise.exceptions import DoesNotExist
 
 from .models import Note, Notebook, NotebookLinkShare, NotebookUserShare, User
 
-## notebook auth check ##
+# notebook auth check
+
 
 async def check_user_notebook_access(
-    user_uuid: UUID,
-    notebook_uuid: UUID,
-    scopes_required : Union[None, tuple] = None) -> Union[str, None]:
+        user_uuid: UUID,
+        notebook_uuid: UUID,
+        scopes_required: Union[None, tuple] = None) -> Union[str, None]:
     """
     checks whether the user has access to the notebook,
     if so what level ('write', 'read', 'owner').
@@ -27,8 +28,8 @@ async def check_user_notebook_access(
     scope = None
     # check whether they are the owner
     if await Notebook.filter(
-        uuid=notebook_uuid,
-        owner_id=user_uuid).get_or_none() is not None:
+            uuid=notebook_uuid,
+            owner_id=user_uuid).get_or_none() is not None:
         scope = "owner"
     # not owner, so check if it's shared with the user
     shared = await NotebookUserShare.filter(
@@ -50,8 +51,8 @@ async def check_user_notebook_access(
 
 
 async def check_share_link_access(
-    link_uuid: UUID,
-    scopes_required : Union[None, tuple] = None) -> Union[str, None]:
+        link_uuid: UUID,
+        scopes_required: Union[None, tuple] = None) -> Union[str, None]:
     """
     checks whether the share-link has access to the notebook,
     if so what level ('write', 'read'),
@@ -78,7 +79,9 @@ async def check_share_link_access(
             raise DoesNotExist()
     return scope
 
-## User CRUD ##
+
+# User CRUD
+
 
 async def create_user(username: str, password: str) -> User:
     """
@@ -134,7 +137,8 @@ async def delete_user(user_uuid: UUID):
     await User.filter(uuid=user_uuid).delete()
 
 
-## Notebook CRUD ##
+# Notebook CRUD #
+
 
 async def create_notebook(owner_uuid: UUID, prefix: str) -> Notebook:
     notebook = Notebook(owner_id=owner_uuid, prefix=prefix)
@@ -151,7 +155,9 @@ async def get_all_personal_notebooks(owner_uuid: UUID) -> List[Notebook]:
 
 
 async def get_shared_notebook(curr_user_uuid: UUID, notebook_uuid: UUID) -> Tuple:
-    shared = await NotebookUserShare.filter(shared_with_id=curr_user_uuid, notebook_id=notebook_uuid).get()
+    shared = await NotebookUserShare.filter(
+        shared_with_id=curr_user_uuid,
+        notebook_id=notebook_uuid).get()
     return (await shared.notebook.get(), shared.has_write)
 
 
@@ -175,12 +181,14 @@ async def delete_notebook(notebook_uuid: UUID):
     notebook = await get_personal_notebook(notebook_uuid)
     await notebook.delete()
 
-## NotebookUserShare CRUD ##
+
+# NotebookUserShare CRUD
+
 
 async def create_notebook_user_share(
-    notebook_uuid: UUID,
-    user_uuid: UUID,
-    write_access=False) -> NotebookUserShare:
+        notebook_uuid: UUID,
+        user_uuid: UUID,
+        write_access=False) -> NotebookUserShare:
     share = NotebookUserShare(
         notebook_id=notebook_uuid,
         shared_with_id=user_uuid,
@@ -198,12 +206,14 @@ async def get_user_shares_by_notebook(notebook_uuid: UUID) -> List[NotebookUserS
     """
     return await NotebookUserShare.filter(notebook_id=notebook_uuid).all()
 
-## NotebookLinkShare CRUD ##
+
+# NotebookLinkShare CRUD
+
 
 async def create_notebook_link_share(
-    notebook_uuid: UUID,
-    write_access=False,
-    expires=None) -> NotebookLinkShare:
+        notebook_uuid: UUID,
+        write_access=False,
+        expires=None) -> NotebookLinkShare:
     """
     creates a notebook share link
 
@@ -243,7 +253,8 @@ async def get_notebook_by_link_share(link_uuid: UUID) -> UUID:
     return await link.notebook.get()
 
 
-## Note CRUD ##
+# Note CRUD
+
 
 async def create_note(notebook_uuid: UUID, prefix: str) -> Note:
     note = Note(prefix=prefix, notebook_id=notebook_uuid)

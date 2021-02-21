@@ -11,6 +11,7 @@ from ..helpers import (datetime_input_type, delete_note_file,
 
 blueprint = Blueprint("personal_home", __name__)
 
+
 @blueprint.route("/")
 @login_required
 async def index():
@@ -199,7 +200,10 @@ async def view_note(notebook_uuid, note_uuid):
         notebook_uuid = UUID(notebook_uuid)
         note_uuid = UUID(note_uuid)
         owner_id = UUID(current_user.auth_id)
-        scope = await crud.check_user_notebook_access(owner_id, notebook_uuid, ("read", "write", "owner"))
+        scope = await crud.check_user_notebook_access(
+            owner_id,
+            notebook_uuid,
+            ("read", "write", "owner"))
         note = await crud.get_note(note_uuid)
         content = await read_note_file_html(notebook_uuid, note_uuid)
         return await render_template(

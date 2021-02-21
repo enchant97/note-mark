@@ -16,8 +16,9 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     try:
         shutdown_event = asyncio.Event()
+
         def _signal_handler(*_) -> None:
-                shutdown_event.set()
+            shutdown_event.set()
         loop.add_signal_handler(signal.SIGTERM, _signal_handler)
         loop.run_until_complete(
             serve(app, config, shutdown_trigger=shutdown_event.wait)

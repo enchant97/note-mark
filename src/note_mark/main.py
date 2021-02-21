@@ -14,7 +14,7 @@ if BASE_URL == "/":
     BASE_URL = ""
 
 app = Quart(__name__, static_url_path=BASE_URL + "/static")
-auth_manager=AuthManager()
+auth_manager = AuthManager()
 
 
 @app.errorhandler(Unauthorized)
@@ -32,10 +32,10 @@ def create_app():
     app.secret_key = get_settings().SECRET_KEY
     app.config["QUART_AUTH_COOKIE_SECURE"] = get_settings().AUTH_COOKIE_SECURE
     # register route blueprints
-    app.register_blueprint(home.blueprint, url_prefix=BASE_URL+ "/")
-    app.register_blueprint(auth.blueprint, url_prefix=BASE_URL+"/auth")
-    app.register_blueprint(personal_home.blueprint, url_prefix=BASE_URL+"/home")
-    app.register_blueprint(share_link.blueprint, url_prefix=BASE_URL+"/share-link")
+    app.register_blueprint(home.blueprint, url_prefix = BASE_URL + "/")
+    app.register_blueprint(auth.blueprint, url_prefix = BASE_URL + "/auth")
+    app.register_blueprint(personal_home.blueprint, url_prefix = BASE_URL + "/home")
+    app.register_blueprint(share_link.blueprint, url_prefix = BASE_URL + "/share-link")
     # database setup
     register_tortoise(
         app,

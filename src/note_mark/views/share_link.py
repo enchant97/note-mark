@@ -9,6 +9,7 @@ from ..helpers import (datetime_input_type, read_note_file_html,
 
 blueprint = Blueprint("share_link", __name__)
 
+
 @blueprint.route("/")
 async def index():
     return await render_template("/share-link/index.jinja2")

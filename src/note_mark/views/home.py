@@ -3,6 +3,7 @@ from quart_auth import current_user
 
 blueprint = Blueprint("home", __name__)
 
+
 @blueprint.route("/")
 async def index():
     if await current_user.is_authenticated:

@@ -25,7 +25,7 @@ async def write_note_file_md(notebook: UUID, note: UUID, md_str: str = ""):
     # make sure new line tags use LF
     md_str = md_str.replace("\r\n", "\n")
     async with aiofiles.open(fn, "w") as fo:
-       await fo.write(md_str)
+        await fo.write(md_str)
 
 
 async def read_note_file_md(notebook: UUID, note: UUID) -> str:
@@ -80,7 +80,9 @@ def delete_notebook_folder(notebook: UUID):
     shutil.rmtree(notebook_path)
 
 
-def datetime_input_type(datetime_str: Union[str, None], format_="%Y-%m-%dT%H:%M") -> Union[datetime, None]:
+def datetime_input_type(
+    datetime_str: Union[str, None],
+    format_="%Y-%m-%dT%H:%M") -> Union[datetime, None]:
     """
     convert a HTML datetime-local
     input into a python datetime obj
