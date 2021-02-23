@@ -2,10 +2,10 @@
 functions to allow easy access
 to the database models(tables) for the app
 """
-from datetime import datetime, timezone
 from typing import Generator, List, Tuple, Union
 from uuid import UUID
 
+from tortoise import timezone
 from tortoise.exceptions import DoesNotExist
 
 from .models import Note, Notebook, NotebookLinkShare, NotebookUserShare, User
@@ -65,7 +65,7 @@ async def check_share_link_access(
     scope = None
     if link is not None and link.expires is not None:
         # check expiry
-        if link.expires < datetime.now(timezone.utc):
+        if link.expires < timezone.now():
             await link.delete()
             link = None
     if link is not None:
@@ -286,7 +286,8 @@ async def mark_note_updated(note_uuid: UUID):
 
     :param note_uuid: the note's uuid
     """
-    await Note.filter(uuid=note_uuid).update(updated_at=datetime.now(timezone.utc))
+    note_row = await Note.filter(uuid=note_uuid).get()
+    await note_row.save()
 
 
 async def delete_note(note_uuid: UUID):
