@@ -2,9 +2,11 @@
 {% block title %}View Note{% endblock %}
 {% block main %}
 <h2>{{ note.prefix }}</h2>
-<a class="button" href="{{ url_for('share_link.get_notebook', share_link_uuid=share_link_uuid) }}">Back To Notebook</a>
-{% if scope == "write" %}
-<a class="button" href="{{ url_for('share_link.edit_note', share_link_uuid=share_link_uuid, note_uuid=note.uuid) }}">Edit</a>
-{% endif %}
+<div class="control-bar">
+    <a class="button" href="{{ url_for('share_link.get_notebook', share_link_uuid=share_link_uuid) }}">Back To Notebook</a>
+    {% if scope == "write" %}
+    <a class="button" href="{{ url_for('share_link.edit_note', share_link_uuid=share_link_uuid, note_uuid=note.uuid) }}">Edit</a>
+    {% endif %}
+</div>
 <div id="note-content">{{ content|safe }}</div>
 {% endblock %}

@@ -1,6 +1,7 @@
 {% extends "/shared/base.jinja2" %}
 {% block title %}Create Note{% endblock %}
 {% block main %}
+<a class="button" href="{{ url_for('share_link.get_notebook', share_link_uuid=share_link_uuid) }}">Back To Notebook</a>
 <form action="{{ url_for('share_link.new_note', share_link_uuid=share_link_uuid) }}" method="post">
     <label for="new-note-prefix">Name</label>
     <input type="text" name="prefix" id="new-note-prefix" required placeholder="name...">

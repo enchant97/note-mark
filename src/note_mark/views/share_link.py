@@ -63,7 +63,7 @@ async def new_note(share_link_uuid):
                     note_uuid=note.uuid))
         return await render_template(
             "/share-link/note/create.jinja2",
-            notebook_uuid=notebook.uuid)
+            share_link_uuid=share_link_uuid)
     except DoesNotExist:
         await flash("share-link does not exist,\
             or you don't have permission for the current page", "error")

@@ -1,11 +1,11 @@
 {% extends "/shared/base.jinja2" %}
 {% block title %}Login{% endblock %}
 {% block main %}
-<form action="{{ url_for('auth.login') }}" method="post">
+<form class="container" action="{{ url_for('auth.login') }}" method="post">
     <label for="username">Username</label>
-    <input type="text" id="username" name="username" required>
+    <input type="text" id="username" name="username" required placeholder="username...">
     <label for="password">Password</label>
-    <input type="password" name="password" id="password" required>
+    <input type="password" name="password" id="password" required placeholder="password...">
     <button type="submit">Login</button>
     <a href="{{ url_for('auth.signup') }}">Create Account</a>
 </form>

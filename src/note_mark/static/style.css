@@ -1,15 +1,19 @@
 :root {
     --font-dark: black;
     --font-light: #f0f0f0;
+    --font-placeholder: #505a69;
     --bg-bnt: #adadad;
     --bg-body: #9299a5;
     --bg-body2: #9096a1;
     --bg-body3: #767d8a;
+    --border-col: #777777;
+    --border-radius: 10px;
     --font-family-title: 'Roboto', sans-serif;
     --font-family-main: 'Open Sans', sans-serif;
     --font-family-code: 'Roboto Mono', monospace;
 }
 
+/* font reset */
 div,
 span,
 applet,
@@ -78,7 +82,8 @@ summary,
 time,
 mark,
 button,
-textarea {
+textarea,
+input {
     font-family: var(--font-family-main);
     font-size: 1em;
 }
@@ -101,6 +106,11 @@ h6 {
 
 h1 {
     font-size: 2em;
+}
+
+a {
+    color: #00048c;
+    text-decoration: none;
 }
 
 body {
@@ -133,7 +143,7 @@ button,
     color: var(--font-dark);
     padding: 10px 20px;
     background-color: var(--bg-bnt);
-    border-radius: 10px;
+    border-radius: var(--border-radius);
 }
 
 button:hover,
@@ -142,6 +152,20 @@ button:hover,
     transition-duration: 400ms;
     background-color: black;
     color: var(--font-light);
+}
+
+/* input/form styles */
+input {
+    padding: 2px 6px;
+    background-color: var(--bg-body3);
+    color: var(--font-light);
+    border: 2px solid black;
+    border-radius: var(--border-radius);
+}
+
+::placeholder {
+    color: var(--font-placeholder);
+    opacity: 1;
 }
 
 /* flash styles */
@@ -153,7 +177,7 @@ button:hover,
 }
 
 .flashes div {
-    border-radius: 10px;
+    border-radius: var(--border-radius);
     padding: 10px;
     margin-bottom: 5px;
 }
@@ -190,28 +214,85 @@ button:hover,
 }
 
 
+.control-bar {
+    width: 100%;
+    display: flex;
+    gap: 4px;
+    background-color: var(--bg-body2);
+    padding: 4px;
+    border-radius: var(--border-radius);
+    flex-wrap: wrap;
+}
+
 #note-content {
     width: 100%;
     background-color: var(--bg-body2);
+    word-break: break-word;
 }
 
 #note-content .codehilite {
-    border-radius: 10px;
+    border-radius: var(--border-radius);
     color: var(--font-light);
     padding: 4px 10px;
     background-color: var(--bg-body3);
     margin: 4px 0px;
+    overflow: auto;
 }
 
 #note-content .codehilite pre {
     margin: 0;
 }
 
+/* table styles */
+table {
+    width: 100%;
+    border-bottom: 4px solid var(--bg-body3);
+    border-spacing: 0;
+}
+
+table th,
+table td {
+    border-bottom: 1px solid var(--border-col);
+    border-right: 1px solid var(--border-col);
+    padding: 8px;
+}
+
+table thead {
+    color: var(--font-light);
+    background-color: var(--bg-body3);
+}
+
+table thead tr:first-child th:first-child {
+    border-top-left-radius: var(--border-radius);
+}
+
+table thead tr:first-child th:last-child {
+    border-top-right-radius: var(--border-radius);
+}
+
+table thead th {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+table tr:last-child>td {
+    border-bottom: none;
+}
+
+table tr td:last-child,
+table tr th:last-child {
+    border-right: none;
+}
+
 textarea {
+    padding: 2px 6px;
+    border: 2px solid black;
+    border-radius: var(--border-radius);
     background-color: var(--bg-body2);
     resize: none;
     width: 100%;
     overflow-y: hidden;
+    outline: none;
 }
 
 /* footer styles */

@@ -77,7 +77,7 @@ def delete_notebook_folder(notebook: UUID):
         :param notebook: the notebook uuid
     """
     notebook_path = get_settings().DATA_PATH / Path("notebooks") / Path(notebook.hex)
-    shutil.rmtree(notebook_path)
+    shutil.rmtree(notebook_path, ignore_errors = True)
 
 
 def datetime_input_type(
