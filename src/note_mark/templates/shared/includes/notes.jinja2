@@ -1,0 +1,3 @@
+{% for note in notes %}
+    <a class="button" href="{{ url_for('personal_home.view_note', notebook_uuid=notebook.uuid, note_uuid=note.uuid) }}">{{ note.prefix }}</a>
+{% endfor %}

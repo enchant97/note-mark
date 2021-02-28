@@ -1,0 +1,3 @@
+{% for notebook in owned_notebooks %}
+<a class="button" href="{{ url_for('personal_home.get_notebook', notebook_uuid=notebook.uuid) }}">{{ notebook.prefix }}</a>
+{% endfor %}

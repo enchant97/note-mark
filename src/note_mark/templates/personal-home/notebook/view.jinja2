@@ -19,9 +19,7 @@
 {% endif %}
 
 <div class="container" id="notes">
-<h3>Notes</h3>
-{% for note in notes %}
-    <a class="button" href="{{ url_for('personal_home.view_note', notebook_uuid=notebook.uuid, note_uuid=note.uuid) }}">{{ note.prefix }}</a>
-{% endfor %}
+    <h3>Notes</h3>
+    {% include('/shared/includes/notes.jinja2') %}
 </div>
 {% endblock %}
