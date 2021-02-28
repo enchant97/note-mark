@@ -15,9 +15,10 @@ async def login():
     if request.method == "POST":
         username = (await request.form)['username']
         password = (await request.form).get('password', '')
+        rememberme = (await request.form).get("rememberme", False, bool)
         user = await crud.check_user(username, password)
         if user:
-            login_user(AuthUser(user.uuid.hex))
+            login_user(AuthUser(user.uuid.hex), rememberme)
             return redirect(url_for("personal_home.index"))
         await flash("username or password incorrect", "error")
 

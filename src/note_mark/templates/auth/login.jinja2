@@ -6,6 +6,8 @@
     <input type="text" id="username" name="username" required placeholder="username...">
     <label for="password">Password</label>
     <input type="password" name="password" id="password" required placeholder="password...">
+    <label for="login-rememberme">Remember Me</label>
+    <input type="checkbox" name="rememberme" id="login-rememberme" value="1" checked>
     <button type="submit">Login</button>
     <a href="{{ url_for('auth.signup') }}">Create Account</a>
 </form>
