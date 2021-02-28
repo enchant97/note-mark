@@ -1,5 +1,3 @@
-from functools import wraps
-from typing import Any, Callable
 from uuid import UUID
 
 from quart import Blueprint, make_response, render_template
@@ -7,19 +5,10 @@ from quart_auth import current_user
 from tortoise.exceptions import DoesNotExist
 
 from ..database import crud
-from ..helpers import read_note_file_html, read_note_file_md
+from ..helpers import (api_login_required, read_note_file_html,
+                       read_note_file_md)
 
 blueprint = Blueprint("api", __name__)
-
-
-def api_login_required(func: Callable) -> Callable:
-    @wraps(func)
-    async def wrapper(*args: Any, **kwargs: Any) -> Any:
-        if not await current_user.is_authenticated:
-            return "you must pass a valid login cookie", 401
-        else:
-            return await func(*args, **kwargs)
-    return wrapper
 
 
 @blueprint.route("/notebook/personal.html")

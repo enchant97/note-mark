@@ -1,11 +1,13 @@
 import shutil
 from datetime import datetime
+from functools import wraps
 from pathlib import Path
-from typing import Union
+from typing import Any, Callable, Union
 from uuid import UUID
 
 import aiofiles
 from markdown import markdown
+from quart_auth import current_user
 
 from .config import get_settings
 
@@ -94,3 +96,13 @@ def datetime_input_type(
     if datetime_str is None or datetime_str == "":
         return None
     return datetime.strptime(datetime_str, format_)
+
+
+def api_login_required(func: Callable) -> Callable:
+    @wraps(func)
+    async def wrapper(*args: Any, **kwargs: Any) -> Any:
+        if not await current_user.is_authenticated:
+            return "you must pass a valid login cookie", 401
+        else:
+            return await func(*args, **kwargs)
+    return wrapper
