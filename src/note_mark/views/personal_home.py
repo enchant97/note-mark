@@ -5,9 +5,10 @@ from quart_auth import current_user, login_required
 from tortoise.exceptions import DoesNotExist, IntegrityError
 
 from ..database import crud
-from ..helpers import (datetime_input_type, delete_note_file,
-                       delete_notebook_folder, read_note_file_html,
-                       read_note_file_md, write_note_file_md)
+from ..helpers.file import (delete_note_file, delete_notebook_folder,
+                            read_note_file_html, read_note_file_md,
+                            write_note_file_md)
+from ..helpers.types import datetime_input_type
 from ..websocket import WS_TOKENS
 
 blueprint = Blueprint("personal_home", __name__)

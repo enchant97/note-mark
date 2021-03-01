@@ -4,8 +4,9 @@ from quart import Blueprint, flash, redirect, render_template, request, url_for
 from tortoise.exceptions import DoesNotExist
 
 from ..database import crud
-from ..helpers import (datetime_input_type, read_note_file_html,
-                       read_note_file_md, write_note_file_md)
+from ..helpers.file import (read_note_file_html, read_note_file_md,
+                            write_note_file_md)
+from ..helpers.types import datetime_input_type
 
 blueprint = Blueprint("share_link", __name__)
 

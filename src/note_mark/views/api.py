@@ -6,9 +6,9 @@ from quart_auth import current_user
 from tortoise.exceptions import DoesNotExist
 
 from ..database import crud
-from ..helpers import (api_login_required, read_note_file_html,
-                       read_note_file_md)
-from ..websocket import WS_CLIENTS, ws_receive, ws_send, WS_TOKENS
+from ..helpers.file import read_note_file_html, read_note_file_md
+from ..helpers.route import api_login_required
+from ..websocket import WS_CLIENTS, WS_TOKENS, ws_receive, ws_send
 
 blueprint = Blueprint("api", __name__)
 
