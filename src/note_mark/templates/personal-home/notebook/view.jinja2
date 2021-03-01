@@ -22,4 +22,5 @@
     <h3>Notes</h3>
     {% include('/shared/includes/notes.jinja2') %}
 </div>
+<script>listen_for_ws_updates(`{{ url_for('api.notebook_update_ws', notebook_uuid=notebook.uuid, token=get_ws_token()) }}`);</script>
 {% endblock %}

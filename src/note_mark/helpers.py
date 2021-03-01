@@ -79,12 +79,12 @@ def delete_notebook_folder(notebook: UUID):
         :param notebook: the notebook uuid
     """
     notebook_path = get_settings().DATA_PATH / Path("notebooks") / Path(notebook.hex)
-    shutil.rmtree(notebook_path, ignore_errors = True)
+    shutil.rmtree(notebook_path, ignore_errors=True)
 
 
 def datetime_input_type(
-    datetime_str: Union[str, None],
-    format_="%Y-%m-%dT%H:%M") -> Union[datetime, None]:
+        datetime_str: Union[str, None],
+        format_="%Y-%m-%dT%H:%M") -> Union[datetime, None]:
     """
     convert a HTML datetime-local
     input into a python datetime obj

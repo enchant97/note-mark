@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     BASE_URL: Optional[str] = ""
     BINDS: Optional[List[str]] = ["127.0.0.1:8000"]
 
+    MAX_QUEUE_SIZE: int = -1
+
     class Config:
         case_sensitive = True
         env_file = '.env'

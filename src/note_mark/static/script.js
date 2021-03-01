@@ -1,3 +1,4 @@
+"use strict";
 /**
  * resize an element based on its current content
  * @param {Element} elem - the element to resize
@@ -18,5 +19,17 @@ function auto_resize_elem(elem){
 function ask_before_get(url, msg ="are you sure you want to delete that?"){
     if (confirm(msg)){
         window.location.replace(url);
+    }
+}
+
+/**
+ * connect the update websocket
+ * @param {string} url - the url to connect to
+ */
+function listen_for_ws_updates(url){
+    const ws = new WebSocket(url);
+    ws.onmessage = evnt => {
+        // TODO implement
+        console.log(evnt.data);
     }
 }

@@ -1,3 +1,4 @@
+import asyncio
 from uuid import UUID
 
 from quart import Blueprint, make_response, render_template
@@ -7,6 +8,7 @@ from tortoise.exceptions import DoesNotExist
 from ..database import crud
 from ..helpers import (api_login_required, read_note_file_html,
                        read_note_file_md)
+from ..websocket import WS_CLIENTS, ws_receive, ws_send, WS_TOKENS
 
 blueprint = Blueprint("api", __name__)
 
@@ -31,6 +33,32 @@ async def rendered_notebook_shared_list():
         shared_notebooks=shared_notebooks)
 
 
+@blueprint.websocket("/notebook/<notebook_uuid>/ws/<token>")
+async def notebook_update_ws(notebook_uuid, token):
+    try:
+        owner_id = WS_TOKENS.get(token)
+        if not owner_id:
+            return "token invalid", 401
+        notebook_uuid = UUID(notebook_uuid)
+        await crud.check_user_notebook_access(
+            owner_id,
+            notebook_uuid,
+            ("read", "write", "owner"))
+        c_queue = WS_CLIENTS.create_client(notebook_uuid)
+        try:
+            producer = asyncio.create_task(ws_send(c_queue))
+            consumer = asyncio.create_task(ws_receive())
+            await asyncio.gather(producer, consumer)
+        except asyncio.CancelledError:
+            WS_CLIENTS.remove_client(c_queue, notebook_uuid)
+            del WS_TOKENS[token]
+            raise
+    except DoesNotExist:
+        return "notebook does not exist, or you don't have access to it", 404
+    except ValueError:
+        return "invalid notebook uuid", 404
+
+
 @blueprint.route("/notebook/<notebook_uuid>/notes.html")
 @api_login_required
 async def rendered_notes_list(notebook_uuid):
@@ -47,6 +75,35 @@ async def rendered_notes_list(notebook_uuid):
             "/shared/includes/notes.jinja2",
             notebook=notebook,
             notes=notes)
+    except DoesNotExist:
+        return "notebook does not exist, or you don't have access to it", 404
+    except ValueError:
+        return "invalid notebook uuid", 404
+
+
+@blueprint.websocket("/notebook/<notebook_uuid>/notes/<note_uuid>/ws/<token>")
+@api_login_required
+async def note_update_ws(notebook_uuid, note_uuid, token):
+    try:
+        owner_id = WS_TOKENS.get(token)
+        if not owner_id:
+            return "token invalid", 401
+        notebook_uuid = UUID(notebook_uuid)
+        note_uuid = UUID(note_uuid)
+        await crud.check_user_notebook_access(
+            owner_id,
+            notebook_uuid,
+            ("read", "write", "owner"))
+        await crud.get_note(note_uuid)
+        c_queue = WS_CLIENTS.create_client(notebook_uuid, note_uuid)
+        try:
+            producer = asyncio.create_task(ws_send(c_queue))
+            consumer = asyncio.create_task(ws_receive())
+            await asyncio.gather(producer, consumer)
+        except asyncio.CancelledError:
+            WS_CLIENTS.remove_client(c_queue, notebook_uuid, note_uuid)
+            del WS_TOKENS[token]
+            raise
     except DoesNotExist:
         return "notebook does not exist, or you don't have access to it", 404
     except ValueError:

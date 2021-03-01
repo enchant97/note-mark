@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from quart import Blueprint, flash, redirect, render_template, request, url_for
 from quart_auth import current_user, login_required
@@ -8,8 +8,18 @@ from ..database import crud
 from ..helpers import (datetime_input_type, delete_note_file,
                        delete_notebook_folder, read_note_file_html,
                        read_note_file_md, write_note_file_md)
+from ..websocket import WS_TOKENS
 
 blueprint = Blueprint("personal_home", __name__)
+
+
+@blueprint.context_processor
+def ws_token_gen():
+    def get_ws_token():
+        token = uuid4().hex
+        WS_TOKENS[token] = UUID(current_user.auth_id)
+        return token
+    return dict(get_ws_token=get_ws_token)
 
 
 @blueprint.route("/")

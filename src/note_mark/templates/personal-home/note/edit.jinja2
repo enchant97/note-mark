@@ -19,4 +19,5 @@
     text_area.style.height = (text_area.scrollHeight + "px");
     text_area.addEventListener("input", evn => { auto_resize_elem(text_area); });
 </script>
+<script>listen_for_ws_updates(`{{ url_for('api.note_update_ws', notebook_uuid=note.notebook_id, note_uuid=note.uuid, token=get_ws_token()) }}`);</script>
 {% endblock %}
