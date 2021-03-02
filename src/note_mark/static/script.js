@@ -15,34 +15,47 @@ const WS_MESSAGE_CATEGORY = {
  * resize an element based on its current content
  * @param {Element} elem - the element to resize
  */
-function auto_resize_elem(elem){
+function auto_resize_elem(elem) {
     const window_pos = window.pageYOffset;
     elem.style.height = "auto";
     elem.style.height = elem.scrollHeight + "px";
     window.scroll(window.pageYOffset, window_pos);
 }
 
-
 /**
  * ask if the user really wants to go to the url
  * @param {string} url - the url to navigate to on success
  * @param {string} msg - the message to show the user
  */
-function ask_before_get(url, msg ="are you sure you want to delete that?"){
-    if (confirm(msg)){
+function ask_before_get(url, msg = "are you sure you want to delete that?") {
+    if (confirm(msg)) {
         window.location.replace(url);
     }
 }
 
 /**
- * connect the update websocket
+ * create a ws event type name from category id
+ * @param {number} category_id - the message category id
+ * @returns the event type name
+ */
+function get_ws_event_type(category_id) {
+    return `ws_update_${category_id}`
+}
+
+/**
+ * connect the update websocket,
+ * and dispatch message category events
  * @param {string} url - the url to connect to
  */
-function listen_for_ws_updates(url){
+function listen_for_ws_updates(url) {
     const ws = new WebSocket(url);
     ws.onmessage = evnt => {
-        // TODO implement
+        // parse the message
         const message = JSON.parse(evnt.data);
-        console.log(message);
+        // create and dispatch the event with payload attached
+        const event = new CustomEvent(
+            get_ws_event_type(message.category),
+            { detail: message.payload });
+        window.dispatchEvent(event);
     }
 }
