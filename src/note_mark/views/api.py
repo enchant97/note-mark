@@ -8,7 +8,8 @@ from tortoise.exceptions import DoesNotExist
 from ..database import crud
 from ..helpers.file import read_note_file_html, read_note_file_md
 from ..helpers.route import api_login_required
-from ..websocket import WS_CLIENTS, WS_TOKENS, ws_receive, ws_send
+from ..helpers.websocket.route import ws_receive, ws_send
+from ..websocket import WS_CLIENTS, WS_TOKENS
 
 blueprint = Blueprint("api", __name__)
 
