@@ -83,7 +83,6 @@ async def rendered_notes_list(notebook_uuid):
 
 
 @blueprint.websocket("/notebook/<notebook_uuid>/notes/<note_uuid>/ws/<token>")
-@api_login_required
 async def note_update_ws(notebook_uuid, note_uuid, token):
     try:
         owner_id = WS_TOKENS.get(token)

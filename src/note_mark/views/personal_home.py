@@ -9,7 +9,8 @@ from ..helpers.file import (delete_note_file, delete_notebook_folder,
                             read_note_file_html, read_note_file_md,
                             write_note_file_md)
 from ..helpers.types import datetime_input_type
-from ..websocket import WS_TOKENS
+from ..helpers.websocket.types import MessageCategory, make_message
+from ..websocket import WS_CLIENTS, WS_TOKENS
 
 blueprint = Blueprint("personal_home", __name__)
 
@@ -88,6 +89,9 @@ async def rename_notebook(notebook_uuid):
             new_prefix = (await request.form)["prefix"]
             await crud.rename_notebook(notebook_uuid, new_prefix)
             await flash("notebook renamed", "ok")
+            await WS_CLIENTS.broadcast_message(
+                make_message(MessageCategory.NOTEBOOK_PREFIX_CHANGE),
+                notebook_uuid)
             return redirect(url_for(".get_notebook", notebook_uuid=notebook_uuid))
         return await render_template(
             "personal-home/notebook/rename.jinja2",
@@ -111,6 +115,9 @@ async def delete_notebook(notebook_uuid):
             ("owner",))
         await crud.delete_notebook(notebook_uuid)
         delete_notebook_folder(notebook_uuid)
+        await WS_CLIENTS.broadcast_message(
+            make_message(MessageCategory.NOTEBOOK_REMOVE),
+            notebook_uuid)
         await flash("notebook deleted", "ok")
     except DoesNotExist:
         await flash("notebook does not exist, or you don't have access to it", "error")
@@ -189,6 +196,9 @@ async def new_note(notebook_uuid):
             note = await crud.create_note(notebook_uuid, prefix)
             await write_note_file_md(notebook_uuid, note.uuid)
             await flash("note create", "ok")
+            await WS_CLIENTS.broadcast_message(
+                make_message(MessageCategory.NOTE_CREATE),
+                notebook_uuid)
             return redirect(
                 url_for(
                     ".view_note",
@@ -244,6 +254,9 @@ async def rename_note(notebook_uuid, note_uuid):
             new_prefix = (await request.form)["prefix"]
             await crud.rename_note(note_uuid, new_prefix)
             await flash("note renamed", "ok")
+            await WS_CLIENTS.broadcast_message(
+                make_message(MessageCategory.NOTE_PREFIX_CHANGE),
+                notebook_uuid)
             return redirect(url_for(".get_notebook", notebook_uuid=notebook_uuid))
         return await render_template(
             "personal-home/note/rename.jinja2",
@@ -286,6 +299,10 @@ async def edit_note(notebook_uuid, note_uuid):
                 await crud.mark_note_updated(note_uuid)
                 await flash("note saved", "ok")
 
+            await WS_CLIENTS.broadcast_message(
+                make_message(MessageCategory.NOTE_CONTENT_CHANGE),
+                notebook_uuid, note_uuid)
+
         content = await read_note_file_md(notebook_uuid, note_uuid)
         return await render_template(
             "/personal-home/note/edit.jinja2",
@@ -312,6 +329,9 @@ async def delete_note(notebook_uuid, note_uuid):
         await crud.delete_note(note_uuid)
         delete_note_file(notebook_uuid, note_uuid)
         await flash("note deleted", "ok")
+        await WS_CLIENTS.broadcast_message(
+            make_message(MessageCategory.NOTE_REMOVE),
+            notebook_uuid)
         return redirect(url_for(".get_notebook", notebook_uuid=notebook_uuid))
     except DoesNotExist:
         await flash("note does not exist, or you don't have access to it", "error")

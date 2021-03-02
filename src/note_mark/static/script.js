@@ -1,4 +1,16 @@
 "use strict";
+
+const WS_MESSAGE_CATEGORY = {
+    NOTEBOOK_CREATE: 10,
+    NOTEBOOK_REMOVE: 11,
+    NOTEBOOK_PREFIX_CHANGE: 12,
+
+    NOTE_CREATE: 20,
+    NOTE_REMOVE: 21,
+    NOTE_PREFIX_CHANGE: 22,
+    NOTE_CONTENT_CHANGE: 23
+}
+
 /**
  * resize an element based on its current content
  * @param {Element} elem - the element to resize
@@ -30,6 +42,7 @@ function listen_for_ws_updates(url){
     const ws = new WebSocket(url);
     ws.onmessage = evnt => {
         // TODO implement
-        console.log(evnt.data);
+        const message = JSON.parse(evnt.data);
+        console.log(message);
     }
 }

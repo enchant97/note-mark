@@ -3,8 +3,9 @@ the message queue handler for websocket updates
 """
 import logging
 from asyncio import Queue
-from typing import Any, Coroutine, Optional
+from typing import Coroutine, Optional
 from uuid import UUID
+from .types import Message
 
 
 class MessageQueueHandler:
@@ -74,7 +75,7 @@ class MessageQueueHandler:
 
     async def broadcast_message(
             self,
-            message: Any,
+            message: Message,
             notebook_uuid: Optional[UUID] = None,
             note_uuid: Optional[UUID] = None) -> Coroutine:
         """
@@ -96,16 +97,16 @@ class MessageQueueHandler:
                     await client.put(message)
             elif not note_uuid and notebook_uuid:
                 # broadcast all in specific notebook
-                for room in self.__clients[notebook_uuid]:
-                    for client in room:
+                for nb_key in self.__clients[notebook_uuid]:
+                    for client in self.__clients[notebook_uuid][nb_key]:
                         await client.put(message)
             elif note_uuid and not notebook_uuid:
                 raise ValueError("notebook_uuid required if note_uuid is specified")
             else:
                 # broadcast to all
                 for notebook in self.__clients:
-                    for room in notebook:
-                        for client in room:
+                    for nb_key in self.__clients[notebook]:
+                        for client in self.__clients[notebook][nb_key]:
                             await client.put(message)
         except KeyError:
             # we don't need to know about this error
