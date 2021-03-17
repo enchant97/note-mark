@@ -14,7 +14,8 @@ class Settings(BaseSettings):
 
     LOG_LEVEL: Optional[str] = "INFO"
     BASE_URL: Optional[str] = ""
-    BINDS: Optional[List[str]] = ["127.0.0.1:8000"]
+    HOST: str = "127.0.0.1"
+    PORT: int = 8000
 
     MAX_QUEUE_SIZE: int = -1
 

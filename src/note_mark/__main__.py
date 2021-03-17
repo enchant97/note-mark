@@ -11,7 +11,7 @@ from .main import create_app
 if __name__ == "__main__":
     config = Config()
     config.loglevel = get_settings().LOG_LEVEL
-    config.bind = get_settings().BINDS
+    config.bind = [f"{get_settings().HOST}:{get_settings().PORT}"]
     app = create_app()
     loop = asyncio.get_event_loop()
     try:
