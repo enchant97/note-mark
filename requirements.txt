@@ -3,5 +3,5 @@ quart-auth==0.4.0
 tortoise-orm==0.16.21
 hypercorn==0.11.2
 pydantic[dotenv]==1.8
-markdown==3.3.3
+markdown==3.3.4
 orjson==3.5.0
