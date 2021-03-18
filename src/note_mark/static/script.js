@@ -34,19 +34,19 @@ function ask_before_get(url, msg = "are you sure you want to delete that?") {
 }
 
 /**
- * replace old note content with new content
- * @param {Element} note_elem - the note-content element to update
- * @param {string} api_url - the api url
+ * replace old element content with new
+ * from requested html fragment
+ * @param {Element} elem - the element to update with fragment
+ * @param {string} api_url - the url to send the request to
  */
-async function load_note_html(note_elem, api_url){
-    // get the new note
+async function load_fragment_to_elem(elem, api_url){
     const resp = await fetch(api_url, { method: "GET" });
     const html_text = await resp.text();
-    // remove the note elements children
-    note_elem.innerHTML = "";
-    // add note to page
+    // remove the elements children
+    elem.innerHTML = "";
+    // add updated element to page
     const new_content = document.createRange().createContextualFragment(html_text);
-    note_elem.appendChild(new_content);
+    elem.appendChild(new_content);
 }
 
 /**
@@ -82,5 +82,5 @@ function listen_for_ws_updates(url) {
  */
 function handle_note_content_change(api_url){
     const note_elem = document.getElementById("note-content");
-    load_note_html(note_elem, api_url).catch(console.error);
+    load_fragment_to_elem(note_elem, api_url).catch(console.error);
 }
