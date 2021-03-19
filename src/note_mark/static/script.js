@@ -84,3 +84,29 @@ function handle_note_content_change(api_url){
     const note_elem = document.getElementById("note-content");
     load_fragment_to_elem(note_elem, api_url).catch(console.error);
 }
+
+/**
+ * handles updating the note prefix on a notes page
+ * @param {string} api_url - api url the get the new note prefix
+ */
+function handle_note_prefix_change(api_url){
+    console.log("note prefix change request not implemented, yet");
+}
+
+/**
+ * handle a note being deleted
+ * @param {string} redirect_url - the url to navigate to
+ */
+function handle_note_remove(redirect_url){
+    alert("Note has been deleted!");
+    window.location.replace(redirect_url);
+}
+
+/**
+ * handle a notebook being deleted
+ * @param {string} redirect_url - the url to navigate to
+ */
+function handle_notebook_remove(redirect_url) {
+    alert("Notebook and notes have been deleted!");
+    window.location.replace(redirect_url);
+}

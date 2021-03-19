@@ -1,7 +1,10 @@
 {% extends "/shared/base.jinja2" %}
 {% block title %}Edit Note{% endblock %}
+{% block extrahead %}
+<script src="{{ url_for('static', filename='textarea-resize.js') }}" defer></script>
+{% endblock %}
 {% block main %}
-<h2>{{ note.prefix }}</h2>
+<h2 id="note-prefix">{{ note.prefix }}</h2>
 <div class="control-bar">
     <a class="button" href="{{ url_for('share_link.get_notebook', share_link_uuid=share_link_uuid) }}">Back To Notebook</a>
     <a class="button" href="{{ url_for('share_link.view_note', share_link_uuid=share_link_uuid, note_uuid=note.uuid) }}">View</a>
