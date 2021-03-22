@@ -120,6 +120,21 @@ class MessageQueueHandler(TokenHandler):
         self.__clients_count -= 1
         logging.info("ws client unregistered, curr clients: %s", self.__clients_count)
 
+    async def __broadcast_note(self, message, notebook_uuid, note_uuid):
+        for client in self.__clients[notebook_uuid][note_uuid]:
+            await client.put(message)
+
+    async def __broadcast_notebook(self, message, notebook_uuid):
+        for nb_key in self.__clients[notebook_uuid]:
+            for client in self.__clients[notebook_uuid][nb_key]:
+                await client.put(message)
+
+    async def __broadcast_all(self, message):
+        for notebook in self.__clients:
+            for nb_key in self.__clients[notebook]:
+                for client in self.__clients[notebook][nb_key]:
+                    await client.put(message)
+
     async def broadcast_message(
             self,
             message: Message,
@@ -139,22 +154,13 @@ class MessageQueueHandler(TokenHandler):
         """
         try:
             if note_uuid and notebook_uuid:
-                # broadcast all in specific note
-                for client in self.__clients[notebook_uuid][note_uuid]:
-                    await client.put(message)
+                await self.__broadcast_note(message, notebook_uuid, note_uuid)
             elif not note_uuid and notebook_uuid:
-                # broadcast all in specific notebook
-                for nb_key in self.__clients[notebook_uuid]:
-                    for client in self.__clients[notebook_uuid][nb_key]:
-                        await client.put(message)
+                await self.__broadcast_notebook(message, notebook_uuid)
             elif note_uuid and not notebook_uuid:
                 raise ValueError("notebook_uuid required if note_uuid is specified")
             else:
-                # broadcast to all
-                for notebook in self.__clients:
-                    for nb_key in self.__clients[notebook]:
-                        for client in self.__clients[notebook][nb_key]:
-                            await client.put(message)
+                await self.__broadcast_all(message)
         except KeyError:
             # we don't need to know about this error
             pass
