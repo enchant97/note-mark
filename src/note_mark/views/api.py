@@ -7,9 +7,8 @@ from tortoise.exceptions import DoesNotExist
 
 from ..database import crud
 from ..helpers.file import read_note_file_html, read_note_file_md
-from ..helpers.route import api_login_required
+from ..helpers.route import api_login_required, get_ws_handler
 from ..helpers.websocket.route import ws_receive, ws_send
-from ..websocket import WS_CLIENTS, WS_TOKENS
 
 blueprint = Blueprint("api", __name__)
 
@@ -36,8 +35,9 @@ async def rendered_notebook_shared_list():
 
 @blueprint.websocket("/notebook/<notebook_uuid>/ws/<token>")
 async def notebook_update_ws(notebook_uuid, token):
+    ws_handler = get_ws_handler()
     try:
-        owner_id = WS_TOKENS.get(token)
+        owner_id = ws_handler.get_token(token)
         if not owner_id:
             return "token invalid", 401
         notebook_uuid = UUID(notebook_uuid)
@@ -45,14 +45,14 @@ async def notebook_update_ws(notebook_uuid, token):
             owner_id,
             notebook_uuid,
             ("read", "write", "owner"))
-        c_queue = WS_CLIENTS.create_client(notebook_uuid)
+        c_queue = ws_handler.create_client(notebook_uuid)
         try:
             producer = asyncio.create_task(ws_send(c_queue))
             consumer = asyncio.create_task(ws_receive())
             await asyncio.gather(producer, consumer)
         except asyncio.CancelledError:
-            WS_CLIENTS.remove_client(c_queue, notebook_uuid)
-            del WS_TOKENS[token]
+            ws_handler.remove_client(c_queue, notebook_uuid)
+            ws_handler.remove_token(token)
             raise
     except DoesNotExist:
         return "notebook does not exist, or you don't have access to it", 404
@@ -84,8 +84,9 @@ async def rendered_notes_list(notebook_uuid):
 
 @blueprint.websocket("/notebook/<notebook_uuid>/notes/<note_uuid>/ws/<token>")
 async def note_update_ws(notebook_uuid, note_uuid, token):
+    ws_handler = get_ws_handler()
     try:
-        owner_id = WS_TOKENS.get(token)
+        owner_id = ws_handler.get_token(token)
         if not owner_id:
             return "token invalid", 401
         notebook_uuid = UUID(notebook_uuid)
@@ -95,14 +96,14 @@ async def note_update_ws(notebook_uuid, note_uuid, token):
             notebook_uuid,
             ("read", "write", "owner"))
         await crud.get_note(note_uuid)
-        c_queue = WS_CLIENTS.create_client(notebook_uuid, note_uuid)
+        c_queue = ws_handler.create_client(notebook_uuid, note_uuid)
         try:
             producer = asyncio.create_task(ws_send(c_queue))
             consumer = asyncio.create_task(ws_receive())
             await asyncio.gather(producer, consumer)
         except asyncio.CancelledError:
-            WS_CLIENTS.remove_client(c_queue, notebook_uuid, note_uuid)
-            del WS_TOKENS[token]
+            ws_handler.remove_client(c_queue, notebook_uuid, note_uuid)
+            ws_handler.remove_token(token)
             raise
     except DoesNotExist:
         return "notebook does not exist, or you don't have access to it", 404

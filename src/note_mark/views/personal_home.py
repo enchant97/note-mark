@@ -1,4 +1,4 @@
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from quart import Blueprint, flash, redirect, render_template, request, url_for
 from quart_auth import current_user, login_required
@@ -8,18 +8,17 @@ from ..database import crud
 from ..helpers.file import (delete_note_file, delete_notebook_folder,
                             read_note_file_html, read_note_file_md,
                             write_note_file_md)
+from ..helpers.route import get_ws_handler
 from ..helpers.types import datetime_input_type
 from ..helpers.websocket.types import MessageCategory, make_message
-from ..websocket import WS_CLIENTS, WS_TOKENS
 
 blueprint = Blueprint("personal_home", __name__)
 
 
 @blueprint.context_processor
-def ws_token_gen():
-    def get_ws_token():
-        token = uuid4().hex
-        WS_TOKENS[token] = UUID(current_user.auth_id)
+def ws_token_gen() -> dict:
+    def get_ws_token() -> str:
+        token = get_ws_handler().create_token(UUID(current_user.auth_id))
         return token
     return dict(get_ws_token=get_ws_token)
 
@@ -89,7 +88,8 @@ async def rename_notebook(notebook_uuid):
             new_prefix = (await request.form)["prefix"]
             await crud.rename_notebook(notebook_uuid, new_prefix)
             await flash("notebook renamed", "ok")
-            await WS_CLIENTS.broadcast_message(
+
+            await get_ws_handler().broadcast_message(
                 make_message(MessageCategory.NOTEBOOK_PREFIX_CHANGE),
                 notebook_uuid)
             return redirect(url_for(".get_notebook", notebook_uuid=notebook_uuid))
@@ -115,7 +115,7 @@ async def delete_notebook(notebook_uuid):
             ("owner",))
         await crud.delete_notebook(notebook_uuid)
         delete_notebook_folder(notebook_uuid)
-        await WS_CLIENTS.broadcast_message(
+        await get_ws_handler().broadcast_message(
             make_message(MessageCategory.NOTEBOOK_REMOVE),
             notebook_uuid)
         await flash("notebook deleted", "ok")
@@ -196,7 +196,7 @@ async def new_note(notebook_uuid):
             note = await crud.create_note(notebook_uuid, prefix)
             await write_note_file_md(notebook_uuid, note.uuid)
             await flash("note create", "ok")
-            await WS_CLIENTS.broadcast_message(
+            await get_ws_handler().broadcast_message(
                 make_message(MessageCategory.NOTE_CREATE),
                 notebook_uuid)
             return redirect(
@@ -254,7 +254,7 @@ async def rename_note(notebook_uuid, note_uuid):
             new_prefix = (await request.form)["prefix"]
             await crud.rename_note(note_uuid, new_prefix)
             await flash("note renamed", "ok")
-            await WS_CLIENTS.broadcast_message(
+            await get_ws_handler().broadcast_message(
                 make_message(MessageCategory.NOTE_PREFIX_CHANGE),
                 notebook_uuid)
             return redirect(url_for(".get_notebook", notebook_uuid=notebook_uuid))
@@ -299,7 +299,7 @@ async def edit_note(notebook_uuid, note_uuid):
                 await crud.mark_note_updated(note_uuid)
                 await flash("note saved", "ok")
 
-            await WS_CLIENTS.broadcast_message(
+            await get_ws_handler().broadcast_message(
                 make_message(MessageCategory.NOTE_CONTENT_CHANGE),
                 notebook_uuid, note_uuid)
 
@@ -329,7 +329,7 @@ async def delete_note(notebook_uuid, note_uuid):
         await crud.delete_note(note_uuid)
         delete_note_file(notebook_uuid, note_uuid)
         await flash("note deleted", "ok")
-        await WS_CLIENTS.broadcast_message(
+        await get_ws_handler().broadcast_message(
             make_message(MessageCategory.NOTE_REMOVE),
             notebook_uuid)
         return redirect(url_for(".get_notebook", notebook_uuid=notebook_uuid))

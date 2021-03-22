@@ -7,7 +7,8 @@ from tortoise.contrib.quart import register_tortoise
 from . import __version__
 from .config import get_settings
 from .database import models
-from .views import auth, home, personal_home, share_link, api
+from .helpers.websocket.handler import MessageQueueHandler
+from .views import api, auth, home, personal_home, share_link
 
 BASE_URL = get_settings().BASE_URL
 if BASE_URL == "/":
@@ -31,6 +32,10 @@ def create_app():
     app.config["__VERSION__"] = __version__
     app.secret_key = get_settings().SECRET_KEY
     app.config["QUART_AUTH_COOKIE_SECURE"] = get_settings().AUTH_COOKIE_SECURE
+
+    # register non-config variables
+    app.config["WS_CLIENTS"] = MessageQueueHandler(get_settings().MAX_QUEUE_SIZE)
+
     # register route blueprints
     app.register_blueprint(home.blueprint, url_prefix=BASE_URL + "/")
     app.register_blueprint(auth.blueprint, url_prefix=BASE_URL + "/auth")

@@ -3,12 +3,59 @@ the message queue handler for websocket updates
 """
 import logging
 from asyncio import Queue
-from typing import Coroutine, Optional
-from uuid import UUID
+from typing import Any, Coroutine, Optional
+from uuid import UUID, uuid4
+
 from .types import Message
 
 
-class MessageQueueHandler:
+class TokenHandler:
+    """
+    handles creating and checking tokens
+    """
+    __tokens = dict()
+
+    def create_token(self, auth_id: Any) -> str:
+        """
+        create a new token
+
+            :param auth_id: the user that it is associated with
+            :return: the created token
+        """
+        token = uuid4().hex
+        self.__tokens[token] = auth_id
+        return token
+
+    def check_token(self, token: str) -> bool:
+        """
+        check whether a token exists
+
+            :param token: token to check
+            :return: whether the token exists
+        """
+        if self.__tokens.get(token) is not None:
+            return True
+        return False
+
+    def get_token(self, token: str) -> Any:
+        """
+        get a token auth_id by the token
+
+            :param token: the token
+            :return: the auth_id or None
+        """
+        return self.__tokens.get(token)
+
+    def remove_token(self, token: str) -> None:
+        """
+        remove a token
+
+            :param token: the token to remove
+        """
+        self.__tokens.pop(token, None)
+
+
+class MessageQueueHandler(TokenHandler):
     """
     handle each client Queue,
     and allow for broadcasting
