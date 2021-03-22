@@ -3,6 +3,7 @@ the message queue handler for websocket updates
 """
 import logging
 from asyncio import Queue
+from dataclasses import asdict
 from typing import Any, Coroutine, Optional
 from uuid import UUID, uuid4
 
@@ -153,6 +154,7 @@ class MessageQueueHandler(TokenHandler):
                                 specified, but note_uuid is not
         """
         try:
+            message = asdict(message)
             if note_uuid and notebook_uuid:
                 await self.__broadcast_note(message, notebook_uuid, note_uuid)
             elif not note_uuid and notebook_uuid:

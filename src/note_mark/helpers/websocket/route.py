@@ -4,8 +4,12 @@ functions to help with the websocket receive and sending
 import logging
 from asyncio import Queue
 
-import orjson
 from quart import websocket
+
+try:
+    import rapidjson as json
+except ImportError:
+    import json
 
 from .types import Message
 
@@ -24,7 +28,7 @@ async def ws_send(client_queue: Queue):
         data = await client_queue.get()
         if not isinstance(data, Message):
             raise ValueError("invalid message type in ws queue, %s", type(data))
-        data = orjson.dumps(data).decode()
+        data = json.dumps(data)
         await websocket.send(data)
 
 
