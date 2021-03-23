@@ -10,6 +10,7 @@
     {% if scope == "owner" %}
     <a class="button" href="{{ url_for('personal_home.rename_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}">Rename</a>
     <button onclick="ask_before_get(`{{ url_for('personal_home.delete_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid)}}`)">Delete</button>
+    <a class="button" href="{{ url_for('api.raw_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}" download>Download</a>
     {% endif %}
 </div>
 <div id="note-content">{{ content|safe }}</div>
