@@ -6,29 +6,16 @@ from asyncio import Queue
 
 from quart import websocket
 
-try:
-    import rapidjson as json
-except ImportError:
-    import json
-
-from .types import Message
-
 
 async def ws_send(client_queue: Queue):
     """
     allow for sending messages with a websocket
 
-        :param notebook_uuid: the notebook uuid
-        :param note_uuid: the note uuid, defaults to None
-        :yield: the event data ready to send
-        :raises ValueError: if the note_uuid is
-                            specified, but note_uuid is not
+        :param client_queue: the queue to
+               get messages to send from
     """
     while True:
         data = await client_queue.get()
-        if not isinstance(data, Message):
-            raise ValueError("invalid message type in ws queue, %s", type(data))
-        data = json.dumps(data)
         await websocket.send(data)
 
 

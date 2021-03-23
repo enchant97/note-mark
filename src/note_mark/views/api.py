@@ -45,8 +45,8 @@ async def notebook_update_ws(notebook_uuid, token):
             owner_id,
             notebook_uuid,
             ("read", "write", "owner"))
-        c_queue = ws_handler.create_client(notebook_uuid)
         try:
+            c_queue = ws_handler.create_client(notebook_uuid)
             producer = asyncio.create_task(ws_send(c_queue))
             consumer = asyncio.create_task(ws_receive())
             await asyncio.gather(producer, consumer)
@@ -96,8 +96,8 @@ async def note_update_ws(notebook_uuid, note_uuid, token):
             notebook_uuid,
             ("read", "write", "owner"))
         await crud.get_note(note_uuid)
-        c_queue = ws_handler.create_client(notebook_uuid, note_uuid)
         try:
+            c_queue = ws_handler.create_client(notebook_uuid, note_uuid)
             producer = asyncio.create_task(ws_send(c_queue))
             consumer = asyncio.create_task(ws_receive())
             await asyncio.gather(producer, consumer)

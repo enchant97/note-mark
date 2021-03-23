@@ -7,6 +7,11 @@ from dataclasses import asdict
 from typing import Any, Coroutine, Optional
 from uuid import UUID, uuid4
 
+try:
+    import rapidjson as json
+except ImportError:
+    import json
+
 from .types import Message
 
 
@@ -136,6 +141,18 @@ class MessageQueueHandler(TokenHandler):
                 for client in self.__clients[notebook][nb_key]:
                     await client.put(message)
 
+    @staticmethod
+    def message_to_json(message: Message) -> str:
+        """
+        convert a Message obj to a json string
+
+            :param message: the Message obj to convert
+            :return: the json string
+        """
+        message = asdict(message)
+        message["dt_stamp"] = message["dt_stamp"].isoformat()
+        return json.dumps(message)
+
     async def broadcast_message(
             self,
             message: Message,
@@ -154,7 +171,7 @@ class MessageQueueHandler(TokenHandler):
                                 specified, but note_uuid is not
         """
         try:
-            message = asdict(message)
+            message = self.message_to_json(message)
             if note_uuid and notebook_uuid:
                 await self.__broadcast_note(message, notebook_uuid, note_uuid)
             elif not note_uuid and notebook_uuid:
