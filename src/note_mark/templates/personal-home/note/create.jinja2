@@ -7,4 +7,10 @@
     <input type="text" name="prefix" id="new-note-prefix" required placeholder="name..." maxlength="100">
     <button class="button" type="submit">Create</button>
 </form>
+<script>
+    listen_for_ws_updates(`{{ url_for('api.notebook_update_ws', notebook_uuid=notebook_uuid, token=get_ws_token()) }}`);
+    window.addEventListener(
+        get_ws_event_type(WS_MESSAGE_CATEGORY.NOTEBOOK_REMOVE),
+        _event => { handle_notebook_remove("{{ url_for('personal_home.index') }}") });
+</script>
 {% endblock %}

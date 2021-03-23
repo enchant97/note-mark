@@ -2,6 +2,9 @@
 {% block title %}View Notebook{% endblock %}
 {% block main %}
 <h2>{{notebook.prefix }}</h2>
+<div>
+<h2>Please note live update requires user-share not link</h2>
+</div>
 <div class="control-bar">
     <a class="button" href="{{ url_for('share_link.index') }}">Back To Home</a>
     {% if scope == "write" %}
