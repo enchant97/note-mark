@@ -2,12 +2,10 @@ FROM python:3.9-slim
 
 LABEL maintainer="enchant97"
 
-EXPOSE 8000
-
 # add curl for health checks
 RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y curl \
-    && apt-get clean
+    && apt-get install -y curl \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # setup python environment
