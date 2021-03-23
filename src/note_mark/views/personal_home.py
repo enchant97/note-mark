@@ -278,12 +278,10 @@ async def edit_note(notebook_uuid, note_uuid):
         owner_id = UUID(current_user.auth_id)
         await crud.check_user_notebook_access(owner_id, notebook_uuid, ("write", "owner"))
         note = await crud.get_note(note_uuid)
-
         if request.method == "POST":
             updated_content = (await request.form)["content"]
             updated_at = (await request.form)["updated_at"]
             updated_at = datetime_input_type(updated_at, "%Y-%m-%d %H:%M:%S.%f%z")
-
             if updated_at < note.updated_at:
                 # conflict was detected
                 conflict_dt = note.updated_at.strftime("%Y-%m-%d %H:%M:%S")
@@ -291,14 +289,13 @@ async def edit_note(notebook_uuid, note_uuid):
                 conflict_data = await read_note_file_md(notebook_uuid, note_uuid)
                 await write_note_file_md(notebook_uuid, note_backup.uuid, conflict_data)
                 await write_note_file_md(notebook_uuid, note_uuid, updated_content)
-                await crud.mark_note_updated(note_uuid)
+                await note.save()  # mark the note updated
                 await flash("note saved, but conflict was detected", "ok")
             else:
                 # no conflict detected
                 await write_note_file_md(notebook_uuid, note_uuid, updated_content)
-                await crud.mark_note_updated(note_uuid)
+                await note.save()  # mark the note updated
                 await flash("note saved", "ok")
-
             await get_ws_handler().broadcast_message(
                 make_message(MessageCategory.NOTE_CONTENT_CHANGE),
                 notebook_uuid, note_uuid)

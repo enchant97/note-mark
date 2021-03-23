@@ -14,10 +14,4 @@
     <textarea name="content" id="edit-note-content" placeholder="enter content...">{{ content }}</textarea>
     <input type="hidden" name="updated_at" value="{{ note.updated_at }}">
 </form>
-<script>
-    // script to control auto resize of text-area
-    const text_area = document.getElementById("edit-note-content");
-    text_area.style.height = (text_area.scrollHeight + "px");
-    text_area.addEventListener("input", evn => { auto_resize_elem(text_area); });
-</script>
 {% endblock %}

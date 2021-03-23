@@ -1,7 +1,7 @@
 import asyncio
 from uuid import UUID
 
-from quart import Blueprint, make_response, render_template
+from quart import Blueprint, make_response, render_template, jsonify
 from quart_auth import current_user
 from tortoise.exceptions import DoesNotExist
 
@@ -11,6 +11,13 @@ from ..helpers.route import api_login_required, get_ws_handler
 from ..helpers.websocket.route import ws_receive, ws_send
 
 blueprint = Blueprint("api", __name__)
+
+
+@blueprint.route("/get-ws-token")
+@api_login_required
+async def get_ws_token():
+    token = get_ws_handler().create_token(UUID(current_user.auth_id))
+    return jsonify(token=token)
 
 
 @blueprint.route("/notebook/personal.html")

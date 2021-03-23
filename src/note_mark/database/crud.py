@@ -280,16 +280,6 @@ async def rename_note(note_uuid: UUID, new_prefix: str):
     await Note.filter(uuid=note_uuid).update(prefix=new_prefix)
 
 
-async def mark_note_updated(note_uuid: UUID):
-    """
-    mark a note row as updated
-
-    :param note_uuid: the note's uuid
-    """
-    note_row = await Note.filter(uuid=note_uuid).get()
-    await note_row.save()
-
-
 async def delete_note(note_uuid: UUID):
     note = await Note.filter(uuid=note_uuid).get()
     await note.delete()
