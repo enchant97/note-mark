@@ -80,16 +80,20 @@ function listen_for_ws_updates(url) {
  * handles updating the view page with new note content
  * @param {string} api_url - the api url to get the note html
  */
-function handle_note_content_change(api_url){
+function handle_note_content_change(api_url) {
     const note_elem = document.getElementById("note-content");
     load_fragment_to_elem(note_elem, api_url).catch(console.error);
+}
+
+function handle_note_content_change_edit() {
+    alert("note has been edited elsewhere!");
 }
 
 /**
  * handles updating the note prefix on a notes page
  * @param {string} api_url - api url the get the new note prefix
  */
-function handle_note_prefix_change(api_url){
+function handle_note_prefix_change(api_url) {
     console.log("note prefix change request not implemented, yet");
 }
 
@@ -97,7 +101,7 @@ function handle_note_prefix_change(api_url){
  * handle a note being deleted
  * @param {string} redirect_url - the url to navigate to
  */
-function handle_note_remove(redirect_url){
+function handle_note_remove(redirect_url) {
     alert("Note has been deleted!");
     window.location.replace(redirect_url);
 }

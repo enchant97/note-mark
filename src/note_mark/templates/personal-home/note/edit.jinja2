@@ -19,6 +19,9 @@
 <script>
     listen_for_ws_updates(`{{ url_for('api.note_update_ws', notebook_uuid=note.notebook_id, note_uuid=note.uuid, token=get_ws_token()) }}`);
     window.addEventListener(
+        get_ws_event_type(WS_MESSAGE_CATEGORY.NOTE_CONTENT_CHANGE),
+        _event => { handle_note_content_change_edit() });
+    window.addEventListener(
         get_ws_event_type(WS_MESSAGE_CATEGORY.NOTE_PREFIX_CHANGE),
         _event => { handle_note_prefix_change("") });
     window.addEventListener(
