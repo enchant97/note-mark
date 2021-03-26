@@ -21,7 +21,7 @@
         _event => { handle_note_content_change(`{{ url_for('api.rendered_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}`) });
     window.addEventListener(
         get_ws_event_type(WS_MESSAGE_CATEGORY.NOTE_PREFIX_CHANGE),
-        _event => { handle_note_prefix_change("") });
+        _event => { handle_note_prefix_change(`{{ url_for('api.note_prefix', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}`) });
     window.addEventListener(
         get_ws_event_type(WS_MESSAGE_CATEGORY.NOTE_REMOVE),
         _event => { handle_note_remove("{{ url_for('personal_home.get_notebook', notebook_uuid=note.notebook_id) }}") });

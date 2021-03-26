@@ -50,6 +50,17 @@ async function load_fragment_to_elem(elem, api_url){
 }
 
 /**
+ * replace old note prefix element content with new from request
+ * @param {Element} elem - the element to update with fragment
+ * @param {string} api_url - the url to send the request to
+ */
+async function load_new_note_prefix(elem, api_url) {
+    const resp = await fetch(api_url, { method: "GET" });
+    const resp_json = await resp.json();
+    elem.innerText = resp_json.prefix;
+}
+
+/**
  * create a ws event type name from category id
  * @param {number} category_id - the message category id
  * @returns the event type name
@@ -85,6 +96,10 @@ function handle_note_content_change(api_url) {
     load_fragment_to_elem(note_elem, api_url).catch(console.error);
 }
 
+/**
+ * handle showing the user that
+ * their edit page is out of date
+*/
 function handle_note_content_change_edit() {
     alert("note has been edited elsewhere!");
 }
@@ -94,7 +109,8 @@ function handle_note_content_change_edit() {
  * @param {string} api_url - api url the get the new note prefix
  */
 function handle_note_prefix_change(api_url) {
-    console.log("note prefix change request not implemented, yet");
+    const elem = document.getElementById("note-prefix");
+    load_new_note_prefix(elem, api_url).catch(console.error);
 }
 
 /**

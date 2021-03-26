@@ -157,3 +157,22 @@ async def rendered_note(notebook_uuid, note_uuid):
         return "notebook does not exist, or you don't have access to it", 404
     except ValueError:
         return "invalid notebook/user/note", 404
+
+
+@blueprint.route("/notebook/<notebook_uuid>/notes/<note_uuid>/prefix")
+@api_login_required
+async def note_prefix(notebook_uuid, note_uuid):
+    try:
+        notebook_uuid = UUID(notebook_uuid)
+        note_uuid = UUID(note_uuid)
+        owner_id = UUID(current_user.auth_id)
+        await crud.check_user_notebook_access(
+            owner_id,
+            notebook_uuid,
+            ("read", "write", "owner"))
+        note = await crud.get_note(note_uuid)
+        return jsonify(prefix=note.prefix)
+    except DoesNotExist:
+        return "notebook does not exist, or you don't have access to it", 404
+    except ValueError:
+        return "invalid notebook/user/note", 404
