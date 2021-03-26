@@ -123,12 +123,12 @@ async def edit_note(share_link_uuid, note_uuid):
                 conflict_data = await read_note_file_md(notebook_uuid, note_uuid)
                 await write_note_file_md(notebook_uuid, note_backup.uuid, conflict_data)
                 await write_note_file_md(notebook_uuid, note_uuid, updated_content)
-                await crud.mark_note_updated(note_uuid)
+                await note.save()  # mark the note updated
                 await flash("note saved, but conflict was detected", "ok")
             else:
                 # no conflict detected
                 await write_note_file_md(notebook_uuid, note_uuid, updated_content)
-                await crud.mark_note_updated(note_uuid)
+                await note.save()  # mark the note updated
                 await flash("note saved", "ok")
 
         content = await read_note_file_md(notebook_uuid, note_uuid)
