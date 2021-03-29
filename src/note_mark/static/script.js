@@ -39,7 +39,7 @@ function ask_before_get(url, msg = "are you sure you want to delete that?") {
  * @param {Element} elem - the element to update with fragment
  * @param {string} api_url - the url to send the request to
  */
-async function load_fragment_to_elem(elem, api_url){
+async function load_fragment_to_elem(elem, api_url) {
     const resp = await fetch(api_url, { method: "GET" });
     const html_text = await resp.text();
     // remove the elements children
@@ -129,4 +129,14 @@ function handle_note_remove(redirect_url) {
 function handle_notebook_remove(redirect_url) {
     alert("Notebook and notes have been deleted!");
     window.location.replace(redirect_url);
+}
+
+/**
+ * handle new notes being modified to a
+ * notebook and updating the list
+ * @param {string} api_url - url to get new notes list
+ */
+function handle_notebook_notes_change(api_url) {
+    const notes_elem = document.getElementById("notes");
+    load_fragment_to_elem(notes_elem, api_url).catch(console.error);
 }
