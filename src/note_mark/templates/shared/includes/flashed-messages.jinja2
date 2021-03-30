@@ -1,12 +1,10 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="flashes">
-    {% for category, message in messages %}
-      <div class="{{ category }}">
-        <strong>{{ message }}</strong>
-        <span onclick="this.parentElement.style.display='none';">&times;</span>
-      </div>
-    {% endfor %}
-    </div>
-  {% endif %}
+<div class="flashes" id="flashes">
+{% for category, message in messages %}
+  <div class="{{ category }}" data-dismiss="flash">
+    <strong>{{ message }}</strong>
+    <span onclick="this.parentElement.style.display='none';">&times;</span>
+  </div>
+{% endfor %}
+</div>
 {% endwith %}

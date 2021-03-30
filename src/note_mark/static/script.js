@@ -1,5 +1,13 @@
 "use strict";
 
+/**
+ * delay to wait before removing a flashed message
+ */
+const FLASH_EXPIRE_TIME_MS = 4000;
+
+/**
+ * the message types that will be sent by websocket
+ */
 const WS_MESSAGE_CATEGORY = {
     NOTEBOOK_CREATE: 10,
     NOTEBOOK_REMOVE: 11,
@@ -9,6 +17,39 @@ const WS_MESSAGE_CATEGORY = {
     NOTE_REMOVE: 21,
     NOTE_PREFIX_CHANGE: 22,
     NOTE_CONTENT_CHANGE: 23
+}
+
+/**
+ * the css classes for the flashed message categories
+ */
+const FLASH_MESS_CATEGORY = {
+    OK: "ok",
+    WARNING: "warning",
+    ERROR: "error"
+}
+
+/**
+ * create a message flash
+ * @param {string} message - the message content
+ * @param {string} category - the category of message
+ * @param {number} expire_time_ms - time until the message
+ * auto deletes, if null will not expire
+ */
+function add_flash(message, category = FLASH_MESS_CATEGORY.OK, expire_time_ms = FLASH_EXPIRE_TIME_MS) {
+    const flashes_elem = document.getElementById("flashes");
+    const flash_elem = document.createElement("div");
+    flash_elem.classList.add(category);
+    const flash_mess = document.createElement("strong");
+    flash_mess.innerText = message;
+    const flash_close = document.createElement("span");
+    flash_close.addEventListener("click", _evnt => { flash_elem.remove() });
+    flash_close.innerText = "×";
+    flash_elem.append(flash_mess);
+    flash_elem.append(flash_close);
+    flashes_elem.append(flash_elem);
+    if (expire_time_ms !== null) {
+        setTimeout(() => { flash_elem.remove() }, expire_time_ms);
+    }
 }
 
 /**
@@ -52,11 +93,11 @@ function do_note_autosave(api_url) {
         })
         .then(updated_at => {
             document.getElementById("edit-note-updated_at").value = updated_at;
-            alert("note has been auto-saved");
+            add_flash("note has been auto-saved");
         })
         .catch((error) => {
             console.error(error);
-            alert("note could not be auto-saved");
+            add_flash("note could not be auto-saved", "error");
         });
 }
 
@@ -128,7 +169,7 @@ function handle_note_content_change(api_url) {
  * their edit page is out of date
 */
 function handle_note_content_change_edit() {
-    alert("note has been edited elsewhere!");
+    add_flash("note has been edited elsewhere!");
 }
 
 /**
@@ -145,7 +186,7 @@ function handle_note_prefix_change(api_url) {
  * @param {string} redirect_url - the url to navigate to
  */
 function handle_note_remove(redirect_url) {
-    alert("Note has been deleted!");
+    add_flash("Note has been deleted!");
     window.location.replace(redirect_url);
 }
 
@@ -154,7 +195,7 @@ function handle_note_remove(redirect_url) {
  * @param {string} redirect_url - the url to navigate to
  */
 function handle_notebook_remove(redirect_url) {
-    alert("Notebook and notes have been deleted!");
+    add_flash("Notebook and notes have been deleted!");
     window.location.replace(redirect_url);
 }
 
@@ -167,3 +208,11 @@ function handle_notebook_notes_change(api_url) {
     const notes_elem = document.getElementById("notes");
     load_fragment_to_elem(notes_elem, api_url).catch(console.error);
 }
+
+window.addEventListener("load", _evnt => {
+    const elements = document.querySelectorAll("[data-dismiss='flash']");
+    console.log(elements);
+    elements.forEach(elem => {
+        setTimeout(() => { elem.remove() }, FLASH_EXPIRE_TIME_MS);
+    });
+}, { once: true});
