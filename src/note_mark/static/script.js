@@ -211,7 +211,6 @@ function handle_notebook_notes_change(api_url) {
 
 window.addEventListener("load", _evnt => {
     const elements = document.querySelectorAll("[data-dismiss='flash']");
-    console.log(elements);
     elements.forEach(elem => {
         setTimeout(() => { elem.remove() }, FLASH_EXPIRE_TIME_MS);
     });

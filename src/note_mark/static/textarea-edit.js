@@ -1,5 +1,6 @@
 "use strict";
 
+const INDENT = "    ";
 var auto_save_timeout = null;
 const auto_save_delay_ms = 8000; // 8 seconds
 const text_area = document.getElementById("edit-note-content");
@@ -16,4 +17,13 @@ function add_auto_save_handle(api_url){
         window.clearTimeout(auto_save_timeout);
         auto_save_timeout = window.setTimeout(do_note_autosave, auto_save_delay_ms, api_url);
     });
+}
+
+function edit_textarea_indent(){
+    const sel_start = text_area.selectionStart;
+    const sel_end = text_area.selectionEnd;
+    text_area.focus();
+    if (sel_start === sel_end){
+        text_area.setRangeText(INDENT, sel_start, sel_end, "end");
+    }
 }

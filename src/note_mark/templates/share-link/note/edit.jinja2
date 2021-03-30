@@ -10,8 +10,11 @@
     <a class="button" href="{{ url_for('share_link.view_note', share_link_uuid=share_link_uuid, note_uuid=note.uuid) }}">View</a>
 </div>
 <form class="container" id="form-edit-note" action="" method="post">
-    <button type="submit">Save</button>
-    <textarea name="content" id="edit-note-content" placeholder="enter content...">{{ content }}</textarea>
+    <div class="control-bar">
+        <button type="submit">Save</button>
+        {% include "/shared/includes/edit-toolbox.jinja2" %}
+    </div>
+    <textarea name="content" id="edit-note-content" placeholder="enter content..." autofocus="true">{{ content }}</textarea>
     <input type="hidden" name="updated_at" value="{{ note.updated_at }}">
 </form>
 {% endblock %}

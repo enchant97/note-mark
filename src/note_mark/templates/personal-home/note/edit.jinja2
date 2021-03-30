@@ -9,8 +9,11 @@
     <button onclick="ask_before_get(`{{ url_for('personal_home.delete_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid)}}`)">Delete</button>
 </div>
 <form class="container" id="form-edit-note" action="" method="post">
-    <button type="submit">Save</button>
-    <textarea name="content" id="edit-note-content" placeholder="enter content...">{{ content }}</textarea>
+    <div class="control-bar">
+        <button type="submit">Save</button>
+        {% include "/shared/includes/edit-toolbox.jinja2" %}
+    </div>
+    <textarea name="content" id="edit-note-content" placeholder="enter content..." autofocus="true">{{ content }}</textarea>
     <input type="hidden" id="edit-note-updated_at" name="updated_at" value="{{ note.updated_at }}">
 </form>
 <script src="{{ url_for('static', filename='textarea-edit.js') }}"></script>
