@@ -1,7 +1,7 @@
 {% extends "/shared/base.jinja2" %}
 {% block title %}Edit Note{% endblock %}
 {% block extrahead %}
-<script src="{{ url_for('static', filename='textarea-resize.js') }}" defer></script>
+<script src="{{ url_for('static', filename='textarea-edit.js') }}" defer></script>
 {% endblock %}
 {% block main %}
 <h2 id="note-prefix">{{ note.prefix }}</h2>

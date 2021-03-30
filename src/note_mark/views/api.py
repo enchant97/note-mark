@@ -1,14 +1,17 @@
 import asyncio
 from uuid import UUID
 
-from quart import Blueprint, make_response, render_template, jsonify
+from quart import Blueprint, jsonify, make_response, render_template, request
 from quart_auth import current_user
 from tortoise.exceptions import DoesNotExist
 
 from ..database import crud
-from ..helpers.file import read_note_file_html, read_note_file_md
+from ..helpers.file import (read_note_file_html, read_note_file_md,
+                            write_note_file_md)
 from ..helpers.route import api_login_required, get_ws_handler
+from ..helpers.types import datetime_input_type
 from ..helpers.websocket.route import ws_receive, ws_send
+from ..helpers.websocket.types import MessageCategory, make_message
 
 blueprint = Blueprint("api", __name__)
 
@@ -176,3 +179,40 @@ async def note_prefix(notebook_uuid, note_uuid):
         return "notebook does not exist, or you don't have access to it", 404
     except ValueError:
         return "invalid notebook/user/note", 404
+
+
+@blueprint.route("/notebook/<notebook_uuid>/notes/<note_uuid>/auto-save", methods=["PATCH"])
+@api_login_required
+async def note_auto_save(notebook_uuid, note_uuid):
+    try:
+        notebook_uuid = UUID(notebook_uuid)
+        note_uuid = UUID(note_uuid)
+        owner_id = UUID(current_user.auth_id)
+        await crud.check_user_notebook_access(
+            owner_id,
+            notebook_uuid,
+            ("write", "owner"))
+        note = await crud.get_note(note_uuid)
+
+        updated_content = (await request.form)["content"]
+        updated_at = (await request.form)["updated_at"]
+        updated_at = datetime_input_type(updated_at, "%Y-%m-%d %H:%M:%S.%f%z")
+
+        if updated_at < note.updated_at:
+            # conflict was detected
+            return "note conflict detected", 400
+
+        # no conflict detected
+        await write_note_file_md(notebook_uuid, note_uuid, updated_content)
+        await note.save()  # mark the note updated
+        await get_ws_handler().broadcast_message(
+            make_message(MessageCategory.NOTE_CONTENT_CHANGE),
+            notebook_uuid, note_uuid)
+        return str(note.updated_at)
+
+    except DoesNotExist:
+        return "notebook does not exist, or you don't have access to it", 404
+    except ValueError:
+        return "invalid notebook/user/note", 404
+    except KeyError:
+        return "missing required params", 400

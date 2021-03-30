@@ -34,6 +34,33 @@ function ask_before_get(url, msg = "are you sure you want to delete that?") {
 }
 
 /**
+ * called to update a note in the background
+ * @param {string} api_url - api url to send
+ * the new note content to
+ */
+function do_note_autosave(api_url) {
+    const form_data = new FormData(document.getElementById("form-edit-note"));
+    fetch(api_url, {
+        body: form_data,
+        method: "patch"
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            }
+            throw new Error("auto-save error!");
+        })
+        .then(updated_at => {
+            document.getElementById("edit-note-updated_at").value = updated_at;
+            alert("note has been auto-saved");
+        })
+        .catch((error) => {
+            console.error(error);
+            alert("note could not be auto-saved");
+        });
+}
+
+/**
  * replace old element content with new
  * from requested html fragment
  * @param {Element} elem - the element to update with fragment

@@ -1,8 +1,5 @@
 {% extends "/shared/base.jinja2" %}
 {% block title %}Edit Note{% endblock %}
-{% block extrahead %}
-<script src="{{ url_for('static', filename='textarea-resize.js') }}" defer></script>
-{% endblock %}
 {% block main %}
 <h2 id="note-prefix">{{ note.prefix }}</h2>
 <div class="control-bar">
@@ -14,9 +11,11 @@
 <form class="container" id="form-edit-note" action="" method="post">
     <button type="submit">Save</button>
     <textarea name="content" id="edit-note-content" placeholder="enter content...">{{ content }}</textarea>
-    <input type="hidden" name="updated_at" value="{{ note.updated_at }}">
+    <input type="hidden" id="edit-note-updated_at" name="updated_at" value="{{ note.updated_at }}">
 </form>
+<script src="{{ url_for('static', filename='textarea-edit.js') }}"></script>
 <script>
+    add_auto_save_handle("{{ url_for('api.note_auto_save', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}");
     listen_for_ws_updates(`{{ url_for('api.note_update_ws', notebook_uuid=note.notebook_id, note_uuid=note.uuid, token=get_ws_token()) }}`);
     window.addEventListener(
         get_ws_event_type(WS_MESSAGE_CATEGORY.NOTE_CONTENT_CHANGE),
