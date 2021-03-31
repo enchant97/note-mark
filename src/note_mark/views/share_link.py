@@ -6,7 +6,9 @@ from tortoise.exceptions import DoesNotExist
 from ..database import crud
 from ..helpers.file import (read_note_file_html, read_note_file_md,
                             write_note_file_md)
+from ..helpers.route import get_ws_handler
 from ..helpers.types import datetime_input_type
+from ..helpers.websocket.types import MessageCategory, make_message
 
 blueprint = Blueprint("share_link", __name__)
 
@@ -57,6 +59,9 @@ async def new_note(share_link_uuid):
             note = await crud.create_note(notebook.uuid, prefix)
             await write_note_file_md(notebook.uuid, note.uuid)
             await flash("note create", "ok")
+            await get_ws_handler().broadcast_message(
+                make_message(MessageCategory.NOTE_CREATE),
+                notebook.uuid)
             return redirect(
                 url_for(
                     ".view_note",
@@ -130,6 +135,9 @@ async def edit_note(share_link_uuid, note_uuid):
                 await write_note_file_md(notebook_uuid, note_uuid, updated_content)
                 await note.save()  # mark the note updated
                 await flash("note saved", "ok")
+                await get_ws_handler().broadcast_message(
+                    make_message(MessageCategory.NOTE_CONTENT_CHANGE),
+                    notebook_uuid, note_uuid)
 
         content = await read_note_file_md(notebook_uuid, note_uuid)
         return await render_template(

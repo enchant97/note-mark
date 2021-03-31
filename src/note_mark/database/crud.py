@@ -242,7 +242,7 @@ async def get_link_shares_by_notebook(notebook_uuid: UUID) -> List[NotebookLinkS
     return await NotebookLinkShare.filter(notebook_id=notebook_uuid).all()
 
 
-async def get_notebook_by_link_share(link_uuid: UUID) -> UUID:
+async def get_notebook_by_link_share(link_uuid: UUID) -> Notebook:
     """
     gets a returned notebook link share, if one exists
 
