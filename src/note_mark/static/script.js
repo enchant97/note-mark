@@ -29,6 +29,26 @@ const FLASH_MESS_CATEGORY = {
 }
 
 /**
+ * markdown strings to insert
+ * and wrap around selected text
+ */
+const MARKDOWN_SYNTAX = {
+    INDENT: "    ",
+    HEADING: "#",
+    EMPHASIS: {
+        ITALIC: "*",
+        BOLD: "**",
+        STRIKE: "~~"
+    },
+    BLOCKQUOTE: "> ",
+    CODE: "`",
+    LINK: "[]()",
+    IMAGE: "![]()",
+    TASK: "- [ ] ",
+    HORIZ_RULE: "---"
+}
+
+/**
  * create a message flash
  * @param {string} message - the message content
  * @param {string} category - the category of message
