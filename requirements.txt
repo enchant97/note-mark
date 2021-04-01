@@ -2,7 +2,7 @@ quart==0.14.1
 quart-auth==0.4.0
 tortoise-orm==0.17.1
 hypercorn==0.11.2
-pydantic[dotenv]==1.8
+pydantic[dotenv]==1.8.1
 markdown==3.3.4
 # this is optional
 python-rapidjson==1.0
