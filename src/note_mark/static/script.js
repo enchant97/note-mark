@@ -107,17 +107,53 @@ function do_note_autosave(api_url) {
     })
         .then(response => {
             if (response.ok) {
-                return response.text();
+                return response.json();
             }
             throw new Error("auto-save error!");
         })
-        .then(updated_at => {
-            document.getElementById("edit-note-updated_at").value = updated_at;
-            add_flash("note has been auto-saved");
+        .then(json_data => {
+            if (json_data.conflict === true) {
+                add_flash("note could not be auto-saved as conflict was detected", "error");
+            }
+            else {
+                document.getElementById("edit-note-updated_at").value = json_data.updated_at;
+                add_flash("note has been auto-saved");
+            }
         })
         .catch((error) => {
             console.error(error);
             add_flash("note could not be auto-saved", "error");
+        });
+}
+
+function do_note_save(api_url) {
+    if (typeof auto_save_timeout === "number") {
+        // clear the auto-save timeout
+        window.clearTimeout(auto_save_timeout);
+    }
+    const form_data = new FormData(document.getElementById("form-edit-note"));
+    fetch(api_url, {
+        body: form_data,
+        method: "patch"
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error("save error!");
+        })
+        .then(json_data => {
+            document.getElementById("edit-note-updated_at").value = json_data.updated_at;
+            if (json_data.conflict === true) {
+                add_flash("note has been saved, but conflict was detected so made a backup file");
+            }
+            else {
+                add_flash("note has been saved");
+            }
+        })
+        .catch((error) => {
+            console.error(error);
+            add_flash("note could not be saved", "error");
         });
 }
 
@@ -185,14 +221,6 @@ function listen_for_ws_updates(url) {
 function handle_note_content_change(api_url) {
     const note_elem = document.getElementById("note-content");
     load_fragment_to_elem(note_elem, api_url).catch(console.error);
-}
-
-/**
- * handle showing the user that
- * their edit page is out of date
-*/
-function handle_note_content_change_edit() {
-    add_flash("note has been edited elsewhere!");
 }
 
 /**
