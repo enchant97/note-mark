@@ -12,7 +12,7 @@
 | ALLOW_ACCOUNT_CREATION | Allow creation of new accounts         | NO       | True               |
 | DATA_PATH              | Path to your data folder               | NO       | "./data"           |
 | AUTH_COOKIE_SECURE     | Whether to require https for cookies   | NO       | False              |
-| LOG_LEVEL              | What log level to use                  | NO       | "INFO"             |
+| LOG_LEVEL              | What log level to use                  | NO       | "WARNING"          |
 | HOST                   | host to listen for requests            | NO       | "127.0.0.1"        |
 | PORT                   | port to listen for requests            | NO       | 8000               |
 | BASE_URL               | The base url prefix                    | NO       | "/"                |

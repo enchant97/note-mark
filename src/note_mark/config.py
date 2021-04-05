@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     ALLOW_ACCOUNT_CREATION: Optional[bool] = True
     AUTH_COOKIE_SECURE: Optional[bool] = False
 
-    LOG_LEVEL: Optional[str] = "INFO"
+    LOG_LEVEL: Optional[str] = "WARNING"
     BASE_URL: Optional[str] = ""
     HOST: str = "127.0.0.1"
     PORT: int = 8000
