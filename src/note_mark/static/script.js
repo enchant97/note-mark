@@ -163,6 +163,9 @@ function get_ws_event_type(category_id) {
  * @param {string} url - the url to connect to
  */
 function listen_for_ws_updates(url) {
+    if (window.location.protocol == "https:") {
+        url = url.replace("ws:", "wss:")
+    }
     const ws = new WebSocket(url);
     ws.onmessage = evnt => {
         // parse the message
@@ -234,4 +237,4 @@ window.addEventListener("load", _evnt => {
     elements.forEach(elem => {
         setTimeout(() => { elem.remove() }, FLASH_EXPIRE_TIME_MS);
     });
-}, { once: true});
+}, { once: true });
