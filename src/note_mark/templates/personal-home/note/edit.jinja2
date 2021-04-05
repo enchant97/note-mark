@@ -9,7 +9,7 @@
     <button onclick="ask_before_get(`{{ url_for('personal_home.delete_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid)}}`)">Delete</button>
 </div>
 <form class="container" id="form-edit-note" action="" method="post">
-    <div class="control-bar">
+    <div class="control-bar" id="edit-toolbox">
         <button type="submit">Save</button>
         {% include "/shared/includes/edit-toolbox.jinja2" %}
     </div>

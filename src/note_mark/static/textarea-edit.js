@@ -6,6 +6,22 @@ const text_area = document.getElementById("edit-note-content");
 text_area.style.height = (text_area.scrollHeight + "px");
 text_area.addEventListener("input", _event => { auto_resize_elem(text_area); });
 
+const toolbox = document.getElementById("edit-toolbox");
+const toolbox_offset = toolbox.offsetTop;
+window.addEventListener("scroll", toggle_sticky_toolbox);
+
+/**
+ * allow for the toolbox to stick to
+ * top of page when it goes out of view
+ */
+function toggle_sticky_toolbox() {
+    if (window.pageYOffset >= toolbox_offset) {
+        toolbox.classList.add("sticky-control-bar")
+    } else {
+        toolbox.classList.remove("sticky-control-bar");
+    }
+}
+
 /**
  * adds a event listener for handling auto-save,
  * should only be called once
