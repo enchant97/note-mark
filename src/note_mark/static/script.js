@@ -103,7 +103,7 @@ function do_note_autosave(api_url) {
     const form_data = new FormData(document.getElementById("form-edit-note"));
     fetch(api_url, {
         body: form_data,
-        method: "patch"
+        method: "post"
     })
         .then(response => {
             if (response.ok) {
@@ -134,7 +134,7 @@ function do_note_save(api_url) {
     const form_data = new FormData(document.getElementById("form-edit-note"));
     fetch(api_url, {
         body: form_data,
-        method: "patch"
+        method: "post"
     })
         .then(response => {
             if (response.ok) {

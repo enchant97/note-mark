@@ -1,8 +1,8 @@
 import asyncio
 from uuid import UUID
 
-from quart import Blueprint, json, jsonify, make_response, render_template, request
-from quart_auth import current_user
+from quart import Blueprint, jsonify, make_response, render_template, request
+from quart_auth import current_user, login_required
 from tortoise.exceptions import DoesNotExist
 
 from ..database import crud
@@ -181,7 +181,7 @@ async def note_prefix(notebook_uuid, note_uuid):
         return "invalid notebook/user/note", 404
 
 
-@blueprint.route("/notebook/<notebook_uuid>/notes/<note_uuid>/auto-save", methods=["PATCH"])
+@blueprint.route("/notebook/<notebook_uuid>/notes/<note_uuid>/auto-save", methods=["POST"])
 @api_login_required
 async def note_auto_save(notebook_uuid, note_uuid):
     try:
@@ -217,8 +217,8 @@ async def note_auto_save(notebook_uuid, note_uuid):
         return "missing required params", 400
 
 
-@blueprint.route("/notebook/<notebook_uuid>/notes/<note_uuid>/save", methods=["PATCH"])
-@api_login_required
+@blueprint.route("/notebook/<notebook_uuid>/notes/<note_uuid>/save", methods=["POST"])
+@login_required
 async def note_save(notebook_uuid, note_uuid):
     try:
         notebook_uuid = UUID(notebook_uuid)
