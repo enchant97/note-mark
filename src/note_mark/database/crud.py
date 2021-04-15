@@ -128,6 +128,18 @@ async def modify_user_password(user_uuid: UUID, new_password: str):
     await user.save()
 
 
+async def modify_user_username(user_uuid: UUID, new_username: str):
+    """
+    change a user's username
+
+        :param user_uuid: the user's uuid
+        :param new_username: the new username
+    """
+    user = await User.filter(uuid=user_uuid).get()
+    user.username = new_username
+    await user.save()
+
+
 async def delete_user(user_uuid: UUID):
     """
     delete a user by their uuid

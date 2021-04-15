@@ -49,7 +49,7 @@ async def signup():
             await flash("account created", "ok")
             return redirect(url_for("home.index"))
         except IntegrityError:
-            await flash("username already exists", "error")
+            await flash("username already taken", "error")
         except KeyError:
             await flash("required fields missing", "error")
 

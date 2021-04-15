@@ -1,0 +1,8 @@
+{% extends "/shared/base.jinja2" %}
+{% block title %}My Account{% endblock %}
+{% block main %}
+<div class="container">
+    <a href="{{ url_for('account.change_password') }}" class="button">Change Password</a>
+    <a href="{{ url_for('account.change_username') }}" class="button">Change Username</a>
+</div>
+{% endblock %}

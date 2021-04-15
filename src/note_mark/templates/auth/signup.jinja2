@@ -1,11 +1,15 @@
 {% extends "/shared/base.jinja2" %}
 {% block title %}Create Account{% endblock %}
 {% block main %}
+<p>
+    Passwords must have a length of 8 characters or more,
+    upper and lowercase letters, a number and a symbol.
+</p>
 <form class="container" action="{{ url_for('auth.signup') }}" method="post">
     <label for="username">Username</label>
     <input type="text" id="username" name="username" required placeholder="username..." maxlength="25">
     <label for="password">Password</label>
-    <input type="password" name="password" id="password" required placeholder="password..." minlength="8">
+    <input type="password" name="password" id="password" required placeholder="password..." pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}">
     <button type="submit">Create</button>
 </form>
 {% endblock %}

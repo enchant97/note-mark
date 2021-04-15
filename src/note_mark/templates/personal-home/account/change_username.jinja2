@@ -1,0 +1,9 @@
+{% extends "/shared/base.jinja2" %}
+{% block title %}Change Username{% endblock %}
+{% block main %}
+<form class="container" action="" method="post">
+    <label for="username">New Username</label>
+    <input type="text" name="new-username" id="new-username" maxlength="25" placeholder="new username..." required>
+    <button type="submit">Change</button>
+</form>
+{% endblock %}
