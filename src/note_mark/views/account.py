@@ -1,10 +1,11 @@
 from uuid import UUID
 
 from quart import Blueprint, flash, redirect, render_template, request, url_for
-from quart_auth import current_user, login_required
+from quart_auth import current_user, login_required, logout_user
 from tortoise.exceptions import IntegrityError
 
 from ..database import crud
+from ..helpers.file import delete_notebook_folder
 
 blueprint = Blueprint("account", __name__)
 
@@ -44,3 +45,15 @@ async def change_username():
         except KeyError:
             await flash("missing required params", "error")
     return await render_template("/personal-home/account/change_username.jinja2")
+
+
+@blueprint.route("/delete")
+@login_required
+async def delete():
+    owner_uuid = UUID(current_user.auth_id)
+    for notebook in (await crud.get_all_personal_notebooks(owner_uuid)):
+        delete_notebook_folder(notebook.uuid)
+    await crud.delete_user(owner_uuid)
+    logout_user()
+    await flash("deleted account", "ok")
+    return redirect(url_for("home.index"))

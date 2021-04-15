@@ -4,5 +4,6 @@
 <div class="container">
     <a href="{{ url_for('account.change_password') }}" class="button">Change Password</a>
     <a href="{{ url_for('account.change_username') }}" class="button">Change Username</a>
+    <button onclick="ask_before_get(`{{ url_for('account.delete') }}`)">Delete All</button>
 </div>
 {% endblock %}
