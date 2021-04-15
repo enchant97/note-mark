@@ -1,0 +1,10 @@
+{% extends "/shared/base.jinja2" %}
+{% block title %}Admin Login{% endblock %}
+{% block nav %}{% endblock %}
+{% block main %}
+<form class="container" action="" method="post">
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password" placeholder="password..." required>
+    <button type="submit">Login</button>
+</form>
+{% endblock %}

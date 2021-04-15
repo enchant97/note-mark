@@ -9,8 +9,10 @@ class Settings(BaseSettings):
     DB_URL: str
     DATA_PATH: Optional[Path] = Path("data/")
     SECRET_KEY: str
+    ADMIN_PASSWORD: str
     ALLOW_ACCOUNT_CREATION: Optional[bool] = True
     AUTH_COOKIE_SECURE: Optional[bool] = False
+    ADMIN_LOGIN_ALLOWED = True
 
     LOG_LEVEL: Optional[str] = "WARNING"
     BASE_URL: Optional[str] = ""
@@ -23,6 +25,7 @@ class Settings(BaseSettings):
         case_sensitive = True
         env_file = '.env'
         env_file_encoding = 'utf-8'
+        secrets_dir = "/run/secrets"
 
 
 @lru_cache()

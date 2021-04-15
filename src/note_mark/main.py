@@ -8,7 +8,7 @@ from . import __version__
 from .config import get_settings
 from .database import models
 from .helpers.websocket.handler import MessageQueueHandler
-from .views import api, auth, home, personal_home, share_link, account
+from .views import account, admin, api, auth, home, personal_home, share_link
 
 BASE_URL = get_settings().BASE_URL
 if BASE_URL == "/":
@@ -38,6 +38,7 @@ def create_app():
 
     # register route blueprints
     app.register_blueprint(home.blueprint, url_prefix=BASE_URL + "/")
+    app.register_blueprint(admin.blueprint, url_prefix=BASE_URL + "/admin")
     app.register_blueprint(auth.blueprint, url_prefix=BASE_URL + "/auth")
     app.register_blueprint(personal_home.blueprint, url_prefix=BASE_URL + "/home")
     app.register_blueprint(account.blueprint, url_prefix=BASE_URL + "/home/account")
