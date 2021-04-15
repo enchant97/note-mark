@@ -13,6 +13,18 @@
     --font-family-code: 'Roboto Mono', monospace;
 }
 
+@media (prefers-color-scheme: dark) {
+    :root {
+        --font-dark: var(--font-light);
+        --font-light: #bcbcbc;
+        --bg-bnt: #003d4b;
+        --bg-body: #002b36;
+        --bg-body2: #073540;
+        --bg-body3: #083b47;
+        --border-col: #005163;
+    }
+}
+
 body::-webkit-scrollbar {
     width: 6px;
     background-color: var(--bg-body);
@@ -102,6 +114,7 @@ button,
 textarea,
 input {
     font-family: var(--font-family-main);
+    color: var(--font-dark);
     font-size: 1em;
 }
 
@@ -117,6 +130,7 @@ h3,
 h4,
 h5,
 h6 {
+    color: var(--font-dark);
     font-family: var(--font-family-title);
     text-align: center;
 }
@@ -218,11 +232,11 @@ input {
     color: black;
 }
 
-.flashes .ok {
+.ok {
     background-color: #3c9630;
 }
 
-.flashes .error {
+.error {
     background-color: #c24141;
 }
 
@@ -272,6 +286,15 @@ input {
 
 #note-content .codehilite pre {
     margin: 0;
+}
+
+#themepicker {
+    background-image: url("/static/theme-changer.svg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: auto;
+    height: 35px;
+    width: 65px;
 }
 
 /* table styles */
