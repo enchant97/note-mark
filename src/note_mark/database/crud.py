@@ -116,6 +116,10 @@ async def get_users() -> List[User]:
     return await User.all()
 
 
+async def count_users() -> int:
+    return await User.filter().count()
+
+
 async def modify_user_password(user_uuid: UUID, new_password: str):
     """
     change a user's password
@@ -177,6 +181,10 @@ async def get_shared_notebooks(curr_user_uuid: UUID) -> Generator:
     shared = await NotebookUserShare.filter(shared_with_id=curr_user_uuid).all()
     for row in shared:
         yield await row.notebook.get()
+
+
+async def count_notebooks() -> int:
+    return await Notebook.filter().count()
 
 
 async def rename_notebook(notebook_uuid: UUID, new_prefix: str):
@@ -280,6 +288,10 @@ async def get_note(note_uuid: UUID) -> Note:
 
 async def get_notes(notebook_uuid: UUID) -> List[Note]:
     return await Note.filter(notebook_id=notebook_uuid).all()
+
+
+async def count_notes() -> int:
+    return await Note.filter().count()
 
 
 async def rename_note(note_uuid: UUID, new_prefix: str):

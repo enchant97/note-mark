@@ -1,0 +1,36 @@
+{% extends "/shared/base.jinja2" %}
+{% block title %}Admin Stats{% endblock %}
+{% block nav %}{% include "/shared/includes/admin-nav.jinja2" %}{% endblock %}
+{% block main %}
+<table>
+    <legend>Counts</legend>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Stat</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Note Count</td>
+            <td>{{ note_count }}</td>
+        </tr>
+        <tr>
+            <td>Notebook Count</td>
+            <td>{{ notebook_count }}</td>
+        </tr>
+        <tr>
+            <td>User Count</td>
+            <td>{{ user_count }}</td>
+        </tr>
+        <tr>
+            <td>Upload Count</td>
+            <td>{{ upload_count }}</td>
+        </tr>
+        <tr>
+            <td>WebSocket Count</td>
+            <td>{{ ws_clients_count }}</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

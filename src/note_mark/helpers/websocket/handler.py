@@ -183,3 +183,7 @@ class MessageQueueHandler(TokenHandler):
         except KeyError:
             # we don't need to know about this error
             pass
+
+    @property
+    def clients_count(self):
+        return self.__clients_count

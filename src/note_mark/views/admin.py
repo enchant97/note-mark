@@ -6,7 +6,8 @@ from quart import Blueprint, flash, redirect, render_template, request, url_for
 from ..config import get_settings
 from ..database import crud
 from ..helpers.route import (admin_authenticated, admin_login,
-                             admin_login_required, admin_logout)
+                             admin_login_required, admin_logout,
+                             get_ws_handler)
 
 blueprint = Blueprint("admin", __name__)
 
@@ -57,3 +58,16 @@ async def change_user_password():
             return redirect(url_for(".index"))
     users = await crud.get_users()
     return await render_template("/admin/change-password.jinja2", users=users)
+
+
+@blueprint.route("/stats")
+@admin_login_required
+async def stats():
+    context = {
+        "note_count": await crud.count_notes(),
+        "notebook_count": await crud.count_notebooks(),
+        "user_count": await crud.count_users(),
+        "upload_count": 0,  # TODO add upload count when implemented in app
+        "ws_clients_count": get_ws_handler().clients_count,
+    }
+    return await render_template("/admin/stats.jinja2", **context)
