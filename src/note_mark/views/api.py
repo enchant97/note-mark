@@ -2,7 +2,7 @@ import asyncio
 from uuid import UUID
 
 from quart import Blueprint, jsonify, make_response, render_template, request
-from quart_auth import current_user, login_required
+from quart_auth import current_user
 from tortoise.exceptions import DoesNotExist
 
 from ..database import crud
@@ -218,7 +218,7 @@ async def note_auto_save(notebook_uuid, note_uuid):
 
 
 @blueprint.route("/notebook/<notebook_uuid>/notes/<note_uuid>/save", methods=["POST"])
-@login_required
+@api_login_required
 async def note_save(notebook_uuid, note_uuid):
     try:
         notebook_uuid = UUID(notebook_uuid)

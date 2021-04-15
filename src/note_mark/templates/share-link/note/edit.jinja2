@@ -9,9 +9,9 @@
     <a class="button" href="{{ url_for('share_link.get_notebook', share_link_uuid=share_link_uuid) }}">Back To Notebook</a>
     <a class="button" href="{{ url_for('share_link.view_note', share_link_uuid=share_link_uuid, note_uuid=note.uuid) }}">View</a>
 </div>
-<form class="container" id="form-edit-note" action="" method="post" onsubmit="return false;">
+<form class="container" id="form-edit-note" action="" method="post">
     <div class="control-bar" id="edit-toolbox">
-        <button type="submit" onclick="do_note_save(`{{ url_for('api.note_save', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}`)">Save</button>
+        <button type="submit">Save</button>
         {% include "/shared/includes/edit-toolbox.jinja2" %}
     </div>
     <textarea name="content" id="edit-note-content" placeholder="enter content..." autofocus="true">{{ content }}</textarea>
