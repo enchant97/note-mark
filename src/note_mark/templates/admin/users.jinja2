@@ -1,0 +1,22 @@
+{% extends "/shared/base.jinja2" %}
+{% block title %}Users{% endblock %}
+{% block nav %}{% include "/shared/includes/admin-nav.jinja2" %}{% endblock %}
+{% block main %}
+<table>
+    <legend>Users</legend>
+    <thead>
+        <tr>
+            <th>UUID</th>
+            <th>Username</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.uuid }}</td>
+            <td>{{ user.username }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

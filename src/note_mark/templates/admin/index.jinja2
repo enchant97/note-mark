@@ -3,5 +3,6 @@
 {% block nav %}{% include "/shared/includes/admin-nav.jinja2" %}{% endblock %}
 {% block main %}
 <a href="{{ url_for('admin.stats') }}" class="button">Stats</a>
+<a href="{{ url_for('admin.user_list') }}" class="button">Users</a>
 <a href="{{ url_for('admin.change_user_password') }}" class="button">Change User Password</a>
 {% endblock %}

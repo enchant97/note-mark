@@ -71,3 +71,10 @@ async def stats():
         "ws_clients_count": get_ws_handler().clients_count,
     }
     return await render_template("/admin/stats.jinja2", **context)
+
+
+@blueprint.route("/users")
+@admin_login_required
+async def user_list():
+    users = await crud.get_users()
+    return await render_template("/admin/users.jinja2", users=users)
