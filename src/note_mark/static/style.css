@@ -11,6 +11,7 @@
     --font-family-title: 'Roboto', sans-serif;
     --font-family-main: 'Open Sans', sans-serif;
     --font-family-code: 'Roboto Mono', monospace;
+    --link-fg: #00048c;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,6 +23,7 @@
         --bg-body2: #073540;
         --bg-body3: #083b47;
         --border-col: #005163;
+        --link-fg: #4e9df8;
     }
 }
 
@@ -140,7 +142,7 @@ h1 {
 }
 
 a {
-    color: #00048c;
+    color: var(--link-fg);
     text-decoration: none;
 }
 

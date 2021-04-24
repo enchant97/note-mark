@@ -16,6 +16,7 @@ function change_theme() {
             document.documentElement.style.setProperty("--bg-body2", "#9096a1");
             document.documentElement.style.setProperty("--bg-body3", "#767d8a");
             document.documentElement.style.setProperty("--border-col", "#777777");
+            document.documentElement.style.setProperty("--link-fg", "#00048c");
             break;
         case THEME_NAMES.DARK:
             document.documentElement.style.setProperty("--font-dark", "var(--font-light)");
@@ -25,6 +26,7 @@ function change_theme() {
             document.documentElement.style.setProperty("--bg-body2", "#073540");
             document.documentElement.style.setProperty("--bg-body3", "#083b47");
             document.documentElement.style.setProperty("--border-col", "#005163");
+            document.documentElement.style.setProperty("--link-fg", "#4e9df8");
             break;
     }
 }
