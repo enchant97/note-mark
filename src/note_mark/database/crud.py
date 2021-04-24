@@ -166,8 +166,11 @@ async def get_personal_notebook(notebook_uuid: UUID) -> Notebook:
     return await Notebook.filter(uuid=notebook_uuid).get()
 
 
-async def get_all_personal_notebooks(owner_uuid: UUID) -> List[Notebook]:
-    return await Notebook.filter(owner_id=owner_uuid).all()
+async def get_all_personal_notebooks(owner_uuid: UUID, order_by="prefix") -> List[Notebook]:
+    query = Notebook.filter(owner_id=owner_uuid)
+    if order_by:
+        query = query.order_by(order_by)
+    return await query.all()
 
 
 async def get_shared_notebook(curr_user_uuid: UUID, notebook_uuid: UUID) -> Tuple:
@@ -286,8 +289,11 @@ async def get_note(note_uuid: UUID) -> Note:
     return await Note.filter(uuid=note_uuid).get()
 
 
-async def get_notes(notebook_uuid: UUID) -> List[Note]:
-    return await Note.filter(notebook_id=notebook_uuid).all()
+async def get_notes(notebook_uuid: UUID, order_by="prefix") -> List[Note]:
+    query = Note.filter(notebook_id=notebook_uuid)
+    if order_by:
+        query = query.order_by(order_by)
+    return await query.all()
 
 
 async def count_notes() -> int:
