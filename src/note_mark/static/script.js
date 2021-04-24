@@ -48,6 +48,11 @@ const MARKDOWN_SYNTAX = {
     HORIZ_RULE: "---"
 }
 
+const SAVE_ERROR = {
+    UNHANDLED: 0,
+    CONFLICT: 1,
+}
+
 /**
  * create a message flash
  * @param {string} message - the message content
@@ -94,12 +99,59 @@ function ask_before_get(url, msg = "are you sure you want to delete that?") {
     }
 }
 
+function show_saved_status() {
+    const save_bnt = document.getElementById("note-save-bnt");
+    save_bnt.removeAttribute("disabled");
+    save_bnt.innerText = "Save";
+}
+
+function handle_saved(updated_at) {
+    show_saved_status();
+    document.getElementById("edit-note-updated_at").value = updated_at;
+    add_flash("note has been saved");
+}
+
+function handle_auto_saved(updated_at) {
+    show_saved_status();
+    document.getElementById("edit-note-updated_at").value = updated_at;
+    add_flash("note has been auto-saved");
+}
+
+function handle_saved_conflict(updated_at) {
+    show_saved_status();
+    document.getElementById("edit-note-updated_at").value = updated_at;
+    add_flash("note has been saved, but conflict was detected so made a backup file");
+}
+
+function handle_auto_save_failed(reason) {
+    handle_unsaved();
+    switch (reason) {
+        case SAVE_ERROR.CONFLICT:
+            add_flash("note could not be auto-saved as conflict was detected", "error");
+            break;
+        default:
+            add_flash("note could not be auto-saved", "error");
+            break;
+    }
+}
+
+function handle_unsaved() {
+    const save_bnt = document.getElementById("note-save-bnt");
+    save_bnt.innerText = "Save*";
+    save_bnt.removeAttribute("disabled");
+}
+
+function handle_saving() {
+    document.getElementById("note-save-bnt").setAttribute("disabled", true);
+}
+
 /**
  * called to update a note in the background
  * @param {string} api_url - api url to send
  * the new note content to
  */
 function do_note_autosave(api_url) {
+    handle_saving();
     const form_data = new FormData(document.getElementById("form-edit-note"));
     fetch(api_url, {
         body: form_data,
@@ -113,20 +165,20 @@ function do_note_autosave(api_url) {
         })
         .then(json_data => {
             if (json_data.conflict === true) {
-                add_flash("note could not be auto-saved as conflict was detected", "error");
+                handle_auto_save_failed(SAVE_ERROR.CONFLICT);
             }
             else {
-                document.getElementById("edit-note-updated_at").value = json_data.updated_at;
-                add_flash("note has been auto-saved");
+                handle_auto_saved(json_data.updated_at);
             }
         })
         .catch((error) => {
             console.error(error);
-            add_flash("note could not be auto-saved", "error");
+            handle_auto_save_failed(SAVE_ERROR.UNHANDLED);
         });
 }
 
 function do_note_save(api_url) {
+    handle_saving();
     if (typeof auto_save_timeout === "number") {
         // clear the auto-save timeout
         window.clearTimeout(auto_save_timeout);
@@ -143,17 +195,16 @@ function do_note_save(api_url) {
             throw new Error("save error!");
         })
         .then(json_data => {
-            document.getElementById("edit-note-updated_at").value = json_data.updated_at;
             if (json_data.conflict === true) {
-                add_flash("note has been saved, but conflict was detected so made a backup file");
+                handle_saved_conflict(json_data.updated_at);
             }
             else {
-                add_flash("note has been saved");
+                handle_saved(json_data.updated_at);
             }
         })
         .catch((error) => {
             console.error(error);
-            add_flash("note could not be saved", "error");
+            handle_auto_save_failed(SAVE_ERROR.UNHANDLED);
         });
 }
 

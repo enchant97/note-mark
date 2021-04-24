@@ -4,7 +4,10 @@ var auto_save_timeout = null;
 const auto_save_delay_ms = 8000; // 8 seconds
 const text_area = document.getElementById("edit-note-content");
 text_area.style.height = (text_area.scrollHeight + "px");
-text_area.addEventListener("input", _event => { auto_resize_elem(text_area); });
+text_area.addEventListener("input", _event => {
+    auto_resize_elem(text_area);
+    handle_unsaved();
+});
 
 const toolbox = document.getElementById("edit-toolbox");
 const toolbox_offset = toolbox.offsetTop;
