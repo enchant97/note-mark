@@ -17,4 +17,3 @@
 | LOG_LEVEL              | What log level to use                  | NO       | "WARNING"          |
 | HOST                   | host to listen for requests            | NO       | "127.0.0.1"        |
 | PORT                   | port to listen for requests            | NO       | 8000               |
-| BASE_URL               | The base url prefix                    | NO       | "/"                |

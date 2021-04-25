@@ -15,7 +15,6 @@ class Settings(BaseSettings):
     ADMIN_LOGIN_ALLOWED = True
 
     LOG_LEVEL: Optional[str] = "WARNING"
-    BASE_URL: Optional[str] = ""
     HOST: str = "127.0.0.1"
     PORT: int = 8000
 

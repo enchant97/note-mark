@@ -10,11 +10,7 @@ from .database import models
 from .helpers.websocket.handler import MessageQueueHandler
 from .views import account, admin, api, auth, home, personal_home, share_link
 
-BASE_URL = get_settings().BASE_URL
-if BASE_URL == "/":
-    BASE_URL = ""
-
-app = Quart(__name__, static_url_path=BASE_URL + "/static")
+app = Quart(__name__)
 auth_manager = AuthManager()
 
 
@@ -37,13 +33,13 @@ def create_app():
     app.config["WS_CLIENTS"] = MessageQueueHandler(get_settings().MAX_QUEUE_SIZE)
 
     # register route blueprints
-    app.register_blueprint(home.blueprint, url_prefix=BASE_URL + "/")
-    app.register_blueprint(admin.blueprint, url_prefix=BASE_URL + "/admin")
-    app.register_blueprint(auth.blueprint, url_prefix=BASE_URL + "/auth")
-    app.register_blueprint(personal_home.blueprint, url_prefix=BASE_URL + "/home")
-    app.register_blueprint(account.blueprint, url_prefix=BASE_URL + "/home/account")
-    app.register_blueprint(share_link.blueprint, url_prefix=BASE_URL + "/share-link")
-    app.register_blueprint(api.blueprint, url_prefix=BASE_URL + "/api")
+    app.register_blueprint(home.blueprint, url_prefix="/")
+    app.register_blueprint(admin.blueprint, url_prefix="/admin")
+    app.register_blueprint(auth.blueprint, url_prefix="/auth")
+    app.register_blueprint(personal_home.blueprint, url_prefix="/home")
+    app.register_blueprint(account.blueprint, url_prefix="/home/account")
+    app.register_blueprint(share_link.blueprint, url_prefix="/share-link")
+    app.register_blueprint(api.blueprint, url_prefix="/api")
     # database setup
     register_tortoise(
         app,
