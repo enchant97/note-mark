@@ -78,6 +78,15 @@ function add_flash(message, category = FLASH_MESS_CATEGORY.OK, expire_time_ms = 
 }
 
 /**
+ * copy some data to the clipboard
+ * @param {string} data - the data to copy to clipboard
+ */
+function copy_to_clipboard(data) {
+    navigator.clipboard.writeText(data);
+    add_flash("copied to clipboard!", "ok");
+}
+
+/**
  * resize an element based on its current content
  * @param {Element} elem - the element to resize
  */

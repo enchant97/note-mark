@@ -271,6 +271,11 @@ input {
     z-index: 2;
 }
 
+.col-copy {
+    display: grid;
+    grid-template-columns: auto max-content;
+}
+
 #note-content {
     width: 100%;
     background-color: var(--bg-body2);

@@ -21,7 +21,10 @@
     <tbody>
         {% for share in link_shares %}
         <tr>
-            <td>{{ share.uuid }}</td>
+            <td class="col-copy">
+                <input type="text" value="{{ share.uuid }}" readonly>
+                <button onclick="copy_to_clipboard(`{{ url_for('home.get_sharelink_notebook', _external=True, share_uuid=share.uuid) }}`)">Copy</button>
+            </td>
             <td>{{ share.has_write }}</td>
             <td>{{ share.expires }}</td>
         </tr>

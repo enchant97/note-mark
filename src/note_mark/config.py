@@ -10,13 +10,14 @@ class Settings(BaseSettings):
     DATA_PATH: Optional[Path] = Path("data/")
     SECRET_KEY: str
     ADMIN_PASSWORD: str
-    ALLOW_ACCOUNT_CREATION: Optional[bool] = True
-    AUTH_COOKIE_SECURE: Optional[bool] = False
+    ALLOW_ACCOUNT_CREATION: bool = True
+    AUTH_COOKIE_SECURE: bool = False
     ADMIN_LOGIN_ALLOWED = True
 
-    LOG_LEVEL: Optional[str] = "WARNING"
+    LOG_LEVEL: str = "WARNING"
     HOST: str = "127.0.0.1"
     PORT: int = 8000
+    SERVER_NAME: Optional[str] = None
 
     MAX_QUEUE_SIZE: int = -1
 

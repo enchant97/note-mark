@@ -28,6 +28,7 @@ def create_app():
     app.config["__VERSION__"] = __version__
     app.secret_key = get_settings().SECRET_KEY
     app.config["QUART_AUTH_COOKIE_SECURE"] = get_settings().AUTH_COOKIE_SECURE
+    app.config["SERVER_NAME"] = get_settings().SERVER_NAME
 
     # register non-config variables
     app.config["WS_CLIENTS"] = MessageQueueHandler(get_settings().MAX_QUEUE_SIZE)
