@@ -81,7 +81,6 @@ async def stats():
         "note_count": await crud.count_notes(),
         "notebook_count": await crud.count_notebooks(),
         "user_count": await crud.count_users(),
-        "upload_count": 0,  # TODO add upload count when implemented in app
         "ws_clients_count": get_ws_handler().clients_count,
     }
     return await render_template("/admin/stats.jinja2", **context)
