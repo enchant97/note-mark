@@ -10,6 +10,7 @@
     {% if scope == "owner" %}
     <a class="button" href="{{ url_for('personal_home.rename_notebook', notebook_uuid=notebook.uuid) }}">Rename</a>
     <button onclick="ask_before_get(`{{ url_for('personal_home.delete_notebook', notebook_uuid=notebook.uuid) }}`)">Delete</button>
+    <a class="button" href="{{ url_for('api.notebook_as_zip', notebook_uuid=notebook.uuid) }}" download>Download</a>
     {% endif %}
 </div>
 

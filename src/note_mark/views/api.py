@@ -6,8 +6,8 @@ from quart_auth import current_user
 from tortoise.exceptions import DoesNotExist
 
 from ..database import crud
-from ..helpers.file import (read_note_file_html, read_note_file_md,
-                            write_note_file_md)
+from ..helpers.file import (create_notebook_zip, read_note_file_html,
+                            read_note_file_md, write_note_file_md)
 from ..helpers.route import api_login_required, get_ws_handler
 from ..helpers.types import datetime_input_type
 from ..helpers.websocket.route import ws_receive, ws_send
@@ -41,6 +41,26 @@ async def rendered_notebook_shared_list():
     return await render_template(
         "/shared/includes/notebook_shared.jinja2",
         shared_notebooks=shared_notebooks)
+
+
+@blueprint.route("/notebook/<notebook_uuid>.zip")
+async def notebook_as_zip(notebook_uuid):
+    try:
+        notebook_uuid = UUID(notebook_uuid)
+        owner_id = UUID(current_user.auth_id)
+        await crud.check_user_notebook_access(
+            owner_id,
+            notebook_uuid,
+            ("read", "write", "owner"))
+
+        byteio_obj = create_notebook_zip(notebook_uuid)
+        file_resp = await make_response(byteio_obj)
+        file_resp.mimetype = "application/zip"
+        return file_resp
+    except DoesNotExist:
+        return "notebook does not exist, or you don't have access to it", 404
+    except ValueError:
+        return "invalid notebook/user", 404
 
 
 @blueprint.websocket("/notebook/<notebook_uuid>/ws/<token>")

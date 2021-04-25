@@ -2,7 +2,10 @@
 markdown file/folder functions
 """
 import shutil
+import zipfile
+from io import BytesIO
 from pathlib import Path
+from typing import Generator
 from uuid import UUID
 
 import aiofiles
@@ -79,3 +82,33 @@ def delete_notebook_folder(notebook: UUID):
     """
     notebook_path = get_settings().DATA_PATH / Path("notebooks") / Path(notebook.hex)
     shutil.rmtree(notebook_path, ignore_errors=True)
+
+
+def get_notebook_files(notebook: UUID) -> Generator[Path, None, None]:
+    """
+    yield each note file from a specific notebook
+
+        :param notebook: the notebook uuid
+        :yield: the full path of the notebook file
+    """
+    notebook_path = notebook_path = get_settings().DATA_PATH / Path("notebooks") / Path(notebook.hex)
+    for fn in notebook_path.glob("*.md"):
+        yield fn
+
+
+def create_notebook_zip(notebook: UUID) -> BytesIO:
+    """
+    create and return a notebook as a zip file
+
+        :param notebook: the notebook uuid
+        :return: the zip file as BytesIO obj
+    """
+    file_obj = BytesIO()
+    with zipfile.ZipFile(
+            file_obj, mode="w",
+            compression=zipfile.ZIP_STORED,
+            compresslevel=None) as zip_obj:
+        for file_path in get_notebook_files(notebook):
+            zip_obj.write(file_path, file_path.name)
+    file_obj.seek(0)
+    return file_obj
