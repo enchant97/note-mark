@@ -9,7 +9,7 @@ __all__ = [
     "NotebookUserShare",
     "NotebookLinkShare",
     "Note",
-    "Upload"]
+]
 
 from tortoise.fields.data import (BinaryField, BooleanField, CharField,
                                   DatetimeField, UUIDField)
@@ -100,14 +100,3 @@ class Note(CommonModel):
 
     class Meta:
         table = "notes"
-
-
-class Upload(CommonModel):
-    """
-    the upload model, inherits from CommonModel
-    """
-    prefix = CharField(100)
-    note: ForeignKeyRelation[Note] = ForeignKeyField("models.Note", "uploads")
-
-    class Meta:
-        table = "uploads"
