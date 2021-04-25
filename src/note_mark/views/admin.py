@@ -5,6 +5,7 @@ from quart import Blueprint, flash, redirect, render_template, request, url_for
 
 from ..config import get_settings
 from ..database import crud
+from ..helpers.file import delete_notebook_folder
 from ..helpers.route import (admin_authenticated, admin_login,
                              admin_login_required, admin_logout,
                              get_ws_handler)
@@ -58,6 +59,19 @@ async def change_user_password():
             return redirect(url_for(".index"))
     users = await crud.get_users()
     return await render_template("/admin/change-password.jinja2", users=users)
+
+
+@blueprint.route("/delete-user", methods=["GET", "POST"])
+@admin_login_required
+async def delete_user():
+    if request.method == "POST":
+        user_uuid = UUID((await request.form)["user-uuid"])
+        for notebook in (await crud.get_all_personal_notebooks(user_uuid)):
+            delete_notebook_folder(notebook.uuid)
+        await crud.delete_user(user_uuid)
+        await flash("user deleted", "ok")
+    users = await crud.get_users()
+    return await render_template("/admin/delete-user.jinja2", users=users)
 
 
 @blueprint.route("/stats")

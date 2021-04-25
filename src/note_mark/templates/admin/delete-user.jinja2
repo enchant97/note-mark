@@ -1,0 +1,15 @@
+{% extends "/shared/base.jinja2" %}
+{% block title %}Delete User{% endblock %}
+{% block nav %}{% include "/shared/includes/admin-nav.jinja2" %}{% endblock %}
+{% block main %}
+<form class="container" action="" method="post">
+    <label for="user-uuid">User</label>
+    <select name="user-uuid" id="user-uuid" required>
+        <option value=""></option>
+        {% for user in users %}
+        <option value="{{ user.uuid }}">{{ user.username }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Delete</button>
+</form>
+{% endblock %}
