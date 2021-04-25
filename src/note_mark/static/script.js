@@ -155,6 +155,22 @@ function handle_saving() {
 }
 
 /**
+ * fetch and then reload current page on response
+ * @param {string} url - url to send get request to
+ */
+function do_fetch_get_reload(url) {
+    fetch(url, {
+        method: "GET",
+    })
+        .then(resp => { resp.text(); })
+        .then(_ => { location.reload(); })
+        .catch(err => {
+            console.error(err);
+            add_flash("failed", "error");
+        })
+}
+
+/**
  * called to update a note in the background
  * @param {string} api_url - api url to send
  * the new note content to

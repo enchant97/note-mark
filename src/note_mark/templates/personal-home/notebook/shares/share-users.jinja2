@@ -22,6 +22,7 @@
         <tr>
             <th>User</th>
             <th>Has Write</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -29,6 +30,7 @@
         <tr>
             <td>{{ share.shared_with.username }}</td>
             <td>{{ share.has_write }}</td>
+            <td><button onclick="do_fetch_get_reload(`{{ url_for('api.delete_share_user', share_uuid=share.uuid) }}`)">×</button></td>
         </tr>
         {% endfor %}
     </tbody>

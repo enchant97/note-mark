@@ -1,7 +1,8 @@
 import asyncio
 from uuid import UUID
 
-from quart import Blueprint, jsonify, make_response, render_template, request
+from quart import (Blueprint, abort, jsonify, make_response, render_template,
+                   request)
 from quart_auth import current_user
 from tortoise.exceptions import DoesNotExist
 
@@ -277,3 +278,37 @@ async def note_save(notebook_uuid, note_uuid):
         return "invalid notebook/user/note", 404
     except KeyError:
         return "missing required params", 400
+
+
+@blueprint.route("/share/link/<share_uuid>/delete")
+@api_login_required
+async def delete_share_link(share_uuid):
+    try:
+        share_uuid = UUID(share_uuid)
+        notebook = await crud.get_notebook_by_link_share(share_uuid)
+        owner_id = UUID(current_user.auth_id)
+        await crud.check_user_notebook_access(
+            owner_id,
+            notebook.uuid,
+            ("owner"))
+        await crud.delete_link_share(share_uuid)
+        return "🆗"
+    except (ValueError, DoesNotExist):
+        abort(404)
+
+
+@blueprint.route("/share/user/<share_uuid>/delete")
+@api_login_required
+async def delete_share_user(share_uuid):
+    try:
+        share_uuid = UUID(share_uuid)
+        notebook = await crud.get_notebook_by_user_share(share_uuid)
+        owner_id = UUID(current_user.auth_id)
+        await crud.check_user_notebook_access(
+            owner_id,
+            notebook.uuid,
+            ("owner"))
+        await crud.delete_user_share(share_uuid)
+        return "🆗"
+    except (ValueError, DoesNotExist):
+        abort(404)

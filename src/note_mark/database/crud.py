@@ -230,6 +230,21 @@ async def get_user_shares_by_notebook(notebook_uuid: UUID) -> List[NotebookUserS
     return await NotebookUserShare.filter(notebook_id=notebook_uuid).all()
 
 
+async def get_notebook_by_user_share(share_uuid: UUID) -> NotebookUserShare:
+    """
+    get the notebook that is associated with the user share
+
+        :param share_uuid: the user share uuid
+        :return: the notebook
+    """
+    share = await NotebookUserShare.filter(uuid=share_uuid).get()
+    return await share.notebook.get()
+
+
+async def delete_user_share(share_uuid: UUID):
+    await NotebookUserShare.filter(uuid=share_uuid).delete();
+
+
 # NotebookLinkShare CRUD
 
 
@@ -274,6 +289,10 @@ async def get_notebook_by_link_share(link_uuid: UUID) -> Notebook:
     """
     link = await NotebookLinkShare.filter(uuid=link_uuid).get()
     return await link.notebook.get()
+
+
+async def delete_link_share(link_uuid: UUID):
+    await NotebookLinkShare.filter(uuid=link_uuid).delete();
 
 
 # Note CRUD

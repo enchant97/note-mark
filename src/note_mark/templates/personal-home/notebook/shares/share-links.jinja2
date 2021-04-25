@@ -16,6 +16,7 @@
             <th>Code (UUID4)</th>
             <th>Has Write</th>
             <th>Expires</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -27,6 +28,7 @@
             </td>
             <td>{{ share.has_write }}</td>
             <td>{{ share.expires }}</td>
+            <td><button onclick="do_fetch_get_reload(`{{ url_for('api.delete_share_link', share_uuid=share.uuid) }}`)">×</button></td>
         </tr>
         {% endfor %}
     </tbody>
