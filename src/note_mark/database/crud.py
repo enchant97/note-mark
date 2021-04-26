@@ -242,7 +242,7 @@ async def get_notebook_by_user_share(share_uuid: UUID) -> NotebookUserShare:
 
 
 async def delete_user_share(share_uuid: UUID):
-    await NotebookUserShare.filter(uuid=share_uuid).delete();
+    await NotebookUserShare.filter(uuid=share_uuid).delete()
 
 
 # NotebookLinkShare CRUD
@@ -292,7 +292,7 @@ async def get_notebook_by_link_share(link_uuid: UUID) -> Notebook:
 
 
 async def delete_link_share(link_uuid: UUID):
-    await NotebookLinkShare.filter(uuid=link_uuid).delete();
+    await NotebookLinkShare.filter(uuid=link_uuid).delete()
 
 
 # Note CRUD
