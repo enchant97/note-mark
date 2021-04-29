@@ -12,6 +12,7 @@
     --font-family-main: 'Open Sans', sans-serif;
     --font-family-code: 'Roboto Mono', monospace;
     --link-fg: #00048c;
+    --bg-bnt-disabled-fg: grey;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -177,6 +178,11 @@ button,
     padding: 10px 20px;
     background-color: var(--bg-bnt);
     border-radius: var(--border-radius);
+}
+
+button:disabled,
+.button:disabled {
+    color: var(--bg-bnt-disabled-fg);
 }
 
 button:hover,

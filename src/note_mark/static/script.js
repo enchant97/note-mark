@@ -117,13 +117,11 @@ function show_saved_status() {
 function handle_saved(updated_at) {
     show_saved_status();
     document.getElementById("edit-note-updated_at").value = updated_at;
-    add_flash("note has been saved");
 }
 
 function handle_auto_saved(updated_at) {
     show_saved_status();
     document.getElementById("edit-note-updated_at").value = updated_at;
-    add_flash("note has been auto-saved");
 }
 
 function handle_saved_conflict(updated_at) {
@@ -151,7 +149,9 @@ function handle_unsaved() {
 }
 
 function handle_saving() {
-    document.getElementById("note-save-bnt").setAttribute("disabled", true);
+    const save_bnt = document.getElementById("note-save-bnt");
+    save_bnt.innerText = "Saving";
+    save_bnt.setAttribute("disabled", true);
 }
 
 /**
