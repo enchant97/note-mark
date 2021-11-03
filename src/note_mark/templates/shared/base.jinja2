@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&family=Roboto+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='theme.js') }}", async></script>
+    <script src="{{ url_for('static', filename='theme-changer.js') }}"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     {% block extrahead %}{% endblock %}
 </head>
@@ -26,7 +26,7 @@
             <a class="button" href="{{ url_for('home.index') }}">Home</a>
             <a class="button" href="{{ url_for('auth.login') }}">Login</a>
             {% endif %}
-            <button id="themepicker" onclick="toggle_theme_picker()"></button>
+            <button id="themeToggleBnt"></button>
             {% endblock %}
         </nav>
     </header>

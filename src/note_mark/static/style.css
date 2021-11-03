@@ -301,7 +301,7 @@ input {
     margin: 0;
 }
 
-#themepicker {
+#themeToggleBnt {
     background-image: url("/static/theme-changer.svg");
     background-repeat: no-repeat;
     background-position: center;
