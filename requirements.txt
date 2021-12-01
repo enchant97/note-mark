@@ -1,4 +1,4 @@
-quart==0.15.*
+quart==0.16.*
 quart-auth==0.5.*
 tortoise-orm==0.17.*
 hypercorn==0.11.*
