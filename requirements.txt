@@ -1,7 +1,7 @@
 quart==0.15.*
 quart-auth==0.5.*
 tortoise-orm==0.17.*
-hypercorn==0.11.*
+hypercorn==0.12.*
 pydantic[dotenv]==1.8.*
 markdown==3.3.*
 # this is optional
