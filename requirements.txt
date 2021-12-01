@@ -1,5 +1,5 @@
 quart==0.15.*
-quart-auth==0.5.*
+quart-auth==0.6.*
 tortoise-orm==0.17.*
 hypercorn==0.11.*
 pydantic[dotenv]==1.8.*
