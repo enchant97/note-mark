@@ -11,7 +11,7 @@ from uuid import UUID
 import aiofiles
 from markdown import markdown
 
-from ..config import get_settings
+from .paths import combine_note_path, combine_notebook_path
 
 
 async def write_note_file_md(notebook: UUID, note: UUID, md_str: str = ""):
@@ -23,12 +23,11 @@ async def write_note_file_md(notebook: UUID, note: UUID, md_str: str = ""):
         :param notebook: the notebook uuid
         :param note: the note uuid
     """
-    notebook_path = get_settings().DATA_PATH / Path("notebooks") / Path(notebook.hex)
-    notebook_path.mkdir(parents=True, exist_ok=True)
-    fn = notebook_path / Path(note.hex + ".md")
+    file_path = combine_note_path(notebook, note)
+    file_path.parent.mkdir(parents=True, exist_ok=True)
     # make sure new line tags use LF
     md_str = md_str.replace("\r\n", "\n")
-    async with aiofiles.open(fn, "w") as fo:
+    async with aiofiles.open(file_path, "w") as fo:
         await fo.write(md_str)
 
 
@@ -40,11 +39,9 @@ async def read_note_file_md(notebook: UUID, note: UUID) -> str:
         :param note: the note uuid
         :return: the markdown document
     """
-    fn = get_settings().DATA_PATH / Path("notebooks") / Path(notebook.hex) / Path(note.hex + ".md")
-    loaded_file = None
-    async with aiofiles.open(fn, "r") as fo:
-        loaded_file = await fo.read()
-    return loaded_file
+    file_path = combine_note_path(notebook, note)
+    async with aiofiles.open(file_path, "r") as fo:
+        return await fo.read()
 
 
 async def read_note_file_html(notebook: UUID, note: UUID) -> str:
@@ -70,8 +67,8 @@ def delete_note_file(notebook: UUID, note: UUID):
         :param notebook: the notebook uuid
         :param note: the note uuid
     """
-    fn = get_settings().DATA_PATH / Path("notebooks") / Path(notebook.hex) / Path(note.hex + ".md")
-    fn.unlink(missing_ok=True)
+    file_path = combine_note_path(notebook, note)
+    file_path.unlink(missing_ok=True)
 
 
 def delete_notebook_folder(notebook: UUID):
@@ -80,7 +77,7 @@ def delete_notebook_folder(notebook: UUID):
 
         :param notebook: the notebook uuid
     """
-    notebook_path = get_settings().DATA_PATH / Path("notebooks") / Path(notebook.hex)
+    notebook_path = combine_notebook_path(notebook)
     shutil.rmtree(notebook_path, ignore_errors=True)
 
 
@@ -91,9 +88,8 @@ def get_notebook_files(notebook: UUID) -> Generator[Path, None, None]:
         :param notebook: the notebook uuid
         :yield: the full path of the notebook file
     """
-    notebook_path = notebook_path = get_settings().DATA_PATH / Path("notebooks") / Path(notebook.hex)
-    for fn in notebook_path.glob("*.md"):
-        yield fn
+    notebook_path = combine_notebook_path(notebook)
+    return notebook_path.glob("*.md")
 
 
 def create_notebook_zip(notebook: UUID) -> BytesIO:
