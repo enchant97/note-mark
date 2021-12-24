@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional, overload
 from uuid import UUID
 
 from ..database.crud import get_users
+from ..database.models import User
 
 
 @dataclass
@@ -31,10 +33,34 @@ class ExportV1:
     version: int = 1
 
 
+@overload
 async def export_v1() -> ExportV1:
+    """
+    Generate a export using V1, getting the users from database
+
+        :return: the exported metadata
+    """
+    ...
+
+
+@overload
+async def export_v1(users: list[User]) -> ExportV1:
+    """
+    Generate a export using V1, using provided users
+
+        :param users: The users
+        :return: the exported metadata
+    """
+    ...
+
+
+async def export_v1(users: Optional[list[User]] = None) -> ExportV1:
     processed_users: list[UserExportV1] = []
 
-    for user in await get_users():
+    if users is None:
+        users = await get_users()
+
+    for user in users:
         processed_user = UserExportV1(user.uuid, user.username, [])
         for notebook in await user.owned_notebooks.all():
             processed_nb = NotebookExportV1(notebook.uuid, notebook.prefix, [])
