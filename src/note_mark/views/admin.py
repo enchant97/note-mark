@@ -1,10 +1,13 @@
 import secrets
+from dataclasses import asdict
 from uuid import UUID
 
-from quart import Blueprint, flash, redirect, render_template, request, url_for
+from quart import (Blueprint, flash, jsonify, redirect, render_template,
+                   request, url_for)
 
 from ..config import get_settings
 from ..database import crud
+from ..helpers.exporter import export_v1
 from ..helpers.file import delete_notebook_folder
 from ..helpers.route import (admin_authenticated, admin_login,
                              admin_login_required, admin_logout,
@@ -91,3 +94,10 @@ async def stats():
 async def user_list():
     users = await crud.get_users()
     return await render_template("/admin/users.jinja2", users=users)
+
+
+@blueprint.route("/export/v1/meta")
+@admin_login_required
+async def export_v1_meta():
+    export = await export_v1()
+    return jsonify(asdict(export))
