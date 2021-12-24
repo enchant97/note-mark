@@ -7,6 +7,7 @@ from tortoise.contrib.quart import register_tortoise
 from . import __version__
 from .config import get_settings
 from .database import models
+from .helpers.paths import get_admin_export_path, get_admin_import_path
 from .helpers.websocket.handler import MessageQueueHandler
 from .views import account, admin, api, auth, home, personal_home, share_link
 
@@ -32,6 +33,10 @@ def create_app():
 
     # register non-config variables
     app.config["WS_CLIENTS"] = MessageQueueHandler(get_settings().MAX_QUEUE_SIZE)
+
+    # create required paths
+    get_admin_import_path().mkdir(parents=True, exist_ok=True)
+    get_admin_export_path().mkdir(parents=True, exist_ok=True)
 
     # register route blueprints
     app.register_blueprint(home.blueprint, url_prefix="/")

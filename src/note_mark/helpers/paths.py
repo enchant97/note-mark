@@ -4,6 +4,14 @@ from uuid import UUID
 from ..config import get_settings
 
 
+def get_admin_import_path() -> Path:
+    return get_settings().DATA_PATH / "import"
+
+
+def get_admin_export_path() -> Path:
+    return get_settings().DATA_PATH / "export"
+
+
 def get_notebooks_path() -> Path:
     return get_settings().DATA_PATH / "notebooks"
 

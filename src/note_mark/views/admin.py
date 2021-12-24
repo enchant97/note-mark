@@ -3,11 +3,11 @@ from dataclasses import asdict
 from uuid import UUID
 
 from quart import (Blueprint, flash, jsonify, redirect, render_template,
-                   request, url_for)
+                   request, url_for, current_app)
 
 from ..config import get_settings
 from ..database import crud
-from ..helpers.exporter import export_v1
+from ..helpers.exporter import export_v1, exported_v1_to_exports
 from ..helpers.file import delete_notebook_folder
 from ..helpers.route import (admin_authenticated, admin_login,
                              admin_login_required, admin_logout,
@@ -101,3 +101,13 @@ async def user_list():
 async def export_v1_meta():
     export = await export_v1()
     return jsonify(asdict(export))
+
+
+@blueprint.route("/export/v1/internal")
+@admin_login_required
+async def export_v1_internal():
+    export = await export_v1()
+    current_app.add_background_task(exported_v1_to_exports, export)
+    await flash("Processing export. This may take some time, \
+        check export folder on server for progress", "ok")
+    return redirect(url_for(".index"))

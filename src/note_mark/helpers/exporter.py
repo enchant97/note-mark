@@ -1,10 +1,18 @@
-from dataclasses import dataclass
+import shutil
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Optional, overload
 from uuid import UUID
 
+try:
+    import rapidjson as json
+except ImportError:
+    import json
+
 from ..database.crud import get_users
 from ..database.models import User
+from .paths import combine_note_path, get_admin_export_path
 
 
 @dataclass
@@ -74,3 +82,35 @@ async def export_v1(users: Optional[list[User]] = None) -> ExportV1:
         processed_users,
         datetime.utcnow(),
     )
+
+
+def exported_v1_to_exports(exported: ExportV1, show_completion: bool = False) -> Path:
+    """
+    Export the exported metadata and copy notes into
+    the export directory under current datetime,
+
+        :param exported: The export metadata
+        :param show_completion: Place a 'done.txt' file in
+                                directory when export is complete
+        :return: Path to where export took place
+    """
+    export_path = get_admin_export_path() / datetime.utcnow().isoformat()
+    exported_notes_path = export_path / "notes"
+    export_path.mkdir()
+    exported_notes_path.mkdir()
+
+    with open(export_path / "meta.json", "wt") as fo:
+        json.dump(asdict(exported), fo, indent=4, default=str)
+
+    for user in exported.users:
+        for notebook in user.notebooks:
+            for note in notebook.notes:
+                dst = exported_notes_path / (note.uuid.hex + ".md")
+                src = combine_note_path(notebook.uuid, note.uuid)
+                shutil.copyfile(src, dst)
+
+    if show_completion:
+        with open(export_path / "done.txt", "wt") as fo:
+            pass
+
+    return export_path
