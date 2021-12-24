@@ -37,6 +37,7 @@ class UserExportV1:
 @dataclass
 class ExportV1:
     users: list[UserExportV1]
+    total_notes: int
     dt_stamp: datetime
     version: int = 1
 
@@ -68,6 +69,8 @@ async def export_v1(users: Optional[list[User]] = None) -> ExportV1:
     if users is None:
         users = await get_users()
 
+    total_notes = 0
+
     for user in users:
         processed_user = UserExportV1(user.uuid, user.username, [])
         for notebook in await user.owned_notebooks.all():
@@ -75,11 +78,13 @@ async def export_v1(users: Optional[list[User]] = None) -> ExportV1:
             for note in await notebook.notes.all():
                 processed_note = NoteExportV1(note.uuid, note.prefix)
                 processed_nb.notes.append(processed_note)
+                total_notes += 1
             processed_user.notebooks.append(processed_nb)
         processed_users.append(processed_user)
 
     return ExportV1(
         processed_users,
+        total_notes,
         datetime.utcnow(),
     )
 
