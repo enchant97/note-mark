@@ -7,7 +7,8 @@ from quart import (Blueprint, flash, jsonify, redirect, render_template,
 
 from ..config import get_settings
 from ..database import crud
-from ..helpers.exporter import export_v1, exported_v1_to_exports
+from ..helpers.exporter.version_1.export import exported_v1_to_exports
+from ..helpers.exporter.version_1.meta import export_v1
 from ..helpers.file import delete_notebook_folder
 from ..helpers.route import (admin_authenticated, admin_login,
                              admin_login_required, admin_logout,
