@@ -6,7 +6,7 @@ services:
     container_name: note-mark
     restart: unless-stopped
     volumes:
-      - ./.env:/.env:ro
+      - ./.env:/app/.env:ro
       - note-mark:/data
     ports:
       - 8080:8000

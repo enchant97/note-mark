@@ -1,9 +1,5 @@
 ARG PYTHON_VERSION=3.9
 
-# metadata for docker
-LABEL maintainer="enchant97"
-EXPOSE 8000
-
 FROM python:${PYTHON_VERSION}-slim as builder
     WORKDIR /app
 
@@ -20,12 +16,13 @@ FROM python:${PYTHON_VERSION}-slim as builder
     # add pip requirements
     # with caching allowing for DOCKER_BUILDKIT=1 to be used
     RUN --mount=type=cache,target=/root/.cache \
-        pip install --user -r requirements.txt
+        pip install -r requirements.txt
 
 FROM python:${PYTHON_VERSION}-alpine3.15
     WORKDIR /app
     ENV PATH="/app/.venv/bin:$PATH"
     ENV DATA_PATH=/data
+    ENV WORKERS=1
 
     # copy python environment
     COPY --from=builder /app/.venv .venv
@@ -38,3 +35,7 @@ FROM python:${PYTHON_VERSION}-alpine3.15
 
     HEALTHCHECK --interval=1m --start-period=30s \
         CMD python -m web_health_checker 'http://127.0.0.1:8000/is-healthy'
+
+    # metadata for docker
+    LABEL maintainer="enchant97"
+    EXPOSE 8000
