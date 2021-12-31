@@ -11,12 +11,6 @@ async def index():
     return await render_template("/home/index.jinja2")
 
 
-@blueprint.route("/is-healthy")
-async def health_check():
-    # route to test whether server has not crashed
-    return "🆗"
-
-
 @blueprint.route("/<share_uuid>")
 async def get_sharelink_notebook(share_uuid):
     return redirect(url_for("share_link.get_notebook", share_link_uuid=share_uuid))
