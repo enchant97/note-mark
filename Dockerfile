@@ -23,6 +23,9 @@ FROM python:${PYTHON_VERSION}-alpine3.15
     ENV PATH="/app/.venv/bin:$PATH"
     ENV DATA_PATH=/data
     ENV WORKERS=1
+    ENV LOG_LEVEL="INFO"
+    ENV HOST="0.0.0.0"
+    ENV PORT="8000"
 
     # copy python environment
     COPY --from=builder /app/.venv .venv
@@ -31,7 +34,7 @@ FROM python:${PYTHON_VERSION}-alpine3.15
     COPY src/note_mark note_mark
 
     # start the server
-    CMD hypercorn 'note_mark.main:create_app()' --bind '0.0.0.0:8000' --workers "$WORKERS"
+    CMD hypercorn 'note_mark.main:create_app()' --bind "$HOST:$PORT" --workers "$WORKERS" --log-level "$LOG_LEVEL"
 
     HEALTHCHECK --interval=1m --start-period=30s \
         CMD python -m web_health_checker 'http://127.0.0.1:8000/is-healthy'
