@@ -1,10 +1,18 @@
 {% extends "/shared/base.jinja2" %}
 {% block title %}Home{% endblock %}
 {% block main %}
-<p>
-    Welcome to Note-Mark the web-based note taking
-    program that renders your markdown notes in beautiful HTML.
-</p>
+<img src="{{ url_for('static', filename='icon-256.png') }}" alt="site icon">
+<h1>Note Mark</h1>
+<h2>A Fast, Simple Markdown Note Application.</h2>
+<h3>Features</h3>
+<ul>
+    <li>Notebook sharing</li>
+    <li>View notes in HTML</li>
+    <li>Fast on lower end devices, like a Raspberry Pi</li>
+    <li>Cross-Platform, built with Python 3</li>
+    <li>Containerized, built Docker image</li>
+    <li>Stunning look, with site theme picker</li>
+</ul>
 <p>
     To get started create an account <a href="{{ url_for('auth.signup') }}">here</a>.
     Or use a share link if you have been given one.
