@@ -1,7 +1,10 @@
 {% extends "/shared/base.jinja2" %}
 {% block title %}Create Note{% endblock %}
 {% block main %}
-<a class="button" href="{{ url_for('personal_home.get_notebook', notebook_uuid=notebook_uuid) }}">Back To Notebook</a>
+<h2></h2>
+<div class="control-bar">
+    <a href="{{ url_for('personal_home.get_notebook', notebook_uuid=notebook_uuid) }}" class="button" title="Back To Notebook">{{ macros.feather_img('arrow-left') }}</a>
+</div>
 <form class="container" action="{{ url_for('personal_home.new_note', notebook_uuid=notebook_uuid) }}" method="post">
     <label for="new-note-prefix">Name</label>
     <input type="text" name="prefix" id="new-note-prefix" required placeholder="name..." maxlength="100">

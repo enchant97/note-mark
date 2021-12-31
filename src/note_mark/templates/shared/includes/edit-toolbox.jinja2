@@ -1,9 +1,9 @@
-<button type="button" onclick="edit_textarea_indent()">Indent</button>
+<button type="button" onclick="edit_textarea_indent()" title="Indent">{{ macros.feather_img('chevron-right') }}</button>
 
-<button type="button" onclick="edit_textarea_wrap_sel(MARKDOWN_SYNTAX.EMPHASIS.ITALIC)"><i>I</i></button>
-<button type="button" onclick="edit_textarea_wrap_sel(MARKDOWN_SYNTAX.EMPHASIS.BOLD)"><b>B</b></button>
+<button type="button" onclick="edit_textarea_wrap_sel(MARKDOWN_SYNTAX.EMPHASIS.ITALIC)" title="Italic">{{ macros.feather_img('italic') }}</button>
+<button type="button" onclick="edit_textarea_wrap_sel(MARKDOWN_SYNTAX.EMPHASIS.BOLD)" title="Bold">{{ macros.feather_img('bold') }}</button>
 
-<button type="button" onclick="edit_textarea_insert(MARKDOWN_SYNTAX.LINK)">Link</button>
-<button type="button" onclick="edit_textarea_insert(MARKDOWN_SYNTAX.IMAGE)">Image</button>
-<button type="button" onclick="edit_textarea_insert(MARKDOWN_SYNTAX.TASK)">Task</button>
-<button type="button" onclick="edit_textarea_insert(MARKDOWN_SYNTAX.BLOCKQUOTE)">>></button>
+<button type="button" onclick="edit_textarea_insert(MARKDOWN_SYNTAX.LINK)" title="Link">{{ macros.feather_img('link-2') }}</button>
+<button type="button" onclick="edit_textarea_insert(MARKDOWN_SYNTAX.IMAGE)" title="Image">{{ macros.feather_img('image') }}</button>
+<button type="button" onclick="edit_textarea_insert(MARKDOWN_SYNTAX.TASK)" title="Task">{{ macros.feather_img('check-square') }}</button>
+<button type="button" onclick="edit_textarea_insert(MARKDOWN_SYNTAX.BLOCKQUOTE)" title="block quote">{{ macros.feather_img('chevrons-right') }}</button>

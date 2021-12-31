@@ -244,8 +244,22 @@ input {
     background-color: #3c9630;
 }
 
+.warning {
+    background-color: #93641e;
+}
+
 .error {
     background-color: #c24141;
+}
+
+.feather-icon {
+    width: 24px;
+    height: 18px;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
 }
 
 .container {

@@ -1,9 +1,12 @@
 {% extends "/shared/base.jinja2" %}
 {% block title %}Notebook User Shares{% endblock %}
 {% block main %}
-<a class="button" href="{{ url_for('personal_home.get_notebook', notebook_uuid=notebook_uuid) }}">Back To Notebook</a>
+<h2>User Shares</h2>
+<div class="control-bar">
+    <a class="button" href="{{ url_for('personal_home.get_notebook', notebook_uuid=notebook_uuid) }}" title="Back To Notebook">{{ macros.feather_img('arrow-left') }}</a>
+</div>
 <form action="{{ url_for('personal_home.user_share', notebook_uuid=notebook_uuid) }}" method="post">
-    <h3>Add User Share Notebook</h3>
+    <h3>Add New</h3>
     <label for="notebook-share-user-uuid">Users</label>
     <select name="user_uuid" id="notebook-share-user-uuid" required>
         <option value="">** SELECT USER **</option>
@@ -18,6 +21,7 @@
     <button type="submit">Add</button>
 </form>
 <table>
+    <caption>Existing Shares</caption>
     <thead>
         <tr>
             <th>User</th>

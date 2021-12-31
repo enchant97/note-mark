@@ -1,10 +1,11 @@
 {% extends "/shared/base.jinja2" %}
 {% block title %}My Home{% endblock %}
 {% block main %}
+<h2>Welcome Back</h2>
 <div class="control-bar">
-    <a class="button" href="{{ url_for('personal_home.new_notebook') }}">New Notebook</a>
-    <a class="button" href="{{ url_for('share_link.index') }}">Use Share Link</a>
-    <a href="{{ url_for('account.index') }}" class="button">My Account</a>
+    <a class="button" href="{{ url_for('personal_home.new_notebook') }}" title="New Notebook">{{ macros.feather_img('folder-plus') }}</a>
+    <a class="button" href="{{ url_for('share_link.index') }}" title="Use Share Link">{{ macros.feather_img('link') }}</a>
+    <a href="{{ url_for('account.index') }}" class="button" title="My Account">{{ macros.feather_img('user') }}</a>
 </div>
 
 <section class="container" id="personal-notebooks">

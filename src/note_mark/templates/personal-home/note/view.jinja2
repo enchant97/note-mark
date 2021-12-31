@@ -3,14 +3,14 @@
 {% block main %}
 <h2 id="note-prefix">{{ note.prefix }}</h2>
 <div class="control-bar">
-    <a class="button" href="{{ url_for('personal_home.get_notebook', notebook_uuid=note.notebook_id) }}">Back To Notebook</a>
+    <a class="button" href="{{ url_for('personal_home.get_notebook', notebook_uuid=note.notebook_id) }}" title="Back To Notebook">{{ macros.feather_img('arrow-left') }}</a>
     {% if scope in ("write", "owner") %}
-    <a class="button" href="{{ url_for('personal_home.edit_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}">Edit</a>
+    <a class="button" href="{{ url_for('personal_home.edit_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}" title="Edit">{{ macros.feather_img('edit') }}</a>
     {% endif %}
     {% if scope == "owner" %}
-    <a class="button" href="{{ url_for('personal_home.rename_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}">Rename</a>
-    <button onclick="ask_before_get(`{{ url_for('personal_home.delete_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid)}}`)">Delete</button>
-    <a class="button" href="{{ url_for('api.raw_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}" download>Download</a>
+    <a class="button" href="{{ url_for('personal_home.rename_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}" title="Rename">{{ macros.feather_img('edit-3') }}</a>
+    <button onclick="ask_before_get(`{{ url_for('personal_home.delete_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid)}}`)" title="Delete">{{ macros.feather_img('trash') }}</button>
+    <a class="button" href="{{ url_for('api.raw_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}" title="Download" download>{{ macros.feather_img('download') }}</a>
     {% endif %}
 </div>
 <div id="note-content">{{ content|safe }}</div>

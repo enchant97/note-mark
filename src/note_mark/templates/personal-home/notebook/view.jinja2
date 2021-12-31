@@ -3,20 +3,20 @@
 {% block main %}
 <h2>{{notebook.prefix }}</h2>
 <div class="control-bar">
-    <a class="button" href="{{ url_for('personal_home.index') }}">Back To Home</a>
+    <a class="button" href="{{ url_for('personal_home.index') }}" title="Back To Home">{{ macros.feather_img('arrow-left') }}</a>
     {% if scope in ("write", "owner") %}
-    <a class="button" href="{{ url_for('personal_home.new_note', notebook_uuid=notebook.uuid) }}">Create Note</a>
+    <a class="button" href="{{ url_for('personal_home.new_note', notebook_uuid=notebook.uuid) }}" title="Create Note">{{ macros.feather_img('file-plus') }}</a>
     {% endif %}
     {% if scope == "owner" %}
-    <a class="button" href="{{ url_for('personal_home.rename_notebook', notebook_uuid=notebook.uuid) }}">Rename</a>
-    <button onclick="ask_before_get(`{{ url_for('personal_home.delete_notebook', notebook_uuid=notebook.uuid) }}`)">Delete</button>
-    <a class="button" href="{{ url_for('api.notebook_as_zip', notebook_uuid=notebook.uuid) }}" download>Download</a>
+    <a class="button" href="{{ url_for('personal_home.rename_notebook', notebook_uuid=notebook.uuid) }}" title="Rename">{{ macros.feather_img('edit-3') }}</a>
+    <button onclick="ask_before_get(`{{ url_for('personal_home.delete_notebook', notebook_uuid=notebook.uuid) }}`)" title="Delete">{{ macros.feather_img('trash') }}</button>
+    <a class="button" href="{{ url_for('api.notebook_as_zip', notebook_uuid=notebook.uuid) }}" title="Download" download>{{ macros.feather_img('download') }}</a>
     {% endif %}
 </div>
 
 {% if scope == "owner" %}
-    <a href="{{ url_for('personal_home.user_share', notebook_uuid=notebook.uuid) }}" class="button">Manage User Shares</a>
-    <a href="{{ url_for('personal_home.share_link', notebook_uuid=notebook.uuid) }}" class="button">Manage Link Shares</a>
+    <a href="{{ url_for('personal_home.user_share', notebook_uuid=notebook.uuid) }}" class="button">{{ macros.feather_img('user') }}Manage User Shares</a>
+    <a href="{{ url_for('personal_home.share_link', notebook_uuid=notebook.uuid) }}" class="button">{{ macros.feather_img('link') }}Manage Link Shares</a>
 {% endif %}
 
 <div class="container" id="notes">

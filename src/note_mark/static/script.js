@@ -111,7 +111,7 @@ function ask_before_get(url, msg = "are you sure you want to delete that?") {
 function show_saved_status() {
     const save_bnt = document.getElementById("note-save-bnt");
     save_bnt.removeAttribute("disabled");
-    save_bnt.innerText = "Save";
+    save_bnt.classList.remove("error", "warning");
 }
 
 function handle_saved(updated_at) {
@@ -144,13 +144,15 @@ function handle_auto_save_failed(reason) {
 
 function handle_unsaved() {
     const save_bnt = document.getElementById("note-save-bnt");
-    save_bnt.innerText = "Save*";
+    save_bnt.classList.remove("warning");
+    save_bnt.classList.add("error");
     save_bnt.removeAttribute("disabled");
 }
 
 function handle_saving() {
     const save_bnt = document.getElementById("note-save-bnt");
-    save_bnt.innerText = "Saving";
+    save_bnt.classList.remove("error");
+    save_bnt.classList.add("warning");
     save_bnt.setAttribute("disabled", true);
 }
 

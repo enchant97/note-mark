@@ -3,14 +3,14 @@
 {% block main %}
 <h2 id="note-prefix">{{ note.prefix }}</h2>
 <div class="control-bar">
-    <a class="button" href="{{ url_for('personal_home.get_notebook', notebook_uuid=note.notebook_id) }}">Back To Notebook</a>
-    <a class="button" href="{{ url_for('personal_home.view_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}">View</a>
-    <a class="button" href="{{ url_for('personal_home.rename_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}">Rename</a>
-    <button onclick="ask_before_get(`{{ url_for('personal_home.delete_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid)}}`)">Delete</button>
+    <a class="button" href="{{ url_for('personal_home.get_notebook', notebook_uuid=note.notebook_id) }}" title="Back To Notebook">{{ macros.feather_img('arrow-left') }}</a>
+    <a class="button" href="{{ url_for('personal_home.view_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}" title="View">{{ macros.feather_img('edit-2') }}</a>
+    <a class="button" href="{{ url_for('personal_home.rename_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}" title="Rename">{{ macros.feather_img('edit-3') }}</a>
+    <button onclick="ask_before_get(`{{ url_for('personal_home.delete_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid)}}`)" title="Delete">{{ macros.feather_img('trash') }}</button>
 </div>
 <form class="container" id="form-edit-note" action="" method="post" onsubmit="return false;">
     <div class="control-bar" id="edit-toolbox">
-        <button type="submit" id="note-save-bnt" onclick="do_note_save(`{{ url_for('api.note_save', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}`)">Save</button>
+        <button type="submit" id="note-save-bnt" onclick="do_note_save(`{{ url_for('api.note_save', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}`)" title="Save">{{ macros.feather_img('save') }}</button>
         {% include "/shared/includes/edit-toolbox.jinja2" %}
     </div>
     <textarea name="content" id="edit-note-content" placeholder="enter content..." autofocus="true">{{ content }}</textarea>

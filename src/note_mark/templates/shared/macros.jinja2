@@ -1,0 +1,5 @@
+{% macro feather_img(icon_name) -%}
+<svg class="feather-icon">
+    <use href="{{ url_for('static', filename='feather-sprite.svg') }}#{{ icon_name }}" aria-hidden="true"></use>
+</svg>
+{% endmacro -%}

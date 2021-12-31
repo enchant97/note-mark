@@ -6,9 +6,9 @@
 <h2>Please note live update requires user-share not link</h2>
 </div>
 <div class="control-bar">
-    <a class="button" href="{{ url_for('share_link.index') }}">Back To Home</a>
+    <a class="button" href="{{ url_for('share_link.index') }}" title="Back To Home">{{ macros.feather_img('arrow-left') }}</a>
     {% if scope == "write" %}
-    <a class="button" href="{{ url_for('share_link.new_note', share_link_uuid=share_link_uuid) }}">Create Note</a>
+    <a class="button" href="{{ url_for('share_link.new_note', share_link_uuid=share_link_uuid) }}" title="Create Note">{{ macros.feather_img('file-plus') }}</a>
     {% endif %}
 </div>
 <div class="container" id="notes">
