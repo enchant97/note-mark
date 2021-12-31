@@ -36,16 +36,16 @@ def exported_v1_to_exports(exported: ExportV1) -> Path:
     """
     Export the exported metadata and copy notes into
     the export directory under unique filename
-    beginning with 'export', compressing to a tar.gz file
+    beginning with 'export', into to a tar file
 
         :param exported: The export metadata
         :return: Path to where export took place
     """
     # make a temp filename and finished filename
     export_path_temp = get_admin_export_path() / ("export-" + uuid4().hex[:8] + ".tmp")
-    export_path = export_path_temp.with_suffix(".tar.gz")
+    export_path = export_path_temp.with_suffix(".tar")
 
-    with tarfile.open(export_path_temp, "x:gz") as tar:
+    with tarfile.open(export_path_temp, "x") as tar:
         # add content to tar obj
         _add_v1_content_to_tar(exported, tar)
 
@@ -70,7 +70,7 @@ def exported_v1_to_memory(
     if bytes_obj is None:
         bytes_obj = BytesIO()
 
-    with tarfile.open(bytes_obj, "w:gz") as tar:
+    with tarfile.open(bytes_obj, "w") as tar:
         # add content to tar obj
         _add_v1_content_to_tar(exported, tar)
 
