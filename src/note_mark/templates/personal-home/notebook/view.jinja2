@@ -10,7 +10,7 @@
     {% if scope == "owner" %}
     <a class="button" href="{{ url_for('personal_home.rename_notebook', notebook_uuid=notebook.uuid) }}" title="Rename">{{ macros.feather_img('edit-3') }}</a>
     <button onclick="ask_before_get(`{{ url_for('personal_home.delete_notebook', notebook_uuid=notebook.uuid) }}`)" title="Delete">{{ macros.feather_img('trash') }}</button>
-    <a class="button" href="{{ url_for('api.notebook_as_zip', notebook_uuid=notebook.uuid) }}" title="Download" download>{{ macros.feather_img('download') }}</a>
+    <a class="button" href="{{ url_for('api.notebook_as_zip', notebook_uuid=notebook.uuid) }}" download="{{ notebook.prefix }}.zip" title="Download">{{ macros.feather_img('download') }}</a>
     {% endif %}
 </div>
 

@@ -55,7 +55,7 @@ async def notebook_as_zip(notebook_uuid):
             ("read", "write", "owner"))
 
         byteio_obj = create_notebook_zip(notebook_uuid)
-        file_resp = await make_response(byteio_obj)
+        file_resp = await make_response(byteio_obj.getvalue())
         file_resp.mimetype = "application/zip"
         return file_resp
     except DoesNotExist:

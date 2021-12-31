@@ -10,7 +10,7 @@
     {% if scope == "owner" %}
     <a class="button" href="{{ url_for('personal_home.rename_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}" title="Rename">{{ macros.feather_img('edit-3') }}</a>
     <button onclick="ask_before_get(`{{ url_for('personal_home.delete_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid)}}`)" title="Delete">{{ macros.feather_img('trash') }}</button>
-    <a class="button" href="{{ url_for('api.raw_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}" title="Download" download>{{ macros.feather_img('download') }}</a>
+    <a class="button" href="{{ url_for('api.raw_note', notebook_uuid=note.notebook_id, note_uuid=note.uuid) }}" download="{{ note.prefix }}.md" title="Download">{{ macros.feather_img('download') }}</a>
     {% endif %}
 </div>
 <div id="note-content">{{ content|safe }}</div>
