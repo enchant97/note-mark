@@ -1,7 +1,10 @@
 quart-auth==0.6.*
 quart==0.16.*
 tortoise-orm==0.17.*
+# used for health checking api
+web-health-checker==1.1.2
 pydantic[dotenv]==1.8.*
 markdown==3.3.*
-# this is optional
+
+# optional json accelerator
 python-rapidjson==1.5

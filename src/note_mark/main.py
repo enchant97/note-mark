@@ -3,6 +3,7 @@ import logging
 from quart import Quart, flash, redirect, url_for
 from quart_auth import AuthManager, Unauthorized
 from tortoise.contrib.quart import register_tortoise
+from web_health_checker.contrib import quart as health_check
 
 from . import __version__
 from .config import get_settings
@@ -40,6 +41,7 @@ def create_app():
 
     # register route blueprints
     app.register_blueprint(home.blueprint, url_prefix="/")
+    app.register_blueprint(health_check.blueprint, url_prefix="/")
     app.register_blueprint(admin.blueprint, url_prefix="/admin")
     app.register_blueprint(auth.blueprint, url_prefix="/auth")
     app.register_blueprint(personal_home.blueprint, url_prefix="/home")
