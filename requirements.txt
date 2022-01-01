@@ -3,7 +3,7 @@ quart==0.16.*
 tortoise-orm[aiosqlite, aiomysql]==0.17.*
 # used for health checking api
 web-health-checker==1.1.2
-pydantic[dotenv]==1.8.*
+pydantic[dotenv]==1.9.*
 markdown==3.3.*
 
 # optional json accelerator
