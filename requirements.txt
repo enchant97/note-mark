@@ -7,4 +7,4 @@ pydantic[dotenv]==1.8.*
 markdown==3.3.*
 
 # optional json accelerator
-python-rapidjson==1.5
+python-rapidjson==1.6
