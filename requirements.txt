@@ -1,5 +1,5 @@
 quart-auth==0.6.*
-quart==0.16.*
+quart==0.17.*
 tortoise-orm[aiosqlite, aiomysql]==0.17.*
 # used for health checking api
 web-health-checker==1.1.2
