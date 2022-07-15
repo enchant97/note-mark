@@ -338,36 +338,18 @@ function handle_notebook_notes_change(api_url) {
     load_fragment_to_elem(notes_elem, api_url).catch(console.error);
 }
 
-// setup themes
-ThemeChanger.theme_meta.light[1] = [
-    ["--font-dark", "black"],
-    ["--font-light", "#f0f0f0"],
-    ["--bg-bnt", "#adadad"],
-    ["--bg-body", "#9299a5"],
-    ["--bg-body2", "#9096a1"],
-    ["--bg-body3", "#767d8a"],
-    ["--border-col", "#777777"],
-    ["--link-fg", "#00048c"],
-];
-ThemeChanger.theme_meta.dark[1] = [
-    ["--font-dark", "var(--font-light)"],
-    ["--font-light", "#bcbcbc"],
-    ["--bg-bnt", "#003d4b"],
-    ["--bg-body", "#002b36"],
-    ["--bg-body2", "#073540"],
-    ["--bg-body3", "#083b47"],
-    ["--border-col", "#005163"],
-    ["--link-fg", "#4e9df8"],
-];
-ThemeChanger.selected_theme_css_class = "ok";
-
 window.addEventListener("load", _evnt => {
     // load theme change stuff
     ThemeChanger.theme_picker_parent = document.querySelector("main");
-    document.getElementById("themeToggleBnt").addEventListener("click", _ => {
-        ThemeChanger.toggle_theme_picker(true);
-    });
+    ThemeChanger.use_local = true;
+    ThemeChanger.selected_theme_css_class = "ok";
+
+    let themeToggleBnt = document.getElementById("themeToggleBnt")
+    themeToggleBnt.addEventListener("click", ThemeChanger.toggle_theme_picker);
+    themeToggleBnt.classList.remove("hidden");
+
     ThemeChanger.on_load();
+
 
     // add timeouts on flashed messages
     const elements = document.querySelectorAll("[data-dismiss='flash']");

@@ -8,9 +8,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&family=Roboto+Mono&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='theme-changer.js') }}"></script>
+    <script src="{{ url_for('static', filename='theme-changer.min.js') }}"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     {% block extrahead %}{% endblock %}
 </head>
@@ -21,13 +22,15 @@
         <nav>
             {% block nav %}
             {% if current_user.is_authenticated %}
-            <a class="button" href="{{ url_for('personal_home.index') }}" title="My Home">{{ macros.feather_img('home')}}</a>
+            <a class="button" href="{{ url_for('personal_home.index') }}" title="My Home">{{
+                macros.feather_img('home')}}</a>
             <a class="button" href="{{ url_for('auth.logout') }}">{{ macros.feather_img('log-out') }} Log Out</a>
             {% else %}
             <a class="button" href="{{ url_for('home.index') }}" title="Home">{{ macros.feather_img('home')}}</a>
             <a class="button" href="{{ url_for('auth.login') }}">{{ macros.feather_img('log-in') }} Log In</a>
             {% endif %}
-            <button id="themeToggleBnt"></button>
+            <button class="hidden" id="themeToggleBnt" title="Theme Picker">{{ macros.feather_img('sun') }}|{{
+                macros.feather_img('moon') }}</button>
             {% endblock %}
         </nav>
     </header>
@@ -36,7 +39,8 @@
         {% block main %}
         {% endblock %}
     </main>
-    <footer>Running Note-Mark V{{ config["__VERSION__"] }}, provided by <strong><a href="https://github.com/enchant97">enchant97</a></strong></footer>
+    <footer>Running Note-Mark V{{ config["__VERSION__"] }}, provided by <strong><a
+                href="https://github.com/enchant97">enchant97</a></strong></footer>
 </body>
 
 </html>
