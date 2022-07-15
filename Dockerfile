@@ -18,7 +18,7 @@ FROM python:${PYTHON_VERSION}-slim as builder
     RUN --mount=type=cache,target=/root/.cache \
         pip install -r requirements.txt
 
-FROM python:${PYTHON_VERSION}-alpine3.15
+FROM python:${PYTHON_VERSION}-alpine3.16
     WORKDIR /app
     ENV PATH="/app/.venv/bin:$PATH"
     ENV DATA_PATH=/data
