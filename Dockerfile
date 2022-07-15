@@ -31,7 +31,7 @@ FROM python:${PYTHON_VERSION}-alpine3.16
     COPY --from=builder /app/.venv .venv
 
     # copy required files
-    COPY src/note_mark note_mark
+    COPY note_mark note_mark
 
     # start the server
     CMD hypercorn 'note_mark.main:create_app()' --bind "$HOST:$PORT" --workers "$WORKERS" --log-level "$LOG_LEVEL"
