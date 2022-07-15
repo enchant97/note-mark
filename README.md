@@ -1,4 +1,10 @@
 # Note-Mark
+![GitHub](https://img.shields.io/github/license/enchant97/note-mark?style=flat-square)
+![Supported Python Version](https://img.shields.io/badge/python%20version-3.10-blue?style=flat-square)
+![Lines of code](https://img.shields.io/tokei/lines/github/enchant97/note-mark?style=flat-square)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/enchant97/note-mark?style=flat-square)
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/enchant97/note-mark?include_prereleases&label=latest%20release&style=flat-square)
+
 A python website designed to allow a easy way to store your notes in markdown format and display them as HTML.
 
 > Take note this project is currently in early stages of development, this warning will be removed when v1.0 is released
