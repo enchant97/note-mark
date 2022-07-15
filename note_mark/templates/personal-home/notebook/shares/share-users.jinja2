@@ -3,7 +3,7 @@
 {% block main %}
 <h2>User Shares</h2>
 <div class="control-bar">
-    <a class="button" href="{{ url_for('personal_home.get_notebook', notebook_uuid=notebook_uuid) }}" title="Back To Notebook">{{ macros.feather_img('arrow-left') }}</a>
+    <a class="icon-bnt" href="{{ url_for('personal_home.get_notebook', notebook_uuid=notebook_uuid) }}" title="Back To Notebook">{{ macros.feather_img('arrow-left') }}</a>
 </div>
 <form action="{{ url_for('personal_home.user_share', notebook_uuid=notebook_uuid) }}" method="post">
     <h3>Add New</h3>

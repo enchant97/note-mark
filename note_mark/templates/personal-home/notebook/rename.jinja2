@@ -3,7 +3,7 @@
 {% block main %}
 <h2></h2>
 <div class="control-bar">
-    <a href="{{ url_for('personal_home.get_notebook', notebook_uuid=notebook_uuid) }}" class="button" title="Back To Notebook">{{ macros.feather_img('arrow-left') }}</a>
+    <a href="{{ url_for('personal_home.get_notebook', notebook_uuid=notebook_uuid) }}" class="icon-bnt" title="Back To Notebook">{{ macros.feather_img('arrow-left') }}</a>
 </div>
 <form class="container" action="{{ url_for('personal_home.rename_notebook', notebook_uuid=notebook_uuid) }}" method="post">
     <label for="notebook-name">Name</label>

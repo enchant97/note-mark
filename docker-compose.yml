@@ -1,9 +1,9 @@
-version: "3.3"
+version: "3"
 
 services:
   note-mark:
-    build: .
     container_name: note-mark
+    image: ghcr.io/enchant97/web-portal:latest
     restart: unless-stopped
     volumes:
       - ./.env:/app/.env:ro

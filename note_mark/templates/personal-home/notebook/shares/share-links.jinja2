@@ -3,7 +3,7 @@
 {% block main %}
 <h2>Link Shares</h2>
 <div class="control-bar">
-    <a class="button" href="{{ url_for('personal_home.get_notebook', notebook_uuid=notebook_uuid) }}" title="Back To Notebook">{{ macros.feather_img('arrow-left') }}</a>
+    <a class="icon-bnt" href="{{ url_for('personal_home.get_notebook', notebook_uuid=notebook_uuid) }}" title="Back To Notebook">{{ macros.feather_img('arrow-left') }}</a>
 </div>
 <form action="{{ url_for('personal_home.share_link', notebook_uuid=notebook_uuid) }}" method="post">
     <h3>Add New</h3>
@@ -28,11 +28,11 @@
         <tr>
             <td class="col-copy">
                 <input type="text" value="{{ share.uuid }}" readonly>
-                <button onclick="copy_to_clipboard(`{{ url_for('home.get_sharelink_notebook', _external=True, share_uuid=share.uuid) }}`)" title="Copy To Clipboard">{{ macros.feather_img('copy') }}</button>
+                <button class="icon-bnt" onclick="copy_to_clipboard(`{{ url_for('home.get_sharelink_notebook', _external=True, share_uuid=share.uuid) }}`)" title="Copy To Clipboard">{{ macros.feather_img('copy') }}</button>
             </td>
             <td>{{ share.has_write }}</td>
             <td>{{ share.expires }}</td>
-            <td><button onclick="do_fetch_get_reload(`{{ url_for('api.delete_share_link', share_uuid=share.uuid) }}`)" title="Delete Link Share">{{ macros.feather_img('x') }}</button></td>
+            <td><button class="icon-bnt" onclick="do_fetch_get_reload(`{{ url_for('api.delete_share_link', share_uuid=share.uuid) }}`)" title="Delete Link Share">{{ macros.feather_img('x') }}</button></td>
         </tr>
         {% endfor %}
     </tbody>

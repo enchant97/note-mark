@@ -199,7 +199,8 @@ header nav {
 
 /* button styles */
 button,
-.button {
+.button,
+.icon-bnt {
     border: none;
     text-decoration: none;
     color: var(--font-dark);
@@ -209,16 +210,30 @@ button,
 }
 
 button:disabled,
-.button:disabled {
+.button:disabled,
+.icon-bnt:disabled {
     color: var(--bg-bnt-disabled-fg);
 }
 
 button:hover,
-.button:hover {
+.button:hover,
+.icon-bnt:hover {
     cursor: pointer;
     transition-duration: 400ms;
     background-color: black;
     color: var(--font-light);
+}
+
+.icon-bnt {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+}
+
+header nav .icon-bnt {
+    padding: .7rem 1.2rem;
+    margin: 0;
 }
 
 /* input/form styles */
