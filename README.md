@@ -7,4 +7,10 @@ A python website designed to allow a easy way to store your notes in markdown fo
 Running this app is simple if running with Docker. More info can be found in the /docs directory [here](docs/index.md).
 
 ## License
-The licenses for this project can be found in the `LICENSE` file.
+This project is Copyright (c) 2022 Leo Spratt, licences shown below:
+
+Code
+
+    AGPL-3 or any later version. Full license found in `LICENSE.txt`
+
+This project also uses some third party content, licences for those are found at: `THIRD-PARTY.txt`.
