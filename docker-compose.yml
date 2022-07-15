@@ -10,6 +10,10 @@ services:
       - note-mark:/data
     ports:
       - 8080:8000
+    environment:
+      - "DB_URL=sqlite:///data/db.sqlite"
+      - "SECRET_KEY=change_me_123"
+      - "ADMIN_PASSWORD=change_me_123"
 
 volumes:
   note-mark:
