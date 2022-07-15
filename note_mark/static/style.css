@@ -32,7 +32,7 @@
     --bg-body2: var(--bg-body2--light);
     --bg-body3: var(--bg-body3--light);
     --border-col: var(--border-col--light);
-    --link-fg: var(--link--fg--light);
+    --link-fg: var(--link-fg--light);
 }
 
 @media (prefers-color-scheme: dark) {
