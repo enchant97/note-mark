@@ -32,7 +32,7 @@
     --bg-body2: var(--bg-body2--light);
     --bg-body3: var(--bg-body3--light);
     --border-col: var(--border-col--light);
-    --link-fg: var(--font-dark--light);
+    --link-fg: var(--link--fg--light);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -45,7 +45,7 @@
         --bg-body2: var(--bg-body2--dark);
         --bg-body3: var(--bg-body3--dark);
         --border-col: var(--border-col--dark);
-        --link-fg: var(--font-dark--dark);
+        --link-fg: var(--link-fg--dark);
     }
 }
 
@@ -58,7 +58,7 @@
     --bg-body2: var(--bg-body2--light);
     --bg-body3: var(--bg-body3--light);
     --border-col: var(--border-col--light);
-    --link-fg: var(--font-dark--light);
+    --link-fg: var(--link-fg--light);
 }
 
 [data-theme=dark]:root {
@@ -70,7 +70,7 @@
     --bg-body2: var(--bg-body2--dark);
     --bg-body3: var(--bg-body3--dark);
     --border-col: var(--border-col--dark);
-    --link-fg: var(--font-dark--dark);
+    --link-fg: var(--link-fg--dark);
 }
 
 /* font reset */
