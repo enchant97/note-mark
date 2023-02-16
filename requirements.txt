@@ -3,5 +3,5 @@ quart~=0.17.0
 tortoise-orm[aiomysql]~=0.19.2
 # used for health checking api
 web-health-checker~=1.3.0
-pydantic[dotenv]~=1.9.1
+pydantic[dotenv]~=1.10.5
 markdown==3.4
