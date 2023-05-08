@@ -44,5 +44,7 @@ func InitDB(conf config.DBConfig) error {
 
 	return DB.AutoMigrate(
 		&User{},
+		&Book{},
+		&Note{},
 	)
 }

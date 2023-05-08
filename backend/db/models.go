@@ -27,6 +27,7 @@ type User struct {
 	TimeBase
 	Username string `gorm:"uniqueIndex;not null;type:varchar(30)" json:"username"`
 	Password []byte `gorm:"not null" json:"-"`
+	Books    []Book `gorm:"foreignKey:OwnerID;constraint:OnDelete:CASCADE" json:"books,omitempty"`
 }
 
 func (u *User) SetPassword(newPlainPassword string) {
@@ -42,4 +43,22 @@ func (u *User) IsPasswordMatch(plainPassword string) bool {
 		return true
 	}
 	return false
+}
+
+type Note struct {
+	UUIDBase
+	TimeBase
+	Name   string    `gorm:"not null;type:varchar(80)"`
+	Slug   string    `gorm:"index:idx_note,unique;not null;type:varchar(80)"`
+	BookID uuid.UUID `gorm:"index:idx_note,unique;not null;type:uuid"`
+}
+
+type Book struct {
+	UUIDBase
+	TimeBase
+	Name     string    `gorm:"not null;type:varchar(80)"`
+	Slug     string    `gorm:"index:idx_book,unique;not null;type:varchar(80)"`
+	OwnerID  uuid.UUID `gorm:"index:idx_book,unique;not null;type:uuid" json:"ownerId"`
+	IsPublic bool      `gorm:"not null;default:false;type:boolean" json:"isPublic"`
+	Notes    []Note    `gorm:"foreignKey:BookID;constraint:OnDelete:CASCADE" json:"notes,omitempty"`
 }
