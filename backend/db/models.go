@@ -48,8 +48,8 @@ func (u *User) IsPasswordMatch(plainPassword string) bool {
 type Note struct {
 	UUIDBase
 	TimeBase
-	Name   string    `gorm:"not null;type:varchar(80)"`
-	Slug   string    `gorm:"index:idx_note,unique;not null;type:varchar(80)"`
+	Name   string    `gorm:"not null;type:varchar(80)" json:"name"`
+	Slug   string    `gorm:"index:idx_note,unique;not null;type:varchar(80)" json:"slug"`
 	BookID uuid.UUID `gorm:"index:idx_note,unique;not null;type:uuid" json:"bookId"`
 	Book   Book      `gorm:"foreignKey:BookID" json:"-"`
 }
@@ -57,8 +57,8 @@ type Note struct {
 type Book struct {
 	UUIDBase
 	TimeBase
-	Name     string    `gorm:"not null;type:varchar(80)"`
-	Slug     string    `gorm:"index:idx_book,unique;not null;type:varchar(80)"`
+	Name     string    `gorm:"not null;type:varchar(80)" json:"name"`
+	Slug     string    `gorm:"index:idx_book,unique;not null;type:varchar(80)" json:"slug"`
 	OwnerID  uuid.UUID `gorm:"index:idx_book,unique;not null;type:uuid" json:"ownerId"`
 	IsPublic bool      `gorm:"not null;default:false;type:boolean" json:"isPublic"`
 	Notes    []Note    `gorm:"foreignKey:BookID;constraint:OnDelete:CASCADE" json:"notes,omitempty"`
