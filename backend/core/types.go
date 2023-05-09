@@ -34,13 +34,18 @@ func (c *JWTClaims) ToAuthenticatedUser() (AuthenticatedUser, error) {
 	}
 }
 
-type LoginToken struct {
-	Type   string    `json:"type"`
-	Token  string    `json:"token"`
-	Expiry time.Time `json:"expiry"`
+// OAuth2.0 Access Token, following: RFC6750 & RFC6749
+type AccessToken struct {
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	ExpiresIn   uint   `json:"expires_in"`
 }
 
-type CreateLogin struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
+// OAuth2.0 Access Token Request, following: RFC6749
+//
+// only supporting 'Resource Owner Password Flow'
+type AccessTokenRequest struct {
+	GrantType string `json:"grant_type" validate:"required,eq=password"`
+	Username  string `json:"username" validate:"required"`
+	Password  string `json:"password" validate:"required"`
 }

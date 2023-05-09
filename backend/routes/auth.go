@@ -9,9 +9,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func postLogin(ctx echo.Context) error {
+func postToken(ctx echo.Context) error {
 	appConfig := ctx.Get("AppConfig").(config.AppConfig)
-	var loginData core.CreateLogin
+	var loginData core.AccessTokenRequest
 	if err := core.BindAndValidate(ctx, &loginData); err != nil {
 		return err
 	}

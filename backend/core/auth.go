@@ -15,17 +15,18 @@ func GetAuthenticatedUserFromContext(ctx echo.Context) (AuthenticatedUser, error
 }
 
 // Create token for authentication
-func CreateAuthenticationToken(user AuthenticatedUser, secretKey []byte) (LoginToken, error) {
-	expiresAt := time.Now().Add(time.Hour * 72)
+func CreateAuthenticationToken(user AuthenticatedUser, secretKey []byte) (AccessToken, error) {
+	expiresDuration := time.Hour * 72
+	expiresAt := time.Now().Add(expiresDuration)
 	claims := user.IntoClaims(expiresAt)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	rawToken, err := token.SignedString(secretKey)
 	if err != nil {
-		return LoginToken{}, err
+		return AccessToken{}, err
 	}
-	return LoginToken{
-		Type:   "Bearer",
-		Token:  rawToken,
-		Expiry: expiresAt,
+	return AccessToken{
+		AccessToken: rawToken,
+		TokenType:   "Bearer",
+		ExpiresIn:   uint(expiresDuration.Seconds()),
 	}, nil
 }
