@@ -38,6 +38,7 @@ func main() {
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
 			ctx.Set("AppConfig", appConfig)
+			ctx.Set("Storage", storage)
 			return next(ctx)
 		}
 	})
