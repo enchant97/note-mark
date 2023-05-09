@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/enchant97/note-mark/backend/core"
@@ -124,6 +125,41 @@ func getNoteBySlug(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, note)
+}
+
+func getNoteContent(ctx echo.Context) error {
+	authenticatedUser := getAuthenticatedUser(ctx)
+	noteID, err := uuid.Parse(ctx.Param("noteID"))
+	if err != nil {
+		return err
+	}
+
+	var count int64
+	if err := db.DB.
+		Model(&db.Note{}).
+		Preload("Book").
+		Joins("JOIN books ON books.id = notes.book_id").
+		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
+		Where("notes.id = ?", noteID).
+		Limit(1).
+		Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		return ctx.NoContent(http.StatusNotFound)
+	}
+
+	storage_backend := ctx.Get("Storage").(storage.StorageController)
+
+	stream, err := storage_backend.ReadNote(noteID)
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return ctx.Blob(200, "text/markdown", []byte("\n"))
+		}
+		return err
+	}
+	defer stream.Close()
+	return ctx.Stream(200, "text/markdown", stream)
 }
 
 func updateNoteContent(ctx echo.Context) error {
