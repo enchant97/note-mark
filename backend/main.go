@@ -2,26 +2,14 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/enchant97/note-mark/backend/config"
+	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/routes"
-	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
-
-type Validator struct {
-	validator *validator.Validate
-}
-
-func (cv *Validator) Validate(i interface{}) error {
-	if err := cv.validator.Struct(i); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	return nil
-}
 
 func main() {
 	// Parse config
@@ -38,7 +26,8 @@ func main() {
 	// Register root middleware
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
-	e.Validator = &Validator{validator: validator.New()}
+	v := core.Validator{}.New()
+	e.Validator = &v
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
 			ctx.Set("AppConfig", appConfig)
