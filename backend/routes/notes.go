@@ -40,11 +40,13 @@ func getNotesByBookID(ctx echo.Context) error {
 
 	var notes []db.Note
 	if err := db.DB.
-		First(&db.Book{}, "id = ?", bookID).
-		Where("owner_id = ?", authenticatedUser.UserID).
-		Or("is_public = ?", true).
-		Association("Notes").
-		Find(&notes); err != nil {
+		Preload("Book").
+		Joins("JOIN books ON books.id = notes.book_id").
+		Where(
+			db.DB.Where("books.id = ?", bookID),
+			db.DB.Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true),
+		).
+		Find(&notes).Error; err != nil {
 		return err
 	}
 
@@ -58,8 +60,8 @@ func getNotesBySlug(ctx echo.Context) error {
 
 	var bookOwner db.User
 	if err := db.DB.
-		First(&bookOwner, "username = ?", username).
-		Select("id").Error; err != nil {
+		Select("id").
+		First(&bookOwner, "username = ?", username).Error; err != nil {
 		return err
 	}
 
@@ -86,10 +88,11 @@ func getNoteByID(ctx echo.Context) error {
 	}
 
 	var note db.Note
-	if err := db.DB.Model(&db.User{}).
-		Where("owner_id = ?", authenticatedUser.UserID).
-		Or("is_public = ?", true).Association("Notes").
-		Find(&note, "note_id = ?", noteID); err != nil {
+	if err := db.DB.
+		Preload("Book").
+		Joins("JOIN books ON books.id = notes.book_id").
+		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
+		First(&note, "notes.id = ?", noteID).Error; err != nil {
 		return err
 	}
 
@@ -104,17 +107,18 @@ func getNoteBySlug(ctx echo.Context) error {
 
 	var bookOwner db.User
 	if err := db.DB.
-		First(&bookOwner, "username = ?", username).
-		Select("id").Error; err != nil {
+		Select("id").
+		First(&bookOwner, "username = ?", username).Error; err != nil {
 		return err
 	}
 
 	var note db.Note
 	if err := db.DB.
-		First(&db.Book{}, "slug = ?", bookSlug, "owner_id = ?", bookOwner.ID).
-		Where("owner_id = ?", authenticatedUser.UserID).
-		Or("is_public = ?", true).Association("Notes").
-		Find(&note, "slug = ?", noteSlug); err != nil {
+		Preload("Book").
+		Joins("JOIN books ON books.id = notes.book_id").
+		Where("books.slug = ? AND books.owner_id = ?", bookSlug, bookOwner.ID).
+		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
+		First(&note, "notes.slug = ?", noteSlug).Error; err != nil {
 		return err
 	}
 
