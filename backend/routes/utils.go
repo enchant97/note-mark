@@ -57,8 +57,10 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 			slugUserRoutes.GET("books/:bookSlug/notes/", getNotesBySlug)
 			slugUserRoutes.GET("books/:bookSlug/notes/:noteSlug/", getNoteBySlug)
 		}
+		protectedRoutes.POST("books/", createBook)
 		protectedRoutes.GET("books/:bookID", getBookByID)
 		protectedRoutes.GET("books/:bookID/notes/", getNotesByBookID)
+		protectedRoutes.POST("notes/", createNote)
 		protectedRoutes.GET("notes/:noteID/", getNoteByID)
 	}
 }

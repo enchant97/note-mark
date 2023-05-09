@@ -3,10 +3,33 @@ package routes
 import (
 	"net/http"
 
+	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
+
+func createNote(ctx echo.Context) error {
+	authenticatedUser := getAuthenticatedUser(ctx)
+	var noteData db.CreateNote
+	if err := core.BindAndValidate(ctx, noteData); err != nil {
+		return err
+	}
+
+	// TODO can this be made more effient?
+	if err := db.DB.
+		First(&db.Book{}, "owner_id = ?", authenticatedUser.UserID).
+		Error; err != nil {
+		return err
+	}
+
+	note := noteData.IntoNote()
+	if err := db.DB.Create(&note).Error; err != nil {
+		return err
+	}
+
+	return ctx.JSON(http.StatusCreated, note)
+}
 
 func getNotesByBookID(ctx echo.Context) error {
 	authenticatedUser := getAuthenticatedUser(ctx)

@@ -3,10 +3,26 @@ package routes
 import (
 	"net/http"
 
+	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
+
+func createBook(ctx echo.Context) error {
+	authenticatedUser := getAuthenticatedUser(ctx)
+	var bookData db.CreateBook
+	if err := core.BindAndValidate(ctx, bookData); err != nil {
+		return err
+	}
+
+	book := bookData.IntoBook(authenticatedUser.UserID)
+	if err := db.DB.Create(&book).Error; err != nil {
+		return err
+	}
+
+	return ctx.JSON(http.StatusCreated, book)
+}
 
 func getBooksByUsername(ctx echo.Context) error {
 	authenticatedUser := getAuthenticatedUser(ctx)
