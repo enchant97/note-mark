@@ -45,7 +45,7 @@ type AccessToken struct {
 //
 // only supporting 'Resource Owner Password Flow'
 type AccessTokenRequest struct {
-	GrantType string `json:"grant_type" validate:"required,eq=password"`
-	Username  string `json:"username" validate:"required"`
-	Password  string `json:"password" validate:"required"`
+	GrantType string `json:"grant_type" query:"grant_type" form:"grant_type" validate:"required,eq=password"`
+	Username  string `json:"username" query:"username" form:"username" validate:"required"`
+	Password  string `json:"password" query:"password" form:"password" validate:"required"`
 }
