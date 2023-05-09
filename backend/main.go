@@ -7,6 +7,7 @@ import (
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/routes"
+	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -17,6 +18,12 @@ func main() {
 	if err := appConfig.ParseConfig(); err != nil {
 		log.Fatalln(err)
 	}
+	// Connect to storage backend
+	storage := storage.DiskController{}.New(appConfig.DataPath)
+	if err := storage.Setup(); err != nil {
+		log.Fatalln(err)
+	}
+	defer storage.TearDown()
 	// Connect to database
 	if err := db.InitDB(appConfig.DB); err != nil {
 		log.Fatalln(err)

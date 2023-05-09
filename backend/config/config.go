@@ -20,4 +20,5 @@ type AppConfig struct {
 	Bind      BindConfig    `envPrefix:"BIND__"`
 	DB        DBConfig      `envPrefix:"DB__"`
 	JWTSecret Base64Decoded `env:"JWT_SECRET,notEmpty"`
+	DataPath  string        `env:"DATA_PATH,notEmpty"`
 }
