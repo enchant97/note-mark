@@ -56,20 +56,22 @@ func getNotesBySlug(ctx echo.Context) error {
 	username := ctx.Param("username")
 	bookSlug := ctx.Param("bookSlug")
 
-	var bookOwnerID uuid.UUID
-	if err := db.DB.Model(&db.Book{}).
-		First("username = ?", username).
-		Pluck("id", bookOwnerID).Error; err != nil {
+	var bookOwner db.User
+	if err := db.DB.
+		First(&bookOwner, "username = ?", username).
+		Select("id").Error; err != nil {
 		return err
 	}
 
 	var notes []db.Note
 	if err := db.DB.
-		First(&db.Book{}, "slug = ?", bookSlug, "owner_id = ?", bookOwnerID).
-		Where("owner_id = ?", authenticatedUser.UserID).
-		Or("is_public = ?", true).
-		Association("Notes").
-		Find(&notes); err != nil {
+		Preload("Book").
+		Joins("JOIN books ON books.id = notes.book_id").
+		Where(
+			db.DB.Where("books.slug = ? AND owner_id = ?", bookSlug, bookOwner.ID),
+			db.DB.Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true),
+		).
+		Find(&notes).Error; err != nil {
 		return err
 	}
 
@@ -84,7 +86,7 @@ func getNoteByID(ctx echo.Context) error {
 	}
 
 	var note db.Note
-	if err := db.DB.Model(&db.Book{}).
+	if err := db.DB.Model(&db.User{}).
 		Where("owner_id = ?", authenticatedUser.UserID).
 		Or("is_public = ?", true).Association("Notes").
 		Find(&note, "note_id = ?", noteID); err != nil {
@@ -100,16 +102,16 @@ func getNoteBySlug(ctx echo.Context) error {
 	bookSlug := ctx.Param("bookSlug")
 	noteSlug := ctx.Param("noteSlug")
 
-	var bookOwnerID uuid.UUID
-	if err := db.DB.Model(&db.Book{}).
-		First("username = ?", username).
-		Pluck("id", bookOwnerID).Error; err != nil {
+	var bookOwner db.User
+	if err := db.DB.
+		First(&bookOwner, "username = ?", username).
+		Select("id").Error; err != nil {
 		return err
 	}
 
 	var note db.Note
 	if err := db.DB.
-		First(&db.Book{}, "slug = ?", bookSlug, "owner_id = ?", bookOwnerID).
+		First(&db.Book{}, "slug = ?", bookSlug, "owner_id = ?", bookOwner.ID).
 		Where("owner_id = ?", authenticatedUser.UserID).
 		Or("is_public = ?", true).Association("Notes").
 		Find(&note, "slug = ?", noteSlug); err != nil {

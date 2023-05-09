@@ -28,19 +28,19 @@ func getBooksByUsername(ctx echo.Context) error {
 	authenticatedUser := getAuthenticatedUser(ctx)
 	username := ctx.Param("username")
 
-	var bookOwnerID uuid.UUID
+	var bookOwner db.User
 	if err := db.DB.
-		First(&db.Book{}, "username = ?", username).
-		Pluck("id", bookOwnerID).Error; err != nil {
+		First(&bookOwner, "username = ?", username).
+		Select("id").Error; err != nil {
 		return err
 	}
 
 	var books []db.Book
 	// base query
-	query := db.DB.Model(&books).Where("owner_id = ?", bookOwnerID)
-	if authenticatedUser.UserID != bookOwnerID {
+	query := db.DB.Find(&books, "owner_id = ?", bookOwner.ID)
+	if authenticatedUser.UserID != bookOwner.ID {
 		// restrict to only public books
-		query = query.Where(bookOwnerID, "is_public = ?", true)
+		query = query.Where(bookOwner.ID, "is_public = ?", true)
 	}
 	if err := query.Error; err != nil {
 		return err
@@ -72,16 +72,16 @@ func getBookBySlug(ctx echo.Context) error {
 	username := ctx.Param("username")
 	bookSlug := ctx.Param("bookSlug")
 
-	var bookOwnerID uuid.UUID
+	var bookOwner db.User
 	if err := db.DB.
-		First(&db.Book{}, "username = ?", username).
-		Pluck("id", bookOwnerID).Error; err != nil {
+		First(&bookOwner, "username = ?", username).
+		Select("id").Error; err != nil {
 		return err
 	}
 
 	var book db.Book
 	if err := db.DB.
-		First(&book, "slug = ?", bookSlug, "owner_id = ?", bookOwnerID).
+		First(&book, "slug = ?", bookSlug, "owner_id = ?", bookOwner.ID).
 		Where("owner_id = ?", authenticatedUser.UserID).
 		Or("is_public = ?", true).Error; err != nil {
 		return err

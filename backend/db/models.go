@@ -50,7 +50,8 @@ type Note struct {
 	TimeBase
 	Name   string    `gorm:"not null;type:varchar(80)"`
 	Slug   string    `gorm:"index:idx_note,unique;not null;type:varchar(80)"`
-	BookID uuid.UUID `gorm:"index:idx_note,unique;not null;type:uuid"`
+	BookID uuid.UUID `gorm:"index:idx_note,unique;not null;type:uuid" json:"bookId"`
+	Book   Book      `gorm:"foreignKey:BookID" json:"-"`
 }
 
 type Book struct {
