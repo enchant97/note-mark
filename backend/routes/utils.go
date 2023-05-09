@@ -44,11 +44,21 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 
 	routes := e.Group("/api/")
 	{
-		routes.POST("/api/users/", postCreateUser)
-		routes.POST("/api/login/", postLogin)
+		routes.POST("users/", postCreateUser)
+		routes.POST("login/", postLogin)
 	}
 	protectedRoutes := e.Group("/api/", jwtMiddleware, authenticatedUserMiddleware)
 	{
-		protectedRoutes.GET("/api/users/me", getUserMe)
+		protectedRoutes.GET("users/me", getUserMe)
+		slugUserRoutes := protectedRoutes.Group("slug/@:username/")
+		{
+			slugUserRoutes.GET("books/", getBooksByUsername)
+			slugUserRoutes.GET("books/:bookSlug/", getBookBySlug)
+			slugUserRoutes.GET("books/:bookSlug/notes/", getNotesBySlug)
+			slugUserRoutes.GET("books/:bookSlug/notes/:noteSlug/", getNoteBySlug)
+		}
+		protectedRoutes.GET("books/:bookID", getBookByID)
+		protectedRoutes.GET("books/:bookID/notes/", getNotesByBookID)
+		protectedRoutes.GET("notes/:noteID/", getNoteByID)
 	}
 }

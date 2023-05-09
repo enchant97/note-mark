@@ -26,7 +26,8 @@ func getUserMe(ctx echo.Context) error {
 	authenticatedUser := getAuthenticatedUser(ctx)
 
 	var user db.User
-	if err := db.DB.Model(&user).First("id = ?", authenticatedUser.UserID).Error; err != nil {
+	if err := db.DB.
+		First(&user, "id = ?", authenticatedUser.UserID).Error; err != nil {
 		return err
 	}
 

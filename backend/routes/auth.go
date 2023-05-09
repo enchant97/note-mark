@@ -17,7 +17,9 @@ func postLogin(ctx echo.Context) error {
 	}
 
 	var user db.User
-	if err := db.DB.First(&user, "username = ?", loginData.Username).Select("id", "password").Error; err != nil {
+	if err := db.DB.
+		First(&user, "username = ?", loginData.Username).
+		Select("id", "password").Error; err != nil {
 		return ctx.NoContent(http.StatusUnauthorized)
 	}
 
