@@ -184,11 +184,11 @@ func updateNoteContent(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusNotFound)
 	}
 
-	storage := ctx.Get("Storage").(storage.StorageController)
+	storage_backend := ctx.Get("Storage").(storage.StorageController)
 
 	body := ctx.Request().Body
 	defer body.Close()
-	if err := storage.WriteNote(noteID, body); err != nil {
+	if err := storage_backend.WriteNote(noteID, body); err != nil {
 		return err
 	}
 
