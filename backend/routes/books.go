@@ -12,7 +12,7 @@ import (
 func createBook(ctx echo.Context) error {
 	authenticatedUser := getAuthenticatedUser(ctx)
 	var bookData db.CreateBook
-	if err := core.BindAndValidate(ctx, bookData); err != nil {
+	if err := core.BindAndValidate(ctx, &bookData); err != nil {
 		return err
 	}
 

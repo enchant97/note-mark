@@ -12,7 +12,7 @@ import (
 func createNote(ctx echo.Context) error {
 	authenticatedUser := getAuthenticatedUser(ctx)
 	var noteData db.CreateNote
-	if err := core.BindAndValidate(ctx, noteData); err != nil {
+	if err := core.BindAndValidate(ctx, &noteData); err != nil {
 		return err
 	}
 
