@@ -8,6 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 const (
@@ -62,5 +63,6 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 		protectedRoutes.GET("books/:bookID/notes/", getNotesByBookID)
 		protectedRoutes.POST("notes/", createNote)
 		protectedRoutes.GET("notes/:noteID/", getNoteByID)
+		protectedRoutes.PUT("notes/:noteID/content/", updateNoteContent, middleware.BodyLimit("1M"))
 	}
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
+	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -123,4 +124,37 @@ func getNoteBySlug(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, note)
+}
+
+func updateNoteContent(ctx echo.Context) error {
+	authenticatedUser := getAuthenticatedUser(ctx)
+	noteID, err := uuid.Parse(ctx.Param("noteID"))
+	if err != nil {
+		return err
+	}
+
+	var count int64
+	if err := db.DB.
+		Model(&db.Note{}).
+		Preload("Book").
+		Joins("JOIN books ON books.id = notes.book_id").
+		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
+		Where("notes.id = ?", noteID).
+		Limit(1).
+		Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		return ctx.NoContent(http.StatusNotFound)
+	}
+
+	storage := ctx.Get("Storage").(storage.StorageController)
+
+	body := ctx.Request().Body
+	defer body.Close()
+	if err := storage.WriteNote(noteID, body); err != nil {
+		return err
+	}
+
+	return ctx.NoContent(http.StatusOK)
 }

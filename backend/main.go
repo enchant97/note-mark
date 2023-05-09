@@ -19,11 +19,11 @@ func main() {
 		log.Fatalln(err)
 	}
 	// Connect to storage backend
-	storage := storage.DiskController{}.New(appConfig.DataPath)
-	if err := storage.Setup(); err != nil {
+	storage_backend := storage.DiskController{}.New(appConfig.DataPath)
+	if err := storage_backend.Setup(); err != nil {
 		log.Fatalln(err)
 	}
-	defer storage.TearDown()
+	defer storage_backend.TearDown()
 	// Connect to database
 	if err := db.InitDB(appConfig.DB); err != nil {
 		log.Fatalln(err)
@@ -38,7 +38,7 @@ func main() {
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
 			ctx.Set("AppConfig", appConfig)
-			ctx.Set("Storage", storage)
+			ctx.Set("Storage", storage_backend)
 			return next(ctx)
 		}
 	})

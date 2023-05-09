@@ -16,11 +16,11 @@ type DiskController struct {
 	baseDataPath string
 }
 
-func (c DiskController) New(baseDataPath string) DiskController {
+func (c DiskController) New(baseDataPath string) StorageController {
 	c = DiskController{
 		baseDataPath: baseDataPath,
 	}
-	return c
+	return &c
 }
 
 func (c *DiskController) getNoteDirectory(noteID uuid.UUID) string {
@@ -53,7 +53,10 @@ func (c *DiskController) WriteNote(noteID uuid.UUID, r io.Reader) error {
 	}
 	defer f.Close()
 	_, err = io.Copy(f, r)
-	return errors.Join(err, ErrWrite)
+	if err != nil {
+		return errors.Join(err, ErrWrite)
+	}
+	return nil
 }
 
 func (c *DiskController) ReadNote(noteID uuid.UUID) (io.ReadCloser, error) {
