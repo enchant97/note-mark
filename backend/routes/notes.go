@@ -179,8 +179,7 @@ func patchNoteByID(ctx echo.Context) error {
 		Model(&db.Note{}).
 		Preload("Book").
 		Joins("JOIN books ON books.id = notes.book_id").
-		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
-		Where("notes.id = ?", noteID).
+		Where("owner_id = ? AND notes.id = ?", authenticatedUser.UserID, noteID).
 		Limit(1).
 		Count(&count).Error; err != nil {
 		return err
@@ -215,8 +214,7 @@ func updateNoteContent(ctx echo.Context) error {
 		Model(&db.Note{}).
 		Preload("Book").
 		Joins("JOIN books ON books.id = notes.book_id").
-		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
-		Where("notes.id = ?", noteID).
+		Where("owner_id = ? AND notes.id = ?", authenticatedUser.UserID, noteID).
 		Limit(1).
 		Count(&count).Error; err != nil {
 		return err
