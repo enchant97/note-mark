@@ -12,6 +12,14 @@ import (
 
 const diskStorageNoteFileName = "note.md"
 
+// returns path as: `base / notes / note-id[:3] / note-id`
+func getNoteDirectory(base string, noteID uuid.UUID) string {
+	noteIDString := noteID.String()
+	noteIDStringPart := noteIDString[:3]
+	dirPath := path.Join(base, "notes", noteIDStringPart, noteIDString)
+	return dirPath
+}
+
 type DiskController struct {
 	baseDataPath string
 }
@@ -23,12 +31,8 @@ func (c DiskController) New(baseDataPath string) StorageController {
 	return &c
 }
 
-// returns path as: `base / notes / note-id[:3] / note-id`
 func (c *DiskController) getNoteDirectory(noteID uuid.UUID) string {
-	noteIDString := noteID.String()
-	noteIDStringPart := noteIDString[:3]
-	dirPath := path.Join(c.baseDataPath, "notes", noteIDStringPart, noteIDString)
-	return dirPath
+	return getNoteDirectory(c.baseDataPath, noteID)
 }
 
 func (c *DiskController) Setup() error {
