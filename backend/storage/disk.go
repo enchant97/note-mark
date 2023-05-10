@@ -23,6 +23,7 @@ func (c DiskController) New(baseDataPath string) StorageController {
 	return &c
 }
 
+// returns path as: `base / notes / note-id[:3] / note-id`
 func (c *DiskController) getNoteDirectory(noteID uuid.UUID) string {
 	noteIDString := noteID.String()
 	noteIDStringPart := noteIDString[:3]
@@ -69,6 +70,14 @@ func (c *DiskController) ReadNote(noteID uuid.UUID) (io.ReadCloser, error) {
 		return nil, errors.Join(err, ErrRead)
 	}
 	return f, nil
+}
+
+func (c *DiskController) DeleteNote(noteID uuid.UUID) error {
+	dirPath := c.getNoteDirectory(noteID)
+	if err := os.RemoveAll(dirPath); err != nil {
+		return errors.Join(err, ErrWrite)
+	}
+	return nil
 }
 
 func (c *DiskController) GetNoteInfo(noteID uuid.UUID) (NoteInfo, error) {
