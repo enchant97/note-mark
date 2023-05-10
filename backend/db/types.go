@@ -16,8 +16,8 @@ func (u *CreateUser) IntoUser() User {
 }
 
 type CreateBook struct {
-	Name     string `json:"name" validate:"required"`
-	Slug     string `json:"slug" validate:"required,slug"`
+	Name     string `json:"name" validate:"required,max=80"`
+	Slug     string `json:"slug" validate:"required,max=80,slug"`
 	IsPublic bool   `json:"isPublic"`
 }
 
@@ -31,8 +31,8 @@ func (b *CreateBook) IntoBook(ownerID uuid.UUID) Book {
 }
 
 type CreateNote struct {
-	Name   string    `json:"name" validate:"required"`
-	Slug   string    `json:"slug" validate:"required,slug"`
+	Name   string    `json:"name" validate:"required,max=80"`
+	Slug   string    `json:"slug" validate:"required,max=80,slug"`
 	BookID uuid.UUID `json:"bookId" validate:"required"`
 }
 
@@ -42,4 +42,15 @@ func (n *CreateNote) IntoNote() Note {
 		Slug:   n.Slug,
 		BookID: n.BookID,
 	}
+}
+
+type UpdateBook struct {
+	Name     *string `json:"name,omitempty" validate:"omitempty,max=80"`
+	Slug     *string `json:"slug,omitempty" validate:"omitempty,max=80,slug"`
+	IsPublic *bool   `json:"isPublic,omitempty"`
+}
+
+type UpdateNote struct {
+	Name *string `json:"name,omitempty" validate:"omitempty,max=80"`
+	Slug *string `json:"slug,omitempty" validate:"omitempty,max=80,slug"`
 }

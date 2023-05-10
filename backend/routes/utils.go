@@ -60,9 +60,11 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 		}
 		protectedRoutes.POST("books/", createBook)
 		protectedRoutes.GET("books/:bookID", getBookByID)
+		protectedRoutes.PATCH("books/:bookID/", patchBookByID)
 		protectedRoutes.GET("books/:bookID/notes/", getNotesByBookID)
 		protectedRoutes.POST("notes/", createNote)
 		protectedRoutes.GET("notes/:noteID/", getNoteByID)
+		protectedRoutes.PATCH("notes/:noteID/", patchNoteByID)
 		protectedRoutes.GET("notes/:noteID/content/", getNoteContent)
 		protectedRoutes.PUT("notes/:noteID/content/", updateNoteContent, middleware.BodyLimit("1M"))
 	}

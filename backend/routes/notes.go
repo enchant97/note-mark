@@ -162,6 +162,47 @@ func getNoteContent(ctx echo.Context) error {
 	return ctx.Stream(200, "text/markdown", stream)
 }
 
+func patchNoteByID(ctx echo.Context) error {
+	authenticatedUser := getAuthenticatedUser(ctx)
+	noteID, err := uuid.Parse(ctx.Param("noteID"))
+	if err != nil {
+		return err
+	}
+	var noteData db.UpdateNote
+	if err := core.BindAndValidate(ctx, &noteData); err != nil {
+		return err
+	}
+
+	// INFO this other query is required as joins don't work when updating
+	var count int64
+	if err := db.DB.
+		Model(&db.Note{}).
+		Preload("Book").
+		Joins("JOIN books ON books.id = notes.book_id").
+		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
+		Where("notes.id = ?", noteID).
+		Limit(1).
+		Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		return ctx.NoContent(http.StatusNotFound)
+	}
+
+	result := db.DB.
+		Model(&db.Note{}).
+		Where("notes.id = ?", noteID).
+		Updates(noteData)
+	if err := result.Error; err != nil {
+		return err
+	}
+	if result.RowsAffected == 0 {
+		return ctx.NoContent(http.StatusNotFound)
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
+}
+
 func updateNoteContent(ctx echo.Context) error {
 	authenticatedUser := getAuthenticatedUser(ctx)
 	noteID, err := uuid.Parse(ctx.Param("noteID"))
@@ -192,5 +233,5 @@ func updateNoteContent(ctx echo.Context) error {
 		return err
 	}
 
-	return ctx.NoContent(http.StatusOK)
+	return ctx.NoContent(http.StatusNoContent)
 }

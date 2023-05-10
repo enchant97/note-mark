@@ -93,3 +93,28 @@ func getBookBySlug(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, book)
 }
+
+func patchBookByID(ctx echo.Context) error {
+	authenticatedUser := getAuthenticatedUser(ctx)
+	bookID, err := uuid.Parse(ctx.Param("bookID"))
+	if err != nil {
+		return err
+	}
+	var bookData db.UpdateBook
+	if err := core.BindAndValidate(ctx, &bookData); err != nil {
+		return err
+	}
+
+	result := db.DB.
+		Model(&db.Book{}).
+		Where("id = ? AND owner_id = ?", bookID, authenticatedUser.UserID).
+		Updates(bookData)
+	if err := result.Error; err != nil {
+		return err
+	}
+	if result.RowsAffected == 0 {
+		return ctx.NoContent(http.StatusNotFound)
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
+}
