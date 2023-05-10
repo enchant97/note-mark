@@ -1,11 +1,11 @@
 import { createContext, createEffect, createSignal, useContext } from "solid-js"
 import Api, { ApiDetails } from "../core/api"
 
-const api_details_key = "api_details"
+const api_details_key = "note_mark__api_details"
 
 const readApiDetails = (): ApiDetails => {
     let apiDetails = window.localStorage.getItem(api_details_key)
-    if (!apiDetails) {
+    if (apiDetails) {
         return JSON.parse(apiDetails)
     }
     return {
@@ -33,8 +33,8 @@ const makeApiContext = () => {
     })
     return {
         api,
-        details,
-        setDetails,
+        apiDetails: details,
+        setApiDetails: setDetails,
         clearDetails: () => {
             clearApiDetails()
             setDetails(readApiDetails())
