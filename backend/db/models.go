@@ -18,8 +18,8 @@ func (base *UUIDBase) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 type TimeBase struct {
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
 }
 
 type User struct {
