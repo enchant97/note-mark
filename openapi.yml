@@ -1,0 +1,75 @@
+openapi: 3.1.0
+info:
+  title: Note Mark - API
+  description: ""
+  version: 0.6.0
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: ""
+      flows:
+        password:
+          tokenUrl: /api/auth/token
+          scopes: {}
+
+  schemas:
+    Base:
+      type: object
+      required:
+        - id
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          format: uuid
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+    User:
+      allOf:
+        - $ref: "#/components/schemas/Base"
+        - type: object
+          properties:
+            username:
+              type: string
+    CreateUser:
+          type: object
+          required:
+            - username
+            - password
+          properties:
+            username:
+              type: string
+            password:
+              type: string
+
+  requestBodies:
+    CreateUser:
+      content:
+        application/json:
+          schema:
+            allOf: [{ $ref: "#/components/schemas/CreateUser" }]
+
+security:
+  - OAuth2: []
+
+paths:
+  /api/users/:
+    post:
+      tags:
+        - Users
+      security: []
+      summary: "Create a new user"
+      requestBody: { $ref: "#/components/requestBodies/CreateUser" }
+      responses:
+        201:
+          description: ""
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
