@@ -1,14 +1,15 @@
 import { Routes, Route, Router, A } from '@solidjs/router';
 import { Component, lazy } from 'solid-js';
 import { HiOutlineUser, HiSolidMenu } from "solid-icons/hi";
+import { ApiProvider } from './contexts/ApiProvider';
 
 const Index = lazy(() => import("./pages/index"));
 const Login = lazy(() => import("./pages/login"));
 
 const App: Component = () => {
   return (
-    <>
-      <Router>
+    <Router>
+      <ApiProvider>
         <div class="drawer drawer-mobile">
           <input id="main-drawer" type="checkbox" class="drawer-toggle" />
           <div class="drawer-content">
@@ -43,8 +44,8 @@ const App: Component = () => {
             </ul>
           </div>
         </div>
-      </Router>
-    </>
+      </ApiProvider>
+    </Router>
   );
 };
 
