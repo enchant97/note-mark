@@ -62,7 +62,7 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 		protectedRoutes.GET("books/:bookID", getBookByID)
 		protectedRoutes.PATCH("books/:bookID/", patchBookByID)
 		protectedRoutes.GET("books/:bookID/notes/", getNotesByBookID)
-		protectedRoutes.POST("notes/", createNote)
+		protectedRoutes.POST("books/:bookID/notes/", createNoteByBookID)
 		protectedRoutes.GET("notes/:noteID/", getNoteByID)
 		protectedRoutes.PATCH("notes/:noteID/", patchNoteByID)
 		protectedRoutes.GET("notes/:noteID/content/", getNoteContent)

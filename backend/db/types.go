@@ -31,16 +31,15 @@ func (b *CreateBook) IntoBook(ownerID uuid.UUID) Book {
 }
 
 type CreateNote struct {
-	Name   string    `json:"name" validate:"required,max=80"`
-	Slug   string    `json:"slug" validate:"required,max=80,slug"`
-	BookID uuid.UUID `json:"bookId" validate:"required"`
+	Name string `json:"name" validate:"required,max=80"`
+	Slug string `json:"slug" validate:"required,max=80,slug"`
 }
 
-func (n *CreateNote) IntoNote() Note {
+func (n *CreateNote) IntoNote(bookID uuid.UUID) Note {
 	return Note{
 		Name:   n.Name,
 		Slug:   n.Slug,
-		BookID: n.BookID,
+		BookID: bookID,
 	}
 }
 

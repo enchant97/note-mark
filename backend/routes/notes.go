@@ -11,21 +11,30 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func createNote(ctx echo.Context) error {
+func createNoteByBookID(ctx echo.Context) error {
 	authenticatedUser := getAuthenticatedUser(ctx)
+	bookID, err := uuid.Parse(ctx.Param("bookID"))
+	if err != nil {
+		return err
+	}
 	var noteData db.CreateNote
 	if err := core.BindAndValidate(ctx, &noteData); err != nil {
 		return err
 	}
 
-	// TODO can this be made more effient?
+	var count int64
 	if err := db.DB.
-		First(&db.Book{}, "owner_id = ?", authenticatedUser.UserID).
-		Error; err != nil {
+		Model(&db.Book{}).
+		Where("id = ? AND owner_id = ?", bookID, authenticatedUser.UserID).
+		Limit(1).
+		Count(&count).Error; err != nil {
 		return err
 	}
+	if count == 0 {
+		return ctx.NoContent(http.StatusNotFound)
+	}
 
-	note := noteData.IntoNote()
+	note := noteData.IntoNote(bookID)
 	if err := db.DB.Create(&note).Error; err != nil {
 		return err
 	}
