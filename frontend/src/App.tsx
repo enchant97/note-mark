@@ -1,8 +1,17 @@
-import type { Component } from 'solid-js';
+import { Routes, Route, Router } from '@solidjs/router';
+import { Component, lazy } from 'solid-js';
+
+const Index = lazy(() => import("./pages/index"));
 
 const App: Component = () => {
   return (
-    <p class="text-4xl text-green-700 text-center py-20">Hello tailwind!</p>
+    <>
+      <Router>
+        <Routes>
+          <Route path="/" component={Index} />
+        </Routes>
+      </Router>
+    </>
   );
 };
 
