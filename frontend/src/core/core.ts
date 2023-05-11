@@ -1,5 +1,3 @@
-export type Option<V> = V | undefined
-
 export class Fatal extends Error { }
 
 export class Result<V, E extends Error> {
@@ -21,7 +19,7 @@ export class Result<V, E extends Error> {
     isErr(): boolean {
         return this.result instanceof Error
     }
-    intoOption(): Option<V> {
+    intoOption(): V | undefined {
         if (this.result instanceof Error) return undefined
         return this.result
     }

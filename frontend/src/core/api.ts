@@ -33,7 +33,7 @@ class Api {
         return this
     }
     async postToken(details: OAuth2AccessTokenRequest): Promise<Result<OAuth2AccessToken, ApiError>> {
-        let reqURL = new URL("/auth/token", this.apiServer)
+        let reqURL = `${this.apiServer}/auth/token`
         let resp = await fetch(reqURL, {
             method: "POST",
             headers: {
