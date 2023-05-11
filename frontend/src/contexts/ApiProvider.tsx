@@ -9,7 +9,7 @@ const readApiDetails = (): ApiDetails => {
         return JSON.parse(apiDetails)
     }
     return {
-        authToken: null,
+        authToken: undefined,
         apiServer: (new URL("/api", window.location.origin)).toString(),
     }
 }

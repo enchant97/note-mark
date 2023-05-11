@@ -1,12 +1,25 @@
+import { Result } from "./core"
+import { OAuth2AccessToken, OAuth2AccessTokenRequest } from "./types"
+
 export type ApiDetails = {
     authToken?: string
     apiServer: string
 }
 
+export class ApiError extends Error {
+    readonly status: number
+    constructor(status: number, message?: string) {
+        super(message)
+        this.status = status
+    }
+}
+
 class Api {
-    private apiDetails: ApiDetails
+    private authToken?: string
+    private apiServer: string
     constructor(apiDetails: ApiDetails) {
-        this.apiDetails = apiDetails
+        this.authToken = apiDetails.authToken
+        this.apiServer = apiDetails.apiServer
     }
     /**
      * allows for adjusting the main settings
@@ -15,8 +28,24 @@ class Api {
      * @returns self
      */
     setApi(apiDetails: ApiDetails): Api {
-        this.apiDetails = apiDetails
+        this.authToken = apiDetails.authToken
+        this.apiServer = apiDetails.apiServer
         return this
+    }
+    async postToken(details: OAuth2AccessTokenRequest): Promise<Result<OAuth2AccessToken, ApiError>> {
+        let reqURL = new URL("/auth/token", this.apiServer)
+        let resp = await fetch(reqURL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(details)
+        })
+        if (!resp.ok) return new Result<OAuth2AccessToken, ApiError>(new ApiError(resp.status))
+        return new Result(await resp.json())
+    }
+    async postTokenPasswordFlow(username: string, password: string): Promise<Result<OAuth2AccessToken, ApiError>> {
+        return await this.postToken({ grant_type: "password", username, password })
     }
 }
 
