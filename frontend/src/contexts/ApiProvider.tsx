@@ -1,5 +1,6 @@
 import { createContext, createEffect, createSignal, useContext } from "solid-js"
 import Api, { ApiDetails } from "../core/api"
+import { Fatal } from "../core/core"
 
 const api_details_key = "note_mark__api_details"
 
@@ -44,7 +45,11 @@ const makeApiContext = () => {
 
 type ApiContextType = ReturnType<typeof makeApiContext>
 export const ApiContext = createContext<ApiContextType>()
-export const useApi = () => useContext(ApiContext)
+export const useApi = () => {
+    let ctx = useContext(ApiContext)
+    if (ctx === undefined) throw new Fatal("api was undefined")
+    return ctx
+}
 export const ApiProvider = (props: any) => {
     return (
         <ApiContext.Provider value={makeApiContext()}>
