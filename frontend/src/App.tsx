@@ -30,7 +30,7 @@ const MainApp: Component = () => {
   return (
     <div class="drawer drawer-mobile">
       <input id="main-drawer" type="checkbox" class="drawer-toggle" />
-      <div class="drawer-content">
+      <div class="drawer-content pb-8">
         <Header />
         <Outlet />
       </div>
