@@ -20,6 +20,13 @@ const MainApp: Component = () => {
     return result.unwrap()
   })
 
+  const [notes] = createResource(() => [params.username, params.bookSlug], async ([username, bookSlug]) => {
+    if (username === undefined || bookSlug === undefined) return []
+    // TODO handle errors
+    let result = await api().getNotesBySlug(username, bookSlug)
+    return result.unwrap()
+  })
+
   return (
     <div class="drawer drawer-mobile">
       <input id="main-drawer" type="checkbox" class="drawer-toggle" />
@@ -29,7 +36,7 @@ const MainApp: Component = () => {
       </div>
       <div class="drawer-side">
         <label for="main-drawer" class="drawer-overlay"></label>
-        <ul class="menu gap-4 p-4 w-80 bg-base-300 text-base-content max-h-screen">
+        <ul class="menu menu-compact gap-4 p-4 w-80 bg-base-300 text-base-content max-h-screen">
           <li><button class="btn btn-outline">User Search</button></li>
           <li>NOTEBOOKS</li>
           <ul class="overflow-auto bg-base-100 flex-1 w-full">
@@ -39,6 +46,18 @@ const MainApp: Component = () => {
                   href={`/${params.username}/${book.slug}`}
                   class="whitespace-nowrap"
                 >{book.name}
+                </A></li>}
+            </For>
+          </ul>
+          <li>NOTES</li>
+          <ul class="overflow-auto bg-base-100 flex-1 w-full">
+            <For each={notes()}>
+              {(note) => <li>
+                <A
+                  href={`/${params.username}/${params.bookSlug}/${note.slug}`}
+                  class="whitespace-nowrap"
+                  activeClass="bordered"
+                >{note.name}
                 </A></li>}
             </For>
           </ul>
