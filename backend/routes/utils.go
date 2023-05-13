@@ -50,7 +50,7 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 	}
 	protectedRoutes := e.Group("/api/", jwtMiddleware, authenticatedUserMiddleware)
 	{
-		protectedRoutes.GET("users/me", getUserMe)
+		protectedRoutes.GET("users/me/", getUserMe)
 		slugUserRoutes := protectedRoutes.Group("slug/@:username/")
 		{
 			slugUserRoutes.GET("books/", getBooksByUsername)
