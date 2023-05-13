@@ -14,3 +14,18 @@ export type User = {
     id: string
     username: string
 }
+
+export type Book = {
+    id: string
+    name: string
+    slug: string
+    ownerId: string
+    isPublic: boolean
+}
+
+export type Note = {
+    id: string
+    name: string
+    slug: string
+    bookId: string
+}

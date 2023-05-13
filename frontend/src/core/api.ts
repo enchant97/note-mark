@@ -1,5 +1,5 @@
 import { Result } from "./core"
-import { OAuth2AccessToken, OAuth2AccessTokenRequest, User } from "./types"
+import { Book, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, User } from "./types"
 
 export type ApiDetails = {
     authToken?: string
@@ -58,6 +58,26 @@ class Api {
             }
         })
         if (!resp.ok) return new Result<User, ApiError>(new ApiError(resp.status))
+        return new Result(await resp.json())
+    }
+    async getBooksBySlug(username: string): Promise<Result<Book[], ApiError>> {
+        let reqURL = `${this.apiServer}/slug/@${username}/books/`
+        let resp = await fetch(reqURL, {
+            headers: {
+                "Authorization": `Bearer ${this.authToken}`
+            }
+        })
+        if (!resp.ok) return new Result<Book[], ApiError>(new ApiError(resp.status))
+        return new Result(await resp.json())
+    }
+    async getNotesBySlug(username: string, bookSlug: string): Promise<Result<Note[], ApiError>> {
+        let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/notes/`
+        let resp = await fetch(reqURL, {
+            headers: {
+                "Authorization": `Bearer ${this.authToken}`
+            }
+        })
+        if (!resp.ok) return new Result<Note[], ApiError>(new ApiError(resp.status))
         return new Result(await resp.json())
     }
 }
