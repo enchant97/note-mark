@@ -5,6 +5,7 @@ import { render } from 'solid-js/web';
 import App from './App';
 import { ApiProvider } from './contexts/ApiProvider';
 import { Router } from '@solidjs/router';
+import { CurrentUserProvider } from './contexts/CurrentUserProvider';
 
 const root = document.getElementById('root');
 
@@ -17,7 +18,9 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 render(() => <>
   <Router>
     <ApiProvider>
-      <App />
+      <CurrentUserProvider>
+        <App />
+      </CurrentUserProvider>
     </ApiProvider>
   </Router>
 </>, root!);

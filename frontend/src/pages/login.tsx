@@ -3,7 +3,7 @@ import { createStore } from "solid-js/store";
 import { useApi } from '../contexts/ApiProvider';
 
 const Login: Component = () => {
-  const { api, setApiDetails } = useApi()
+  const { api, apiDetails, setApiDetails } = useApi()
   const [formDetails, setFormDetails] = createStore({ username: "", password: "" })
 
   const onSubmit = async (ev: Event) => {
@@ -11,7 +11,7 @@ const Login: Component = () => {
     // TODO handle errors
     let result = (await api().postTokenPasswordFlow(formDetails.username, formDetails.password)).intoOption()
     if (result !== undefined) {
-      setApiDetails({ authToken: result.access_token })
+      setApiDetails({ authToken: result.access_token, apiServer: apiDetails().apiServer })
     } else {
       setFormDetails({ password: "" })
     }

@@ -9,3 +9,8 @@ export type OAuth2AccessToken = {
     token_type: string
     expires_in: number
 }
+
+export type User = {
+    id: string
+    username: string
+}

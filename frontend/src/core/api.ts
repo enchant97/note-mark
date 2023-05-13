@@ -1,5 +1,5 @@
 import { Result } from "./core"
-import { OAuth2AccessToken, OAuth2AccessTokenRequest } from "./types"
+import { OAuth2AccessToken, OAuth2AccessTokenRequest, User } from "./types"
 
 export type ApiDetails = {
     authToken?: string
@@ -32,6 +32,9 @@ class Api {
         this.apiServer = apiDetails.apiServer
         return this
     }
+    isAuthenticated(): boolean {
+        return this.authToken !== undefined
+    }
     async postToken(details: OAuth2AccessTokenRequest): Promise<Result<OAuth2AccessToken, ApiError>> {
         let reqURL = `${this.apiServer}/auth/token`
         let resp = await fetch(reqURL, {
@@ -46,6 +49,16 @@ class Api {
     }
     async postTokenPasswordFlow(username: string, password: string): Promise<Result<OAuth2AccessToken, ApiError>> {
         return await this.postToken({ grant_type: "password", username, password })
+    }
+    async getUsersMe(): Promise<Result<User, ApiError>> {
+        let reqURL = `${this.apiServer}/users/me/`
+        let resp = await fetch(reqURL, {
+            headers: {
+                "Authorization": `Bearer ${this.authToken}`
+            }
+        })
+        if (!resp.ok) return new Result<User, ApiError>(new ApiError(resp.status))
+        return new Result(await resp.json())
     }
 }
 

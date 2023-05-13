@@ -1,5 +1,4 @@
 import { createContext, createEffect, createSignal, useContext } from "solid-js"
-import { createStore } from "solid-js/store";
 import Api, { ApiDetails } from "../core/api"
 import { Fatal } from "../core/core"
 
@@ -25,17 +24,13 @@ const clearApiDetails = () => {
 }
 
 const makeApiContext = () => {
-    const [details, setDetails] = createStore<ApiDetails>(readApiDetails())
-    const [api, setApi] = createSignal<Api>(new Api(readApiDetails()));
-    // XXX bad practice to set a signal inside of an effect, but it works...
+    const [details, setDetails] = createSignal<ApiDetails>(readApiDetails())
     createEffect(() => {
-        let newDetails = details
-        setApi(api => api.setApi(newDetails))
-        writeApiDetails(newDetails)
+        writeApiDetails(details())
     })
     return {
-        api,
-        apiDetails: () => details,
+        api: () => new Api(details()),
+        apiDetails: details,
         setApiDetails: setDetails,
         clearDetails: () => {
             clearApiDetails()

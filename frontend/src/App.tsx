@@ -6,6 +6,7 @@ import ProtectedRoute from './components/protected_route';
 
 const Index = lazy(() => import("./pages/index"));
 const Login = lazy(() => import("./pages/login"));
+const Logout = lazy(() => import("./pages/logout"));
 
 const App: Component = () => {
   const { apiDetails } = useApi()
@@ -26,7 +27,7 @@ const App: Component = () => {
         <Routes>
           <Route path="/" component={Index} />
           <ProtectedRoute path="/login" redirectPath="/" condition={hasNoAuth} component={Login} />
-          <ProtectedRoute path="/logout" redirectPath="/" condition={hasAuth} element={<></>} />
+          <ProtectedRoute path="/logout" redirectPath="/" condition={hasAuth} component={Logout} />
         </Routes>
       </div>
       <div class="drawer-side">
