@@ -56,7 +56,6 @@ const MainApp: Component = () => {
                 <A
                   href={`/${params.username}/${params.bookSlug}/${note.slug}`}
                   class="whitespace-nowrap"
-                  activeClass="bordered"
                 >{note.name}
                 </A></li>}
             </For>

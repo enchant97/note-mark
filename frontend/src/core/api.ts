@@ -80,6 +80,36 @@ class Api {
         if (!resp.ok) return new Result<Note[], ApiError>(new ApiError(resp.status))
         return new Result(await resp.json())
     }
+    async getNoteBySlug(username: string, bookSlug: string, noteSlug: string): Promise<Result<Note, ApiError>> {
+        let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/notes/${noteSlug}/`
+        let resp = await fetch(reqURL, {
+            headers: {
+                "Authorization": `Bearer ${this.authToken}`
+            }
+        })
+        if (!resp.ok) return new Result<Note, ApiError>(new ApiError(resp.status))
+        return new Result(await resp.json())
+    }
+    async getNoteContentById(noteId: string): Promise<Result<string, ApiError>> {
+        let reqURL = `${this.apiServer}/notes/${noteId}/content/`
+        let resp = await fetch(reqURL, {
+            headers: {
+                "Authorization": `Bearer ${this.authToken}`
+            }
+        })
+        if (!resp.ok) return new Result<string, ApiError>(new ApiError(resp.status))
+        return new Result<string, ApiError>(await resp.text())
+    }
+    async getNoteRenderedById(noteId: string): Promise<Result<string, ApiError>> {
+        let reqURL = `${this.apiServer}/notes/${noteId}/rendered/`
+        let resp = await fetch(reqURL, {
+            headers: {
+                "Authorization": `Bearer ${this.authToken}`
+            }
+        })
+        if (!resp.ok) return new Result<string, ApiError>(new ApiError(resp.status))
+        return new Result<string, ApiError>(await resp.text())
+    }
 }
 
 export default Api
