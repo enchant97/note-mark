@@ -1,7 +1,9 @@
 package routes
 
 import (
+	"bytes"
 	"errors"
+	"io"
 	"net/http"
 
 	"github.com/enchant97/note-mark/backend/core"
@@ -9,6 +11,7 @@ import (
 	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/yuin/goldmark"
 )
 
 func createNoteByBookID(ctx echo.Context) error {
@@ -169,6 +172,54 @@ func getNoteContent(ctx echo.Context) error {
 	}
 	defer stream.Close()
 	return ctx.Stream(200, "text/markdown", stream)
+}
+
+func getNoteRendered(ctx echo.Context) error {
+	authenticatedUser := getAuthenticatedUser(ctx)
+	noteID, err := uuid.Parse(ctx.Param("noteID"))
+	if err != nil {
+		return err
+	}
+
+	var count int64
+	if err := db.DB.
+		Model(&db.Note{}).
+		Preload("Book").
+		Joins("JOIN books ON books.id = notes.book_id").
+		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
+		Where("notes.id = ?", noteID).
+		Limit(1).
+		Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		return ctx.NoContent(http.StatusNotFound)
+	}
+
+	storage_backend := ctx.Get("Storage").(storage.StorageController)
+
+	stream, err := storage_backend.ReadNote(noteID)
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return ctx.Blob(200, "text/markdown", []byte("\n"))
+		}
+		return err
+	}
+	defer stream.Close()
+
+	source, err := io.ReadAll(stream)
+	if err != nil {
+		return err
+	}
+	var buf bytes.Buffer
+	if err := goldmark.Convert(source, &buf); err != nil {
+		return err
+	}
+	final, err := io.ReadAll(&buf)
+	if err != nil {
+		return err
+	}
+	return ctx.HTMLBlob(200, final)
 }
 
 func patchNoteByID(ctx echo.Context) error {
