@@ -1,3 +1,9 @@
+export type Breadcrumb = {
+    username?: string
+    bookSlug?: string
+    noteSlug?: string
+}
+
 export type OAuth2AccessTokenRequest = {
     grant_type: string
     username: string
