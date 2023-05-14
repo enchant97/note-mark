@@ -6,7 +6,7 @@ type NoteBreadcrumbProps = Breadcrumb
 
 const NoteBreadcrumb: Component<NoteBreadcrumbProps> = (props) => {
   return (
-    <div class="p-2 mb-4 text-sm breadcrumbs rounded-md shadow-md bg-base-200">
+    <div class="p-2 text-sm breadcrumbs rounded-md shadow-md bg-base-200">
       <ul>
         <li>
           <HiOutlineUser size={16} />

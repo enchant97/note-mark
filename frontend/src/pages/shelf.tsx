@@ -25,9 +25,18 @@ const Shelf: Component = () => {
   })
 
   return (
-    <div class="p-4">
+    <div class="flex flex-col gap-4 px-6">
       <NoteBreadcrumb {...breadcrumb()} />
-      <Show when={note()} fallback={<></>}>
+      <Show when={note()} fallback={
+        <div class="hero pt-6 bg-base-200 rounded-md">
+          <div class="hero-content text-center">
+            <div class="max-w-md">
+              <h1 class="text-5xl font-bold">No Note Selected</h1>
+              <p class="py-6">Either create a new note or select an existing one.</p>
+            </div>
+          </div>
+        </div>
+      }>
         <NoteView note={note()} />
       </Show>
     </div>
