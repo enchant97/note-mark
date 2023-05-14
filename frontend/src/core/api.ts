@@ -110,6 +110,18 @@ class Api {
         if (!resp.ok) return new Result<string, ApiError>(new ApiError(resp.status))
         return new Result<string, ApiError>(await resp.text())
     }
+    async updateNoteContent(noteId: string, content: string): Promise<Result<undefined, ApiError>> {
+        let reqURL = `${this.apiServer}/notes/${noteId}/content/`
+        let resp = await fetch(reqURL, {
+            method: "PUT",
+            body: content,
+            headers: {
+                "Authorization": `Bearer ${this.authToken}`
+            }
+        })
+        if (!resp.ok) return new Result<undefined, ApiError>(new ApiError(resp.status))
+        return new Result<undefined, ApiError>(undefined)
+    }
 }
 
 export default Api

@@ -18,8 +18,10 @@
     "vite-plugin-solid": "^2.5.0"
   },
   "dependencies": {
+    "@codemirror/state": "^6.2.0",
     "@solidjs/router": "^0.8.2",
     "@tailwindcss/typography": "^0.5.9",
+    "codemirror": "^6.0.1",
     "daisyui": "^2.51.6",
     "solid-icons": "^1.0.4",
     "solid-js": "^1.6.10"

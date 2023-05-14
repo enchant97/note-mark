@@ -1,13 +1,15 @@
 import { Component, Show, createResource } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
-import { useParams } from '@solidjs/router';
+import { useParams, useSearchParams } from '@solidjs/router';
 import NoteView from '../components/note/view';
 import { Breadcrumb } from '../core/types';
 import NoteBreadcrumb from '../components/note/breadcrumb';
+import NoteEdit from '../components/note/edit';
 
 const Shelf: Component = () => {
   const params = useParams()
   const { api } = useApi()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const breadcrumb: () => Breadcrumb = () => {
     return {
@@ -15,6 +17,10 @@ const Shelf: Component = () => {
       bookSlug: params.bookSlug,
       noteSlug: params.noteSlug,
     }
+  }
+
+  const editMode = () => {
+    return searchParams.edit !== undefined && searchParams.edit !== "false"
   }
 
   const [note] = createResource(breadcrumb, async ({ username, bookSlug, noteSlug }) => {
@@ -25,8 +31,19 @@ const Shelf: Component = () => {
   })
 
   return (
-    <div class="flex flex-col gap-4 px-6">
-      <NoteBreadcrumb {...breadcrumb()} />
+    <div class="flex flex-col gap-4 px-6 ">
+      <div class="flex gap-4">
+        <NoteBreadcrumb class="flex-1" {...breadcrumb()} />
+        <Show when={note()}>
+          <label class="label cursor-pointer gap-3 p-2 rounded-md shadow-md bg-base-200">
+            <span class="label-text">Edit</span>
+            <input type="checkbox" class="toggle" checked={editMode()} onchange={(_) => {
+              if (editMode()) { setSearchParams({ edit: undefined }) }
+              else { setSearchParams({ edit: "true" }) }
+            }} />
+          </label>
+        </Show>
+      </div>
       <Show when={note()} fallback={
         <div class="hero pt-6 bg-base-200 rounded-md">
           <div class="hero-content text-center">
@@ -37,7 +54,8 @@ const Shelf: Component = () => {
           </div>
         </div>
       }>
-        <NoteView note={note()} />
+        {editMode() && <NoteEdit note={note()} />}
+        {!editMode() && <NoteView note={note()} />}
       </Show>
     </div>
   );
