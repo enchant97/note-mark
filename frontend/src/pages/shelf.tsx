@@ -1,10 +1,11 @@
-import { Component, Show, createResource } from 'solid-js';
+import { Component, Show, createResource, lazy } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { useParams, useSearchParams } from '@solidjs/router';
-import NoteView from '../components/note/view';
 import { Breadcrumb } from '../core/types';
 import NoteBreadcrumb from '../components/note/breadcrumb';
-import NoteEdit from '../components/note/edit';
+
+const NoteEdit = lazy(() => import("../components/note/edit"))
+const NoteView = lazy(() => import("../components/note/view"))
 
 const Shelf: Component = () => {
   const params = useParams()
@@ -54,8 +55,7 @@ const Shelf: Component = () => {
           </div>
         </div>
       }>
-        {editMode() && <NoteEdit note={note()} />}
-        {!editMode() && <NoteView note={note()} />}
+        {editMode() && <NoteEdit note={note()} /> || <NoteView note={note()} />}
       </Show>
     </div>
   );

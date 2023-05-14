@@ -40,7 +40,7 @@ const NoteEdit: Component<NoteEditProps> = (props) => {
         <li>{unsaved() && "UNSAVED!" || "SAVED"}</li>
       </ul>
       <Show when={initialContent() !== undefined}>
-        <Editor content={initialContent()} oninput={on_doc_input} />
+        <Editor content={initialContent() || ""} oninput={on_doc_input} />
       </Show>
     </>
   )
