@@ -36,9 +36,9 @@ const NoteEdit: Component<NoteEditProps> = (props) => {
 
   return (
     <>
-      <div>
-        {unsaved() && "UNSAVED!" || "SAVED"}
-      </div>
+      <ul class="menu menu-horizontal bg-base-200 rounded-md shadow-md p-2 w-full">
+        <li>{unsaved() && "UNSAVED!" || "SAVED"}</li>
+      </ul>
       <Show when={initialContent() !== undefined}>
         <Editor content={initialContent()} oninput={on_doc_input} />
       </Show>
