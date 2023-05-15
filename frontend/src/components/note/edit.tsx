@@ -1,8 +1,8 @@
-import { Component, Show, createResource, createSignal } from 'solid-js';
+import { Component, Show, createResource } from 'solid-js';
 import { useApi } from '../../contexts/ApiProvider';
 import { Note } from '../../core/types';
-import { EditorState } from "@codemirror/state";
-import Editor from '../editor';
+import Editor, { EditorState } from '../editor';
+import { createStore } from 'solid-js/store';
 
 type NoteEditProps = {
   note: Note
@@ -10,7 +10,11 @@ type NoteEditProps = {
 
 const NoteEdit: Component<NoteEditProps> = (props) => {
   const { api } = useApi()
-  const [unsaved, setUnsaved] = createSignal(false)
+
+  const [state, setState] = createStore<EditorState>({
+    saving: false,
+    unsaved: false,
+  })
 
   const [initialContent] = createResource(() => props.note, async (note) => {
     let result = await api().getNoteContentById(note.id)
@@ -18,31 +22,25 @@ const NoteEdit: Component<NoteEditProps> = (props) => {
     return result.unwrap()
   })
 
-  let save_timeout: number;
-
-  const save_doc = async (state: EditorState) => {
-    let content = state.doc.toString()
+  const save = async (content: string) => {
+    setState({ saving: true })
     let result = await api().updateNoteContent(props.note.id, content)
+    setState({ saving: false })
     // TODO handle this error
     result.unwrap()
-    setUnsaved(false)
-  }
-
-  let on_doc_input = (state: EditorState) => {
-    setUnsaved(true)
-    window.clearTimeout(save_timeout)
-    save_timeout = window.setTimeout(save_doc, 8000, state)
+    setState({ unsaved: false })
   }
 
   return (
-    <>
-      <ul class="menu menu-horizontal bg-base-200 rounded-md shadow-md p-2 w-full">
-        <li>{unsaved() && "UNSAVED!" || "SAVED"}</li>
-      </ul>
-      <Show when={initialContent() !== undefined}>
-        <Editor content={initialContent() || ""} oninput={on_doc_input} />
-      </Show>
-    </>
+    <Show when={initialContent() !== undefined}>
+      <Editor
+        content={initialContent() || ""}
+        autoSaveTimeout={6000}
+        onSave={save}
+        state={state}
+        setState={setState}
+      />
+    </Show>
   )
 }
 
