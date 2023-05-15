@@ -1,9 +1,11 @@
 import { A } from '@solidjs/router';
 import { Component } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
+import { useCurrentUser } from '../contexts/CurrentUserProvider';
 
 const Index: Component = () => {
   const { apiDetails } = useApi()
+  const user = useCurrentUser()
 
   return (
     <div class="hero min-h-screen bg-base-200">
@@ -11,7 +13,11 @@ const Index: Component = () => {
         <div class="max-w-md">
           <h1 class="text-5xl font-bold">Note Mark</h1>
           <p class="py-6">Fancy tag line here.</p>
-          {!apiDetails().authToken && <A href="/login" class="btn btn-primary">Login</A>}
+          <div class="btn-group">
+            {!apiDetails().authToken && <A href="/login" class="btn btn-outline">Login</A>}
+            {user() && <A class="btn btn-outline" href={`/${user()?.username}`}>My Notes</A>}
+            <button class="btn btn-outline" type="button">Find User</button>
+          </div>
         </div>
       </div>
     </div>

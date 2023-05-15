@@ -1,6 +1,7 @@
 import { Component } from 'solid-js';
 import { createStore } from "solid-js/store";
 import { useApi } from '../contexts/ApiProvider';
+import { A } from '@solidjs/router';
 
 const Login: Component = () => {
   const { api, apiDetails, setApiDetails } = useApi()
@@ -55,8 +56,9 @@ const Login: Component = () => {
                   required
                 />
               </div>
-              <div class="form-control mt-5">
+              <div class="btn-group btn-group-vertical w-full mt-5">
                 <button class="btn btn-primary" type="submit">Login</button>
+                <A class="btn btn-outline" href="/">Back Home</A>
               </div>
             </form>
           </div>
