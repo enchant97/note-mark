@@ -1,4 +1,4 @@
-import { Component } from 'solid-js';
+import { Component, createSignal } from 'solid-js';
 import { createStore } from "solid-js/store";
 import { useApi } from '../contexts/ApiProvider';
 import { A } from '@solidjs/router';
@@ -6,11 +6,14 @@ import { A } from '@solidjs/router';
 const Login: Component = () => {
   const { api, apiDetails, setApiDetails } = useApi()
   const [formDetails, setFormDetails] = createStore({ username: "", password: "" })
+  const [loading, setLoading] = createSignal(false)
 
   const onSubmit = async (ev: Event) => {
     ev.preventDefault()
+    setLoading(true)
     // TODO handle errors
     let result = (await api().postTokenPasswordFlow(formDetails.username, formDetails.password)).intoOption()
+    setLoading(false)
     if (result !== undefined) {
       setApiDetails({ authToken: result.access_token, apiServer: apiDetails().apiServer })
     } else {
@@ -57,7 +60,7 @@ const Login: Component = () => {
                 />
               </div>
               <div class="btn-group btn-group-vertical w-full mt-5">
-                <button class="btn btn-primary" type="submit">Login</button>
+                <button class="btn btn-primary" classList={{loading: loading()}} type="submit">Login</button>
                 <A class="btn btn-outline" href="/">Back Home</A>
               </div>
             </form>
