@@ -16,7 +16,7 @@ const NoteView: Component<NoteViewProps> = (props) => {
   })
 
   return (
-    <div class="prose" innerHTML={noteContent()}></div>
+    <div class="prose max-w-none" innerHTML={noteContent()}></div>
   )
 }
 
