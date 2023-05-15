@@ -1,5 +1,5 @@
 import { Routes, Route, Outlet, useParams, A } from '@solidjs/router';
-import { Component, For, createResource, lazy } from 'solid-js';
+import { Component, For, createEffect, createResource, lazy } from 'solid-js';
 import Header from './components/header';
 import { useApi } from './contexts/ApiProvider';
 import ProtectedRoute from './components/protected_route';
@@ -13,15 +13,16 @@ const MainApp: Component = () => {
   const params = useParams()
   const { api } = useApi()
 
-  const [books] = createResource(params.username, async (username) => {
-    if (username === undefined) return []
+  // NOTE: `|| ""` required as resource source will only compare non-nullish/non-false
+  const [books] = createResource(() => params.username || "", async (username) => {
+    if (!username) return []
     // TODO handle errors
     let result = await api().getBooksBySlug(username)
     return result.unwrap()
   })
 
   const [notes] = createResource(() => [params.username, params.bookSlug], async ([username, bookSlug]) => {
-    if (username === undefined || bookSlug === undefined) return []
+    if (!username || !bookSlug) return []
     // TODO handle errors
     let result = await api().getNotesBySlug(username, bookSlug)
     return result.unwrap()
