@@ -70,6 +70,16 @@ class Api {
         if (!resp.ok) return new Result<Book[], ApiError>(new ApiError(resp.status))
         return new Result(await resp.json())
     }
+    async getBookBySlug(username: string, bookSlug: string): Promise<Result<Book, ApiError>> {
+        let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/`
+        let resp = await fetch(reqURL, {
+            headers: {
+                "Authorization": `Bearer ${this.authToken}`
+            }
+        })
+        if (!resp.ok) return new Result<Book, ApiError>(new ApiError(resp.status))
+        return new Result(await resp.json())
+    }
     async getNotesBySlug(username: string, bookSlug: string): Promise<Result<Note[], ApiError>> {
         let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/notes/`
         let resp = await fetch(reqURL, {

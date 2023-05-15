@@ -12,7 +12,11 @@ const Shelf: Component = () => {
   const { api } = useApi()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const breadcrumb: () => Breadcrumb = () => {
+  const editMode = () => {
+    return searchParams.edit !== undefined && searchParams.edit !== "false"
+  }
+
+  const slugParts: () => Breadcrumb = () => {
     return {
       username: params.username,
       bookSlug: params.bookSlug,
@@ -20,16 +24,27 @@ const Shelf: Component = () => {
     }
   }
 
-  const editMode = () => {
-    return searchParams.edit !== undefined && searchParams.edit !== "false"
-  }
+  const [book] = createResource(slugParts, async ({ username, bookSlug }) => {
+    if (!username || !bookSlug) return undefined
+    let result = await api().getBookBySlug(username, bookSlug)
+    // TODO handle errors
+    return result.unwrap()
+  })
 
-  const [note] = createResource(breadcrumb, async ({ username, bookSlug, noteSlug }) => {
+  const [note] = createResource(slugParts, async ({ username, bookSlug, noteSlug }) => {
     if (!username || !bookSlug || !noteSlug) return undefined
     let result = await api().getNoteBySlug(username, bookSlug, noteSlug)
     // TODO handle errors
     return result.unwrap()
   })
+
+  const breadcrumb: () => Breadcrumb = () => {
+    return {
+      username: params.username,
+      bookSlug: book()?.name,
+      noteSlug: note()?.name,
+    }
+  }
 
   return (
     <div class="flex flex-col gap-4">
