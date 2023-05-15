@@ -1,4 +1,4 @@
-import { Component, Show, Suspense, createResource, lazy } from 'solid-js';
+import { Component, Show, createResource, lazy } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { useParams, useSearchParams } from '@solidjs/router';
 import { Breadcrumb } from '../core/types';

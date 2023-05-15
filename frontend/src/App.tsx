@@ -1,5 +1,5 @@
 import { Routes, Route, Outlet, useParams, A } from '@solidjs/router';
-import { Component, For, Show, createEffect, createResource, lazy } from 'solid-js';
+import { Component, For, Show, createResource, lazy } from 'solid-js';
 import Header from './components/header';
 import { useApi } from './contexts/ApiProvider';
 import ProtectedRoute from './components/protected_route';
