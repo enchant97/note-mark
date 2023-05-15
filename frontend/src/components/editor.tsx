@@ -92,11 +92,11 @@ const Editor: Component<EditorProps> = (props) => {
   return (
     <>
       <ul class="menu menu-horizontal gap-2 bg-base-200 rounded-md shadow-md p-2 w-full">
-        <li><button
+        <li class="tooltip" data-tip="Save"><button
           class="btn btn-sm btn-square btn-outline"
           classList={{ "loading": props.state.saving, "btn-error": props.state.unsaved }}
           type="button"
-          title="Save Note"
+          aria-label="Save Note"
           onclick={() => triggerSave()}
         >
           {!props.state.saving && <FiSave size={20} />}

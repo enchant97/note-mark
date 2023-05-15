@@ -17,9 +17,9 @@ const Header: Component = () => {
       </div>
       <span class="flex-1 px-2 mx-2 text-xl">Note Mark</span>
       <div class="flex gap-4">
-        <A activeClass="btn-disabled" class="btn btn-ghost btn-circle shadow-lg avatar" end={true} href="/"><HiOutlineHome size={20} /></A>
+        <A activeClass="btn-disabled" class="btn btn-ghost btn-circle shadow-lg" end={true} href="/"><HiOutlineHome size={20} /></A>
         <div class="dropdown dropdown-end">
-          <label tabindex="0" class="btn btn-ghost btn-circle shadow-lg avatar">
+          <label tabindex="0" class="btn btn-ghost btn-circle shadow-lg">
             <HiOutlineUser size={20} />
           </label>
           <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-300 rounded-box w-52">
