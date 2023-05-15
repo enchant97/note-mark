@@ -1,4 +1,4 @@
-import { Component, Show, createResource, lazy } from 'solid-js';
+import { Component, Show, Suspense, createResource, lazy } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { useParams, useSearchParams } from '@solidjs/router';
 import { Breadcrumb } from '../core/types';
@@ -32,7 +32,7 @@ const Shelf: Component = () => {
   })
 
   return (
-    <div class="flex flex-col gap-4 px-6 ">
+    <div class="flex flex-col gap-4">
       <div class="flex gap-4">
         <NoteBreadcrumb class="flex-1" {...breadcrumb()} />
         <Show when={note()}>
@@ -45,17 +45,19 @@ const Shelf: Component = () => {
           </label>
         </Show>
       </div>
-      <Show when={note()} fallback={
-        <div class="hero pt-6 bg-base-200 rounded-md">
-          <div class="hero-content text-center">
-            <div class="max-w-md">
-              <h1 class="text-5xl font-bold">No Note Selected</h1>
-              <p class="py-6">Either create a new note or select an existing one.</p>
+      <Show when={!note.loading} fallback={<progress class="progress w-full"></progress>}>
+        <Show when={note()} fallback={
+          <div class="hero pt-6 bg-base-200 rounded-md">
+            <div class="hero-content text-center">
+              <div class="max-w-md">
+                <h1 class="text-5xl font-bold">No Note Selected</h1>
+                <p class="py-6">Either create a new note or select an existing one.</p>
+              </div>
             </div>
           </div>
-        </div>
-      }>
-        {editMode() && <NoteEdit note={note()} /> || <NoteView note={note()} />}
+        }>
+          {editMode() && <NoteEdit note={note()} /> || <NoteView note={note()} />}
+        </Show>
       </Show>
     </div>
   );

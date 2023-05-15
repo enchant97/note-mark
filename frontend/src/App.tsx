@@ -1,5 +1,5 @@
 import { Routes, Route, Outlet, useParams, A } from '@solidjs/router';
-import { Component, For, createEffect, createResource, lazy } from 'solid-js';
+import { Component, For, Show, createEffect, createResource, lazy } from 'solid-js';
 import Header from './components/header';
 import { useApi } from './contexts/ApiProvider';
 import ProtectedRoute from './components/protected_route';
@@ -33,32 +33,40 @@ const MainApp: Component = () => {
       <input id="main-drawer" type="checkbox" class="drawer-toggle" />
       <div class="drawer-content pb-8">
         <Header />
-        <Outlet />
+        <div class="px-6">
+          <Show when={!books.loading && !notes.loading} fallback={<progress class="progress w-full"></progress>}>
+            <Outlet />
+          </Show>
+        </div>
       </div>
       <div class="drawer-side">
         <label for="main-drawer" class="drawer-overlay"></label>
         <ul class="menu menu-compact gap-4 p-4 w-80 bg-base-300 text-base-content max-h-screen">
           <li class="menu-title"><span>NOTEBOOKS</span></li>
           <ul class="overflow-auto bg-base-100 flex-1 w-full rounded-lg">
-            <For each={books()}>
-              {(book) => <li>
-                <A
-                  href={`/${params.username}/${book.slug}`}
-                  class="whitespace-nowrap"
-                >{book.name}
-                </A></li>}
-            </For>
+            <Show when={!books.loading}>
+              <For each={books()}>
+                {(book) => <li>
+                  <A
+                    href={`/${params.username}/${book.slug}`}
+                    class="whitespace-nowrap"
+                  >{book.name}
+                  </A></li>}
+              </For>
+            </Show>
           </ul>
           <li class="menu-title"><span>NOTES</span></li>
           <ul class="overflow-auto bg-base-100 flex-1 w-full rounded-lg">
-            <For each={notes()}>
-              {(note) => <li>
-                <A
-                  href={`/${params.username}/${params.bookSlug}/${note.slug}`}
-                  class="whitespace-nowrap"
-                >{note.name}
-                </A></li>}
-            </For>
+            <Show when={!notes.loading}>
+              <For each={notes()}>
+                {(note) => <li>
+                  <A
+                    href={`/${params.username}/${params.bookSlug}/${note.slug}`}
+                    class="whitespace-nowrap"
+                  >{note.name}
+                  </A></li>}
+              </For>
+            </Show>
           </ul>
           <li>
             <a

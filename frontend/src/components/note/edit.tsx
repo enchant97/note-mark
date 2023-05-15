@@ -32,7 +32,7 @@ const NoteEdit: Component<NoteEditProps> = (props) => {
   }
 
   return (
-    <Show when={initialContent() !== undefined}>
+    <Show when={!initialContent.loading} fallback={<progress class="progress w-full"></progress>}>
       <Editor
         content={initialContent() || ""}
         autoSaveTimeout={6000}

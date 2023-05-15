@@ -8,7 +8,7 @@ const Index: Component = () => {
   const user = useCurrentUser()
 
   return (
-    <div class="hero min-h-screen bg-base-200">
+    <div class="hero bg-base-200 pt-6 pb-6">
       <div class="hero-content text-center">
         <div class="max-w-md">
           <h1 class="text-5xl font-bold">Note Mark</h1>
