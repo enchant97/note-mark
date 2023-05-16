@@ -54,7 +54,7 @@ const NewBookModal: Component<NewBookModalProps> = (props) => {
             class="input input-bordered input-sm w-full"
             type="text"
             placeholder="e.g. my-amazing-book"
-            pattern="(?:[a-z0-9]|\\-)"
+            pattern="(?:[a-z0-9]|-)+"
             required
           />
         </label>

@@ -55,7 +55,7 @@ const NewNoteModal: Component<NewNoteModalProps> = (props) => {
             class="input input-bordered input-sm w-full"
             type="text"
             placeholder="e.g. my-amazing-note"
-            pattern="(?:[a-z0-9]|\\-)"
+            pattern="(?:[a-z0-9]|-)+"
             required
           />
         </label>
