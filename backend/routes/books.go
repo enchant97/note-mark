@@ -59,8 +59,7 @@ func getBookByID(ctx echo.Context) error {
 
 	var book db.Book
 	if err := db.DB.
-		Where("owner_id = ?", authenticatedUser.UserID).
-		Or("is_public = ?", true).
+		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
 		First(&book, "id = ?", bookID).
 		Error; err != nil {
 		return err
@@ -84,8 +83,7 @@ func getBookBySlug(ctx echo.Context) error {
 
 	var book db.Book
 	if err := db.DB.
-		Where("owner_id = ?", authenticatedUser.UserID).
-		Or("is_public = ?", true).
+		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
 		First(&book, "slug = ?", bookSlug, "owner_id = ?", bookOwner.ID).
 		Error; err != nil {
 		return err
