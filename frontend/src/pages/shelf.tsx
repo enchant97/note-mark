@@ -83,6 +83,7 @@ const Shelf: Component = () => {
             class="btn btn-ghost"
             type="button"
             classList={{ "btn-disabled": !allowBookCreate() }}
+            title="Create New Notebook"
           >
             <FiFolderPlus size={20} />
           </button>
@@ -91,6 +92,7 @@ const Shelf: Component = () => {
             class="btn btn-ghost"
             type="button"
             classList={{ "btn-disabled": !allowNoteCreate() }}
+            title="Create New Note"
           >
             <FiFilePlus size={20} />
           </button>
@@ -102,7 +104,7 @@ const Shelf: Component = () => {
             <input type="checkbox" class="toggle" checked={editMode()} onchange={(_) => {
               if (editMode()) { setSearchParams({ edit: undefined }) }
               else { setSearchParams({ edit: "true" }) }
-            }} />
+            }} title="Toggle View/Edit Mode" />
           </label>
         </Show>
       </div>
