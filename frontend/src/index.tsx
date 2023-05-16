@@ -6,6 +6,7 @@ import App from './App';
 import { ApiProvider } from './contexts/ApiProvider';
 import { Router } from '@solidjs/router';
 import { CurrentUserProvider } from './contexts/CurrentUserProvider';
+import { Modal, ModalProvider } from './contexts/ModalProvider';
 
 const root = document.getElementById('root');
 
@@ -17,10 +18,13 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 
 render(() => <>
   <Router>
-    <ApiProvider>
-      <CurrentUserProvider>
-        <App />
-      </CurrentUserProvider>
-    </ApiProvider>
+    <ModalProvider>
+      <ApiProvider>
+        <CurrentUserProvider>
+          <Modal />
+          <App />
+        </CurrentUserProvider>
+      </ApiProvider>
+    </ModalProvider>
   </Router>
 </>, root!);
