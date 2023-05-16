@@ -62,10 +62,16 @@ const Shelf: Component = () => {
   }
 
   const onNewBookClick = () => {
-    setModal({ component: NewBookModal, props: { onClose: clearModal } })
+    setModal({
+      component: NewBookModal,
+      props: { onClose: clearModal, user: user() },
+    })
   }
   const onNewNoteClick = () => {
-    setModal({ component: NewNoteModal, props: { onClose: clearModal } })
+    setModal({
+      component: NewNoteModal,
+      props: { onClose: clearModal, user: user(), book: book() },
+    })
   }
 
   return (

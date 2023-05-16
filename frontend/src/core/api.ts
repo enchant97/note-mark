@@ -1,5 +1,5 @@
 import { Result } from "./core"
-import { Book, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, User } from "./types"
+import { Book, CreateBook, CreateNote, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, User } from "./types"
 
 export type ApiDetails = {
     authToken?: string
@@ -58,6 +58,32 @@ class Api {
             }
         })
         if (!resp.ok) return new Result<User, ApiError>(new ApiError(resp.status))
+        return new Result(await resp.json())
+    }
+    async createBook(book: CreateBook): Promise<Result<Book, ApiError>> {
+        let reqURL = `${this.apiServer}/books/`
+        let resp = await fetch(reqURL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${this.authToken}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(book),
+        })
+        if (!resp.ok) return new Result<Book, ApiError>(new ApiError(resp.status))
+        return new Result(await resp.json())
+    }
+    async createNote(bookId: string, note: CreateNote): Promise<Result<Note, ApiError>> {
+        let reqURL = `${this.apiServer}/books/${bookId}/notes/`
+        let resp = await fetch(reqURL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${this.authToken}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(note),
+        })
+        if (!resp.ok) return new Result<Note, ApiError>(new ApiError(resp.status))
         return new Result(await resp.json())
     }
     async getBooksBySlug(username: string): Promise<Result<Book[], ApiError>> {

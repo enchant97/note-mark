@@ -35,3 +35,14 @@ export type Note = {
     slug: string
     bookId: string
 }
+
+export type CreateBook = {
+    name: string
+    slug: string
+    isPublic: boolean
+}
+
+export type CreateNote = {
+    name: string
+    slug: string
+}
