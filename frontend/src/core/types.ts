@@ -46,3 +46,9 @@ export type CreateNote = {
     name: string
     slug: string
 }
+
+export type UpdateBook = {
+    name?: string
+    slug?: string
+    isPublic?: boolean
+}

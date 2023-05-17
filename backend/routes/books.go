@@ -116,3 +116,23 @@ func patchBookByID(ctx echo.Context) error {
 
 	return ctx.NoContent(http.StatusNoContent)
 }
+
+func deleteBookByID(ctx echo.Context) error {
+	authenticatedUser := getAuthenticatedUser(ctx)
+	bookID, err := uuid.Parse(ctx.Param("bookID"))
+	if err != nil {
+		return err
+	}
+
+	result := db.DB.
+		Where("id = ? AND owner_id = ?", bookID, authenticatedUser.UserID).
+		Delete(&db.Book{})
+	if err := result.Error; err != nil {
+		return err
+	}
+	if result.RowsAffected == 0 {
+		return ctx.NoContent(http.StatusNotFound)
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
+}

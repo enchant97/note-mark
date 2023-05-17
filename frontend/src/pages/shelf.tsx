@@ -1,13 +1,14 @@
 import { Component, Show, createResource, lazy } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { useParams, useSearchParams } from '@solidjs/router';
-import { Breadcrumb } from '../core/types';
+import { Book, Breadcrumb } from '../core/types';
 import NoteBreadcrumb from '../components/note/breadcrumb';
-import { FiFilePlus, FiFolderPlus } from 'solid-icons/fi';
+import { FiFilePlus, FiFolderPlus, FiSettings } from 'solid-icons/fi';
 import { useModal } from '../contexts/ModalProvider';
 import { useCurrentUser } from '../contexts/CurrentUserProvider';
 import NewBookModal from '../components/modals/new_book';
 import NewNoteModal from '../components/modals/new_note';
+import UpdateBookModal from '../components/modals/edit_book';
 
 const NoteEdit = lazy(() => import("../components/note/edit"))
 const NoteView = lazy(() => import("../components/note/view"))
@@ -39,7 +40,7 @@ const Shelf: Component = () => {
     return user() && (book() && user()?.id === book()?.ownerId)
   }
 
-  const [book] = createResource(slugParts, async ({ username, bookSlug }) => {
+  const [book, { mutate: setBook }] = createResource(slugParts, async ({ username, bookSlug }) => {
     if (!username || !bookSlug) return undefined
     let result = await api().getBookBySlug(username, bookSlug)
     // TODO handle errors
@@ -74,6 +75,18 @@ const Shelf: Component = () => {
     })
   }
 
+  const onUpdateBookClick = () => {
+    setModal({
+      component: UpdateBookModal,
+      props: {
+        onClose: (newBook?: Book) => {
+          if (newBook) setBook(newBook)
+          clearModal()
+        }, user: user(), book: book()
+      },
+    })
+  }
+
   return (
     <div class="flex flex-col gap-4">
       <div class="flex gap-4">
@@ -95,6 +108,15 @@ const Shelf: Component = () => {
             title="Create New Note"
           >
             <FiFilePlus size={20} />
+          </button>
+          <button
+            onclick={onUpdateBookClick}
+            class="btn btn-ghost"
+            type="button"
+            classList={{ "btn-disabled": !allowNoteCreate() }}
+            title="Notebook Settings"
+          >
+            <FiSettings size={20} />
           </button>
         </div>
         <NoteBreadcrumb class="flex-1" {...breadcrumb()} />
