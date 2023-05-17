@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/yuin/goldmark"
+	"gorm.io/gorm"
 )
 
 func createNoteByBookID(ctx echo.Context) error {
@@ -316,11 +317,16 @@ func deleteNoteById(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusNotFound)
 	}
 
-	if err := db.DB.Delete(&db.Note{}, "id = ?", noteID).Error; err != nil {
+	storage_backend := ctx.Get("Storage").(storage.StorageController)
+
+	if err := db.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Delete(&db.Note{}, "id = ?", noteID).Error; err != nil {
+			return err
+		}
+		return storage_backend.DeleteNote(noteID)
+	}); err != nil {
 		return err
 	}
-
-	// TODO also delete file
 
 	return ctx.NoContent(http.StatusNoContent)
 }
