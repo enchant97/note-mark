@@ -128,6 +128,7 @@ func deleteBookByID(ctx echo.Context) error {
 		Where("id = ? AND owner_id = ?", bookID, authenticatedUser.UserID).
 		Delete(&db.Book{})
 	if err := result.Error; err != nil {
+		// TODO handle when book can't be deleted as it was related notes
 		return err
 	}
 	if result.RowsAffected == 0 {

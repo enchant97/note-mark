@@ -30,6 +30,8 @@ func InitDB(conf config.DBConfig) error {
 	switch conf.Type {
 	case "sqlite":
 		DB, err = getSQLite(conf)
+		// https://www.sqlite.org/pragma.html#pragma_foreign_keys
+		DB.Exec("PRAGMA foreign_keys = '1';").Commit()
 	case "mysql":
 		DB, err = getMySQL(conf)
 	case "postgres":
