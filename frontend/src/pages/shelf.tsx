@@ -1,7 +1,7 @@
-import { Component, Show, createResource, lazy } from 'solid-js';
+import { Component, Match, Show, Switch, createResource, lazy } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { useParams, useSearchParams } from '@solidjs/router';
-import { Book, Breadcrumb } from '../core/types';
+import { Book, Breadcrumb, Note } from '../core/types';
 import NoteBreadcrumb from '../components/note/breadcrumb';
 import { FiFilePlus, FiFolderPlus, FiSettings } from 'solid-icons/fi';
 import { useModal } from '../contexts/ModalProvider';
@@ -9,6 +9,7 @@ import { useCurrentUser } from '../contexts/CurrentUserProvider';
 import NewBookModal from '../components/modals/new_book';
 import NewNoteModal from '../components/modals/new_note';
 import UpdateBookModal from '../components/modals/edit_book';
+import UpdateNoteModal from '../components/modals/edit_note';
 
 const NoteEdit = lazy(() => import("../components/note/edit"))
 const NoteView = lazy(() => import("../components/note/view"))
@@ -47,7 +48,7 @@ const Shelf: Component = () => {
     return result.unwrap()
   })
 
-  const [note] = createResource(slugParts, async ({ username, bookSlug, noteSlug }) => {
+  const [note, { mutate: setNote }] = createResource(slugParts, async ({ username, bookSlug, noteSlug }) => {
     if (!username || !bookSlug || !noteSlug) return undefined
     let result = await api().getNoteBySlug(username, bookSlug, noteSlug)
     // TODO handle errors
@@ -87,6 +88,18 @@ const Shelf: Component = () => {
     })
   }
 
+  const onUpdateNoteClick = () => {
+    setModal({
+      component: UpdateNoteModal,
+      props: {
+        onClose: (newNote?: Note) => {
+          if (newNote) setNote(newNote)
+          clearModal()
+        }, user: user(), book: book(), note: note(),
+      },
+    })
+  }
+
   return (
     <div class="flex flex-col gap-4">
       <div class="flex gap-4">
@@ -109,15 +122,30 @@ const Shelf: Component = () => {
           >
             <FiFilePlus size={20} />
           </button>
-          <button
-            onclick={onUpdateBookClick}
-            class="btn btn-ghost"
-            type="button"
-            classList={{ "btn-disabled": !allowNoteCreate() }}
-            title="Notebook Settings"
-          >
-            <FiSettings size={20} />
-          </button>
+          <Switch>
+            <Match when={book() && !note()}>
+              <button
+                onclick={onUpdateBookClick}
+                class="btn btn-ghost"
+                type="button"
+                classList={{ "btn-disabled": !allowNoteCreate() }}
+                title="Notebook Settings"
+              >
+                <FiSettings size={20} />
+              </button>
+            </Match>
+            <Match when={book() && note()}>
+              <button
+                onclick={onUpdateNoteClick}
+                class="btn btn-ghost"
+                type="button"
+                classList={{ "btn-disabled": !allowNoteCreate() }}
+                title="Note Settings"
+              >
+                <FiSettings size={20} />
+              </button>
+            </Match>
+          </Switch>
         </div>
         <NoteBreadcrumb class="flex-1" {...breadcrumb()} />
         <Show when={note()}>

@@ -52,3 +52,8 @@ export type UpdateBook = {
     slug?: string
     isPublic?: boolean
 }
+
+export type UpdateNote = {
+    name?: string
+    slug?: string
+}

@@ -1,5 +1,5 @@
 import { Result } from "./core"
-import { Book, CreateBook, CreateNote, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, UpdateBook, User } from "./types"
+import { Book, CreateBook, CreateNote, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, UpdateBook, UpdateNote, User } from "./types"
 
 export type ApiDetails = {
     authToken?: string
@@ -159,6 +159,19 @@ class Api {
         if (!resp.ok) return new Result<undefined, ApiError>(new ApiError(resp.status))
         return new Result<undefined, ApiError>(undefined)
     }
+    async updateNote(noteId: string, book: UpdateNote): Promise<Result<undefined, ApiError>> {
+        let reqURL = `${this.apiServer}/notes/${noteId}/`
+        let resp = await fetch(reqURL, {
+            method: "PATCH",
+            headers: {
+                "Authorization": `Bearer ${this.authToken}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(book),
+        })
+        if (!resp.ok) return new Result<undefined, ApiError>(new ApiError(resp.status))
+        return new Result<undefined, ApiError>(undefined)
+    }
     async updateNoteContent(noteId: string, content: string): Promise<Result<undefined, ApiError>> {
         let reqURL = `${this.apiServer}/notes/${noteId}/content/`
         let resp = await fetch(reqURL, {
@@ -173,6 +186,17 @@ class Api {
     }
     async deleteBook(bookId: string): Promise<Result<undefined, ApiError>> {
         let reqURL = `${this.apiServer}/books/${bookId}/`
+        let resp = await fetch(reqURL, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${this.authToken}`,
+            },
+        })
+        if (!resp.ok) return new Result<undefined, ApiError>(new ApiError(resp.status))
+        return new Result<undefined, ApiError>(undefined)
+    }
+    async deleteNote(noteId: string): Promise<Result<undefined, ApiError>> {
+        let reqURL = `${this.apiServer}/notes/${noteId}/`
         let resp = await fetch(reqURL, {
             method: "DELETE",
             headers: {

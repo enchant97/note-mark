@@ -293,3 +293,34 @@ func updateNoteContent(ctx echo.Context) error {
 
 	return ctx.NoContent(http.StatusNoContent)
 }
+
+func deleteNoteById(ctx echo.Context) error {
+	authenticatedUser := getAuthenticatedUser(ctx)
+	noteID, err := uuid.Parse(ctx.Param("noteID"))
+	if err != nil {
+		return err
+	}
+
+	// INFO this other query is required as joins don't work when deleting
+	var count int64
+	if err := db.DB.
+		Model(&db.Note{}).
+		Preload("Book").
+		Joins("JOIN books ON books.id = notes.book_id").
+		Where("owner_id = ? AND notes.id = ?", authenticatedUser.UserID, noteID).
+		Limit(1).
+		Count(&count).Error; err != nil {
+		return err
+	}
+	if count == 0 {
+		return ctx.NoContent(http.StatusNotFound)
+	}
+
+	if err := db.DB.Delete(&db.Note{}, "id = ?", noteID).Error; err != nil {
+		return err
+	}
+
+	// TODO also delete file
+
+	return ctx.NoContent(http.StatusNoContent)
+}
