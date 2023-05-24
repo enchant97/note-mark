@@ -10,6 +10,7 @@ import NewBookModal from '../components/modals/new_book';
 import NewNoteModal from '../components/modals/new_note';
 import UpdateBookModal from '../components/modals/edit_book';
 import UpdateNoteModal from '../components/modals/edit_note';
+import { useDrawer } from '../contexts/DrawerProvider';
 
 const NoteEdit = lazy(() => import("../components/note/edit"))
 const NoteView = lazy(() => import("../components/note/view"))
@@ -20,6 +21,7 @@ const Shelf: Component = () => {
   const user = useCurrentUser()
   const [searchParams, setSearchParams] = useSearchParams()
   const { setModal, clearModal } = useModal()
+  const drawer = useDrawer()
 
   const editMode = () => {
     return searchParams.edit !== undefined && searchParams.edit !== "false"
@@ -66,13 +68,23 @@ const Shelf: Component = () => {
   const onNewBookClick = () => {
     setModal({
       component: NewBookModal,
-      props: { onClose: clearModal, user: user() },
+      props: {
+        onClose: (newBook?: Book) => {
+          if (newBook) drawer.updateBook(newBook)
+          clearModal()
+        }, user: user()
+      },
     })
   }
   const onNewNoteClick = () => {
     setModal({
       component: NewNoteModal,
-      props: { onClose: clearModal, user: user(), book: book() },
+      props: {
+        onClose: (newNote?: Note) => {
+          if (newNote) drawer.updateNote(newNote)
+          clearModal()
+        }, user: user(), book: book()
+      },
     })
   }
 
@@ -81,9 +93,17 @@ const Shelf: Component = () => {
       component: UpdateBookModal,
       props: {
         onClose: (newBook?: Book) => {
-          if (newBook) setBook(newBook)
+          if (newBook) {
+            setBook(newBook)
+            drawer.updateBook(newBook)
+          }
           clearModal()
-        }, user: user(), book: book()
+        },
+        onDeleteClose: (bookId: string) => {
+          drawer.deleteBook(bookId)
+          clearModal()
+        },
+        user: user(), book: book()
       },
     })
   }
@@ -93,9 +113,17 @@ const Shelf: Component = () => {
       component: UpdateNoteModal,
       props: {
         onClose: (newNote?: Note) => {
-          if (newNote) setNote(newNote)
+          if (newNote) {
+            setNote(newNote)
+            drawer.updateNote(newNote)
+          }
           clearModal()
-        }, user: user(), book: book(), note: note(),
+        },
+        onDeleteClose: (noteId: string) => {
+          drawer.deleteNote(noteId)
+          clearModal()
+        },
+        user: user(), book: book(), note: note(),
       },
     })
   }

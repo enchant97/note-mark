@@ -8,6 +8,7 @@ import { useNavigate } from '@solidjs/router';
 
 type UpdateBookModalProps = {
   onClose: (book?: Book) => void
+  onDeleteClose: (bookId: string) => void
   user: User
   book: Book
 }
@@ -40,7 +41,7 @@ const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
     setLoading(false)
     result.unwrap()
     navigate(`/${props.user.username}`)
-    props.onClose()
+    props.onDeleteClose(props.book.id)
   }
 
   return (

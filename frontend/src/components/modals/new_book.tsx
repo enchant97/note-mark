@@ -1,13 +1,13 @@
 import { Component, createSignal } from 'solid-js';
 import BaseModal from './base';
-import { CreateBook, User } from '../../core/types';
+import { Book, CreateBook, User } from '../../core/types';
 import { createStore } from 'solid-js/store';
 import { toSlug } from '../../core/helpers';
 import { useApi } from '../../contexts/ApiProvider';
 import { useNavigate } from '@solidjs/router';
 
 type NewBookModalProps = {
-  onClose: () => void
+  onClose: (newBook?: Book) => void
   user: User
 }
 
@@ -22,9 +22,9 @@ const NewBookModal: Component<NewBookModalProps> = (props) => {
     setLoading(true)
     let result = await api().createBook(form)
     setLoading(false)
-    result.unwrap()
+    let book = result.unwrap()
     navigate(`/${props.user.username}/${form.slug}`)
-    props.onClose()
+    props.onClose(book)
   }
 
   return (

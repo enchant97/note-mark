@@ -1,13 +1,13 @@
 import { Component, createSignal } from 'solid-js';
 import BaseModal from './base';
-import { Book, CreateNote, User } from '../../core/types';
+import { Book, CreateNote, Note, User } from '../../core/types';
 import { createStore } from 'solid-js/store';
 import { toSlug } from '../../core/helpers';
 import { useApi } from '../../contexts/ApiProvider';
 import { useNavigate } from '@solidjs/router';
 
 type NewNoteModalProps = {
-  onClose: () => void
+  onClose: (newNote?: Note) => void
   user: User
   book: Book
 }
@@ -23,9 +23,9 @@ const NewNoteModal: Component<NewNoteModalProps> = (props) => {
     setLoading(true)
     let result = await api().createNote(props.book.id, form)
     setLoading(false)
-    result.unwrap()
+    let note = result.unwrap()
     navigate(`/${props.user.username}/${props.book.slug}/${form.slug}`)
-    props.onClose()
+    props.onClose(note)
   }
 
   return (

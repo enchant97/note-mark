@@ -8,6 +8,7 @@ import { useNavigate } from '@solidjs/router';
 
 type UpdateNoteModalProps = {
   onClose: (note?: Note) => void
+  onDeleteClose: (noteId: string) => void
   user: User
   book: Book
   note: Note
@@ -40,7 +41,7 @@ const UpdateNoteModal: Component<UpdateNoteModalProps> = (props) => {
     setLoading(false)
     result.unwrap()
     navigate(`/${props.user.username}/${props.book.slug}`)
-    props.onClose()
+    props.onDeleteClose(props.note.id)
   }
 
   return (

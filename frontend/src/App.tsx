@@ -1,8 +1,10 @@
 import { Routes, Route, Outlet, useParams, A } from '@solidjs/router';
-import { Component, For, Show, createResource, lazy } from 'solid-js';
+import { Component, For, Resource, Show, createResource, lazy } from 'solid-js';
 import Header from './components/header';
 import { useApi } from './contexts/ApiProvider';
 import ProtectedRoute from './components/protected_route';
+import { DrawerProvider } from './contexts/DrawerProvider';
+import { Book, Note } from './core/types';
 
 const Index = lazy(() => import("./pages/index"));
 const Login = lazy(() => import("./pages/login"));
@@ -14,19 +16,31 @@ const MainApp: Component = () => {
   const { api } = useApi()
 
   // NOTE: `|| ""` required as resource source will only compare non-nullish/non-false
-  const [books] = createResource(() => params.username || "", async (username) => {
+  const [booksById, { mutate: mutateBooks }] = createResource(() => params.username || "", async (username) => {
     if (!username) return []
     // TODO handle errors
     let result = await api().getBooksBySlug(username)
-    return result.unwrap()
+    return new Map(result.unwrap().map((v) => [v.id, v]))
   })
 
-  const [notes] = createResource(() => [params.username, params.bookSlug], async ([username, bookSlug]) => {
+  const books = () => {
+    let byId = booksById()
+    if (!byId) return []
+    return Array.from(byId, (v) => v[1])
+  }
+
+  const [notesById, { mutate: mutateNotes }] = createResource(() => [params.username, params.bookSlug], async ([username, bookSlug]) => {
     if (!username || !bookSlug) return []
     // TODO handle errors
     let result = await api().getNotesBySlug(username, bookSlug)
-    return result.unwrap()
+    return new Map(result.unwrap().map((v) => [v.id, v]))
   })
+
+  const notes = () => {
+    let byId = notesById()
+    if (!byId) return []
+    return Array.from(byId, (v) => v[1])
+  }
 
   return (
     <div class="drawer drawer-mobile">
@@ -34,8 +48,43 @@ const MainApp: Component = () => {
       <div class="drawer-content pb-8">
         <Header />
         <div class="px-6">
-          <Show when={!books.loading && !notes.loading} fallback={<progress class="progress w-full"></progress>}>
-            <Outlet />
+          <Show when={!booksById.loading && !notesById.loading} fallback={<progress class="progress w-full"></progress>}>
+            <DrawerProvider
+              updateBook={(newBook: Book) => {
+                mutateBooks((v) => {
+                  if (!Array.isArray(v)) {
+                    v?.set(newBook.id, newBook)
+                  }
+                  return new Map(v)
+                })
+              }}
+              updateNote={(newNote: Note) => {
+                mutateNotes((v) => {
+                  if (!Array.isArray(v)) {
+                    v?.set(newNote.id, newNote)
+                  }
+                  return new Map(v)
+                })
+              }}
+              deleteBook={(id) => {
+                mutateBooks((v) => {
+                  if (!Array.isArray(v)) {
+                    v?.delete(id)
+                  }
+                  return new Map(v)
+                })
+              }}
+              deleteNote={(id) => {
+                mutateNotes((v) => {
+                  if (!Array.isArray(v)) {
+                    v?.delete(id)
+                  }
+                  return new Map(v)
+                })
+              }}
+            >
+              <Outlet />
+            </DrawerProvider>
           </Show>
         </div>
       </div>
@@ -44,7 +93,7 @@ const MainApp: Component = () => {
         <ul class="menu menu-compact gap-4 p-4 w-80 bg-base-300 text-base-content max-h-screen">
           <li class="menu-title"><span>NOTEBOOKS</span></li>
           <ul class="overflow-auto bg-base-100 flex-1 w-full rounded-lg">
-            <Show when={!books.loading}>
+            <Show when={!booksById.loading}>
               <For each={books()}>
                 {(book) => <li>
                   <A
@@ -57,7 +106,7 @@ const MainApp: Component = () => {
           </ul>
           <li class="menu-title"><span>NOTES</span></li>
           <ul class="overflow-auto bg-base-100 flex-1 w-full rounded-lg">
-            <Show when={!notes.loading}>
+            <Show when={!notesById.loading}>
               <For each={notes()}>
                 {(note) => <li>
                   <A
