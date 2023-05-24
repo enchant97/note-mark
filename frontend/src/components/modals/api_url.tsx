@@ -31,8 +31,8 @@ const ApiUrlModal: Component<ApiUrlModal> = (props) => {
           />
         </div>
         <div class="modal-action">
-          <button onclick={() => props.onClose()} class="btn" type="button">Cancel</button>
           <button onclick={onSubmit} class="btn btn-primary" type="submit">Set</button>
+          <button onclick={() => props.onClose()} class="btn" type="button">Cancel</button>
         </div>
       </form>
     </BaseModal>
