@@ -49,3 +49,7 @@ type AccessTokenRequest struct {
 	Username  string `json:"username" query:"username" form:"username" validate:"required"`
 	Password  string `json:"password" query:"password" form:"password" validate:"required"`
 }
+
+type FindUserParams struct {
+	Username string `query:"username" validate:"required"`
+}

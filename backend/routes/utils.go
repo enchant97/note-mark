@@ -47,6 +47,7 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 	{
 		routes.POST("auth/token", postToken)
 		routes.POST("users/", postCreateUser)
+		routes.GET("users/search/", searchForUser)
 	}
 	protectedRoutes := e.Group("/api/", jwtMiddleware, authenticatedUserMiddleware)
 	{

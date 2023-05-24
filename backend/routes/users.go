@@ -33,3 +33,22 @@ func getUserMe(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, user)
 }
+
+func searchForUser(ctx echo.Context) error {
+	var params core.FindUserParams
+	if err := core.BindAndValidate(ctx, &params); err != nil {
+		return err
+	}
+
+	var users []string
+	if err := db.DB.
+		Model(&db.User{}).
+		Limit(6).
+		Where("username LIKE ?", params.Username+"%").
+		Pluck("username", &users).
+		Error; err != nil {
+		return err
+	}
+
+	return ctx.JSON(http.StatusOK, users)
+}
