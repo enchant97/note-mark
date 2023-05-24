@@ -1,5 +1,5 @@
 import { Result } from "./core"
-import { Book, CreateBook, CreateNote, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, UpdateBook, UpdateNote, User } from "./types"
+import { Book, CreateBook, CreateNote, CreateUser, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, UpdateBook, UpdateNote, User } from "./types"
 
 export type ApiDetails = {
     authToken?: string
@@ -49,6 +49,18 @@ class Api {
     }
     async postTokenPasswordFlow(username: string, password: string): Promise<Result<OAuth2AccessToken, ApiError>> {
         return await this.postToken({ grant_type: "password", username, password })
+    }
+    async createUser(user: CreateUser): Promise<Result<User, ApiError>> {
+        let reqURL = `${this.apiServer}/users/`
+        let resp = await fetch(reqURL, {
+            method: "POST",
+            body: JSON.stringify(user),
+            headers: {
+                "Content-Type": "application/json",
+            }
+        })
+        if (!resp.ok) return new Result<User, ApiError>(new ApiError(resp.status))
+        return new Result(await resp.json())
     }
     async getUsersMe(): Promise<Result<User, ApiError>> {
         let reqURL = `${this.apiServer}/users/me/`

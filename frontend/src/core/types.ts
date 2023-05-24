@@ -36,6 +36,11 @@ export type Note = {
     bookId: string
 }
 
+export type CreateUser = {
+    username: string
+    password: string
+}
+
 export type CreateBook = {
     name: string
     slug: string

@@ -8,6 +8,7 @@ import { Book, Note } from './core/types';
 
 const Index = lazy(() => import("./pages/index"));
 const Login = lazy(() => import("./pages/login"));
+const Signup = lazy(() => import("./pages/signup"));
 const Logout = lazy(() => import("./pages/logout"));
 const Shelf = lazy(() => import("./pages/shelf"));
 
@@ -151,6 +152,7 @@ const App: Component = () => {
   return (
     <Routes>
       <ProtectedRoute path="/login" redirectPath="/" condition={hasNoAuth} component={Login} />
+      <ProtectedRoute path="/signup" redirectPath="/" condition={hasNoAuth} component={Signup} />
       <ProtectedRoute path="/logout" redirectPath="/" condition={hasAuth} component={Logout} />
       <Route path="/" component={MainApp}>
         <Route path="/" component={Index} />
