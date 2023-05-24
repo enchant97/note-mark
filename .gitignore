@@ -2,9 +2,7 @@
 *.DS_Store
 ~$*
 
-__pycache__
-
 .vscode/
-.venv/
+
 .data/
 .env
