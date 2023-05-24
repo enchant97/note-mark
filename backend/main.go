@@ -33,7 +33,11 @@ func main() {
 	// Register root middleware
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
-	e.Use(middleware.CORS())
+	corsConfig := middleware.DefaultCORSConfig
+	{
+		corsConfig.AllowOrigins = appConfig.CORSOrigins
+	}
+	e.Use(middleware.CORSWithConfig(corsConfig))
 	v := core.Validator{}.New()
 	e.Validator = &v
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
