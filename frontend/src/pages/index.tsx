@@ -16,7 +16,7 @@ const Index: Component = () => {
           <div class="btn-group">
             {!apiDetails().authToken && <A href="/login" class="btn btn-outline">Login</A>}
             {user() && <A class="btn btn-outline" href={`/${user()?.username}`}>My Notes</A>}
-            <button class="btn btn-outline" type="button">Find User</button>
+            <button class="btn btn-outline btn-disabled" type="button">Find User</button>
           </div>
         </div>
       </div>
