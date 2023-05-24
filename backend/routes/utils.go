@@ -5,7 +5,7 @@ import (
 
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
