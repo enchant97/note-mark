@@ -1,4 +1,4 @@
-import { Component, createContext, createSignal, useContext } from "solid-js"
+import { Component, Show, createContext, createSignal, useContext } from "solid-js"
 import { Fatal } from "../core/core"
 import { Dynamic, Portal } from "solid-js/web"
 
@@ -32,7 +32,9 @@ export const Modal: Component = () => {
     let { modal } = useModal()
     return (
         <Portal>
-            {modal() && <Dynamic component={modal()?.component} {...modal()?.props} />}
+            <Show when={modal()} keyed>
+                {modal => <Dynamic component={modal.component} {...modal.props} />}
+            </Show>
         </Portal>
     )
 }
