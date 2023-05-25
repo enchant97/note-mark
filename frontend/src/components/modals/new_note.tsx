@@ -61,7 +61,7 @@ const NewNoteModal: Component<NewNoteModalProps> = (props) => {
         </label>
         <div class="modal-action">
           <button class="btn btn-primary" classList={{ loading: loading() }} type="submit">Create</button>
-          <button onclick={props.onClose} class="btn" type="button">Cancel</button>
+          <button onclick={() => props.onClose()} class="btn" type="button">Cancel</button>
         </div>
       </form>
     </BaseModal>
