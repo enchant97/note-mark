@@ -1,11 +1,9 @@
 package core
 
 import (
-	"net/http"
 	"regexp"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
 )
 
 const slugRegexString = "^[a-z0-9-]+$"
@@ -37,8 +35,5 @@ func (v Validator) New() Validator {
 }
 
 func (cv *Validator) Validate(i interface{}) error {
-	if err := cv.validator.Struct(i); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	return nil
+	return cv.validator.Struct(i)
 }

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"log"
+	"net/http"
 
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
@@ -10,7 +12,27 @@ import (
 	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"gorm.io/gorm"
 )
+
+// HTTP error handler, to handle unexpected errors
+func httpErrorHandler(err error, ctx echo.Context) {
+	if e, ok := err.(*echo.HTTPError); ok {
+		// normal HTTP error
+		ctx.JSON(e.Code, e.Message)
+		return
+	}
+	ctx.Logger().Error(err)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		ctx.NoContent(http.StatusNotFound)
+	} else if errors.Is(err, gorm.ErrDuplicatedKey) {
+		ctx.NoContent(http.StatusConflict)
+	} else if errors.Is(err, core.BindError) || errors.Is(err, core.ValidationError) {
+		ctx.NoContent(http.StatusUnprocessableEntity)
+	} else {
+		ctx.NoContent(http.StatusInternalServerError)
+	}
+}
 
 func main() {
 	// Parse config
@@ -30,6 +52,7 @@ func main() {
 	}
 	// Create server
 	e := echo.New()
+	e.HTTPErrorHandler = httpErrorHandler
 	// Register root middleware
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
