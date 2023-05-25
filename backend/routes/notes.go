@@ -199,6 +199,9 @@ func getNoteRendered(ctx echo.Context) error {
 
 	var buf bytes.Buffer
 	if err := storage_backend.GetNoteAsHTML(noteID, &buf); err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			return ctx.Blob(http.StatusOK, "text/html", []byte("\n"))
+		}
 		return err
 	}
 
