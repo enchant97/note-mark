@@ -53,17 +53,15 @@ const MainApp: Component = () => {
             <DrawerProvider
               updateBook={(newBook: Book) => {
                 mutateBooks((v) => {
-                  if (!Array.isArray(v)) {
-                    v?.set(newBook.id, newBook)
-                  }
+                  if (Array.isArray(v)) { v = new Map() }
+                  v?.set(newBook.id, newBook)
                   return new Map(v)
                 })
               }}
               updateNote={(newNote: Note) => {
                 mutateNotes((v) => {
-                  if (!Array.isArray(v)) {
-                    v?.set(newNote.id, newNote)
-                  }
+                  if (Array.isArray(v)) { v = new Map() }
+                  v?.set(newNote.id, newNote)
                   return new Map(v)
                 })
               }}
