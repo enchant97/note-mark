@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/enchant97/note-mark/backend/core"
 	"github.com/google/uuid"
 )
 
@@ -99,4 +100,23 @@ func (c *DiskController) GetNoteInfo(noteID uuid.UUID) (NoteInfo, error) {
 	}
 
 	return info, nil
+}
+
+func (c *DiskController) GetNoteAsHTML(noteID uuid.UUID, w io.Writer) error {
+	noteReader, err := c.ReadNote(noteID)
+	if err != nil {
+		return err
+	}
+	defer noteReader.Close()
+
+	source, err := io.ReadAll(noteReader)
+	if err != nil {
+		return errors.Join(ErrRead, err)
+	}
+
+	if err := core.MarkdownToHTML(source, w); err != nil {
+		return errors.Join(ErrRead, err)
+	}
+
+	return nil
 }
