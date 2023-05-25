@@ -11,6 +11,9 @@ Note Mark is a lighting fast and minimal; web-based Markdown notes app. Featurin
 
 > Project currently in **"ALPHA"** stage of development:
 
+## Docs
+Documentation is still a WIP, however you can view it here: [/docs](docs)
+
 
 ## License
 This project is Copyright (c) 2023 Leo Spratt, licences shown below:
