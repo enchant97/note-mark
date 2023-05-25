@@ -16,10 +16,10 @@ FROM gcr.io/distroless/static-debian11
 
     EXPOSE 8000
 
-    ENV HOST=0.0.0.0
-    ENV PORT=8000
-    ENV DATA_PATH=/data
+    ENV BIND__HOST=0.0.0.0
+    ENV BIND__PORT=8000
     ENV DB__URI=/data/db.sqlite
     ENV DB__TYPE=sqlite
+    ENV DATA_PATH=/data
 
     CMD ["/note-mark"]
