@@ -165,12 +165,12 @@ func getNoteContent(ctx echo.Context) error {
 	stream, err := storage_backend.ReadNote(noteID)
 	if err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
-			return ctx.Blob(200, "text/markdown", []byte("\n"))
+			return ctx.Blob(http.StatusOK, "text/markdown", []byte("\n"))
 		}
 		return err
 	}
 	defer stream.Close()
-	return ctx.Stream(200, "text/markdown", stream)
+	return ctx.Stream(http.StatusOK, "text/markdown", stream)
 }
 
 func getNoteRendered(ctx echo.Context) error {
