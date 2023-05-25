@@ -27,13 +27,14 @@ const Signup: Component = () => {
 
   return (
     <div class="hero min-h-screen bg-base-200">
-      <div class="hero-content flex-col">
-        <div class="text-center lg:text-left">
-          <h1 class="text-5xl font-bold">Note Mark</h1>
-          <p class="py-6">Create your account here.</p>
-        </div>
-        <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+      <div class="hero-content w-full flex-col">
+        <div class="card flex-shrink-0 w-full max-w-md shadow-2xl bg-base-100">
           <div class="card-body">
+            <img class="mb-2 mx-auto w-36" src="/icon.svg" alt="Note Mark Icon" />
+            <div class="text-center">
+              <h1 class="text-5xl font-bold">Note Mark</h1>
+              <p class="py-6">Create your account here.</p>
+            </div>
             <form onSubmit={onSubmit}>
               <div class="form-control">
                 <label class="label">

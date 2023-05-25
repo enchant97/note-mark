@@ -23,13 +23,14 @@ const Login: Component = () => {
 
   return (
     <div class="hero min-h-screen bg-base-200">
-      <div class="hero-content flex-col">
-        <div class="text-center lg:text-left">
-          <h1 class="text-5xl font-bold">Note Mark</h1>
-          <p class="py-6">Login here.</p>
-        </div>
-        <div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+      <div class="hero-content w-full flex-col">
+        <div class="card flex-shrink-0 w-full max-w-md shadow-2xl bg-base-100">
           <div class="card-body">
+            <img class="mb-2 mx-auto w-36" src="/icon.svg" alt="Note Mark Icon" />
+            <div class="text-center">
+              <h1 class="text-5xl font-bold">Note Mark</h1>
+              <p class="py-6">Login here.</p>
+            </div>
             <form onSubmit={onSubmit}>
               <div class="form-control">
                 <label class="label">
@@ -60,7 +61,7 @@ const Login: Component = () => {
                 />
               </div>
               <div class="btn-group btn-group-vertical w-full mt-5">
-                <button class="btn btn-primary" classList={{loading: loading()}} type="submit">Login</button>
+                <button class="btn btn-primary" classList={{ loading: loading() }} type="submit">Login</button>
                 <A class="btn" href="/signup">Need An Account?</A>
                 <A class="btn" href="/">Back Home</A>
               </div>
