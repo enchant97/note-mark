@@ -29,12 +29,12 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ghcr.io/${{ github.repository }}-${{ matrix.service_name }}
+            ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=semver,pattern={{major}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{version}}
+            type=raw,value=${{ matrix.service_name }}-latest,enable={{is_default_branch}}
+            type=semver,pattern=${{ matrix.service_name }}-{{major}}
+            type=semver,pattern=${{ matrix.service_name }}-{{major}}.{{minor}}
+            type=semver,pattern=${{ matrix.service_name }}-{{version}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
