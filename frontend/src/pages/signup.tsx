@@ -2,9 +2,11 @@ import { Component, createSignal } from 'solid-js';
 import { createStore } from "solid-js/store";
 import { useApi } from '../contexts/ApiProvider';
 import { A, useNavigate } from '@solidjs/router';
+import { ToastType, useToast } from '../contexts/ToastProvider';
 
 const Signup: Component = () => {
   const { api } = useApi()
+  const { pushToast } = useToast()
   const navigate = useNavigate()
   const [formDetails, setFormDetails] = createStore({ username: "", password: "", passwordConfirm: "" })
   const [loading, setLoading] = createSignal(false)
@@ -19,6 +21,7 @@ const Signup: Component = () => {
     })).intoOption()
     setLoading(false)
     if (result !== undefined) {
+      pushToast({ message: "created new account", type: ToastType.SUCCESS })
       navigate("/login")
     }
   }
