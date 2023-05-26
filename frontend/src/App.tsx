@@ -1,11 +1,12 @@
 import { Routes, Route, Outlet, useParams, A } from '@solidjs/router';
-import { Component, For, Resource, Show, createResource, lazy } from 'solid-js';
+import { Component, For, Show, createResource, lazy } from 'solid-js';
 import Header from './components/header';
 import { useApi } from './contexts/ApiProvider';
 import ProtectedRoute from './components/protected_route';
 import { DrawerProvider } from './contexts/DrawerProvider';
 import { Book, Note } from './core/types';
 import { LoadingBar } from './components/loading';
+import { resultUnwrap } from './core/core';
 
 const Index = lazy(() => import("./pages/index"));
 const Login = lazy(() => import("./pages/login"));
@@ -22,7 +23,7 @@ const MainApp: Component = () => {
     if (!username) return []
     // TODO handle errors
     let result = await api().getBooksBySlug(username)
-    return new Map(result.unwrap().map((v) => [v.id, v]))
+    return new Map(resultUnwrap(result).map((v) => [v.id, v]))
   })
 
   const books = () => {
@@ -35,7 +36,7 @@ const MainApp: Component = () => {
     if (!username || !bookSlug) return []
     // TODO handle errors
     let result = await api().getNotesBySlug(username, bookSlug)
-    return new Map(result.unwrap().map((v) => [v.id, v]))
+    return new Map(resultUnwrap(result).map((v) => [v.id, v]))
   })
 
   const notes = () => {

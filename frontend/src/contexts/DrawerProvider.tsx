@@ -1,5 +1,5 @@
 import { JSX, createContext, useContext } from "solid-js"
-import { Fatal } from "../core/core"
+import { optionExpect } from "../core/core"
 import { Book, Note } from "../core/types"
 
 type DrawerContextProps = {
@@ -17,8 +17,7 @@ type DrawerContextType = ReturnType<typeof makeDrawerContext>
 export const DrawerContext = createContext<DrawerContextType>()
 export const useDrawer = () => {
   let ctx = useContext(DrawerContext)
-  if (ctx === undefined) throw new Fatal("current drawer context was undefined")
-  return ctx
+  return optionExpect(ctx, "current drawer context was undefined")
 }
 
 type DrawerProviderProps = DrawerContextProps & {

@@ -5,6 +5,7 @@ import { createStore } from 'solid-js/store';
 import { toSlug } from '../../core/helpers';
 import { useApi } from '../../contexts/ApiProvider';
 import { useNavigate } from '@solidjs/router';
+import { resultUnwrap } from '../../core/core';
 
 type UpdateNoteModalProps = {
   onClose: (note?: Note) => void
@@ -25,7 +26,7 @@ const UpdateNoteModal: Component<UpdateNoteModalProps> = (props) => {
     setLoading(true)
     let result = await api().updateNote(props.note.id, form)
     setLoading(false)
-    result.unwrap()
+    resultUnwrap(result)
     navigate(`/${props.user.username}/${props.book.slug}/${form.slug}`)
     props.onClose({
       id: props.note.id,
@@ -39,7 +40,7 @@ const UpdateNoteModal: Component<UpdateNoteModalProps> = (props) => {
     setLoading(true)
     let result = await api().deleteNote(props.note.id)
     setLoading(false)
-    result.unwrap()
+    resultUnwrap(result)
     navigate(`/${props.user.username}/${props.book.slug}`)
     props.onDeleteClose(props.note.id)
   }

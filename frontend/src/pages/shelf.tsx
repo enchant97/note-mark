@@ -1,4 +1,4 @@
-import { Component, Match, Show, Suspense, Switch, createResource, lazy } from 'solid-js';
+import { Component, Match, Show, Switch, createResource, lazy } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { useParams, useSearchParams } from '@solidjs/router';
 import { Book, Breadcrumb, Note } from '../core/types';
@@ -12,6 +12,7 @@ import UpdateBookModal from '../components/modals/edit_book';
 import UpdateNoteModal from '../components/modals/edit_note';
 import { useDrawer } from '../contexts/DrawerProvider';
 import { LoadingBar } from '../components/loading';
+import { resultUnwrap } from '../core/core';
 
 const NoteEdit = lazy(() => import("../components/note/edit"))
 const NoteView = lazy(() => import("../components/note/view"))
@@ -48,14 +49,14 @@ const Shelf: Component = () => {
     if (!username || !bookSlug) return undefined
     let result = await api().getBookBySlug(username, bookSlug)
     // TODO handle errors
-    return result.unwrap()
+    return resultUnwrap(result)
   })
 
   const [note, { mutate: setNote }] = createResource(slugParts, async ({ username, bookSlug, noteSlug }) => {
     if (!username || !bookSlug || !noteSlug) return undefined
     let result = await api().getNoteBySlug(username, bookSlug, noteSlug)
     // TODO handle errors
-    return result.unwrap()
+    return resultUnwrap(result)
   })
 
   const breadcrumb: () => Breadcrumb = () => {

@@ -1,5 +1,5 @@
 import { Component, Show, createContext, createSignal, useContext } from "solid-js"
-import { Fatal } from "../core/core"
+import { optionExpect } from "../core/core"
 import { Dynamic, Portal } from "solid-js/web"
 
 type ModalProps<P = {}> = {
@@ -17,8 +17,7 @@ type ModalContextType = ReturnType<typeof makeModalContext>
 export const ModalContext = createContext<ModalContextType>()
 export const useModal = () => {
     let ctx = useContext(ModalContext)
-    if (ctx === undefined) throw new Fatal("modal was undefined")
-    return ctx
+    return optionExpect(ctx, "modal was undefined")
 }
 export const ModalProvider = (props: any) => {
     return (

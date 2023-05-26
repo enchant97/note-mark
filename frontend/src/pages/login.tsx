@@ -2,6 +2,7 @@ import { Component, createSignal } from 'solid-js';
 import { createStore } from "solid-js/store";
 import { useApi } from '../contexts/ApiProvider';
 import { A } from '@solidjs/router';
+import { resultIntoOption } from '../core/core';
 
 const Login: Component = () => {
   const { api, apiDetails, setApiDetails } = useApi()
@@ -12,7 +13,7 @@ const Login: Component = () => {
     ev.preventDefault()
     setLoading(true)
     // TODO handle errors
-    let result = (await api().postTokenPasswordFlow(formDetails.username, formDetails.password)).intoOption()
+    let result = resultIntoOption(await api().postTokenPasswordFlow(formDetails.username, formDetails.password))
     setLoading(false)
     if (result !== undefined) {
       setApiDetails({ authToken: result.access_token, apiServer: apiDetails().apiServer })

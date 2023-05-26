@@ -1,5 +1,5 @@
 import { Component, For, createContext, onMount, useContext } from "solid-js"
-import { Fatal } from "../core/core"
+import { optionExpect } from "../core/core"
 import { Portal } from "solid-js/web"
 import { createStore } from "solid-js/store"
 
@@ -33,8 +33,7 @@ type ToastContextType = ReturnType<typeof makeToastContext>
 export const ToastContext = createContext<ToastContextType>()
 export const useToast = () => {
   let ctx = useContext(ToastContext)
-  if (ctx === undefined) throw new Fatal("toast context was undefined")
-  return ctx
+  return optionExpect(ctx, "toast context was undefined")
 }
 export const ToastProvider = (props: any) => {
   return (

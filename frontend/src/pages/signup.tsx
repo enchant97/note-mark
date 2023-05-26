@@ -3,6 +3,7 @@ import { createStore } from "solid-js/store";
 import { useApi } from '../contexts/ApiProvider';
 import { A, useNavigate } from '@solidjs/router';
 import { ToastType, useToast } from '../contexts/ToastProvider';
+import { resultIntoOption } from '../core/core';
 
 const Signup: Component = () => {
   const { api } = useApi()
@@ -15,10 +16,10 @@ const Signup: Component = () => {
     ev.preventDefault()
     setLoading(true)
     // TODO handle errors
-    let result = (await api().createUser({
+    let result = resultIntoOption(await api().createUser({
       username: formDetails.username,
       password: formDetails.password,
-    })).intoOption()
+    }))
     setLoading(false)
     if (result !== undefined) {
       pushToast({ message: "created new account", type: ToastType.SUCCESS })

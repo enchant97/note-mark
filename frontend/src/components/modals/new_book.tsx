@@ -5,6 +5,7 @@ import { createStore } from 'solid-js/store';
 import { toSlug } from '../../core/helpers';
 import { useApi } from '../../contexts/ApiProvider';
 import { useNavigate } from '@solidjs/router';
+import { resultUnwrap } from '../../core/core';
 
 type NewBookModalProps = {
   onClose: (newBook?: Book) => void
@@ -22,7 +23,7 @@ const NewBookModal: Component<NewBookModalProps> = (props) => {
     setLoading(true)
     let result = await api().createBook(form)
     setLoading(false)
-    let book = result.unwrap()
+    let book = resultUnwrap(result)
     navigate(`/${props.user.username}/${form.slug}`)
     props.onClose(book)
   }

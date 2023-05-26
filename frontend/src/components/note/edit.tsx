@@ -4,6 +4,7 @@ import { Note } from '../../core/types';
 import Editor, { EditorState } from '../editor';
 import { createStore } from 'solid-js/store';
 import { LoadingBar } from '../loading';
+import { resultUnwrap } from '../../core/core';
 
 type NoteEditProps = {
   note: Note
@@ -20,7 +21,7 @@ const NoteEdit: Component<NoteEditProps> = (props) => {
   const [initialContent] = createResource(() => props.note, async (note) => {
     let result = await api().getNoteContentById(note.id)
     // TODO handle errors
-    return result.unwrap()
+    return resultUnwrap(result)
   })
 
   const save = async (content: string) => {
@@ -28,7 +29,7 @@ const NoteEdit: Component<NoteEditProps> = (props) => {
     let result = await api().updateNoteContent(props.note.id, content)
     setState({ saving: false })
     // TODO handle this error
-    result.unwrap()
+    resultUnwrap(result)
     setState({ unsaved: false })
   }
 

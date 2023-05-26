@@ -1,14 +1,29 @@
 import { Result } from "./core"
 import { Book, CreateBook, CreateNote, CreateUser, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, UpdateBook, UpdateNote, User } from "./types"
 
+/**
+ * HTTP status codes that are errors (>= 400),
+ * including error code 0 (connection error for js)
+ */
+export enum HttpErrors {
+    NetworkError = 0,
+
+    BadRequest = 400,
+    Unauthorized = 401,
+    NotFound = 404,
+    Conflict = 409,
+
+    InternalServerError = 500,
+}
+
 export type ApiDetails = {
     authToken?: string
     apiServer: string
 }
 
 export class ApiError extends Error {
-    readonly status: number
-    constructor(status: number, message?: string) {
+    readonly status: number | HttpErrors
+    constructor(status: number | HttpErrors, message?: string) {
         super(message)
         this.status = status
     }
@@ -44,8 +59,8 @@ class Api {
             },
             body: JSON.stringify(details)
         })
-        if (!resp.ok) return new Result<OAuth2AccessToken, ApiError>(new ApiError(resp.status))
-        return new Result(await resp.json())
+        if (!resp.ok) return new ApiError(resp.status)
+        return await resp.json()
     }
     async postTokenPasswordFlow(username: string, password: string): Promise<Result<OAuth2AccessToken, ApiError>> {
         return await this.postToken({ grant_type: "password", username, password })
@@ -59,8 +74,8 @@ class Api {
                 "Content-Type": "application/json",
             }
         })
-        if (!resp.ok) return new Result<User, ApiError>(new ApiError(resp.status))
-        return new Result(await resp.json())
+        if (!resp.ok) return new ApiError(resp.status)
+        return await resp.json()
     }
     async getUsersMe(): Promise<Result<User, ApiError>> {
         let reqURL = `${this.apiServer}/users/me/`
@@ -69,8 +84,8 @@ class Api {
                 "Authorization": `Bearer ${this.authToken}`
             }
         })
-        if (!resp.ok) return new Result<User, ApiError>(new ApiError(resp.status))
-        return new Result(await resp.json())
+        if (!resp.ok) return new ApiError(resp.status)
+        return await resp.json()
     }
     async createBook(book: CreateBook): Promise<Result<Book, ApiError>> {
         let reqURL = `${this.apiServer}/books/`
@@ -82,8 +97,8 @@ class Api {
             },
             body: JSON.stringify(book),
         })
-        if (!resp.ok) return new Result<Book, ApiError>(new ApiError(resp.status))
-        return new Result(await resp.json())
+        if (!resp.ok) return new ApiError(resp.status)
+        return await resp.json()
     }
     async createNote(bookId: string, note: CreateNote): Promise<Result<Note, ApiError>> {
         let reqURL = `${this.apiServer}/books/${bookId}/notes/`
@@ -95,8 +110,8 @@ class Api {
             },
             body: JSON.stringify(note),
         })
-        if (!resp.ok) return new Result<Note, ApiError>(new ApiError(resp.status))
-        return new Result(await resp.json())
+        if (!resp.ok) return new ApiError(resp.status)
+        return await resp.json()
     }
     async getBooksBySlug(username: string): Promise<Result<Book[], ApiError>> {
         let reqURL = `${this.apiServer}/slug/@${username}/books/`
@@ -105,8 +120,8 @@ class Api {
                 "Authorization": `Bearer ${this.authToken}`
             }
         })
-        if (!resp.ok) return new Result<Book[], ApiError>(new ApiError(resp.status))
-        return new Result(await resp.json())
+        if (!resp.ok) return new ApiError(resp.status)
+        return await resp.json()
     }
     async getBookBySlug(username: string, bookSlug: string): Promise<Result<Book, ApiError>> {
         let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/`
@@ -115,8 +130,8 @@ class Api {
                 "Authorization": `Bearer ${this.authToken}`
             }
         })
-        if (!resp.ok) return new Result<Book, ApiError>(new ApiError(resp.status))
-        return new Result(await resp.json())
+        if (!resp.ok) return new ApiError(resp.status)
+        return await resp.json()
     }
     async getNotesBySlug(username: string, bookSlug: string): Promise<Result<Note[], ApiError>> {
         let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/notes/`
@@ -125,8 +140,8 @@ class Api {
                 "Authorization": `Bearer ${this.authToken}`
             }
         })
-        if (!resp.ok) return new Result<Note[], ApiError>(new ApiError(resp.status))
-        return new Result(await resp.json())
+        if (!resp.ok) return new ApiError(resp.status)
+        return await resp.json()
     }
     async getNoteBySlug(username: string, bookSlug: string, noteSlug: string): Promise<Result<Note, ApiError>> {
         let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/notes/${noteSlug}/`
@@ -135,8 +150,8 @@ class Api {
                 "Authorization": `Bearer ${this.authToken}`
             }
         })
-        if (!resp.ok) return new Result<Note, ApiError>(new ApiError(resp.status))
-        return new Result(await resp.json())
+        if (!resp.ok) return new ApiError(resp.status)
+        return await resp.json()
     }
     async getNoteContentById(noteId: string): Promise<Result<string, ApiError>> {
         let reqURL = `${this.apiServer}/notes/${noteId}/content/`
@@ -145,8 +160,8 @@ class Api {
                 "Authorization": `Bearer ${this.authToken}`
             }
         })
-        if (!resp.ok) return new Result<string, ApiError>(new ApiError(resp.status))
-        return new Result<string, ApiError>(await resp.text())
+        if (!resp.ok) return new ApiError(resp.status)
+        return await resp.text()
     }
     async getNoteRenderedById(noteId: string): Promise<Result<string, ApiError>> {
         let reqURL = `${this.apiServer}/notes/${noteId}/rendered/`
@@ -155,8 +170,8 @@ class Api {
                 "Authorization": `Bearer ${this.authToken}`
             }
         })
-        if (!resp.ok) return new Result<string, ApiError>(new ApiError(resp.status))
-        return new Result<string, ApiError>(await resp.text())
+        if (!resp.ok) return new ApiError(resp.status)
+        return await resp.text()
     }
     async updateBook(bookId: string, book: UpdateBook): Promise<Result<undefined, ApiError>> {
         let reqURL = `${this.apiServer}/books/${bookId}/`
@@ -168,8 +183,8 @@ class Api {
             },
             body: JSON.stringify(book),
         })
-        if (!resp.ok) return new Result<undefined, ApiError>(new ApiError(resp.status))
-        return new Result<undefined, ApiError>(undefined)
+        if (!resp.ok) return new ApiError(resp.status)
+        return undefined
     }
     async updateNote(noteId: string, book: UpdateNote): Promise<Result<undefined, ApiError>> {
         let reqURL = `${this.apiServer}/notes/${noteId}/`
@@ -181,8 +196,8 @@ class Api {
             },
             body: JSON.stringify(book),
         })
-        if (!resp.ok) return new Result<undefined, ApiError>(new ApiError(resp.status))
-        return new Result<undefined, ApiError>(undefined)
+        if (!resp.ok) return new ApiError(resp.status)
+        return undefined
     }
     async updateNoteContent(noteId: string, content: string): Promise<Result<undefined, ApiError>> {
         let reqURL = `${this.apiServer}/notes/${noteId}/content/`
@@ -193,8 +208,8 @@ class Api {
                 "Authorization": `Bearer ${this.authToken}`
             }
         })
-        if (!resp.ok) return new Result<undefined, ApiError>(new ApiError(resp.status))
-        return new Result<undefined, ApiError>(undefined)
+        if (!resp.ok) return new ApiError(resp.status)
+        return undefined
     }
     async deleteBook(bookId: string): Promise<Result<undefined, ApiError>> {
         let reqURL = `${this.apiServer}/books/${bookId}/`
@@ -204,8 +219,8 @@ class Api {
                 "Authorization": `Bearer ${this.authToken}`,
             },
         })
-        if (!resp.ok) return new Result<undefined, ApiError>(new ApiError(resp.status))
-        return new Result<undefined, ApiError>(undefined)
+        if (!resp.ok) return new ApiError(resp.status)
+        return undefined
     }
     async deleteNote(noteId: string): Promise<Result<undefined, ApiError>> {
         let reqURL = `${this.apiServer}/notes/${noteId}/`
@@ -215,8 +230,8 @@ class Api {
                 "Authorization": `Bearer ${this.authToken}`,
             },
         })
-        if (!resp.ok) return new Result<undefined, ApiError>(new ApiError(resp.status))
-        return new Result<undefined, ApiError>(undefined)
+        if (!resp.ok) return new ApiError(resp.status)
+        return undefined
     }
 }
 

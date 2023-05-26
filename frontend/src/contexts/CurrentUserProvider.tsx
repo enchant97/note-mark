@@ -1,5 +1,5 @@
 import { createContext, createResource, useContext } from "solid-js"
-import { Fatal } from "../core/core"
+import { optionExpect, resultUnwrap } from "../core/core"
 import { useApi } from "./ApiProvider"
 
 const makeCurrentUserContext = () => {
@@ -8,7 +8,7 @@ const makeCurrentUserContext = () => {
         if (current_api.isAuthenticated()) {
             let result = await current_api.getUsersMe()
             // TODO error handle this!
-            return result.unwrap()
+            return resultUnwrap(result)
         }
         return undefined
     })
@@ -19,8 +19,7 @@ type CurrentUserContextType = ReturnType<typeof makeCurrentUserContext>
 export const CurrentUserContext = createContext<CurrentUserContextType>()
 export const useCurrentUser = () => {
     let ctx = useContext(CurrentUserContext)
-    if (ctx === undefined) throw new Fatal("current user was undefined")
-    return ctx
+    return optionExpect(ctx, "current user was undefined")
 }
 export const CurrentUserProvider = (props: any) => {
     return (

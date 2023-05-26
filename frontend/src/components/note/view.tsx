@@ -2,6 +2,7 @@ import { Component, Show, createResource } from 'solid-js';
 import { useApi } from '../../contexts/ApiProvider';
 import { Note } from '../../core/types';
 import { LoadingBar } from '../loading';
+import { resultUnwrap } from '../../core/core';
 
 type NoteViewProps = {
   note: Note
@@ -13,7 +14,7 @@ const NoteView: Component<NoteViewProps> = (props) => {
   const [noteContent] = createResource(() => props.note, async (note) => {
     let result = await api().getNoteRenderedById(note.id)
     // TODO handle errors
-    return result.unwrap()
+    return resultUnwrap(result)
   })
 
   return (
