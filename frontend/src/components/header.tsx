@@ -1,10 +1,40 @@
-import { Component } from 'solid-js';
+import { Component, For, createEffect, createSignal } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { HiOutlineHome, HiOutlineUser, HiSolidMenu } from 'solid-icons/hi';
 import { A } from '@solidjs/router';
 import { useCurrentUser } from '../contexts/CurrentUserProvider';
 import { useModal } from '../contexts/ModalProvider';
 import ApiUrlModal from './modals/api_url';
+import { FiMoon, FiSun } from 'solid-icons/fi';
+import { THEMES, getTheme, setTheme } from '../core/theme_switcher';
+
+const ThemeSwitcher: Component = () => {
+  const [currentTheme, setCurrentTheme] = createSignal(getTheme())
+  createEffect(() =>
+    setTheme(currentTheme())
+  )
+  return (
+    <div class="dropdown dropdown-end">
+      <label tabindex="0" class="btn btn-ghost shadow-lg flex gap-2">
+        <FiSun size={20} />
+        <FiMoon size={20} />
+      </label>
+      <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-300 rounded-box">
+        <For each={THEMES}>
+          {(theme) => (
+            <li><button
+              onclick={() => setCurrentTheme(theme.name)}
+              classList={{ "active": currentTheme() === theme.name }}
+              type="button"
+            >
+              {theme.title}
+            </button></li>
+          )}
+        </For>
+      </ul>
+    </div>
+  )
+}
 
 const ProfileDropdownNoAuth = () => {
   const { apiDetails, setApiDetails } = useApi()
@@ -56,6 +86,7 @@ const Header: Component = () => {
       </div>
       <span class="flex-1 px-2 mx-2 text-xl">Note Mark</span>
       <div class="flex gap-4">
+        <ThemeSwitcher />
         <A activeClass="btn-disabled" class="btn btn-ghost btn-circle shadow-lg" end={true} href="/"><HiOutlineHome size={20} /></A>
         <div class="dropdown dropdown-end">
           <label tabindex="0" class="btn btn-ghost btn-circle shadow-lg">
