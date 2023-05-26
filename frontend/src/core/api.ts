@@ -1,6 +1,14 @@
 import { Result } from "./core"
 import { Book, CreateBook, CreateNote, CreateUser, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, UpdateBook, UpdateNote, User } from "./types"
 
+export enum HttpMethods {
+    GET = "GET",
+    POST = "POST",
+    PUT = "PUT",
+    PATCH = "PATCH",
+    DELETE = "DELETE",
+}
+
 /**
  * HTTP status codes that are errors (>= 400),
  * including error code 0 (connection error for js)
@@ -20,6 +28,8 @@ export type ApiDetails = {
     authToken?: string
     apiServer: string
 }
+
+const HEADER_JSON = { "Content-Type": "application/json" }
 
 export class ApiError extends Error {
     readonly status: number | HttpErrors
@@ -50,14 +60,15 @@ class Api {
     isAuthenticated(): boolean {
         return this.authToken !== undefined
     }
+    headerAuthorization(): Record<string, string> {
+        return { "Authorization": `Bearer ${this.authToken}` }
+    }
     async postToken(details: OAuth2AccessTokenRequest): Promise<Result<OAuth2AccessToken, ApiError>> {
         let reqURL = `${this.apiServer}/auth/token`
         let resp = await fetch(reqURL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(details)
+            method: HttpMethods.POST,
+            headers: HEADER_JSON,
+            body: JSON.stringify(details),
         })
         if (!resp.ok) return new ApiError(resp.status)
         return await resp.json()
@@ -68,11 +79,9 @@ class Api {
     async createUser(user: CreateUser): Promise<Result<User, ApiError>> {
         let reqURL = `${this.apiServer}/users/`
         let resp = await fetch(reqURL, {
-            method: "POST",
+            method: HttpMethods.POST,
             body: JSON.stringify(user),
-            headers: {
-                "Content-Type": "application/json",
-            }
+            headers: HEADER_JSON,
         })
         if (!resp.ok) return new ApiError(resp.status)
         return await resp.json()
@@ -80,9 +89,7 @@ class Api {
     async getUsersMe(): Promise<Result<User, ApiError>> {
         let reqURL = `${this.apiServer}/users/me/`
         let resp = await fetch(reqURL, {
-            headers: {
-                "Authorization": `Bearer ${this.authToken}`
-            }
+            headers: this.headerAuthorization(),
         })
         if (!resp.ok) return new ApiError(resp.status)
         return await resp.json()
@@ -90,10 +97,10 @@ class Api {
     async createBook(book: CreateBook): Promise<Result<Book, ApiError>> {
         let reqURL = `${this.apiServer}/books/`
         let resp = await fetch(reqURL, {
-            method: "POST",
+            method: HttpMethods.POST,
             headers: {
-                "Authorization": `Bearer ${this.authToken}`,
-                "Content-Type": "application/json",
+                ...HEADER_JSON,
+                ...this.headerAuthorization(),
             },
             body: JSON.stringify(book),
         })
@@ -103,10 +110,10 @@ class Api {
     async createNote(bookId: string, note: CreateNote): Promise<Result<Note, ApiError>> {
         let reqURL = `${this.apiServer}/books/${bookId}/notes/`
         let resp = await fetch(reqURL, {
-            method: "POST",
+            method: HttpMethods.POST,
             headers: {
-                "Authorization": `Bearer ${this.authToken}`,
-                "Content-Type": "application/json",
+                ...HEADER_JSON,
+                ...this.headerAuthorization(),
             },
             body: JSON.stringify(note),
         })
@@ -116,9 +123,7 @@ class Api {
     async getBooksBySlug(username: string): Promise<Result<Book[], ApiError>> {
         let reqURL = `${this.apiServer}/slug/@${username}/books/`
         let resp = await fetch(reqURL, {
-            headers: {
-                "Authorization": `Bearer ${this.authToken}`
-            }
+            headers: this.headerAuthorization(),
         })
         if (!resp.ok) return new ApiError(resp.status)
         return await resp.json()
@@ -126,9 +131,7 @@ class Api {
     async getBookBySlug(username: string, bookSlug: string): Promise<Result<Book, ApiError>> {
         let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/`
         let resp = await fetch(reqURL, {
-            headers: {
-                "Authorization": `Bearer ${this.authToken}`
-            }
+            headers: this.headerAuthorization(),
         })
         if (!resp.ok) return new ApiError(resp.status)
         return await resp.json()
@@ -136,9 +139,7 @@ class Api {
     async getNotesBySlug(username: string, bookSlug: string): Promise<Result<Note[], ApiError>> {
         let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/notes/`
         let resp = await fetch(reqURL, {
-            headers: {
-                "Authorization": `Bearer ${this.authToken}`
-            }
+            headers: this.headerAuthorization(),
         })
         if (!resp.ok) return new ApiError(resp.status)
         return await resp.json()
@@ -146,9 +147,7 @@ class Api {
     async getNoteBySlug(username: string, bookSlug: string, noteSlug: string): Promise<Result<Note, ApiError>> {
         let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/notes/${noteSlug}/`
         let resp = await fetch(reqURL, {
-            headers: {
-                "Authorization": `Bearer ${this.authToken}`
-            }
+            headers: this.headerAuthorization(),
         })
         if (!resp.ok) return new ApiError(resp.status)
         return await resp.json()
@@ -156,9 +155,7 @@ class Api {
     async getNoteContentById(noteId: string): Promise<Result<string, ApiError>> {
         let reqURL = `${this.apiServer}/notes/${noteId}/content/`
         let resp = await fetch(reqURL, {
-            headers: {
-                "Authorization": `Bearer ${this.authToken}`
-            }
+            headers: this.headerAuthorization(),
         })
         if (!resp.ok) return new ApiError(resp.status)
         return await resp.text()
@@ -166,9 +163,7 @@ class Api {
     async getNoteRenderedById(noteId: string): Promise<Result<string, ApiError>> {
         let reqURL = `${this.apiServer}/notes/${noteId}/rendered/`
         let resp = await fetch(reqURL, {
-            headers: {
-                "Authorization": `Bearer ${this.authToken}`
-            }
+            headers: this.headerAuthorization(),
         })
         if (!resp.ok) return new ApiError(resp.status)
         return await resp.text()
@@ -176,10 +171,10 @@ class Api {
     async updateBook(bookId: string, book: UpdateBook): Promise<Result<undefined, ApiError>> {
         let reqURL = `${this.apiServer}/books/${bookId}/`
         let resp = await fetch(reqURL, {
-            method: "PATCH",
+            method: HttpMethods.PATCH,
             headers: {
-                "Authorization": `Bearer ${this.authToken}`,
-                "Content-Type": "application/json",
+                ...HEADER_JSON,
+                ...this.headerAuthorization(),
             },
             body: JSON.stringify(book),
         })
@@ -189,10 +184,10 @@ class Api {
     async updateNote(noteId: string, book: UpdateNote): Promise<Result<undefined, ApiError>> {
         let reqURL = `${this.apiServer}/notes/${noteId}/`
         let resp = await fetch(reqURL, {
-            method: "PATCH",
+            method: HttpMethods.PATCH,
             headers: {
-                "Authorization": `Bearer ${this.authToken}`,
-                "Content-Type": "application/json",
+                ...HEADER_JSON,
+                ...this.headerAuthorization(),
             },
             body: JSON.stringify(book),
         })
@@ -202,11 +197,9 @@ class Api {
     async updateNoteContent(noteId: string, content: string): Promise<Result<undefined, ApiError>> {
         let reqURL = `${this.apiServer}/notes/${noteId}/content/`
         let resp = await fetch(reqURL, {
-            method: "PUT",
+            method: HttpMethods.PUT,
             body: content,
-            headers: {
-                "Authorization": `Bearer ${this.authToken}`
-            }
+            headers: this.headerAuthorization(),
         })
         if (!resp.ok) return new ApiError(resp.status)
         return undefined
@@ -214,10 +207,8 @@ class Api {
     async deleteBook(bookId: string): Promise<Result<undefined, ApiError>> {
         let reqURL = `${this.apiServer}/books/${bookId}/`
         let resp = await fetch(reqURL, {
-            method: "DELETE",
-            headers: {
-                "Authorization": `Bearer ${this.authToken}`,
-            },
+            method: HttpMethods.DELETE,
+            headers: this.headerAuthorization(),
         })
         if (!resp.ok) return new ApiError(resp.status)
         return undefined
@@ -225,10 +216,8 @@ class Api {
     async deleteNote(noteId: string): Promise<Result<undefined, ApiError>> {
         let reqURL = `${this.apiServer}/notes/${noteId}/`
         let resp = await fetch(reqURL, {
-            method: "DELETE",
-            headers: {
-                "Authorization": `Bearer ${this.authToken}`,
-            },
+            method: HttpMethods.DELETE,
+            headers: this.headerAuthorization(),
         })
         if (!resp.ok) return new ApiError(resp.status)
         return undefined
