@@ -2,23 +2,35 @@ import { Component, createSignal } from 'solid-js';
 import { createStore } from "solid-js/store";
 import { useApi } from '../contexts/ApiProvider';
 import { A } from '@solidjs/router';
-import { resultIntoOption } from '../core/core';
+import { ApiError, HttpErrors } from '../core/api';
+import { ToastType, useToast } from '../contexts/ToastProvider';
 
 const Login: Component = () => {
   const { api, apiDetails, setApiDetails } = useApi()
+  const { pushToast } = useToast()
   const [formDetails, setFormDetails] = createStore({ username: "", password: "" })
   const [loading, setLoading] = createSignal(false)
 
   const onSubmit = async (ev: Event) => {
     ev.preventDefault()
     setLoading(true)
-    // TODO handle errors
-    let result = resultIntoOption(await api().postTokenPasswordFlow(formDetails.username, formDetails.password))
+    let result = await api().postTokenPasswordFlow(formDetails.username, formDetails.password)
     setLoading(false)
-    if (result !== undefined) {
-      setApiDetails({ authToken: result.access_token, apiServer: apiDetails().apiServer })
-    } else {
+
+    if (result instanceof ApiError) {
+      switch (result.status) {
+        case HttpErrors.Unauthorized:
+          pushToast({ message: "could not login, given details not accepted", type: ToastType.WARNING })
+          break;
+        default:
+          pushToast({ message: `an unknown error occurred while logging-in, status = ${result.status}`, type: ToastType.ERROR })
+          console.error(result, result.stack);
+          break;
+      }
       setFormDetails({ password: "" })
+    } else {
+      console.debug(`login flow success, token expires in ${result.expires_in}`)
+      setApiDetails({ authToken: result.access_token, apiServer: apiDetails().apiServer })
     }
   }
 
