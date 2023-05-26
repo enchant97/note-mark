@@ -1,6 +1,7 @@
 import { Component, Show, createResource } from 'solid-js';
 import { useApi } from '../../contexts/ApiProvider';
 import { Note } from '../../core/types';
+import { LoadingBar } from '../loading';
 
 type NoteViewProps = {
   note: Note
@@ -16,8 +17,8 @@ const NoteView: Component<NoteViewProps> = (props) => {
   })
 
   return (
-    <Show when={!noteContent.loading} fallback={<progress class="progress w-full"></progress>}>
-      <div class="prose max-w-none" innerHTML={noteContent() || ""}></div>
+    <Show when={noteContent()} fallback={<LoadingBar />}>
+      {content => <div class="prose max-w-none" innerHTML={content()}></div>}
     </Show>
   )
 }

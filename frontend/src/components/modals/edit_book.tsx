@@ -86,7 +86,7 @@ const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
           </label>
         </div>
         <div class="modal-action">
-          <button onclick={onDelete} class="btn btn-outline btn-error" classList={{ loading: loading() }} type="button">Delete</button>
+          <button onclick={onDelete} class="btn btn-outline btn-error" classList={{ "btn-disabled": loading() }} type="button">Delete</button>
           <button class="btn btn-primary" classList={{ loading: loading() }} type="submit">Save</button>
           <button onclick={() => props.onClose()} class="btn" type="button">Cancel</button>
         </div>

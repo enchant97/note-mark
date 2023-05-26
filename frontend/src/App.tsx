@@ -5,6 +5,7 @@ import { useApi } from './contexts/ApiProvider';
 import ProtectedRoute from './components/protected_route';
 import { DrawerProvider } from './contexts/DrawerProvider';
 import { Book, Note } from './core/types';
+import { LoadingBar } from './components/loading';
 
 const Index = lazy(() => import("./pages/index"));
 const Login = lazy(() => import("./pages/login"));
@@ -49,42 +50,42 @@ const MainApp: Component = () => {
       <div class="drawer-content pb-8">
         <Header />
         <div class="px-6">
-          <Show when={!booksById.loading && !notesById.loading} fallback={<progress class="progress w-full"></progress>}>
-            <DrawerProvider
-              updateBook={(newBook: Book) => {
-                mutateBooks((v) => {
-                  if (Array.isArray(v)) { v = new Map() }
-                  v?.set(newBook.id, newBook)
-                  return new Map(v)
-                })
-              }}
-              updateNote={(newNote: Note) => {
-                mutateNotes((v) => {
-                  if (Array.isArray(v)) { v = new Map() }
-                  v?.set(newNote.id, newNote)
-                  return new Map(v)
-                })
-              }}
-              deleteBook={(id) => {
-                mutateBooks((v) => {
-                  if (!Array.isArray(v)) {
-                    v?.delete(id)
-                  }
-                  return new Map(v)
-                })
-              }}
-              deleteNote={(id) => {
-                mutateNotes((v) => {
-                  if (!Array.isArray(v)) {
-                    v?.delete(id)
-                  }
-                  return new Map(v)
-                })
-              }}
-            >
+          <DrawerProvider
+            updateBook={(newBook: Book) => {
+              mutateBooks((v) => {
+                if (Array.isArray(v)) { v = new Map() }
+                v?.set(newBook.id, newBook)
+                return new Map(v)
+              })
+            }}
+            updateNote={(newNote: Note) => {
+              mutateNotes((v) => {
+                if (Array.isArray(v)) { v = new Map() }
+                v?.set(newNote.id, newNote)
+                return new Map(v)
+              })
+            }}
+            deleteBook={(id) => {
+              mutateBooks((v) => {
+                if (!Array.isArray(v)) {
+                  v?.delete(id)
+                }
+                return new Map(v)
+              })
+            }}
+            deleteNote={(id) => {
+              mutateNotes((v) => {
+                if (!Array.isArray(v)) {
+                  v?.delete(id)
+                }
+                return new Map(v)
+              })
+            }}
+          >
+            <Show when={!booksById.loading && !notesById.loading} fallback={<LoadingBar />}>
               <Outlet />
-            </DrawerProvider>
-          </Show>
+            </Show>
+          </DrawerProvider>
         </div>
       </div>
       <div class="drawer-side">

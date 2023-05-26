@@ -3,6 +3,7 @@ import { useApi } from '../../contexts/ApiProvider';
 import { Note } from '../../core/types';
 import Editor, { EditorState } from '../editor';
 import { createStore } from 'solid-js/store';
+import { LoadingBar } from '../loading';
 
 type NoteEditProps = {
   note: Note
@@ -32,14 +33,14 @@ const NoteEdit: Component<NoteEditProps> = (props) => {
   }
 
   return (
-    <Show when={!initialContent.loading} fallback={<progress class="progress w-full"></progress>}>
-      <Editor
-        content={initialContent() || ""}
+    <Show when={initialContent()} fallback={<LoadingBar />} keyed>
+      {content => <Editor
+        content={content}
         autoSaveTimeout={6000}
         onSave={save}
         state={state}
         setState={setState}
-      />
+      />}
     </Show>
   )
 }

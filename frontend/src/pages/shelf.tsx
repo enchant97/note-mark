@@ -1,4 +1,4 @@
-import { Component, Match, Show, Switch, createResource, lazy } from 'solid-js';
+import { Component, Match, Show, Suspense, Switch, createResource, lazy } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { useParams, useSearchParams } from '@solidjs/router';
 import { Book, Breadcrumb, Note } from '../core/types';
@@ -11,6 +11,7 @@ import NewNoteModal from '../components/modals/new_note';
 import UpdateBookModal from '../components/modals/edit_book';
 import UpdateNoteModal from '../components/modals/edit_note';
 import { useDrawer } from '../contexts/DrawerProvider';
+import { LoadingBar } from '../components/loading';
 
 const NoteEdit = lazy(() => import("../components/note/edit"))
 const NoteView = lazy(() => import("../components/note/view"))
@@ -186,7 +187,7 @@ const Shelf: Component = () => {
           </label>
         </Show>
       </div>
-      <Show when={!note.loading} fallback={<progress class="progress w-full"></progress>}>
+      <Show when={!note.loading} fallback={<LoadingBar />}>
         <Show when={note()} fallback={
           <div class="hero pt-6 bg-base-200 rounded-md">
             <div class="hero-content text-center">
@@ -197,7 +198,15 @@ const Shelf: Component = () => {
             </div>
           </div>
         }>
-          {editMode() && <NoteEdit note={note()} /> || <NoteView note={note()} />}
+          {note => <Switch>
+            <Match when={!editMode()}>
+              <NoteView note={note()} />
+            </Match>
+            <Match when={editMode()}>
+              <NoteEdit note={note()} />
+            </Match>
+          </Switch>
+          }
         </Show>
       </Show>
     </div>
