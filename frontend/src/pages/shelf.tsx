@@ -183,10 +183,17 @@ const Shelf: Component = () => {
         <Show when={note()}>
           <label class="label cursor-pointer gap-3 p-2 rounded-md shadow-md bg-base-200">
             <span class="label-text">Edit</span>
-            <input type="checkbox" class="toggle" checked={editMode()} onchange={(_) => {
-              if (editMode()) { setSearchParams({ edit: undefined }) }
-              else { setSearchParams({ edit: "true" }) }
-            }} title="Toggle View/Edit Mode" />
+            <input
+              type="checkbox"
+              class="toggle"
+              disabled={!allowNoteCreate()}
+              checked={editMode()}
+              onchange={(_) => {
+                if (editMode()) { setSearchParams({ edit: undefined }) }
+                else { setSearchParams({ edit: "true" }) }
+              }}
+              title="Toggle View/Edit Mode"
+            />
           </label>
         </Show>
       </div>
