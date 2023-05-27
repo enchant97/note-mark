@@ -27,7 +27,7 @@ func httpErrorHandler(err error, ctx echo.Context) {
 		ctx.NoContent(http.StatusNotFound)
 	} else if errors.Is(err, gorm.ErrDuplicatedKey) {
 		ctx.NoContent(http.StatusConflict)
-	} else if errors.Is(err, core.BindError) || errors.Is(err, core.ValidationError) {
+	} else if errors.Is(err, core.ErrBind) || errors.Is(err, core.ErrValidation) {
 		ctx.NoContent(http.StatusUnprocessableEntity)
 	} else {
 		ctx.NoContent(http.StatusInternalServerError)
