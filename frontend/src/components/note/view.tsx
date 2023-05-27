@@ -2,7 +2,8 @@ import { Component, Show, createResource } from 'solid-js';
 import { useApi } from '../../contexts/ApiProvider';
 import { Note } from '../../core/types';
 import { LoadingBar } from '../loading';
-import { resultUnwrap } from '../../core/core';
+import { useToast, apiErrorIntoToast } from '../../contexts/ToastProvider';
+import { ApiError } from '../../core/api';
 
 type NoteViewProps = {
   note: Note
@@ -10,11 +11,13 @@ type NoteViewProps = {
 
 const NoteView: Component<NoteViewProps> = (props) => {
   const { api } = useApi()
-
+  const { pushToast } = useToast()
   const [noteContent] = createResource(() => props.note, async (note) => {
     let result = await api().getNoteRenderedById(note.id)
-    // TODO handle errors
-    return resultUnwrap(result)
+    if (result instanceof ApiError) {
+      pushToast(apiErrorIntoToast(result, "getting note content"))
+      return
+    } else return result
   })
 
   return (

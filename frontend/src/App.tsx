@@ -6,7 +6,8 @@ import ProtectedRoute from './components/protected_route';
 import { DrawerProvider } from './contexts/DrawerProvider';
 import { Book, Note } from './core/types';
 import { LoadingBar } from './components/loading';
-import { resultUnwrap } from './core/core';
+import { apiErrorIntoToast, useToast } from './contexts/ToastProvider';
+import { ApiError } from './core/api';
 
 const Index = lazy(() => import("./pages/index"));
 const Login = lazy(() => import("./pages/login"));
@@ -17,13 +18,16 @@ const Shelf = lazy(() => import("./pages/shelf"));
 const MainApp: Component = () => {
   const params = useParams()
   const { api } = useApi()
+  const { pushToast } = useToast()
 
   // NOTE: `|| ""` required as resource source will only compare non-nullish/non-false
   const [booksById, { mutate: mutateBooks }] = createResource(() => params.username || "", async (username) => {
     if (!username) return []
-    // TODO handle errors
     let result = await api().getBooksBySlug(username)
-    return new Map(resultUnwrap(result).map((v) => [v.id, v]))
+    if (result instanceof ApiError) {
+      pushToast(apiErrorIntoToast(result, `loading books for ${username}`))
+      return []
+    } else return new Map(result.map((v) => [v.id, v]))
   })
 
   const books = () => {
@@ -34,9 +38,11 @@ const MainApp: Component = () => {
 
   const [notesById, { mutate: mutateNotes }] = createResource(() => [params.username, params.bookSlug], async ([username, bookSlug]) => {
     if (!username || !bookSlug) return []
-    // TODO handle errors
     let result = await api().getNotesBySlug(username, bookSlug)
-    return new Map(resultUnwrap(result).map((v) => [v.id, v]))
+    if (result instanceof ApiError) {
+      pushToast(apiErrorIntoToast(result, `loading notes for ${username}/${bookSlug}}`))
+      return []
+    } else return new Map(result.map((v) => [v.id, v]))
   })
 
   const notes = () => {

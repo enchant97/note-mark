@@ -5,7 +5,8 @@ import { createStore } from 'solid-js/store';
 import { toSlug } from '../../core/helpers';
 import { useApi } from '../../contexts/ApiProvider';
 import { useNavigate } from '@solidjs/router';
-import { resultUnwrap } from '../../core/core';
+import { apiErrorIntoToast, useToast } from '../../contexts/ToastProvider';
+import { ApiError } from '../../core/api';
 
 type UpdateBookModalProps = {
   onClose: (book?: Book) => void
@@ -16,6 +17,7 @@ type UpdateBookModalProps = {
 
 const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
   const { api } = useApi()
+  const { pushToast } = useToast()
   const navigate = useNavigate()
   const [form, setForm] = createStore<UpdateBook>(props.book)
   const [loading, setLoading] = createSignal(false)
@@ -25,24 +27,28 @@ const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
     setLoading(true)
     let result = await api().updateBook(props.book.id, form)
     setLoading(false)
-    resultUnwrap(result)
-    navigate(`/${props.user.username}/${form.slug}`)
-    props.onClose({
-      id: props.book.id,
-      ownerId: props.book.ownerId,
-      name: form.name || props.book.name,
-      slug: form.slug || props.book.slug,
-      isPublic: form.isPublic || props.book.isPublic
-    })
+    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "saving book"))
+    else {
+      navigate(`/${props.user.username}/${form.slug}`)
+      props.onClose({
+        id: props.book.id,
+        ownerId: props.book.ownerId,
+        name: form.name || props.book.name,
+        slug: form.slug || props.book.slug,
+        isPublic: form.isPublic || props.book.isPublic
+      })
+    }
   }
 
   const onDelete = async () => {
     setLoading(true)
     let result = await api().deleteBook(props.book.id)
     setLoading(false)
-    resultUnwrap(result)
-    navigate(`/${props.user.username}`)
-    props.onDeleteClose(props.book.id)
+    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "deleting book"))
+    else {
+      navigate(`/${props.user.username}`)
+      props.onDeleteClose(props.book.id)
+    }
   }
 
   return (

@@ -12,7 +12,8 @@ import UpdateBookModal from '../components/modals/edit_book';
 import UpdateNoteModal from '../components/modals/edit_note';
 import { useDrawer } from '../contexts/DrawerProvider';
 import { LoadingBar } from '../components/loading';
-import { resultUnwrap } from '../core/core';
+import { apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
+import { ApiError } from '../core/api';
 
 const NoteEdit = lazy(() => import("../components/note/edit"))
 const NoteView = lazy(() => import("../components/note/view"))
@@ -20,6 +21,7 @@ const NoteView = lazy(() => import("../components/note/view"))
 const Shelf: Component = () => {
   const params = useParams()
   const { api } = useApi()
+  const { pushToast } = useToast()
   const user = useCurrentUser()
   const [searchParams, setSearchParams] = useSearchParams()
   const { setModal, clearModal } = useModal()
@@ -48,15 +50,15 @@ const Shelf: Component = () => {
   const [book, { mutate: setBook }] = createResource(slugParts, async ({ username, bookSlug }) => {
     if (!username || !bookSlug) return undefined
     let result = await api().getBookBySlug(username, bookSlug)
-    // TODO handle errors
-    return resultUnwrap(result)
+    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, `loading book ${username}/${bookSlug}`))
+    else return result
   })
 
   const [note, { mutate: setNote }] = createResource(slugParts, async ({ username, bookSlug, noteSlug }) => {
     if (!username || !bookSlug || !noteSlug) return undefined
     let result = await api().getNoteBySlug(username, bookSlug, noteSlug)
-    // TODO handle errors
-    return resultUnwrap(result)
+    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, `loading note ${username}/${bookSlug}/${noteSlug}`))
+    else return result
   })
 
   const breadcrumb: () => Breadcrumb = () => {

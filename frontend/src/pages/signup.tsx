@@ -2,8 +2,8 @@ import { Component, createSignal } from 'solid-js';
 import { createStore } from "solid-js/store";
 import { useApi } from '../contexts/ApiProvider';
 import { A, useNavigate } from '@solidjs/router';
-import { ToastType, useToast } from '../contexts/ToastProvider';
-import { resultIntoOption } from '../core/core';
+import { ToastType, apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
+import { ApiError } from '../core/api';
 
 const Signup: Component = () => {
   const { api } = useApi()
@@ -15,13 +15,14 @@ const Signup: Component = () => {
   const onSubmit = async (ev: Event) => {
     ev.preventDefault()
     setLoading(true)
-    // TODO handle errors
-    let result = resultIntoOption(await api().createUser({
+    let result = await api().createUser({
       username: formDetails.username,
       password: formDetails.password,
-    }))
+    })
     setLoading(false)
-    if (result !== undefined) {
+    if (result instanceof ApiError) {
+      pushToast(apiErrorIntoToast(result, "creating account"))
+    } else {
       pushToast({ message: "created new account", type: ToastType.SUCCESS })
       navigate("/login")
     }

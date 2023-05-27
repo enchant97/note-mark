@@ -5,7 +5,8 @@ import { createStore } from 'solid-js/store';
 import { toSlug } from '../../core/helpers';
 import { useApi } from '../../contexts/ApiProvider';
 import { useNavigate } from '@solidjs/router';
-import { resultUnwrap } from '../../core/core';
+import { ApiError } from '../../core/api';
+import { apiErrorIntoToast, useToast } from '../../contexts/ToastProvider';
 
 type NewBookModalProps = {
   onClose: (newBook?: Book) => void
@@ -14,6 +15,7 @@ type NewBookModalProps = {
 
 const NewBookModal: Component<NewBookModalProps> = (props) => {
   const { api } = useApi()
+  const { pushToast } = useToast()
   const navigate = useNavigate()
   const [form, setForm] = createStore<CreateBook>({ name: "", slug: "", isPublic: false })
   const [loading, setLoading] = createSignal(false)
@@ -23,9 +25,11 @@ const NewBookModal: Component<NewBookModalProps> = (props) => {
     setLoading(true)
     let result = await api().createBook(form)
     setLoading(false)
-    let book = resultUnwrap(result)
-    navigate(`/${props.user.username}/${form.slug}`)
-    props.onClose(book)
+    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "creating book"))
+    else {
+      navigate(`/${props.user.username}/${form.slug}`)
+      props.onClose(result)
+    }
   }
 
   return (

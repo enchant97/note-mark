@@ -2,8 +2,8 @@ import { Component, createSignal } from 'solid-js';
 import { createStore } from "solid-js/store";
 import { useApi } from '../contexts/ApiProvider';
 import { A } from '@solidjs/router';
-import { ApiError, HttpErrors } from '../core/api';
-import { ToastType, useToast } from '../contexts/ToastProvider';
+import { ApiError } from '../core/api';
+import { apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
 
 const Login: Component = () => {
   const { api, apiDetails, setApiDetails } = useApi()
@@ -18,15 +18,7 @@ const Login: Component = () => {
     setLoading(false)
 
     if (result instanceof ApiError) {
-      switch (result.status) {
-        case HttpErrors.Unauthorized:
-          pushToast({ message: "could not login, given details not accepted", type: ToastType.WARNING })
-          break;
-        default:
-          pushToast({ message: `an unknown error occurred while logging-in, status = ${result.status}`, type: ToastType.ERROR })
-          console.error(result, result.stack);
-          break;
-      }
+      pushToast(apiErrorIntoToast(result, "logging-in"))
       setFormDetails({ password: "" })
     } else {
       console.debug(`login flow success, token expires in ${result.expires_in}`)

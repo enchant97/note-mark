@@ -2,6 +2,7 @@ import { Component, For, createContext, onMount, useContext } from "solid-js"
 import { optionExpect } from "../core/core"
 import { Portal } from "solid-js/web"
 import { createStore } from "solid-js/store"
+import { ApiError, HttpErrors } from "../core/api"
 
 export enum ToastType {
   INFO = "info",
@@ -77,4 +78,36 @@ export const Toasts: Component = () => {
       </div>
     </Portal>
   )
+}
+
+/**
+ * convert a api error into a toast
+ * @param err the api error
+ * @param when the message part to include in toast
+ * @returns the created toast
+ */
+export function apiErrorIntoToast(err: ApiError, when: string): Toast {
+  switch (err.status) {
+    case HttpErrors.Unauthorized:
+      return {
+        message: `authentication not recognised when ${when}`,
+        type: ToastType.ERROR,
+      }
+    case HttpErrors.Conflict:
+      return {
+        message: `resource conflict when ${when}`,
+        type: ToastType.ERROR,
+      }
+    case HttpErrors.NotFound:
+      return {
+        message: `resource was not found when ${when}, do you have permission?`,
+        type: ToastType.ERROR,
+      }
+    default:
+      console.error(err, err.stack);
+      return {
+        message: `an unknown error occurred when ${when}, status = ${err.status}`,
+        type: ToastType.ERROR,
+      }
+  }
 }

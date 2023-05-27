@@ -5,7 +5,8 @@ import { createStore } from 'solid-js/store';
 import { toSlug } from '../../core/helpers';
 import { useApi } from '../../contexts/ApiProvider';
 import { useNavigate } from '@solidjs/router';
-import { resultUnwrap } from '../../core/core';
+import { apiErrorIntoToast, useToast } from '../../contexts/ToastProvider';
+import { ApiError } from '../../core/api';
 
 type UpdateNoteModalProps = {
   onClose: (note?: Note) => void
@@ -17,6 +18,7 @@ type UpdateNoteModalProps = {
 
 const UpdateNoteModal: Component<UpdateNoteModalProps> = (props) => {
   const { api } = useApi()
+  const { pushToast } = useToast()
   const navigate = useNavigate()
   const [form, setForm] = createStore<UpdateNote>(props.note)
   const [loading, setLoading] = createSignal(false)
@@ -26,23 +28,28 @@ const UpdateNoteModal: Component<UpdateNoteModalProps> = (props) => {
     setLoading(true)
     let result = await api().updateNote(props.note.id, form)
     setLoading(false)
-    resultUnwrap(result)
-    navigate(`/${props.user.username}/${props.book.slug}/${form.slug}`)
-    props.onClose({
-      id: props.note.id,
-      bookId: props.note.bookId,
-      name: form.name || props.note.name,
-      slug: form.slug || props.note.slug,
-    })
+
+    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "saving note"))
+    else {
+      navigate(`/${props.user.username}/${props.book.slug}/${form.slug}`)
+      props.onClose({
+        id: props.note.id,
+        bookId: props.note.bookId,
+        name: form.name || props.note.name,
+        slug: form.slug || props.note.slug,
+      })
+    }
   }
 
   const onDelete = async () => {
     setLoading(true)
     let result = await api().deleteNote(props.note.id)
     setLoading(false)
-    resultUnwrap(result)
-    navigate(`/${props.user.username}/${props.book.slug}`)
-    props.onDeleteClose(props.note.id)
+    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "deleting note"))
+    else {
+      navigate(`/${props.user.username}/${props.book.slug}`)
+      props.onDeleteClose(props.note.id)
+    }
   }
 
   return (

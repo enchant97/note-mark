@@ -1,14 +1,19 @@
 import { createContext, createResource, useContext } from "solid-js"
-import { optionExpect, resultUnwrap } from "../core/core"
+import { optionExpect } from "../core/core"
 import { useApi } from "./ApiProvider"
+import { apiErrorIntoToast, useToast } from "./ToastProvider"
+import { ApiError } from "../core/api"
 
 const makeCurrentUserContext = () => {
     const { api } = useApi()
+    const { pushToast } = useToast()
     const [user] = createResource(api, async (current_api) => {
         if (current_api.isAuthenticated()) {
             let result = await current_api.getUsersMe()
-            // TODO error handle this!
-            return resultUnwrap(result)
+            if (result instanceof ApiError) {
+                pushToast(apiErrorIntoToast(result, "getting user details"))
+                return undefined
+            } else return result
         }
         return undefined
     })
