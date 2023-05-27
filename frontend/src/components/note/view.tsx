@@ -37,10 +37,12 @@ const NoteView: Component<NoteViewProps> = (props) => {
         <button onclick={() => setShowPlain(true)} class="tab" classList={{ "tab-active": showPlain() }}>Plain</button>
       </div>
       <Show when={noteContent() && !noteContent.loading} fallback={<LoadingBar />}>
-        <div
-          class="prose max-w-none"
-          innerHTML={!showPlain() ? noteContent() : `<pre class="whitespace-pre-wrap">${noteContent()}<pre>`}>
-        </div>
+        <Show
+          when={!showPlain()}
+          fallback={<div class="prose max-w-none"><pre class="whitespace-pre-wrap">{noteContent()}</pre></div>}
+        >
+          <div class="prose max-w-none" innerHTML={noteContent()}></div>
+        </Show>
       </Show>
     </>
   )
