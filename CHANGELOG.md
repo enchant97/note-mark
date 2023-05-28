@@ -4,9 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0-alpha.2] - 2023-05-28
+### Added
+- theme picker to choose between light/dark themes
+- error handling for frontend
+- ability to push "toasts" to screen
+- user search functionality (to access public notebooks)
+### Changed
+- improved loading screens
+- support for GFM (GitHub flavoured markdown)
+- tab to toggle between rendered and raw view
+### Fixed
+- arm64 & amd64 docker image (was broken)
+- disable edit screen when viewing a read-only notebook/note
+
 ## [0.6.0-alpha] - 2023-05-26
 ### Changed
-Complete overhaul of original Note Mark project.
+- Complete overhaul of original Note Mark project.
 
 ## [0.5.0] - 2022-07-15
 ### Changed

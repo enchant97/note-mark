@@ -29,11 +29,11 @@ This app consists of two components, the backend (api) and the frontend.
 > - `<major>.<minor>.<patch>`
 
 ```
-ghcr.io/enchant97/note-mark-frontend:0.6.0-alpha
+ghcr.io/enchant97/note-mark-frontend:0.6.0-alpha.2
 ```
 
 ```
-ghcr.io/enchant97/note-mark-backend:0.6.0-alpha
+ghcr.io/enchant97/note-mark-backend:0.6.0-alpha.2
 ```
 
 Here is an example using Docker Compose and a NGINX reverse proxy:
@@ -47,7 +47,7 @@ volumes:
 
 services:
   backend:
-    image: ghcr.io/enchant97/note-mark-backend:0.6.0-alpha
+    image: ghcr.io/enchant97/note-mark-backend:0.6.0-alpha.2
     restart: unless-stopped
     volumes:
       - data:/data
@@ -56,7 +56,7 @@ services:
       CORS_ORIGINS: "http://example.com"
 
   frontend:
-    image: ghcr.io/enchant97/note-mark-frontend:0.6.0-alpha
+    image: ghcr.io/enchant97/note-mark-frontend:0.6.0-alpha.2
     restart: unless-stopped
 
   proxy:
