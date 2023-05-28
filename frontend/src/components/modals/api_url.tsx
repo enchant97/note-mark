@@ -1,12 +1,12 @@
 import { Component, createSignal } from "solid-js";
 import BaseModal from "./base";
 
-type ApiUrlModal = {
+type ApiUrlModalProps = {
   onClose: (newUrl?: string) => void
   apiUrl: string
 }
 
-const ApiUrlModal: Component<ApiUrlModal> = (props) => {
+const ApiUrlModal: Component<ApiUrlModalProps> = (props) => {
   const [apiUrl, setApiUrl] = createSignal(props.apiUrl)
 
   const onSubmit = (ev: Event) => {
