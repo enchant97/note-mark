@@ -84,7 +84,7 @@ func getBookBySlug(ctx echo.Context) error {
 	var book db.Book
 	if err := db.DB.
 		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
-		First(&book, "slug = ?", bookSlug, "owner_id = ?", bookOwner.ID).
+		First(&book, "slug = ? AND owner_id = ?", bookSlug, bookOwner.ID).
 		Error; err != nil {
 		return err
 	}
