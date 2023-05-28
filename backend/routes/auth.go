@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
@@ -35,6 +36,7 @@ func postToken(ctx echo.Context) error {
 	if token, err := core.CreateAuthenticationToken(
 		authenticationData,
 		[]byte(appConfig.JWTSecret),
+		time.Duration(int64(time.Second)*appConfig.TokenExpiry),
 	); err != nil {
 		return err
 	} else {

@@ -11,6 +11,7 @@ App configuration is accomplished via environment variables, listed below are th
 | DB__TYPE     | Type of DB (sqlite, mysql, postgres)      |           | sqlite          |
 | DB__URI      | URI (or file path if using SQLite)        |           | /data/db.sqlite |
 | JWT_SECRET   | base64 encoded secret                     |           |                 |
+| TOKEN_EXPIRY | seconds until a token expires             | 259200    | 259200          |
 | DATA_PATH    | Where to store app data                   |           | /data           |
 | CORS_ORIGINS | Comma separated values of allowed origins |           |                 |
 
