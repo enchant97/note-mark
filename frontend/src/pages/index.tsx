@@ -2,10 +2,22 @@ import { A } from '@solidjs/router';
 import { Component } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { useCurrentUser } from '../contexts/CurrentUserProvider';
+import { useModal } from '../contexts/ModalProvider';
+import UserSearchModal from '../components/modals/user_search';
 
 const Index: Component = () => {
   const { apiDetails } = useApi()
+  const { setModal, clearModal } = useModal()
   const user = useCurrentUser()
+
+  const openUserSearchModal = () => {
+    setModal({
+      component: UserSearchModal,
+      props: {
+        onClose: () => clearModal(),
+      },
+    })
+  }
 
   return (
     <div class="hero bg-base-200 pt-6 pb-6">
@@ -17,7 +29,13 @@ const Index: Component = () => {
           <div class="btn-group">
             {!apiDetails().authToken && <A href="/login" class="btn btn-outline">Login</A>}
             {user() && <A class="btn btn-outline" href={`/${user()?.username}`}>My Notes</A>}
-            <button class="btn btn-outline btn-disabled" type="button">Find User</button>
+            <button
+              onclick={() => openUserSearchModal()}
+              class="btn btn-outline"
+              type="button"
+            >
+              Find User
+            </button>
           </div>
         </div>
       </div>

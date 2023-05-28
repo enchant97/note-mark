@@ -97,6 +97,13 @@ class Api {
         if (!resp.ok) return new ApiError(resp.status)
         return await resp.json()
     }
+    async getUsersSearch(username: string): Promise<Result<string[], ApiError>> {
+        let reqURL = `${this.apiServer}/users/search/?username=${username}`
+        let resp = await handleFetchErrors(fetch(reqURL))
+        if (resp instanceof Error) return resp
+        if (!resp.ok) return new ApiError(resp.status)
+        return await resp.json()
+    }
     async getUsersMe(): Promise<Result<User, ApiError>> {
         let reqURL = `${this.apiServer}/users/me/`
         let resp = await handleFetchErrors(fetch(reqURL, {
