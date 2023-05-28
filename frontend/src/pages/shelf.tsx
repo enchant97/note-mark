@@ -16,7 +16,8 @@ import { apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
 import { ApiError } from '../core/api';
 
 const NoteEdit = lazy(() => import("../components/note/edit"))
-const NoteView = lazy(() => import("../components/note/view"))
+const NoteViewRendered = lazy(() => import("../components/note/view_rendered"))
+const NoteViewPlain = lazy(() => import("../components/note/view_plain"))
 
 const Shelf: Component = () => {
   const params = useParams()
@@ -27,8 +28,10 @@ const Shelf: Component = () => {
   const { setModal, clearModal } = useModal()
   const drawer = useDrawer()
 
-  const editMode = () => {
-    return searchParams.edit !== undefined && searchParams.edit !== "false"
+  const noteMode = () => {
+    let mode = searchParams.mode
+    if (mode === undefined) return "rendered"
+    else return mode
   }
 
   const slugParts: () => Breadcrumb = () => {
@@ -180,22 +183,6 @@ const Shelf: Component = () => {
           </Switch>
         </div>
         <NoteBreadcrumb class="flex-1" {...breadcrumb()} />
-        <Show when={note()}>
-          <label class="label cursor-pointer gap-3 p-2 rounded-md shadow-md bg-base-200">
-            <span class="label-text">Edit</span>
-            <input
-              type="checkbox"
-              class="toggle"
-              disabled={!allowNoteCreate()}
-              checked={editMode()}
-              onchange={(_) => {
-                if (editMode()) { setSearchParams({ edit: undefined }) }
-                else { setSearchParams({ edit: "true" }) }
-              }}
-              title="Toggle View/Edit Mode"
-            />
-          </label>
-        </Show>
       </div>
       <Show when={!note.loading} fallback={<LoadingBar />}>
         <Show when={note()} fallback={
@@ -208,14 +195,40 @@ const Shelf: Component = () => {
             </div>
           </div>
         }>
-          {note => <Switch>
-            <Match when={!editMode()}>
-              <NoteView note={note()} />
-            </Match>
-            <Match when={editMode()}>
-              <NoteEdit note={note()} />
-            </Match>
-          </Switch>
+          {note => <>
+            <div class="bg-base-200 shadow-md rounded-md">
+              <div class="tabs justify-center">
+                <button
+                  onclick={() => setSearchParams({ mode: undefined })}
+                  class="tab"
+                  classList={{ "tab-active": noteMode() === "rendered" }}
+                  title="switch to rendered view"
+                >Rendered</button>
+                <button
+                  onclick={() => setSearchParams({ mode: "plain" })}
+                  class="tab"
+                  classList={{ "tab-active": noteMode() === "plain" }}
+                  title="switch to plain view"
+                >Plain</button>
+                <Show when={allowNoteCreate()}>
+                  <button
+                    onclick={() => setSearchParams({ mode: "edit" })}
+                    class="tab"
+                    classList={{ "tab-active": noteMode() === "edit" }}
+                    title="switch to editor"
+                  >Editor</button>
+                </Show>
+              </div>
+            </div>
+            <Switch fallback={<NoteViewRendered note={note()} />}>
+              <Match when={noteMode() === "plain"}>
+                <NoteViewPlain note={note()} />
+              </Match>
+              <Match when={noteMode() === "edit"}>
+                <NoteEdit note={note()} />
+              </Match>
+            </Switch>
+          </>
           }
         </Show>
       </Show>
