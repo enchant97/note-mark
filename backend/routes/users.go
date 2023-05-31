@@ -3,12 +3,19 @@ package routes
 import (
 	"net/http"
 
+	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/labstack/echo/v4"
 )
 
 func postCreateUser(ctx echo.Context) error {
+	appConfig := ctx.Get("AppConfig").(config.AppConfig)
+
+	if !appConfig.AllowSignup {
+		return ctx.NoContent(http.StatusForbidden)
+	}
+
 	var userData db.CreateUser
 	if err := core.BindAndValidate(ctx, &userData); err != nil {
 		return err

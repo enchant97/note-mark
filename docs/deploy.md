@@ -14,6 +14,7 @@ App configuration is accomplished via environment variables, listed below are th
 | TOKEN_EXPIRY | seconds until a token expires             | 259200    | 259200          |
 | DATA_PATH    | Where to store app data                   |           | /data           |
 | CORS_ORIGINS | Comma separated values of allowed origins |           |                 |
+| ALLOW_SIGNUP | Whether to enable new accounts            |  true     | true            |
 
 > *TIP* A secret can be generated using: `openssl rand -base64 32`
 

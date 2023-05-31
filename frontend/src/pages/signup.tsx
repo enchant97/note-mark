@@ -3,7 +3,7 @@ import { createStore } from "solid-js/store";
 import { useApi } from '../contexts/ApiProvider';
 import { A, useNavigate } from '@solidjs/router';
 import { ToastType, apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
-import { ApiError } from '../core/api';
+import { ApiError, HttpErrors } from '../core/api';
 
 const Signup: Component = () => {
   const { api } = useApi()
@@ -21,7 +21,11 @@ const Signup: Component = () => {
     })
     setLoading(false)
     if (result instanceof ApiError) {
-      pushToast(apiErrorIntoToast(result, "creating account"))
+      if (result.status === HttpErrors.Forbidden) {
+        pushToast({ message: "server is not accepting new accounts", type: ToastType.ERROR })
+      } else {
+        pushToast(apiErrorIntoToast(result, "creating account"))
+      }
     } else {
       pushToast({ message: "created new account", type: ToastType.SUCCESS })
       navigate("/login")

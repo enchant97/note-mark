@@ -23,4 +23,5 @@ type AppConfig struct {
 	TokenExpiry int64         `env:"TOKEN_EXPIRY" envDefault:"259200"`
 	DataPath    string        `env:"DATA_PATH,notEmpty"`
 	CORSOrigins []string      `env:"CORS_ORIGINS,notEmpty" envSeparator:","`
+	AllowSignup bool          `env:"ALLOW_SIGNUP,notEmpty" envDefault:"true"`
 }
