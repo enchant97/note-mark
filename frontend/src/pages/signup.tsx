@@ -9,7 +9,12 @@ const Signup: Component = () => {
   const { api } = useApi()
   const { pushToast } = useToast()
   const navigate = useNavigate()
-  const [formDetails, setFormDetails] = createStore({ username: "", password: "", passwordConfirm: "" })
+  const [formDetails, setFormDetails] = createStore({
+      username: "",
+      password: "",
+      passwordConfirm: "",
+      name: "",
+  })
   const [loading, setLoading] = createSignal(false)
 
   const onSubmit = async (ev: Event) => {
@@ -18,6 +23,7 @@ const Signup: Component = () => {
     let result = await api().createUser({
       username: formDetails.username,
       password: formDetails.password,
+      name: formDetails.name || undefined,
     })
     setLoading(false)
     if (result instanceof ApiError) {
@@ -60,6 +66,19 @@ const Signup: Component = () => {
                   minlength={3}
                   maxlength={30}
                   required
+                />
+              </div>
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">Full Name</span>
+                </label>
+                <input
+                  class="input input-bordered"
+                  value={formDetails.name}
+                  oninput={(ev) => { setFormDetails({ name: ev.currentTarget.value }) }}
+                  type="text"
+                  placeholder="e.g. Leo S"
+                  maxlength={128}
                 />
               </div>
               <div class="form-control">

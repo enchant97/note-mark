@@ -19,6 +19,7 @@ export type OAuth2AccessToken = {
 export type User = {
     id: string
     username: string
+    name?: string
 }
 
 export type Book = {
@@ -39,6 +40,7 @@ export type Note = {
 export type CreateUser = {
     username: string
     password: string
+    name?: string
 }
 
 export type CreateBook = {

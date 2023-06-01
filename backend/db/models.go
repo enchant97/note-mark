@@ -25,9 +25,10 @@ type TimeBase struct {
 type User struct {
 	UUIDBase
 	TimeBase
-	Username string `gorm:"uniqueIndex;not null;type:varchar(30)" json:"username"`
-	Password []byte `gorm:"not null" json:"-"`
-	Books    []Book `gorm:"foreignKey:OwnerID" json:"books,omitempty"`
+	Username string  `gorm:"uniqueIndex;not null;type:varchar(30)" json:"username"`
+	Password []byte  `gorm:"not null" json:"-"`
+	Name     *string `gorm:"size:128" json:"name"`
+	Books    []Book  `gorm:"foreignKey:OwnerID" json:"books,omitempty"`
 }
 
 func (u *User) SetPassword(newPlainPassword string) {

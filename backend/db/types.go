@@ -3,13 +3,15 @@ package db
 import "github.com/google/uuid"
 
 type CreateUser struct {
-	Username string `json:"username" validate:"required,alphanum,min=3,max=30"`
-	Password string `json:"password" validate:"required"`
+	Username string  `json:"username" validate:"required,alphanum,min=3,max=30"`
+	Password string  `json:"password" validate:"required"`
+	Name     *string `json:"name"`
 }
 
 func (u *CreateUser) IntoUser() User {
 	user := User{
 		Username: u.Username,
+		Name:     u.Name,
 	}
 	user.SetPassword(u.Password)
 	return user
