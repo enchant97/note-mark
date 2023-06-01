@@ -69,6 +69,7 @@ const ProfileDropdownHasAuth = () => {
   return (
     <>
       <li class="menu-title"><span>Logged In As: <span class="kbd kbd-sm">{user()?.username}</span></span></li>
+      <li><A href="/profile">My Profile</A></li>
       <li><A href="/logout">Logout</A></li>
     </>
   )

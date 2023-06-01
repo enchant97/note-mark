@@ -13,6 +13,7 @@ const Index = lazy(() => import("./pages/index"));
 const Login = lazy(() => import("./pages/login"));
 const Signup = lazy(() => import("./pages/signup"));
 const Logout = lazy(() => import("./pages/logout"));
+const Profile = lazy(() => import("./pages/profile"));
 const Shelf = lazy(() => import("./pages/shelf"));
 
 const MainApp: Component = () => {
@@ -162,6 +163,7 @@ const App: Component = () => {
       <ProtectedRoute path="/logout" redirectPath="/" condition={hasAuth} component={Logout} />
       <Route path="/" component={MainApp}>
         <Route path="/" component={Index} />
+        <ProtectedRoute path="/profile" redirectPath="/" condition={hasAuth} component={Profile} />
         <Route path="/:username/:bookSlug?/:noteSlug?" component={Shelf} />
       </Route>
     </Routes>
