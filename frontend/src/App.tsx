@@ -53,7 +53,7 @@ const MainApp: Component = () => {
   }
 
   return (
-    <div class="drawer drawer-mobile">
+    <div class="drawer lg:drawer-open">
       <input id="main-drawer" type="checkbox" class="drawer-toggle" />
       <div class="drawer-content pb-8">
         <Header />
@@ -98,7 +98,7 @@ const MainApp: Component = () => {
       </div>
       <div class="drawer-side">
         <label for="main-drawer" class="drawer-overlay"></label>
-        <ul class="menu menu-compact gap-4 p-4 w-80 bg-base-300 text-base-content max-h-screen">
+        <ul class="menu menu-sm lg:menu-md gap-4 p-4 w-80 bg-base-300 text-base-content h-full">
           <li class="menu-title"><span>NOTEBOOKS</span></li>
           <ul class="overflow-auto bg-base-100 flex-1 w-full rounded-lg">
             <Show when={!booksById.loading}>

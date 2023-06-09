@@ -22,7 +22,7 @@
     "@solidjs/router": "^0.8.2",
     "@tailwindcss/typography": "^0.5.9",
     "codemirror": "^6.0.1",
-    "daisyui": "^2.52.0",
+    "daisyui": "^3.0.22",
     "solid-icons": "^1.0.8",
     "solid-js": "^1.7.6"
   }

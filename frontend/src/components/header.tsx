@@ -19,7 +19,7 @@ const ThemeSwitcher: Component = () => {
         <FiSun size={20} />
         <FiMoon size={20} />
       </label>
-      <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-300 rounded-box">
+      <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 p-2 shadow bg-base-300 rounded-box">
         <For each={THEMES}>
           {(theme) => (
             <li><button
@@ -93,7 +93,7 @@ const Header: Component = () => {
           <label tabindex="0" class="btn btn-ghost btn-circle shadow-lg">
             <FiUser size={20} />
           </label>
-          <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-300 rounded-box w-52">
+          <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 p-2 shadow bg-base-300 rounded-box w-52">
             {apiDetails().authToken && <ProfileDropdownHasAuth /> || <ProfileDropdownNoAuth />}
           </ul>
         </div>

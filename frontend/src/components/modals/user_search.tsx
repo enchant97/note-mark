@@ -48,9 +48,10 @@ const UserSearchModal: Component<UserSearchModalProps> = (props) => {
         <button
           onclick={() => props.onClose()}
           class="btn"
-          classList={{ "loading": users.loading }}
+          classList={{ "btn-disabled": users.loading }}
           type="button"
         >
+          {users.loading && <span class="loading loading-spinner"></span>}
           Close
         </button>
       </div>

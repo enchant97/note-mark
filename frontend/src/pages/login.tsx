@@ -65,10 +65,13 @@ const Login: Component = () => {
                   required
                 />
               </div>
-              <div class="btn-group btn-group-vertical w-full mt-5">
-                <button class="btn btn-primary" classList={{ loading: loading() }} type="submit">Login</button>
-                <A class="btn" href="/signup">Need An Account?</A>
-                <A class="btn" href="/">Back Home</A>
+              <div class="join join-vertical w-full mt-5">
+                <button class="btn join-item btn-primary" classList={{ "btn-disabled": loading() }} type="submit">
+                  {loading() && <span class="loading loading-spinner"></span>}
+                  Login
+                </button>
+                <A class="btn join-item" href="/signup">Need An Account?</A>
+                <A class="btn join-item" href="/">Back Home</A>
               </div>
             </form>
           </div>

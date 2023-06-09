@@ -10,10 +10,10 @@ const Signup: Component = () => {
   const { pushToast } = useToast()
   const navigate = useNavigate()
   const [formDetails, setFormDetails] = createStore({
-      username: "",
-      password: "",
-      passwordConfirm: "",
-      name: "",
+    username: "",
+    password: "",
+    passwordConfirm: "",
+    name: "",
   })
   const [loading, setLoading] = createSignal(false)
 
@@ -110,10 +110,13 @@ const Signup: Component = () => {
                   required
                 />
               </div>
-              <div class="btn-group btn-group-vertical w-full mt-5">
-                <button class="btn btn-primary" classList={{ loading: loading(), "btn-disabled": !passwordsMatch() }} type="submit">Create User</button>
-                <A class="btn" href="/login">Have An Account?</A>
-                <A class="btn" href="/">Back Home</A>
+              <div class="join join-vertical w-full mt-5">
+                <button class="btn join-item btn-primary" classList={{ "btn-disabled": !passwordsMatch() || loading() }} type="submit">
+                  {loading() && <span class="loading loading-spinner"></span>}
+                  Create User
+                </button>
+                <A class="btn join-item" href="/login">Have An Account?</A>
+                <A class="btn join-item" href="/">Back Home</A>
               </div>
             </form>
           </div>

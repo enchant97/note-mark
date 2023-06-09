@@ -9,9 +9,9 @@ const Profile: Component = () => {
       <h1 class="text-xl font-bold">My Profile</h1>
       <div>username: {user()?.username}</div>
       <div class="mb-2">full-name: {user()?.name || ""}</div>
-      <div class="btn-group">
-        <button class="btn btn-disabled">Update Profile</button>
-        <button class="btn btn-disabled">Change Password</button>
+      <div class="join">
+        <button class="btn join-item btn-disabled">Update Profile</button>
+        <button class="btn join-item btn-disabled">Change Password</button>
       </div>
     </div>
   );

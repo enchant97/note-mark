@@ -138,10 +138,10 @@ const Shelf: Component = () => {
   return (
     <div class="flex flex-col gap-4">
       <div class="flex gap-4">
-        <div class="btn-group rounded-lg shadow-md bg-base-200">
+        <div class="join rounded-lg shadow-md bg-base-200">
           <button
             onclick={onNewBookClick}
-            class="btn btn-ghost"
+            class="btn join-item btn-ghost"
             type="button"
             classList={{ "btn-disabled": !allowBookCreate() }}
             title="Create New Notebook"
@@ -150,7 +150,7 @@ const Shelf: Component = () => {
           </button>
           <button
             onclick={onNewNoteClick}
-            class="btn btn-ghost"
+            class="btn join-item btn-ghost"
             type="button"
             classList={{ "btn-disabled": !allowNoteCreate() }}
             title="Create New Note"
@@ -161,7 +161,7 @@ const Shelf: Component = () => {
             <Match when={book() && !note()}>
               <button
                 onclick={onUpdateBookClick}
-                class="btn btn-ghost"
+                class="btn join-item btn-ghost"
                 type="button"
                 classList={{ "btn-disabled": !allowNoteCreate() }}
                 title="Notebook Settings"
@@ -172,7 +172,7 @@ const Shelf: Component = () => {
             <Match when={book() && note()}>
               <button
                 onclick={onUpdateNoteClick}
-                class="btn btn-ghost"
+                class="btn join-item btn-ghost"
                 type="button"
                 classList={{ "btn-disabled": !allowNoteCreate() }}
                 title="Note Settings"
