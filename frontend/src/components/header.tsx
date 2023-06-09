@@ -1,6 +1,6 @@
 import { Component, For, createEffect, createSignal } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
-import { HiOutlineHome, HiOutlineUser, HiSolidMenu } from 'solid-icons/hi';
+import { HiOutlineHome, HiOutlineUser, HiSolidBars3 } from 'solid-icons/hi';
 import { A } from '@solidjs/router';
 import { useCurrentUser } from '../contexts/CurrentUserProvider';
 import { useModal } from '../contexts/ModalProvider';
@@ -82,7 +82,7 @@ const Header: Component = () => {
     <div class="w-full navbar bg-base-100">
       <div class="flex-none lg:hidden">
         <label for="main-drawer" class="btn btn-square btn-ghost">
-          <HiSolidMenu size={20} />
+          <HiSolidBars3 size={20} />
         </label>
       </div>
       <span class="flex-1 px-2 mx-2 text-xl">Note Mark</span>
