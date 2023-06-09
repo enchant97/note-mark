@@ -1,6 +1,6 @@
 import { Component, For, createEffect, createSignal } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
-import { HiOutlineHome, HiOutlineUser, HiSolidBars3 } from 'solid-icons/hi';
+import { FiHome, FiUser, FiMenu } from 'solid-icons/fi';
 import { A } from '@solidjs/router';
 import { useCurrentUser } from '../contexts/CurrentUserProvider';
 import { useModal } from '../contexts/ModalProvider';
@@ -82,16 +82,16 @@ const Header: Component = () => {
     <div class="w-full navbar bg-base-100">
       <div class="flex-none lg:hidden">
         <label for="main-drawer" class="btn btn-square btn-ghost">
-          <HiSolidBars3 size={20} />
+          <FiMenu size={20} />
         </label>
       </div>
       <span class="flex-1 px-2 mx-2 text-xl">Note Mark</span>
       <div class="flex gap-4">
         <ThemeSwitcher />
-        <A activeClass="btn-disabled" class="btn btn-ghost btn-circle shadow-lg" end={true} href="/"><HiOutlineHome size={20} /></A>
+        <A activeClass="btn-disabled" class="btn btn-ghost btn-circle shadow-lg" end={true} href="/"><FiHome size={20} /></A>
         <div class="dropdown dropdown-end">
           <label tabindex="0" class="btn btn-ghost btn-circle shadow-lg">
-            <HiOutlineUser size={20} />
+            <FiUser size={20} />
           </label>
           <ul tabindex="0" class="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-300 rounded-box w-52">
             {apiDetails().authToken && <ProfileDropdownHasAuth /> || <ProfileDropdownNoAuth />}
