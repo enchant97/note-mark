@@ -1,8 +1,27 @@
 import type { Component } from 'solid-js';
+import UpdateUserModal from '../components/modals/edit_user';
 import { useCurrentUser } from '../contexts/CurrentUserProvider';
+import { useModal } from '../contexts/ModalProvider';
+import { User } from '../core/types';
 
 const Profile: Component = () => {
-  const user = useCurrentUser()
+  const { setModal, clearModal } = useModal()
+  const { user, setUser } = useCurrentUser()
+
+  const onUpdateProfileClick = () => {
+    setModal({
+      component: UpdateUserModal,
+      props: {
+        onClose: (newUser?: User) => {
+          if (newUser !== undefined) {
+            setUser(newUser)
+          }
+          clearModal()
+        },
+        user: user(),
+      },
+    })
+  }
 
   return (
     <div class="bg-base-200 p-6 rounded-md">
@@ -10,8 +29,8 @@ const Profile: Component = () => {
       <div>username: {user()?.username}</div>
       <div class="mb-2">full-name: {user()?.name || ""}</div>
       <div class="join">
-        <button class="btn join-item btn-disabled">Update Profile</button>
-        <button class="btn join-item btn-disabled">Change Password</button>
+        <button onclick={() => onUpdateProfileClick()} class="btn join-item">Update Profile</button>
+        <button class="btn btn-disabled join-item">Change Password</button>
       </div>
     </div>
   );

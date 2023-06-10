@@ -54,6 +54,10 @@ export type CreateNote = {
   slug: string
 }
 
+export type UpdateUser = {
+  name?: string
+}
+
 export type UpdateBook = {
   name?: string
   slug?: string

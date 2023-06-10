@@ -8,7 +8,7 @@ import UserSearchModal from '../components/modals/user_search';
 const Index: Component = () => {
   const { apiDetails } = useApi()
   const { setModal, clearModal } = useModal()
-  const user = useCurrentUser()
+  const { user } = useCurrentUser()
 
   const openUserSearchModal = () => {
     setModal({

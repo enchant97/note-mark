@@ -5,7 +5,7 @@ import "github.com/google/uuid"
 type CreateUser struct {
 	Username string  `json:"username" validate:"required,alphanum,min=3,max=30"`
 	Password string  `json:"password" validate:"required"`
-	Name     *string `json:"name"`
+	Name     *string `json:"name" validate:"omitempty,max=128"`
 }
 
 func (u *CreateUser) IntoUser() User {
@@ -43,6 +43,10 @@ func (n *CreateNote) IntoNote(bookID uuid.UUID) Note {
 		Slug:   n.Slug,
 		BookID: bookID,
 	}
+}
+
+type UpdateUser struct {
+	Name *string `json:"name" validate:"omitempty,max=128"`
 }
 
 type UpdateBook struct {

@@ -23,7 +23,7 @@ const Shelf: Component = () => {
   const params = useParams()
   const { api } = useApi()
   const { pushToast } = useToast()
-  const user = useCurrentUser()
+  const { user } = useCurrentUser()
   const [searchParams, setSearchParams] = useSearchParams()
   const { setModal, clearModal } = useModal()
   const drawer = useDrawer()

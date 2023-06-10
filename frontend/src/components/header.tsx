@@ -64,7 +64,7 @@ const ProfileDropdownNoAuth = () => {
 }
 
 const ProfileDropdownHasAuth = () => {
-  const user = useCurrentUser()
+  const { user } = useCurrentUser()
 
   return (
     <>

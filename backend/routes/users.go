@@ -41,6 +41,21 @@ func getUserMe(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, user)
 }
 
+func updateUserMe(ctx echo.Context) error {
+	authenticatedUser := getAuthenticatedUser(ctx)
+
+	var userData db.UpdateUser
+	if err := core.BindAndValidate(ctx, &userData); err != nil {
+		return err
+	}
+
+	if err := db.DB.First(&db.User{}, "id = ?", authenticatedUser.UserID).Updates(userData).Error; err != nil {
+		return err
+	}
+
+	return ctx.NoContent(http.StatusOK)
+}
+
 func searchForUser(ctx echo.Context) error {
 	var params core.FindUserParams
 	if err := core.BindAndValidate(ctx, &params); err != nil {
