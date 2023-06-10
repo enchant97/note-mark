@@ -56,6 +56,35 @@ func updateUserMe(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
+func updateUserMePassword(ctx echo.Context) error {
+	authenticatedUser := getAuthenticatedUser(ctx)
+
+	var userData db.UpdateUserPassword
+	if err := core.BindAndValidate(ctx, &userData); err != nil {
+		return err
+	}
+
+	var user db.User
+	if err := db.DB.
+		First(&user, "id = ?", authenticatedUser.UserID).
+		Select("password").
+		Error; err != nil {
+		return err
+	}
+
+	if !user.IsPasswordMatch(userData.ExistingPassword) {
+		return ctx.NoContent(http.StatusForbidden)
+	}
+
+	user.SetPassword(userData.NewPassword)
+
+	if err := db.DB.Save(&user).Error; err != nil {
+		return err
+	}
+
+	return ctx.NoContent(http.StatusOK)
+}
+
 func searchForUser(ctx echo.Context) error {
 	var params core.FindUserParams
 	if err := core.BindAndValidate(ctx, &params); err != nil {

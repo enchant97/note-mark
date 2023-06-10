@@ -1,5 +1,5 @@
 import { Result } from "./core"
-import { Book, CreateBook, CreateNote, CreateUser, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, UpdateBook, UpdateNote, UpdateUser, User } from "./types"
+import { Book, CreateBook, CreateNote, CreateUser, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, UpdateBook, UpdateNote, UpdateUser, UpdateUserPassword, User } from "./types"
 
 export enum HttpMethods {
   GET = "GET",
@@ -219,6 +219,20 @@ class Api {
         ...this.headerAuthorization(),
       },
       body: JSON.stringify(user),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return undefined
+  }
+  async updateUserPassword(details: UpdateUserPassword): Promise<Result<undefined, ApiError>> {
+    let reqURL = `${this.apiServer}/users/me/password/`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      method: HttpMethods.PUT,
+      headers: {
+        ...HEADER_JSON,
+        ...this.headerAuthorization(),
+      },
+      body: JSON.stringify(details),
     }))
     if (resp instanceof Error) return resp
     if (!resp.ok) return new ApiError(resp.status)

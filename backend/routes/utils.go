@@ -53,6 +53,7 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 	{
 		protectedRoutes.GET("users/me/", getUserMe)
 		protectedRoutes.PATCH("users/me/", updateUserMe)
+		protectedRoutes.PUT("users/me/password/", updateUserMePassword)
 		slugUserRoutes := protectedRoutes.Group("slug/@:username/")
 		{
 			slugUserRoutes.GET("books/", getBooksByUsername)

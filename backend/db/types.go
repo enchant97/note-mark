@@ -49,6 +49,11 @@ type UpdateUser struct {
 	Name *string `json:"name" validate:"omitempty,max=128"`
 }
 
+type UpdateUserPassword struct {
+	ExistingPassword string `json:"existingPassword"`
+	NewPassword      string `json:"newPassword"`
+}
+
 type UpdateBook struct {
 	Name     *string `json:"name,omitempty" validate:"omitempty,max=80"`
 	Slug     *string `json:"slug,omitempty" validate:"omitempty,max=80,slug"`

@@ -58,6 +58,11 @@ export type UpdateUser = {
   name?: string
 }
 
+export type UpdateUserPassword = {
+  existingPassword: string
+  newPassword: string
+}
+
 export type UpdateBook = {
   name?: string
   slug?: string
