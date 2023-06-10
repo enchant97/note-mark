@@ -66,7 +66,7 @@ const Login: Component = () => {
                 />
               </div>
               <div class="join join-vertical w-full mt-5">
-                <button class="btn join-item btn-primary" classList={{ "btn-disabled": loading() }} type="submit">
+                <button class="btn join-item btn-primary" disabled={loading()} type="submit">
                   {loading() && <span class="loading loading-spinner"></span>}
                   Login
                 </button>

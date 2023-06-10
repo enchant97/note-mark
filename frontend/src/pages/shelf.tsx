@@ -143,7 +143,7 @@ const Shelf: Component = () => {
             onclick={onNewBookClick}
             class="btn join-item btn-ghost"
             type="button"
-            classList={{ "btn-disabled": !allowBookCreate() }}
+            disabled={!allowBookCreate()}
             title="Create New Notebook"
           >
             <FiFolderPlus size={20} />
@@ -152,7 +152,7 @@ const Shelf: Component = () => {
             onclick={onNewNoteClick}
             class="btn join-item btn-ghost"
             type="button"
-            classList={{ "btn-disabled": !allowNoteCreate() }}
+            disabled={!allowNoteCreate()}
             title="Create New Note"
           >
             <FiFilePlus size={20} />
@@ -163,7 +163,7 @@ const Shelf: Component = () => {
                 onclick={onUpdateBookClick}
                 class="btn join-item btn-ghost"
                 type="button"
-                classList={{ "btn-disabled": !allowNoteCreate() }}
+                disabled={!allowNoteCreate()}
                 title="Notebook Settings"
               >
                 <FiSettings size={20} />
@@ -174,7 +174,7 @@ const Shelf: Component = () => {
                 onclick={onUpdateNoteClick}
                 class="btn join-item btn-ghost"
                 type="button"
-                classList={{ "btn-disabled": !allowNoteCreate() }}
+                disabled={!allowNoteCreate()}
                 title="Note Settings"
               >
                 <FiSettings size={20} />

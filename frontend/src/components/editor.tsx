@@ -94,7 +94,8 @@ const Editor: Component<EditorProps> = (props) => {
       <ul class="menu menu-sm menu-horizontal gap-2 bg-base-200 rounded-md shadow-md p-2 w-full">
         <li><button
           class="btn btn-sm btn-square btn-outline"
-          classList={{ "btn-disabled": props.state.saving, "btn-error": props.state.unsaved }}
+          disabled={props.state.saving}
+          classList={{ "btn-error": props.state.unsaved }}
           type="button"
           title="Save Note"
           onclick={() => triggerSave()}
