@@ -4,6 +4,11 @@ export type Breadcrumb = {
   noteSlug?: string
 }
 
+export type ServerInfo = {
+  minSupportedVersion: string
+  allowSignup: boolean
+}
+
 export type OAuth2AccessTokenRequest = {
   grant_type: string
   username: string

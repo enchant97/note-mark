@@ -1,4 +1,6 @@
 import { Component, createSignal } from "solid-js";
+import { ToastType, useToast } from "../../contexts/ToastProvider";
+import Api, { ApiError } from "../../core/api";
 import BaseModal from "./base";
 
 type ApiUrlModalProps = {
@@ -8,11 +10,22 @@ type ApiUrlModalProps = {
 
 const ApiUrlModal: Component<ApiUrlModalProps> = (props) => {
   const [apiUrl, setApiUrl] = createSignal(props.apiUrl)
+  const { pushToast } = useToast()
+  const [loading, setLoading] = createSignal(false)
 
-  const onSubmit = (ev: Event) => {
+  const onSubmit = async (ev: Event) => {
     ev.preventDefault()
+    setLoading(true)
     let url = apiUrl().replace(/\/$/g, "")
-    props.onClose(url)
+    let result = await new Api({ apiServer: url }).getServerInfo()
+    setLoading(false)
+    if (result instanceof ApiError) {
+      pushToast({ message: "failed to validate compatible API server", type: ToastType.ERROR })
+    } else {
+      // TODO validate api min supported version
+      pushToast({ message: "new API server set", type: ToastType.SUCCESS })
+      props.onClose(url)
+    }
   }
 
   return (
@@ -31,7 +44,14 @@ const ApiUrlModal: Component<ApiUrlModalProps> = (props) => {
           />
         </div>
         <div class="modal-action">
-          <button onclick={onSubmit} class="btn btn-primary" type="submit">Set</button>
+          <button
+            onclick={onSubmit}
+            class="btn btn-primary"
+            classList={{ loading: loading() }}
+            disabled={loading()}
+            type="submit">
+            Set
+          </button>
           <button onclick={() => props.onClose()} class="btn" type="button">Cancel</button>
         </div>
       </form>

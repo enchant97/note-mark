@@ -1,5 +1,5 @@
 import { Result } from "./core"
-import { Book, CreateBook, CreateNote, CreateUser, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, UpdateBook, UpdateNote, UpdateUser, UpdateUserPassword, User } from "./types"
+import { Book, CreateBook, CreateNote, CreateUser, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, ServerInfo, UpdateBook, UpdateNote, UpdateUser, UpdateUserPassword, User } from "./types"
 
 export enum HttpMethods {
   GET = "GET",
@@ -14,6 +14,7 @@ export enum HttpMethods {
  * including error code 0 (connection error for js)
  */
 export enum HttpErrors {
+  BodyError = -1,
   NetworkError = 0,
 
   BadRequest = 400,
@@ -72,7 +73,17 @@ class Api {
   headerAuthorization(): Record<string, string> {
     return { "Authorization": `Bearer ${this.authToken}` }
   }
-
+  async getServerInfo(): Promise<Result<ServerInfo, ApiError>> {
+    let reqURL = `${this.apiServer}/info`
+    let resp = await handleFetchErrors(fetch(reqURL))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      return await resp.json()
+    } catch (err) {
+      return new ApiError(HttpErrors.BodyError, undefined, { cause: err })
+    }
+  }
   async postToken(details: OAuth2AccessTokenRequest): Promise<Result<OAuth2AccessToken, ApiError>> {
     let reqURL = `${this.apiServer}/auth/token`
     let resp = await handleFetchErrors(fetch(reqURL, {

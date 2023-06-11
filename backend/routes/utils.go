@@ -33,6 +33,15 @@ func getAuthenticatedUser(ctx echo.Context) core.AuthenticatedUser {
 	return ctx.Get(AuthenticatedUserKey).(core.AuthenticatedUser)
 }
 
+func getServerInfo(ctx echo.Context) error {
+	appConfig := ctx.Get("AppConfig").(config.AppConfig)
+
+	return ctx.JSON(http.StatusOK, core.ServerInfo{
+		MinSupportedVersion: "0.6.0",
+		AllowSignup:         appConfig.AllowSignup,
+	})
+}
+
 func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
@@ -45,6 +54,7 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 
 	routes := e.Group("/api/")
 	{
+		routes.GET("info", getServerInfo)
 		routes.POST("auth/token", postToken)
 		routes.POST("users", postCreateUser)
 		routes.GET("users/search", searchForUser)

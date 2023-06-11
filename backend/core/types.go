@@ -53,3 +53,8 @@ type AccessTokenRequest struct {
 type FindUserParams struct {
 	Username string `query:"username" validate:"required"`
 }
+
+type ServerInfo struct {
+	MinSupportedVersion string `json:"minSupportedVersion"`
+	AllowSignup         bool   `json:"allowSignup"`
+}
