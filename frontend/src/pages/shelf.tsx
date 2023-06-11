@@ -210,14 +210,13 @@ const Shelf: Component = () => {
                   classList={{ "tab-active": noteMode() === "plain" }}
                   title="switch to plain view"
                 >Plain</button>
-                <Show when={allowNoteCreate()}>
-                  <button
-                    onclick={() => setSearchParams({ mode: "edit" })}
-                    class="tab"
-                    classList={{ "tab-active": noteMode() === "edit" }}
-                    title="switch to editor"
-                  >Editor</button>
-                </Show>
+                <button
+                  onclick={() => setSearchParams({ mode: "edit" })}
+                  class="tab"
+                  disabled={!allowNoteCreate()}
+                  classList={{ "tab-active": noteMode() === "edit" }}
+                  title="switch to editor"
+                >Editor</button>
               </div>
             </div>
             <Switch fallback={<NoteViewRendered note={note()} />}>
