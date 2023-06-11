@@ -10,7 +10,6 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.10.2
-	github.com/yuin/goldmark v1.5.4
 	golang.org/x/crypto v0.9.0
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/driver/postgres v1.5.2

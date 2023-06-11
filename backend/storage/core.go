@@ -26,5 +26,4 @@ type StorageController interface {
 	ReadNote(noteID uuid.UUID) (io.ReadCloser, error)
 	DeleteNote(noteID uuid.UUID) error
 	GetNoteInfo(noteID uuid.UUID) (NoteInfo, error)
-	GetNoteAsHTML(noteID uuid.UUID, w io.Writer) error
 }

@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"bytes"
 	"errors"
 	"net/http"
 
@@ -171,41 +170,6 @@ func getNoteContent(ctx echo.Context) error {
 	}
 	defer stream.Close()
 	return ctx.Stream(http.StatusOK, "text/markdown", stream)
-}
-
-func getNoteRendered(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
-	noteID, err := uuid.Parse(ctx.Param("noteID"))
-	if err != nil {
-		return err
-	}
-
-	var count int64
-	if err := db.DB.
-		Model(&db.Note{}).
-		Preload("Book").
-		Joins("JOIN books ON books.id = notes.book_id").
-		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
-		Where("notes.id = ?", noteID).
-		Limit(1).
-		Count(&count).Error; err != nil {
-		return err
-	}
-	if count == 0 {
-		return ctx.NoContent(http.StatusNotFound)
-	}
-
-	storage_backend := ctx.Get("Storage").(storage.StorageController)
-
-	var buf bytes.Buffer
-	if err := storage_backend.GetNoteAsHTML(noteID, &buf); err != nil {
-		if errors.Is(err, storage.ErrNotFound) {
-			return ctx.Blob(http.StatusOK, "text/html", []byte("\n"))
-		}
-		return err
-	}
-
-	return ctx.Stream(http.StatusOK, "text/html", &buf)
 }
 
 func patchNoteByID(ctx echo.Context) error {
