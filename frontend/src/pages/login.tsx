@@ -70,7 +70,7 @@ const Login: Component = () => {
                   {loading() && <span class="loading loading-spinner"></span>}
                   Login
                 </button>
-                <A class="btn join-item" href="/signup">Need An Account?</A>
+                {apiDetails().info?.allowSignup !== false && <A class="btn join-item" href="/signup">Need An Account?</A>}
                 <A class="btn join-item" href="/">Back Home</A>
               </div>
             </form>

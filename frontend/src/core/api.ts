@@ -26,7 +26,7 @@ export enum HttpErrors {
   InternalServerError = 500,
 }
 
-export type ApiDetails = {
+export type ApiHandlerConfig = {
   authToken?: string
   apiServer: string
 }
@@ -52,7 +52,7 @@ async function handleFetchErrors(v: Promise<Response>): Promise<Result<Response,
 class Api {
   private authToken?: string
   private apiServer: string
-  constructor(apiDetails: ApiDetails) {
+  constructor(apiDetails: ApiHandlerConfig) {
     this.authToken = apiDetails.authToken
     this.apiServer = apiDetails.apiServer
   }
@@ -62,7 +62,7 @@ class Api {
    * @param apiDetails the new details
    * @returns self
    */
-  setApi(apiDetails: ApiDetails): Api {
+  setApi(apiDetails: ApiHandlerConfig): Api {
     this.authToken = apiDetails.authToken
     this.apiServer = apiDetails.apiServer
     return this

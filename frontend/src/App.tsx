@@ -159,7 +159,7 @@ const App: Component = () => {
   return (
     <Routes>
       <ProtectedRoute path="/login" redirectPath="/" condition={hasNoAuth} component={Login} />
-      <ProtectedRoute path="/signup" redirectPath="/" condition={hasNoAuth} component={Signup} />
+      <ProtectedRoute path="/signup" redirectPath="/login" condition={() => hasNoAuth() && apiDetails().info?.allowSignup !== false} component={Signup} />
       <ProtectedRoute path="/logout" redirectPath="/" condition={hasAuth} component={Logout} />
       <Route path="/" component={MainApp}>
         <Route path="/" component={Index} />

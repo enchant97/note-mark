@@ -2,9 +2,10 @@ import { Component, createSignal } from "solid-js";
 import { ToastType, useToast } from "../../contexts/ToastProvider";
 import Api, { ApiError } from "../../core/api";
 import BaseModal from "./base";
+import { ServerInfo } from "../../core/types";
 
 type ApiUrlModalProps = {
-  onClose: (newUrl?: string) => void
+  onClose: (config?: { apiServer: string, info: ServerInfo }) => void
   apiUrl: string
 }
 
@@ -24,7 +25,7 @@ const ApiUrlModal: Component<ApiUrlModalProps> = (props) => {
     } else {
       // TODO validate api min supported version
       pushToast({ message: "new API server set", type: ToastType.SUCCESS })
-      props.onClose(url)
+      props.onClose({ apiServer: url, info: result })
     }
   }
 

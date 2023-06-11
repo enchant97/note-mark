@@ -6,6 +6,7 @@ import { useModal } from '../contexts/ModalProvider';
 import ApiUrlModal from './modals/api_url';
 import { THEMES, getTheme, setTheme } from '../core/theme_switcher';
 import Icon from './icon';
+import { ServerInfo } from '../core/types';
 
 const ThemeSwitcher: Component = () => {
   const [currentTheme, setCurrentTheme] = createSignal(getTheme())
@@ -43,10 +44,8 @@ const ProfileDropdownNoAuth = () => {
     setModal({
       component: ApiUrlModal,
       props: {
-        onClose: (newUrl?: string) => {
-          if (newUrl) {
-            setApiDetails({ apiServer: newUrl })
-          }
+        onClose: (config?: { apiServer: string, info: ServerInfo }) => {
+          if (config) setApiDetails(config)
           clearModal()
         },
         apiUrl: apiDetails().apiServer,
