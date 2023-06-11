@@ -1,4 +1,4 @@
-import { createContext, createEffect, useContext } from "solid-js"
+import { createContext, createEffect, createMemo, useContext } from "solid-js"
 import Api, { ApiHandlerConfig } from "../core/api"
 import { optionExpect } from "../core/core"
 import { createStore } from "solid-js/store"
@@ -31,11 +31,12 @@ const clearApiDetails = () => {
 
 const makeApiContext = () => {
   const [details, setDetails] = createStore<ApiDetails>(readApiDetails())
+  const api = createMemo(() => new Api(details))
   createEffect(() => {
     writeApiDetails({ apiServer: details.apiServer, authToken: details.authToken })
   })
   return {
-    api: () => new Api(details),
+    api,
     apiDetails: () => details,
     setApiDetails: setDetails,
     clearDetails: () => {
