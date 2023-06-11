@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@types/dompurify": "^3.0.2",
+    "@types/feather-icons": "^4.29.1",
     "@types/marked": "^5.0.0",
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.24",
@@ -26,8 +27,8 @@
     "codemirror": "^6.0.1",
     "daisyui": "^3.0.22",
     "dompurify": "^3.0.3",
+    "feather-icons": "^4.29.0",
     "marked": "^5.1.0",
-    "solid-icons": "^1.0.8",
     "solid-js": "^1.7.6"
   }
 }

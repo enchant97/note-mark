@@ -1,6 +1,6 @@
 import { Component, Show } from 'solid-js';
 import { Breadcrumb } from '../../core/types';
-import { FiFile, FiFolder, FiUser } from 'solid-icons/fi';
+import Icon from '../icon';
 
 type NoteBreadcrumbProps = Breadcrumb & {
   class?: string
@@ -16,17 +16,17 @@ const NoteBreadcrumb: Component<NoteBreadcrumbProps> = (props) => {
       <ul>
         <Show when={props.username}>
           <li>
-            <FiUser size={16} />
+            <Icon name="user" size={16} />
             <span class="ml-1">{props.username}</span>
           </li>
           <Show when={props.bookSlug}>
             <li>
-              <FiFolder size={16} />
+              <Icon name="folder" size={16} />
               <span class="ml-1">{props.bookSlug}</span>
             </li>
             <Show when={props.noteSlug}>
               <li>
-                <FiFile size={16} />
+                <Icon name="file" size={16} />
                 <span class="ml-1">{props.noteSlug}</span>
               </li>
             </Show>

@@ -1,12 +1,11 @@
 import { Component, For, createEffect, createSignal } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
-import { FiHome, FiUser, FiMenu } from 'solid-icons/fi';
 import { A } from '@solidjs/router';
 import { useCurrentUser } from '../contexts/CurrentUserProvider';
 import { useModal } from '../contexts/ModalProvider';
 import ApiUrlModal from './modals/api_url';
-import { FiMoon, FiSun } from 'solid-icons/fi';
 import { THEMES, getTheme, setTheme } from '../core/theme_switcher';
+import Icon from './icon';
 
 const ThemeSwitcher: Component = () => {
   const [currentTheme, setCurrentTheme] = createSignal(getTheme())
@@ -16,8 +15,8 @@ const ThemeSwitcher: Component = () => {
   return (
     <div class="dropdown dropdown-end">
       <label tabindex="0" class="btn btn-ghost shadow-lg flex gap-2">
-        <FiSun size={20} />
-        <FiMoon size={20} />
+        <Icon name="sun" />
+        <Icon name="moon" />
       </label>
       <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 p-2 shadow bg-base-300 rounded-box">
         <For each={THEMES}>
@@ -82,16 +81,16 @@ const Header: Component = () => {
     <div class="w-full navbar bg-base-100">
       <div class="flex-none lg:hidden">
         <label for="main-drawer" class="btn btn-square btn-ghost">
-          <FiMenu size={20} />
+          <Icon name="menu" />
         </label>
       </div>
       <span class="flex-1 px-2 mx-2 text-xl">Note Mark</span>
       <div class="flex gap-4">
         <ThemeSwitcher />
-        <A activeClass="btn-disabled" class="btn btn-ghost btn-circle shadow-lg" end={true} href="/"><FiHome size={20} /></A>
+        <A activeClass="btn-disabled" class="btn btn-ghost btn-circle shadow-lg" end={true} href="/"><Icon name="home" /></A>
         <div class="dropdown dropdown-end">
           <label tabindex="0" class="btn btn-ghost btn-circle shadow-lg">
-            <FiUser size={20} />
+            <Icon name="user" />
           </label>
           <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 p-2 shadow bg-base-300 rounded-box w-52">
             {apiDetails().authToken && <ProfileDropdownHasAuth /> || <ProfileDropdownNoAuth />}

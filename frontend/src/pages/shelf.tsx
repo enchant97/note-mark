@@ -3,7 +3,6 @@ import { useApi } from '../contexts/ApiProvider';
 import { useParams, useSearchParams } from '@solidjs/router';
 import { Book, Breadcrumb, Note } from '../core/types';
 import NoteBreadcrumb from '../components/note/breadcrumb';
-import { FiFilePlus, FiFolderPlus, FiSettings } from 'solid-icons/fi';
 import { useModal } from '../contexts/ModalProvider';
 import { useCurrentUser } from '../contexts/CurrentUserProvider';
 import NewBookModal from '../components/modals/new_book';
@@ -14,6 +13,7 @@ import { useDrawer } from '../contexts/DrawerProvider';
 import { LoadingBar } from '../components/loading';
 import { apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
 import { ApiError } from '../core/api';
+import Icon from '../components/icon';
 
 const NoteEdit = lazy(() => import("../components/note/edit"))
 const NoteViewRendered = lazy(() => import("../components/note/view_rendered"))
@@ -146,7 +146,7 @@ const Shelf: Component = () => {
             disabled={!allowBookCreate()}
             title="Create New Notebook"
           >
-            <FiFolderPlus size={20} />
+            <Icon name="folder-plus" />
           </button>
           <button
             onclick={onNewNoteClick}
@@ -155,7 +155,7 @@ const Shelf: Component = () => {
             disabled={!allowNoteCreate()}
             title="Create New Note"
           >
-            <FiFilePlus size={20} />
+            <Icon name="file-plus" />
           </button>
           <Switch>
             <Match when={book() && !note()}>
@@ -166,7 +166,7 @@ const Shelf: Component = () => {
                 disabled={!allowNoteCreate()}
                 title="Notebook Settings"
               >
-                <FiSettings size={20} />
+                <Icon name="settings" />
               </button>
             </Match>
             <Match when={book() && note()}>
@@ -177,7 +177,7 @@ const Shelf: Component = () => {
                 disabled={!allowNoteCreate()}
                 title="Note Settings"
               >
-                <FiSettings size={20} />
+                <Icon name="settings" />
               </button>
             </Match>
           </Switch>
