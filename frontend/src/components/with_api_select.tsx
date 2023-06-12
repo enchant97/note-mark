@@ -56,6 +56,7 @@ const WithApiSelect: Component<WithApiSelectProps> = (props) => {
             classList={{
               "input-bordered": editMode(),
             }}
+            onkeydown={(ev) => { if (ev.key === "Enter" && editMode()) validateAPI() }}
             type="url"
             readonly={!editMode()}
             placeholder="e.g. https://example.com/api"
