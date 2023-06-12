@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.6.0-alpha.3] - 2023-06-12
+### Added
+- ability to change password
+- api server validation on load and when set
+- profile page
+- admin can disable new account creation
+### Changed
+- markdown will now be rendered in the client (allowing for future offline functionality...)
+- remove trailing slash on api routes, why were they there in the first place?
+- use only feathericons for icons
+- migrate to daisyui V3
+- disable editor button when user does not have permission
+- disk storage folder structure uses 2 characters instead of 3
+- update deps
+- add lockfile ensuring app always gets built consistently
+### Fixed
+- disable buttons when required
+- don't create api object each time it's used
+- fix book slug query (stopped app from working when there is no content
+### Removed
+- server side markdown rendering
+
 ## [0.6.0-alpha.2] - 2023-05-28
 ### Added
 - theme picker to choose between light/dark themes
