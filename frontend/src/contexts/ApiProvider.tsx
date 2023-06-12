@@ -10,7 +10,7 @@ export type ApiDetails = ApiHandlerConfig & {
   info?: ServerInfo
 }
 
-const readApiDetails = (): ApiDetails => {
+const readApiDetails = (): ApiHandlerConfig => {
   let apiDetails = window.localStorage.getItem(api_details_key)
   if (apiDetails) {
     return JSON.parse(apiDetails)
@@ -21,7 +21,7 @@ const readApiDetails = (): ApiDetails => {
   }
 }
 
-const writeApiDetails = (details: ApiDetails) => {
+const writeApiDetails = (details: ApiHandlerConfig) => {
   window.localStorage.setItem(api_details_key, JSON.stringify(details))
 }
 
@@ -31,9 +31,15 @@ const clearApiDetails = () => {
 
 const makeApiContext = () => {
   const [details, setDetails] = createStore<ApiDetails>(readApiDetails())
-  const api = createMemo(() => new Api(details))
+  const apiConfig: () => ApiHandlerConfig = () => {
+    return {
+      apiServer: details.apiServer,
+      authToken: details.authToken,
+    }
+  }
+  const api = createMemo(() => new Api(apiConfig()))
   createEffect(() => {
-    writeApiDetails({ apiServer: details.apiServer, authToken: details.authToken })
+    writeApiDetails(apiConfig())
   })
   return {
     api,

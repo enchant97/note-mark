@@ -8,6 +8,7 @@ import { Book, Note } from './core/types';
 import { LoadingBar } from './components/loading';
 import { apiErrorIntoToast, useToast } from './contexts/ToastProvider';
 import { ApiError } from './core/api';
+import PreLogin from './pages/pre-login';
 
 const Index = lazy(() => import("./pages/index"));
 const Login = lazy(() => import("./pages/login"));
@@ -158,14 +159,15 @@ const App: Component = () => {
 
   return (
     <Routes>
-      <ProtectedRoute path="/login" redirectPath="/" condition={hasNoAuth} component={Login} />
+      <Route path="/pre-login" component={PreLogin} />
+      <ProtectedRoute path="/login" redirectPath="/" condition={() => hasNoAuth()} component={Login} />
       <ProtectedRoute path="/signup" redirectPath="/login" condition={() => hasNoAuth() && apiDetails().info?.allowSignup !== false} component={Signup} />
       <ProtectedRoute path="/logout" redirectPath="/" condition={hasAuth} component={Logout} />
-      <Route path="/" component={MainApp}>
+      <ProtectedRoute path="/" redirectPath="/pre-login" condition={() => apiDetails().info !== undefined} component={MainApp}>
         <Route path="/" component={Index} />
         <ProtectedRoute path="/profile" redirectPath="/" condition={hasAuth} component={Profile} />
         <Route path="/:username/:bookSlug?/:noteSlug?" component={Shelf} />
-      </Route>
+      </ProtectedRoute>
     </Routes>
   );
 };

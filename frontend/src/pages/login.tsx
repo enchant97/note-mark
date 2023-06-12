@@ -4,6 +4,7 @@ import { useApi } from '../contexts/ApiProvider';
 import { A } from '@solidjs/router';
 import { ApiError } from '../core/api';
 import { apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
+import WithApiSelect from '../components/with_api_select';
 
 const Login: Component = () => {
   const { api, apiDetails, setApiDetails } = useApi()
@@ -37,42 +38,44 @@ const Login: Component = () => {
               <p class="py-6">Login here.</p>
             </div>
             <form onSubmit={onSubmit}>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">Username</span>
-                </label>
-                <input
-                  class="input input-bordered"
-                  value={formDetails.username}
-                  oninput={(ev) => { setFormDetails({ username: ev.currentTarget.value }) }}
-                  type="text"
-                  placeholder="e.g. leo"
-                  autocomplete="username"
-                  required
-                />
-              </div>
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">Password</span>
-                </label>
-                <input
-                  class="input input-bordered"
-                  value={formDetails.password}
-                  oninput={(ev) => { setFormDetails({ password: ev.currentTarget.value }) }}
-                  type="password"
-                  placeholder="e.g. P@ssword123"
-                  autocomplete="current-password"
-                  required
-                />
-              </div>
-              <div class="join join-vertical w-full mt-5">
-                <button class="btn join-item btn-primary" disabled={loading()} type="submit">
-                  {loading() && <span class="loading loading-spinner"></span>}
-                  Login
-                </button>
-                {apiDetails().info?.allowSignup !== false && <A class="btn join-item" href="/signup">Need An Account?</A>}
-                <A class="btn join-item" href="/">Back Home</A>
-              </div>
+              <WithApiSelect>
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text">Username</span>
+                  </label>
+                  <input
+                    class="input input-bordered"
+                    value={formDetails.username}
+                    oninput={(ev) => { setFormDetails({ username: ev.currentTarget.value }) }}
+                    type="text"
+                    placeholder="e.g. leo"
+                    autocomplete="username"
+                    required
+                  />
+                </div>
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text">Password</span>
+                  </label>
+                  <input
+                    class="input input-bordered"
+                    value={formDetails.password}
+                    oninput={(ev) => { setFormDetails({ password: ev.currentTarget.value }) }}
+                    type="password"
+                    placeholder="e.g. P@ssword123"
+                    autocomplete="current-password"
+                    required
+                  />
+                </div>
+                <div class="join join-vertical w-full mt-5">
+                  <button class="btn join-item btn-primary" disabled={loading() || !apiDetails().info} type="submit">
+                    {loading() && <span class="loading loading-spinner"></span>}
+                    Login
+                  </button>
+                  {apiDetails().info?.allowSignup !== false && <A class="btn join-item" href="/signup">Need An Account?</A>}
+                  <A class="btn join-item" href="/">Back Home</A>
+                </div>
+              </WithApiSelect>
             </form>
           </div>
         </div>

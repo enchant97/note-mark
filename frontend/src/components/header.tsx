@@ -3,7 +3,6 @@ import { useApi } from '../contexts/ApiProvider';
 import { A } from '@solidjs/router';
 import { useCurrentUser } from '../contexts/CurrentUserProvider';
 import { useModal } from '../contexts/ModalProvider';
-import ApiUrlModal from './modals/api_url';
 import { THEMES, getTheme, setTheme } from '../core/theme_switcher';
 import Icon from './icon';
 import { ServerInfo } from '../core/types';
@@ -37,25 +36,8 @@ const ThemeSwitcher: Component = () => {
 }
 
 const ProfileDropdownNoAuth = () => {
-  const { apiDetails, setApiDetails } = useApi()
-  const { setModal, clearModal } = useModal()
-
-  const onChangeServerClick = () => {
-    setModal({
-      component: ApiUrlModal,
-      props: {
-        onClose: (config?: { apiServer: string, info: ServerInfo }) => {
-          if (config) setApiDetails(config)
-          clearModal()
-        },
-        apiUrl: apiDetails().apiServer,
-      },
-    })
-  }
-
   return (
     <>
-      <li><button onclick={onChangeServerClick} type="button">Change Server</button></li>
       <li><A href="/login">Login</A></li>
     </>
   )
