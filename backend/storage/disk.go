@@ -12,10 +12,10 @@ import (
 
 const diskStorageNoteFileName = "note.md"
 
-// returns path as: `base / notes / note-id[:3] / note-id`
+// returns path as: `base / notes / note-id[:2] / note-id`
 func getNoteDirectory(base string, noteID uuid.UUID) string {
 	noteIDString := noteID.String()
-	noteIDStringPart := noteIDString[:3]
+	noteIDStringPart := noteIDString[:2]
 	dirPath := path.Join(base, "notes", noteIDStringPart, noteIDString)
 	return dirPath
 }
