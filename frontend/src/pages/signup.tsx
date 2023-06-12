@@ -118,7 +118,7 @@ const Signup: Component = () => {
                     Create User
                   </button>
                   <A class="btn join-item" href="/login">Have An Account?</A>
-                  <A class="btn join-item" href="/">Back Home</A>
+                  <A class="btn join-item" href="/" classList={{ "btn-disabled": !apiDetails().info }}>Back Home</A>
                 </div>
               </WithApiSelect>
             </form>

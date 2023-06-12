@@ -73,7 +73,7 @@ const Login: Component = () => {
                     Login
                   </button>
                   {apiDetails().info?.allowSignup !== false && <A class="btn join-item" href="/signup">Need An Account?</A>}
-                  <A class="btn join-item" href="/">Back Home</A>
+                  <A class="btn join-item" href="/" classList={{ "btn-disabled": !apiDetails().info }}>Back Home</A>
                 </div>
               </WithApiSelect>
             </form>

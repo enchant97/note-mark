@@ -47,7 +47,7 @@ const makeApiContext = () => {
     setApiDetails: setDetails,
     clearDetails: () => {
       clearApiDetails()
-      setDetails(readApiDetails())
+      setDetails({ ...readApiDetails(), info: undefined })
     }
   } as const
 }
