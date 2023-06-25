@@ -22,4 +22,5 @@ FROM gcr.io/distroless/static-debian11
     ENV DB__TYPE=sqlite
     ENV DATA_PATH=/data
 
-    CMD ["/note-mark"]
+    ENTRYPOINT [ "./note-mark" ]
+    CMD [ "serve" ]
