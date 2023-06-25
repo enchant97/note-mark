@@ -33,7 +33,7 @@ func httpErrorHandler(err error, ctx echo.Context) {
 	}
 }
 
-func command_serve(appConfig config.AppConfig) error {
+func commandServe(appConfig config.AppConfig) error {
 	// Connect to storage backend
 	storage_backend := storage.DiskController{}.New(appConfig.DataPath)
 	if err := storage_backend.Setup(); err != nil {

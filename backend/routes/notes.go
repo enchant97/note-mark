@@ -9,7 +9,6 @@ import (
 	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
 )
 
 func createNoteByBookID(ctx echo.Context) error {
@@ -266,14 +265,8 @@ func deleteNoteById(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusNotFound)
 	}
 
-	storage_backend := ctx.Get("Storage").(storage.StorageController)
-
-	if err := db.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Delete(&db.Note{}, "id = ?", noteID).Error; err != nil {
-			return err
-		}
-		return storage_backend.DeleteNote(noteID)
-	}); err != nil {
+    // performs soft delete
+	if err := db.DB.Delete(&db.Note{}, "id = ?", noteID).Error; err != nil {
 		return err
 	}
 
