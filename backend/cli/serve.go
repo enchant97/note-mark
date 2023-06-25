@@ -10,7 +10,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/gorm"
-	"log"
 	"net/http"
 )
 
@@ -37,12 +36,12 @@ func commandServe(appConfig config.AppConfig) error {
 	// Connect to storage backend
 	storage_backend := storage.DiskController{}.New(appConfig.DataPath)
 	if err := storage_backend.Setup(); err != nil {
-		log.Fatalln(err)
+	    return err
 	}
 	defer storage_backend.TearDown()
 	// Connect to database
 	if err := db.InitDB(appConfig.DB); err != nil {
-		log.Fatalln(err)
+	    return err
 	}
 	// Create server
 	e := echo.New()
