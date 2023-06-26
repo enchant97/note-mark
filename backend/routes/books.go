@@ -37,13 +37,13 @@ func getBooksByUsername(ctx echo.Context) error {
 	}
 
 	var books []db.Book
-	// base query
-	query := db.DB.Where("owner_id = ?", bookOwner.ID)
-	if authenticatedUser.UserID != bookOwner.ID {
-		// restrict to only public books
-		query = query.Where("is_public = ?", true)
-	}
-	if err := query.Find(&books).Error; err != nil {
+	if err := db.DB.
+		Where(
+			db.DB.Where("owner_id = ?", bookOwner.ID),
+			db.DB.Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true),
+		).
+		Find(&books).
+		Error; err != nil {
 		return err
 	}
 
