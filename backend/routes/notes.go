@@ -9,6 +9,7 @@ import (
 	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 func createNoteByBookID(ctx echo.Context) error {
@@ -171,6 +172,24 @@ func getNoteContent(ctx echo.Context) error {
 	return ctx.Stream(http.StatusOK, "text/markdown", stream)
 }
 
+func getDeletedNotes(ctx echo.Context) error {
+	authenticatedUser := getAuthenticatedUser(ctx)
+
+	var notes []db.Note
+	if err := db.DB.
+		Unscoped().
+		Preload("Book").
+		Joins("JOIN books ON books.id = notes.book_id").
+		Where("owner_id = ? AND notes.deleted_at IS NOT NULL", authenticatedUser.UserID).
+		Order("notes.deleted_at DESC").
+		Find(&notes).
+		Error; err != nil {
+		return err
+	}
+
+	return ctx.JSON(http.StatusOK, notes)
+}
+
 func patchNoteByID(ctx echo.Context) error {
 	authenticatedUser := getAuthenticatedUser(ctx)
 	noteID, err := uuid.Parse(ctx.Param("noteID"))
@@ -243,6 +262,49 @@ func updateNoteContent(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNoContent)
 }
 
+func restoreNoteByID(ctx echo.Context) error {
+	authenticatedUser := getAuthenticatedUser(ctx)
+	noteID, err := uuid.Parse(ctx.Param("noteID"))
+	if err != nil {
+		return err
+	}
+
+	var note db.Note
+	if err := db.DB.
+		Unscoped().
+		Preload("Book").
+		Joins("JOIN books ON books.id = notes.book_id").
+		Where("owner_id = ?", authenticatedUser.UserID).
+		Select("notes.id", "book_id").
+		First(&note, "notes.id = ?", noteID).Error; err != nil {
+		return err
+	}
+
+	if err := db.DB.Transaction(func(tx *gorm.DB) error {
+		// restore note
+		if err := tx.Unscoped().
+			Model(&db.Note{}).
+			Where("id = ?", note.ID).
+			Update("deleted_at", nil).
+			Error; err != nil {
+			return err
+		}
+		// restore book (ensuring user can visit restored note)
+		if err := tx.Unscoped().
+			Model(&db.Book{}).
+			Where("id = ?", note.BookID).
+			Update("deleted_at", nil).
+			Error; err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
+}
+
 func deleteNoteById(ctx echo.Context) error {
 	authenticatedUser := getAuthenticatedUser(ctx)
 	noteID, err := uuid.Parse(ctx.Param("noteID"))
@@ -265,7 +327,7 @@ func deleteNoteById(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusNotFound)
 	}
 
-    // performs soft delete
+	// performs soft delete
 	if err := db.DB.Delete(&db.Note{}, "id = ?", noteID).Error; err != nil {
 		return err
 	}

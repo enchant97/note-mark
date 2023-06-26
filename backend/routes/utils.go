@@ -77,9 +77,11 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 		protectedRoutes.DELETE("books/:bookID", deleteBookByID)
 		protectedRoutes.GET("books/:bookID/notes", getNotesByBookID)
 		protectedRoutes.POST("books/:bookID/notes", createNoteByBookID)
+		protectedRoutes.GET("notes/removed", getDeletedNotes)
 		protectedRoutes.GET("notes/:noteID", getNoteByID)
 		protectedRoutes.PATCH("notes/:noteID", patchNoteByID)
 		protectedRoutes.DELETE("notes/:noteID", deleteNoteById)
+		protectedRoutes.PUT("notes/:noteID/restore", restoreNoteByID)
 		protectedRoutes.GET("notes/:noteID/content", getNoteContent)
 		protectedRoutes.PUT("notes/:noteID/content", updateNoteContent, middleware.BodyLimit("1M"))
 	}
