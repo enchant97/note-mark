@@ -87,6 +87,7 @@ const Editor: Component<EditorProps> = (props) => {
       }),
       parent: editorDiv,
     })
+    editor.contentDOM.setAttribute("spellcheck", "true")
   })
 
   return (
