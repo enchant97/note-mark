@@ -312,9 +312,15 @@ func deleteNoteById(ctx echo.Context) error {
 		return err
 	}
 
+	var params core.DeleteParams
+	if err := core.BindAndValidate(ctx, &params); err != nil {
+		return err
+	}
+
 	// INFO this other query is required as joins don't work when deleting
 	var count int64
 	if err := db.DB.
+		Unscoped().
 		Model(&db.Note{}).
 		Preload("Book").
 		Joins("JOIN books ON books.id = notes.book_id").
@@ -327,9 +333,25 @@ func deleteNoteById(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusNotFound)
 	}
 
-	// performs soft delete
-	if err := db.DB.Delete(&db.Note{}, "id = ?", noteID).Error; err != nil {
-		return err
+	if params.Permanent {
+		// performs hard deletion
+		storage_backend := ctx.Get("Storage").(storage.StorageController)
+		if err := db.DB.Transaction(func(tx *gorm.DB) error {
+			if err := tx.Unscoped().Delete(&db.Note{}, "id = ?", noteID).Error; err != nil {
+				return err
+			}
+			if err := storage_backend.DeleteNote(noteID); err != nil {
+				return err
+			}
+			return nil
+		}); err != nil {
+			return err
+		}
+	} else {
+		// performs soft deletion
+		if err := db.DB.Delete(&db.Note{}, "id = ?", noteID).Error; err != nil {
+			return err
+		}
 	}
 
 	return ctx.NoContent(http.StatusNoContent)

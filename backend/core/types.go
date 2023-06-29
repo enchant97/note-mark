@@ -58,3 +58,7 @@ type ServerInfo struct {
 	MinSupportedVersion string `json:"minSupportedVersion"`
 	AllowSignup         bool   `json:"allowSignup"`
 }
+
+type DeleteParams struct {
+	Permanent bool `query:"permanent"`
+}
