@@ -1,4 +1,4 @@
-<img src="frontend/public/icon.svg" style="display: block;width: 12rem;margin: 2rem">
+<img src="frontend/public/icon.svg" width=200 height=200>
 
 # Note Mark
 ![License: AGPL V3](https://img.shields.io/github/license/enchant97/note-mark?style=flat-square)
