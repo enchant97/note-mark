@@ -193,6 +193,18 @@ class Api {
     if (!resp.ok) return new ApiError(resp.status)
     return handleBodyErrors(resp.json())
   }
+  async getNotesByBookId(bookId: string, deleted: boolean = false): Promise<Result<Note[], ApiError>> {
+    let reqURL = `${this.apiServer}/books/${bookId}/notes`
+    if (deleted === true) {
+      reqURL += "?deleted=true"
+    }
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      headers: this.headerAuthorization(),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.json())
+  }
   async getNoteContentById(noteId: string): Promise<Result<string, ApiError>> {
     let reqURL = `${this.apiServer}/notes/${noteId}/content`
     let resp = await handleFetchErrors(fetch(reqURL, {

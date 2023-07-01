@@ -1,4 +1,4 @@
-import { Component, createSignal } from 'solid-js';
+import { Component, For, createResource, createSignal } from 'solid-js';
 import BaseModal from './base';
 import { Book, UpdateBook, User } from '../../core/types';
 import { createStore } from 'solid-js/store';
@@ -7,6 +7,74 @@ import { useApi } from '../../contexts/ApiProvider';
 import { useNavigate } from '@solidjs/router';
 import { apiErrorIntoToast, useToast } from '../../contexts/ToastProvider';
 import { ApiError } from '../../core/api';
+import Icon from '../icon';
+
+type DeletedNotesProps = {
+  bookId: string
+}
+
+const DeletedNotes: Component<DeletedNotesProps> = (props) => {
+  const { api } = useApi()
+  const { pushToast } = useToast()
+  const [notes, { mutate }] = createResource(props.bookId, async (bookId) => {
+    let result = await api().getNotesByBookId(bookId, true)
+    if (result instanceof ApiError) {
+      pushToast(apiErrorIntoToast(result, "getting removed notes"))
+      return []
+    }
+    return result
+  })
+
+  const deleteNote = async (noteId: string, i: number) => {
+    let result = await api().deleteNote(noteId, true)
+    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "deleting note"))
+    else {
+      let new_notes = notes()
+      if (new_notes) {
+        new_notes?.splice(i, 1)
+        mutate([...new_notes])
+      }
+    }
+  }
+  const restoreNote = async (noteId: string, i: number) => {
+    let result = await api().restoreNoteById(noteId)
+    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "restoring note"))
+    else {
+      let new_notes = notes()
+      if (new_notes) {
+        new_notes?.splice(i, 1)
+        mutate([...new_notes])
+      }
+    }
+  }
+
+  return (
+    <div>
+      <h4 class="text-bold mb-2">Removed Notes</h4>
+      <ul class="max-h-40 overflow-y-auto bg-base-200">
+        <For each={notes()}>
+          {(note, i) =>
+            <li class="flex items-center p-2 gap-2 rounded">
+              <span class="mr-auto">{note.name}</span>
+              <div class="join">
+                <button
+                  onclick={() => restoreNote(note.id, i())}
+                  type="button"
+                  class="join-item btn btn-outline btn-sm"
+                >Restore</button>
+                <button
+                  onclick={() => deleteNote(note.id, i())}
+                  type="button"
+                  class="join-item btn btn-outline btn-sm btn-error"
+                ><Icon name="trash" /></button>
+              </div>
+            </li>
+          }
+        </For>
+      </ul>
+    </div>
+  )
+}
 
 type UpdateBookModalProps = {
   onClose: (book?: Book) => void
@@ -92,6 +160,7 @@ const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
             />
           </label>
         </div>
+        <DeletedNotes bookId={props.book.id} />
         <div class="modal-action">
           <button onclick={onDelete} class="btn btn-outline btn-error" disabled={loading()} type="button">Delete</button>
           <button class="btn btn-primary" disabled={loading()} classList={{ loading: loading() }} type="submit">Save</button>

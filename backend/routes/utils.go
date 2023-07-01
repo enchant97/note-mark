@@ -77,7 +77,6 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 		protectedRoutes.DELETE("books/:bookID", deleteBookByID)
 		protectedRoutes.GET("books/:bookID/notes", getNotesByBookID)
 		protectedRoutes.POST("books/:bookID/notes", createNoteByBookID)
-		protectedRoutes.GET("notes/removed", getDeletedNotes)
 		protectedRoutes.GET("notes/:noteID", getNoteByID)
 		protectedRoutes.PATCH("notes/:noteID", patchNoteByID)
 		protectedRoutes.DELETE("notes/:noteID", deleteNoteById)

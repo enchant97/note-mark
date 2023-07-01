@@ -49,15 +49,27 @@ func getNotesByBookID(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
+	var filterParams core.NoteFilterParams
+	if err := core.BindAndValidate(ctx, &filterParams); err != nil {
+		return err
+	}
 
-	var notes []db.Note
-	if err := db.DB.
+	tx := db.DB
+	if filterParams.Deleted {
+		tx = tx.Unscoped()
+	}
+	tx = tx.
 		Preload("Book").
 		Joins("JOIN books ON books.id = notes.book_id").
 		Where(
 			db.DB.Where("books.id = ?", bookID),
 			db.DB.Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true),
-		).
+		)
+	if filterParams.Deleted {
+		tx = tx.Where("notes.deleted_at IS NOT NULL")
+	}
+	var notes []db.Note
+	if err := tx.
 		Find(&notes).Error; err != nil {
 		return err
 	}
@@ -170,24 +182,6 @@ func getNoteContent(ctx echo.Context) error {
 	}
 	defer stream.Close()
 	return ctx.Stream(http.StatusOK, "text/markdown", stream)
-}
-
-func getDeletedNotes(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
-
-	var notes []db.Note
-	if err := db.DB.
-		Unscoped().
-		Preload("Book").
-		Joins("JOIN books ON books.id = notes.book_id").
-		Where("owner_id = ? AND notes.deleted_at IS NOT NULL", authenticatedUser.UserID).
-		Order("notes.deleted_at DESC").
-		Find(&notes).
-		Error; err != nil {
-		return err
-	}
-
-	return ctx.JSON(http.StatusOK, notes)
 }
 
 func patchNoteByID(ctx echo.Context) error {

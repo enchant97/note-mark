@@ -62,3 +62,7 @@ type ServerInfo struct {
 type DeleteParams struct {
 	Permanent bool `query:"permanent" validate:"omitempty,required"`
 }
+
+type NoteFilterParams struct {
+	Deleted bool `query:"deleted" validate:"omitempty,required"`
+}
