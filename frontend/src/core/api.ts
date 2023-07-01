@@ -279,8 +279,8 @@ class Api {
     if (!resp.ok) return new ApiError(resp.status)
     return undefined
   }
-  async deleteBook(bookId: string, permanent: boolean = false): Promise<Result<undefined, ApiError>> {
-    let reqURL = `${this.apiServer}/books/${bookId}?permanent=${permanent}`
+  async deleteBook(bookId: string): Promise<Result<undefined, ApiError>> {
+    let reqURL = `${this.apiServer}/books/${bookId}`
     let resp = await handleFetchErrors(fetch(reqURL, {
       method: HttpMethods.DELETE,
       headers: this.headerAuthorization(),

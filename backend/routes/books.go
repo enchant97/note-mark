@@ -124,17 +124,10 @@ func deleteBookByID(ctx echo.Context) error {
 		return err
 	}
 
-	var params core.DeleteParams
-	if err := core.BindAndValidate(ctx, &params); err != nil {
-		return err
-	}
+	// NOTE always permanent as deletion is only allowed when no notes exist
 
-	tx := db.DB
-	if params.Permanent {
-		// performs hard deletion
-		tx = tx.Unscoped()
-	}
-	result := tx.
+	result := db.DB.
+		Unscoped().
 		Where("id = ? AND owner_id = ?", bookID, authenticatedUser.UserID).
 		Delete(&db.Book{})
 	if err := result.Error; err != nil {
