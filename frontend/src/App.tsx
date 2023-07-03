@@ -5,7 +5,7 @@ import { useApi } from './contexts/ApiProvider';
 import ProtectedRoute from './components/protected_route';
 import { DrawerProvider } from './contexts/DrawerProvider';
 import { Book, Note } from './core/types';
-import { LoadingBar } from './components/loading';
+import { LoadingBar, LoadingSpin } from './components/loading';
 import { apiErrorIntoToast, useToast } from './contexts/ToastProvider';
 import { ApiError } from './core/api';
 import PreLogin from './pages/pre-login';
@@ -102,7 +102,7 @@ const MainApp: Component = () => {
         <ul class="menu menu-sm lg:menu-md gap-4 p-4 w-80 bg-base-300 text-base-content h-full">
           <li class="menu-title"><span>NOTEBOOKS</span></li>
           <ul class="overflow-auto bg-base-100 flex-1 w-full rounded-lg">
-            <Show when={!booksById.loading}>
+            <Show when={!booksById.loading} fallback={<LoadingSpin />}>
               <For each={books()}>
                 {(book) => <li>
                   <A
@@ -115,7 +115,7 @@ const MainApp: Component = () => {
           </ul>
           <li class="menu-title"><span>NOTES</span></li>
           <ul class="overflow-auto bg-base-100 flex-1 w-full rounded-lg">
-            <Show when={!notesById.loading}>
+            <Show when={!notesById.loading} fallback={<LoadingSpin />}>
               <For each={notes()}>
                 {(note) => <li>
                   <A
