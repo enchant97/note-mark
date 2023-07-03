@@ -4,6 +4,10 @@ export const LoadingBar: Component = () => {
   return <progress class="progress w-full"></progress>
 }
 
+export const LoadingSpin: Component = () => {
+  return <span class="loading loading-spinner m-auto block mt-2"></span>
+}
+
 export const LoadingScreen: Component = () => {
   return (
     <div class="hero min-h-screen bg-base-200">

@@ -1,4 +1,4 @@
-import { Component, For, createResource, createSignal } from 'solid-js';
+import { Component, For, Suspense, createResource, createSignal } from 'solid-js';
 import BaseModal from './base';
 import { Book, UpdateBook, User } from '../../core/types';
 import { createStore } from 'solid-js/store';
@@ -8,6 +8,7 @@ import { useNavigate } from '@solidjs/router';
 import { apiErrorIntoToast, useToast } from '../../contexts/ToastProvider';
 import { ApiError } from '../../core/api';
 import Icon from '../icon';
+import { LoadingSpin } from '../loading';
 
 type DeletedNotesProps = {
   bookId: string
@@ -51,26 +52,28 @@ const DeletedNotes: Component<DeletedNotesProps> = (props) => {
   return (
     <div>
       <h4 class="text-bold mb-2">Removed Notes</h4>
-      <ul class="max-h-40 overflow-y-auto bg-base-200">
-        <For each={notes()}>
-          {(note, i) =>
-            <li class="flex items-center p-2 gap-2 rounded">
-              <span class="mr-auto">{note.name}</span>
-              <div class="join">
-                <button
-                  onclick={() => restoreNote(note.id, i())}
-                  type="button"
-                  class="join-item btn btn-outline btn-sm"
-                >Restore</button>
-                <button
-                  onclick={() => deleteNote(note.id, i())}
-                  type="button"
-                  class="join-item btn btn-outline btn-sm btn-error"
-                ><Icon name="trash" /></button>
-              </div>
-            </li>
-          }
-        </For>
+      <ul class="max-h-40 h-40 overflow-y-auto bg-base-200">
+        <Suspense fallback={<LoadingSpin />}>
+          <For each={notes()}>
+            {(note, i) =>
+              <li class="flex items-center p-2 gap-2 rounded">
+                <span class="mr-auto">{note.name}</span>
+                <div class="join">
+                  <button
+                    onclick={() => restoreNote(note.id, i())}
+                    type="button"
+                    class="join-item btn btn-outline btn-sm"
+                  >Restore</button>
+                  <button
+                    onclick={() => deleteNote(note.id, i())}
+                    type="button"
+                    class="join-item btn btn-outline btn-sm btn-error"
+                  ><Icon name="trash" /></button>
+                </div>
+              </li>
+            }
+          </For>
+        </Suspense>
       </ul>
     </div>
   )
