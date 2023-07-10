@@ -87,41 +87,49 @@ func getServerInfo(ctx echo.Context) error {
 }
 
 func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
-	e.Use(
+	apiRoutes := e.Group(
+		"/api",
 		createJwtMiddleware(appConfig.JWTSecret),
 		authHandlerMiddleware,
 	)
-
-	routes := e.Group("/api/")
+	apiRoutes.GET("/info", getServerInfo)
+	apiRoutes.POST("/auth/token", postToken)
+	slugRoutes := apiRoutes.Group("slug/@:username")
 	{
-		routes.GET("info", getServerInfo)
-		routes.POST("auth/token", postToken)
-		routes.POST("users", postCreateUser)
-		routes.GET("users/search", searchForUser)
+		slugRoutes.GET("/books", getBooksByUsername)
+		slugRoutes.GET("/books/:bookSlug", getBookBySlug)
+		slugRoutes.GET("/books/:bookSlug/notes", getNotesBySlug)
+		slugRoutes.GET("/books/:bookSlug/notes/:noteSlug", getNoteBySlug)
 	}
-	protectedRoutes := e.Group("/api/", authRequiredMiddleware)
+	usersRoutes := apiRoutes.Group("users")
 	{
-		protectedRoutes.GET("users/me", getUserMe)
-		protectedRoutes.PATCH("users/me", updateUserMe)
-		protectedRoutes.PUT("users/me/password", updateUserMePassword)
-		slugUserRoutes := protectedRoutes.Group("slug/@:username/")
-		{
-			slugUserRoutes.GET("books", getBooksByUsername)
-			slugUserRoutes.GET("books/:bookSlug", getBookBySlug)
-			slugUserRoutes.GET("books/:bookSlug/notes", getNotesBySlug)
-			slugUserRoutes.GET("books/:bookSlug/notes/:noteSlug", getNoteBySlug)
-		}
-		protectedRoutes.POST("books", createBook)
-		protectedRoutes.GET("books/:bookID", getBookByID)
-		protectedRoutes.PATCH("books/:bookID", patchBookByID)
-		protectedRoutes.DELETE("books/:bookID", deleteBookByID)
-		protectedRoutes.GET("books/:bookID/notes", getNotesByBookID)
-		protectedRoutes.POST("books/:bookID/notes", createNoteByBookID)
-		protectedRoutes.GET("notes/:noteID", getNoteByID)
-		protectedRoutes.PATCH("notes/:noteID", patchNoteByID)
-		protectedRoutes.DELETE("notes/:noteID", deleteNoteById)
-		protectedRoutes.PUT("notes/:noteID/restore", restoreNoteByID)
-		protectedRoutes.GET("notes/:noteID/content", getNoteContent)
-		protectedRoutes.PUT("notes/:noteID/content", updateNoteContent, middleware.BodyLimit("1M"))
+		usersRoutes.POST("", postCreateUser)
+		usersRoutes.GET("/search", searchForUser)
+		usersRoutes.GET("/me", getUserMe, authRequiredMiddleware)
+		usersRoutes.PATCH("/me", updateUserMe, authRequiredMiddleware)
+		usersRoutes.PUT("/me/password", updateUserMePassword, authRequiredMiddleware)
+	}
+	booksRoutes := apiRoutes.Group("/books")
+	{
+		booksRoutes.POST("", createBook, authRequiredMiddleware)
+		booksRoutes.GET("/:bookID", getBookByID)
+		booksRoutes.PATCH("/:bookID", patchBookByID, authRequiredMiddleware)
+		booksRoutes.DELETE("/:bookID", deleteBookByID, authRequiredMiddleware)
+		booksRoutes.GET("/:bookID/notes", getNotesByBookID)
+		booksRoutes.POST("/:bookID/notes", createNoteByBookID, authRequiredMiddleware)
+	}
+	notesRoutes := apiRoutes.Group("/notes")
+	{
+		notesRoutes.GET("notes/:noteID", getNoteByID)
+		notesRoutes.PATCH("notes/:noteID", patchNoteByID, authRequiredMiddleware)
+		notesRoutes.DELETE("notes/:noteID", deleteNoteById, authRequiredMiddleware)
+		notesRoutes.PUT("notes/:noteID/restore", restoreNoteByID, authRequiredMiddleware)
+		notesRoutes.GET("notes/:noteID/content", getNoteContent)
+		notesRoutes.PUT(
+			"notes/:noteID/content",
+			updateNoteContent,
+			authRequiredMiddleware,
+			middleware.BodyLimit("1M"),
+		)
 	}
 }

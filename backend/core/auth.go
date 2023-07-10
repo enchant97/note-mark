@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 // Create token for authentication
@@ -34,7 +35,7 @@ func (a AuthenticationDetails) New(user *AuthenticatedUser) AuthenticationDetail
 }
 
 func (a *AuthenticationDetails) IsAuthenticated() bool {
-    return a.user != nil
+	return a.user != nil
 }
 
 func (a *AuthenticationDetails) GetAuthenticatedUser() AuthenticatedUser {
@@ -46,4 +47,11 @@ func (a *AuthenticationDetails) GetAuthenticatedUser() AuthenticatedUser {
 
 func (a *AuthenticationDetails) GetOptionalAuthenticatedUser() *AuthenticatedUser {
 	return a.user
+}
+
+func (a *AuthenticationDetails) GetOptionalUserID() *uuid.UUID {
+	if a.user == nil {
+		return nil
+	}
+	return &a.user.UserID
 }

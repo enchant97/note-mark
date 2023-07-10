@@ -44,7 +44,7 @@ func createNoteByBookID(ctx echo.Context) error {
 }
 
 func getNotesByBookID(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
+	userID := getAuthDetails(ctx).GetOptionalUserID()
 	bookID, err := uuid.Parse(ctx.Param("bookID"))
 	if err != nil {
 		return err
@@ -63,7 +63,7 @@ func getNotesByBookID(ctx echo.Context) error {
 		Joins("JOIN books ON books.id = notes.book_id").
 		Where(
 			db.DB.Where("books.id = ?", bookID),
-			db.DB.Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true),
+			db.DB.Where("owner_id = ? OR is_public = ?", userID, true),
 		)
 	if filterParams.Deleted {
 		tx = tx.Where("notes.deleted_at IS NOT NULL")
@@ -78,7 +78,7 @@ func getNotesByBookID(ctx echo.Context) error {
 }
 
 func getNotesBySlug(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
+	userID := getAuthDetails(ctx).GetOptionalUserID()
 	username := ctx.Param("username")
 	bookSlug := ctx.Param("bookSlug")
 
@@ -95,7 +95,7 @@ func getNotesBySlug(ctx echo.Context) error {
 		Joins("JOIN books ON books.id = notes.book_id").
 		Where(
 			db.DB.Where("books.slug = ? AND owner_id = ?", bookSlug, bookOwner.ID),
-			db.DB.Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true),
+			db.DB.Where("owner_id = ? OR is_public = ?", userID, true),
 		).
 		Find(&notes).Error; err != nil {
 		return err
@@ -105,7 +105,7 @@ func getNotesBySlug(ctx echo.Context) error {
 }
 
 func getNoteByID(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
+	userID := getAuthDetails(ctx).GetOptionalUserID()
 	noteID, err := uuid.Parse(ctx.Param("noteID"))
 	if err != nil {
 		return err
@@ -115,7 +115,7 @@ func getNoteByID(ctx echo.Context) error {
 	if err := db.DB.
 		Preload("Book").
 		Joins("JOIN books ON books.id = notes.book_id").
-		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
+		Where("owner_id = ? OR is_public = ?", userID, true).
 		First(&note, "notes.id = ?", noteID).Error; err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func getNoteByID(ctx echo.Context) error {
 }
 
 func getNoteBySlug(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
+	userID := getAuthDetails(ctx).GetOptionalUserID()
 	username := ctx.Param("username")
 	bookSlug := ctx.Param("bookSlug")
 	noteSlug := ctx.Param("noteSlug")
@@ -141,7 +141,7 @@ func getNoteBySlug(ctx echo.Context) error {
 		Preload("Book").
 		Joins("JOIN books ON books.id = notes.book_id").
 		Where("books.slug = ? AND books.owner_id = ?", bookSlug, bookOwner.ID).
-		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
+		Where("owner_id = ? OR is_public = ?", userID, true).
 		First(&note, "notes.slug = ?", noteSlug).Error; err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func getNoteBySlug(ctx echo.Context) error {
 }
 
 func getNoteContent(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
+	userID := getAuthDetails(ctx).GetOptionalUserID()
 	noteID, err := uuid.Parse(ctx.Param("noteID"))
 	if err != nil {
 		return err
@@ -161,7 +161,7 @@ func getNoteContent(ctx echo.Context) error {
 		Model(&db.Note{}).
 		Preload("Book").
 		Joins("JOIN books ON books.id = notes.book_id").
-		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
+		Where("owner_id = ? OR is_public = ?", userID, true).
 		Where("notes.id = ?", noteID).
 		Limit(1).
 		Count(&count).Error; err != nil {

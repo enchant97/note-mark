@@ -25,7 +25,7 @@ func createBook(ctx echo.Context) error {
 }
 
 func getBooksByUsername(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
+	userID := getAuthDetails(ctx).GetOptionalUserID()
 	username := ctx.Param("username")
 
 	var bookOwner db.User
@@ -40,7 +40,7 @@ func getBooksByUsername(ctx echo.Context) error {
 	if err := db.DB.
 		Where(
 			db.DB.Where("owner_id = ?", bookOwner.ID),
-			db.DB.Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true),
+			db.DB.Where("owner_id = ? OR is_public = ?", userID, true),
 		).
 		Find(&books).
 		Error; err != nil {
@@ -51,7 +51,7 @@ func getBooksByUsername(ctx echo.Context) error {
 }
 
 func getBookByID(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
+	userID := getAuthDetails(ctx).GetOptionalUserID()
 	bookID, err := uuid.Parse(ctx.Param("bookID"))
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func getBookByID(ctx echo.Context) error {
 
 	var book db.Book
 	if err := db.DB.
-		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
+		Where("owner_id = ? OR is_public = ?", userID, true).
 		First(&book, "id = ?", bookID).
 		Error; err != nil {
 		return err
@@ -69,7 +69,7 @@ func getBookByID(ctx echo.Context) error {
 }
 
 func getBookBySlug(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
+	userID := getAuthDetails(ctx).GetOptionalUserID()
 	username := ctx.Param("username")
 	bookSlug := ctx.Param("bookSlug")
 
@@ -83,7 +83,7 @@ func getBookBySlug(ctx echo.Context) error {
 
 	var book db.Book
 	if err := db.DB.
-		Where("owner_id = ? OR is_public = ?", authenticatedUser.UserID, true).
+		Where("owner_id = ? OR is_public = ?", userID, true).
 		First(&book, "slug = ? AND owner_id = ?", bookSlug, bookOwner.ID).
 		Error; err != nil {
 		return err
