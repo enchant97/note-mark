@@ -26,7 +26,7 @@
     "@tailwindcss/typography": "^0.5.9",
     "codemirror": "^6.0.1",
     "daisyui": "^3.2.1",
-    "dompurify": "^3.0.3",
+    "dompurify": "^3.0.4",
     "feather-icons": "^4.29.0",
     "marked": "^5.1.0",
     "solid-js": "^1.7.7"
