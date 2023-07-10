@@ -30,7 +30,7 @@ func postCreateUser(ctx echo.Context) error {
 }
 
 func getUserMe(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 
 	var user db.User
 	if err := db.DB.
@@ -42,7 +42,7 @@ func getUserMe(ctx echo.Context) error {
 }
 
 func updateUserMe(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 
 	var userData db.UpdateUser
 	if err := core.BindAndValidate(ctx, &userData); err != nil {
@@ -57,7 +57,7 @@ func updateUserMe(ctx echo.Context) error {
 }
 
 func updateUserMePassword(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 
 	var userData db.UpdateUserPassword
 	if err := core.BindAndValidate(ctx, &userData); err != nil {

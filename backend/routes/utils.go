@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/enchant97/note-mark/backend/config"
@@ -12,25 +13,72 @@ import (
 )
 
 const (
-	AuthenticatedUserKey = "AuthenticatedUser"
-	UserTokenKey         = "UserToken"
+	AuthDetailsKey = "AuthDetails"
+	UserTokenKey   = "UserToken"
 )
 
-func authenticatedUserMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+// turns a JWT token into a authenticated user,
+// or returns nil if no JWT is set
+func jwtIntoAuthenticatedUser(ctx echo.Context) (*core.AuthenticatedUser, error) {
+	userTokenData := ctx.Get(UserTokenKey)
+	if userTokenData == nil {
+		return nil, nil
+	}
+	userToken := userTokenData.(*jwt.Token)
+	tokenClaims := userToken.Claims.(*core.JWTClaims)
+	user, err := tokenClaims.ToAuthenticatedUser()
+	return &user, err
+}
+
+type authenticationHandler struct {
+	authRequired bool
+}
+
+func (h authenticationHandler) New(authRequired bool) authenticationHandler {
+	h = authenticationHandler{
+		authRequired: authRequired,
+	}
+	return h
+}
+
+func (h *authenticationHandler) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		authenticatedUser, err := core.GetAuthenticatedUserFromContext(ctx)
+		authenticatedUser, err := jwtIntoAuthenticatedUser(ctx)
 		if err != nil {
 			// invalid token contents
 			return ctx.NoContent(http.StatusUnauthorized)
 		}
+		if h.authRequired && authenticatedUser == nil {
+			ctx.Response().Header().Set("WWW-Authenticate", "Bearer")
+			return ctx.JSON(http.StatusUnauthorized, "authentication required")
+		}
 		// TODO validate username & userID match in database
-		ctx.Set(AuthenticatedUserKey, authenticatedUser)
+		authDetails := core.AuthenticationDetails{}.New(authenticatedUser)
+		ctx.Set(AuthDetailsKey, &authDetails)
 		return next(ctx)
 	}
 }
 
-func getAuthenticatedUser(ctx echo.Context) core.AuthenticatedUser {
-	return ctx.Get(AuthenticatedUserKey).(core.AuthenticatedUser)
+func getAuthDetails(ctx echo.Context) *core.AuthenticationDetails {
+	return ctx.Get(AuthDetailsKey).(*core.AuthenticationDetails)
+}
+
+func createJwtMiddleware(secret []byte) echo.MiddlewareFunc {
+	config := echojwt.Config{
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(core.JWTClaims)
+		},
+		SigningKey: secret,
+		ContextKey: UserTokenKey,
+		ErrorHandler: func(ctx echo.Context, err error) error {
+			if errors.Is(err, echojwt.ErrJWTMissing) {
+				return nil
+			}
+			return ctx.JSON(http.StatusUnauthorized, "missing or malformed jwt")
+		},
+		ContinueOnIgnoredError: true,
+	}
+	return echojwt.WithConfig(config)
 }
 
 func getServerInfo(ctx echo.Context) error {
@@ -43,14 +91,8 @@ func getServerInfo(ctx echo.Context) error {
 }
 
 func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
-	config := echojwt.Config{
-		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return new(core.JWTClaims)
-		},
-		SigningKey: []byte(appConfig.JWTSecret),
-		ContextKey: UserTokenKey,
-	}
-	jwtMiddleware := echojwt.WithConfig(config)
+	jwtMiddleware := createJwtMiddleware(appConfig.JWTSecret)
+	authRequiredHandler := authenticationHandler{}.New(true)
 
 	routes := e.Group("/api/")
 	{
@@ -59,7 +101,7 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 		routes.POST("users", postCreateUser)
 		routes.GET("users/search", searchForUser)
 	}
-	protectedRoutes := e.Group("/api/", jwtMiddleware, authenticatedUserMiddleware)
+	protectedRoutes := e.Group("/api/", jwtMiddleware, authRequiredHandler.Middleware)
 	{
 		protectedRoutes.GET("users/me", getUserMe)
 		protectedRoutes.PATCH("users/me", updateUserMe)

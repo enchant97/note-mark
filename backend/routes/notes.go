@@ -13,7 +13,7 @@ import (
 )
 
 func createNoteByBookID(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	bookID, err := uuid.Parse(ctx.Param("bookID"))
 	if err != nil {
 		return err
@@ -44,7 +44,7 @@ func createNoteByBookID(ctx echo.Context) error {
 }
 
 func getNotesByBookID(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	bookID, err := uuid.Parse(ctx.Param("bookID"))
 	if err != nil {
 		return err
@@ -78,7 +78,7 @@ func getNotesByBookID(ctx echo.Context) error {
 }
 
 func getNotesBySlug(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	username := ctx.Param("username")
 	bookSlug := ctx.Param("bookSlug")
 
@@ -105,7 +105,7 @@ func getNotesBySlug(ctx echo.Context) error {
 }
 
 func getNoteByID(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	noteID, err := uuid.Parse(ctx.Param("noteID"))
 	if err != nil {
 		return err
@@ -124,7 +124,7 @@ func getNoteByID(ctx echo.Context) error {
 }
 
 func getNoteBySlug(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	username := ctx.Param("username")
 	bookSlug := ctx.Param("bookSlug")
 	noteSlug := ctx.Param("noteSlug")
@@ -150,7 +150,7 @@ func getNoteBySlug(ctx echo.Context) error {
 }
 
 func getNoteContent(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	noteID, err := uuid.Parse(ctx.Param("noteID"))
 	if err != nil {
 		return err
@@ -185,7 +185,7 @@ func getNoteContent(ctx echo.Context) error {
 }
 
 func patchNoteByID(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	noteID, err := uuid.Parse(ctx.Param("noteID"))
 	if err != nil {
 		return err
@@ -225,7 +225,7 @@ func patchNoteByID(ctx echo.Context) error {
 }
 
 func updateNoteContent(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	noteID, err := uuid.Parse(ctx.Param("noteID"))
 	if err != nil {
 		return err
@@ -257,7 +257,7 @@ func updateNoteContent(ctx echo.Context) error {
 }
 
 func restoreNoteByID(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	noteID, err := uuid.Parse(ctx.Param("noteID"))
 	if err != nil {
 		return err
@@ -300,7 +300,7 @@ func restoreNoteByID(ctx echo.Context) error {
 }
 
 func deleteNoteById(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	noteID, err := uuid.Parse(ctx.Param("noteID"))
 	if err != nil {
 		return err

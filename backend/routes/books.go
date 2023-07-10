@@ -10,7 +10,7 @@ import (
 )
 
 func createBook(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	var bookData db.CreateBook
 	if err := core.BindAndValidate(ctx, &bookData); err != nil {
 		return err
@@ -25,7 +25,7 @@ func createBook(ctx echo.Context) error {
 }
 
 func getBooksByUsername(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	username := ctx.Param("username")
 
 	var bookOwner db.User
@@ -51,7 +51,7 @@ func getBooksByUsername(ctx echo.Context) error {
 }
 
 func getBookByID(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	bookID, err := uuid.Parse(ctx.Param("bookID"))
 	if err != nil {
 		return err
@@ -69,7 +69,7 @@ func getBookByID(ctx echo.Context) error {
 }
 
 func getBookBySlug(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	username := ctx.Param("username")
 	bookSlug := ctx.Param("bookSlug")
 
@@ -93,7 +93,7 @@ func getBookBySlug(ctx echo.Context) error {
 }
 
 func patchBookByID(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	bookID, err := uuid.Parse(ctx.Param("bookID"))
 	if err != nil {
 		return err
@@ -118,7 +118,7 @@ func patchBookByID(ctx echo.Context) error {
 }
 
 func deleteBookByID(ctx echo.Context) error {
-	authenticatedUser := getAuthenticatedUser(ctx)
+	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
 	bookID, err := uuid.Parse(ctx.Param("bookID"))
 	if err != nil {
 		return err

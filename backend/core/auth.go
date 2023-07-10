@@ -4,15 +4,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/labstack/echo/v4"
 )
-
-// Get the authenticated user
-func GetAuthenticatedUserFromContext(ctx echo.Context) (AuthenticatedUser, error) {
-	userToken := ctx.Get("UserToken").(*jwt.Token)
-	tokenClaims := userToken.Claims.(*JWTClaims)
-	return tokenClaims.ToAuthenticatedUser()
-}
 
 // Create token for authentication
 func CreateAuthenticationToken(user AuthenticatedUser, secretKey []byte, expiresDuration time.Duration) (AccessToken, error) {
@@ -28,4 +20,26 @@ func CreateAuthenticationToken(user AuthenticatedUser, secretKey []byte, expires
 		TokenType:   "Bearer",
 		ExpiresIn:   uint(expiresDuration.Seconds()),
 	}, nil
+}
+
+type AuthenticationDetails struct {
+	user *AuthenticatedUser
+}
+
+func (a AuthenticationDetails) New(user *AuthenticatedUser) AuthenticationDetails {
+	a = AuthenticationDetails{
+		user: user,
+	}
+	return a
+}
+
+func (a *AuthenticationDetails) GetAuthenticatedUser() AuthenticatedUser {
+	if a.user == nil {
+		panic("no authentication has been set")
+	}
+	return *a.user
+}
+
+func (a *AuthenticationDetails) GetOptionalAuthenticatedUser() *AuthenticatedUser {
+	return a.user
 }
