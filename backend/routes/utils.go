@@ -30,39 +30,7 @@ func jwtIntoAuthenticatedUser(ctx echo.Context) (*core.AuthenticatedUser, error)
 	return &user, err
 }
 
-type authenticationHandler struct {
-	authRequired bool
-}
-
-func (h authenticationHandler) New(authRequired bool) authenticationHandler {
-	h = authenticationHandler{
-		authRequired: authRequired,
-	}
-	return h
-}
-
-func (h *authenticationHandler) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
-		authenticatedUser, err := jwtIntoAuthenticatedUser(ctx)
-		if err != nil {
-			// invalid token contents
-			return ctx.NoContent(http.StatusUnauthorized)
-		}
-		if h.authRequired && authenticatedUser == nil {
-			ctx.Response().Header().Set("WWW-Authenticate", "Bearer")
-			return ctx.JSON(http.StatusUnauthorized, "authentication required")
-		}
-		// TODO validate username & userID match in database
-		authDetails := core.AuthenticationDetails{}.New(authenticatedUser)
-		ctx.Set(AuthDetailsKey, &authDetails)
-		return next(ctx)
-	}
-}
-
-func getAuthDetails(ctx echo.Context) *core.AuthenticationDetails {
-	return ctx.Get(AuthDetailsKey).(*core.AuthenticationDetails)
-}
-
+// create JWT middleware, allowing for missing token
 func createJwtMiddleware(secret []byte) echo.MiddlewareFunc {
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
@@ -81,6 +49,34 @@ func createJwtMiddleware(secret []byte) echo.MiddlewareFunc {
 	return echojwt.WithConfig(config)
 }
 
+func authHandlerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		authenticatedUser, err := jwtIntoAuthenticatedUser(ctx)
+		if err != nil {
+			// invalid token contents
+			return ctx.NoContent(http.StatusUnauthorized)
+		}
+		// TODO validate username & userID match in database (if authenticatedUser is not nil)
+		authDetails := core.AuthenticationDetails{}.New(authenticatedUser)
+		ctx.Set(AuthDetailsKey, &authDetails)
+		return next(ctx)
+	}
+}
+
+func authRequiredMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		if !ctx.Get(AuthDetailsKey).(*core.AuthenticationDetails).IsAuthenticated() {
+			ctx.Response().Header().Set("WWW-Authenticate", "Bearer")
+			return ctx.JSON(http.StatusUnauthorized, "authentication required")
+		}
+		return next(ctx)
+	}
+}
+
+func getAuthDetails(ctx echo.Context) *core.AuthenticationDetails {
+	return ctx.Get(AuthDetailsKey).(*core.AuthenticationDetails)
+}
+
 func getServerInfo(ctx echo.Context) error {
 	appConfig := ctx.Get("AppConfig").(config.AppConfig)
 
@@ -91,8 +87,10 @@ func getServerInfo(ctx echo.Context) error {
 }
 
 func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
-	jwtMiddleware := createJwtMiddleware(appConfig.JWTSecret)
-	authRequiredHandler := authenticationHandler{}.New(true)
+	e.Use(
+		createJwtMiddleware(appConfig.JWTSecret),
+		authHandlerMiddleware,
+	)
 
 	routes := e.Group("/api/")
 	{
@@ -101,7 +99,7 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 		routes.POST("users", postCreateUser)
 		routes.GET("users/search", searchForUser)
 	}
-	protectedRoutes := e.Group("/api/", jwtMiddleware, authRequiredHandler.Middleware)
+	protectedRoutes := e.Group("/api/", authRequiredMiddleware)
 	{
 		protectedRoutes.GET("users/me", getUserMe)
 		protectedRoutes.PATCH("users/me", updateUserMe)

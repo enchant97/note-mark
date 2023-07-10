@@ -33,6 +33,10 @@ func (a AuthenticationDetails) New(user *AuthenticatedUser) AuthenticationDetail
 	return a
 }
 
+func (a *AuthenticationDetails) IsAuthenticated() bool {
+    return a.user != nil
+}
+
 func (a *AuthenticationDetails) GetAuthenticatedUser() AuthenticatedUser {
 	if a.user == nil {
 		panic("no authentication has been set")
