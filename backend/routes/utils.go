@@ -94,14 +94,14 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 	)
 	apiRoutes.GET("/info", getServerInfo)
 	apiRoutes.POST("/auth/token", postToken)
-	slugRoutes := apiRoutes.Group("slug/@:username")
+	slugRoutes := apiRoutes.Group("/slug/@:username")
 	{
 		slugRoutes.GET("/books", getBooksByUsername)
 		slugRoutes.GET("/books/:bookSlug", getBookBySlug)
 		slugRoutes.GET("/books/:bookSlug/notes", getNotesBySlug)
 		slugRoutes.GET("/books/:bookSlug/notes/:noteSlug", getNoteBySlug)
 	}
-	usersRoutes := apiRoutes.Group("users")
+	usersRoutes := apiRoutes.Group("/users")
 	{
 		usersRoutes.POST("", postCreateUser)
 		usersRoutes.GET("/search", searchForUser)
@@ -120,13 +120,13 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 	}
 	notesRoutes := apiRoutes.Group("/notes")
 	{
-		notesRoutes.GET("notes/:noteID", getNoteByID)
-		notesRoutes.PATCH("notes/:noteID", patchNoteByID, authRequiredMiddleware)
-		notesRoutes.DELETE("notes/:noteID", deleteNoteById, authRequiredMiddleware)
-		notesRoutes.PUT("notes/:noteID/restore", restoreNoteByID, authRequiredMiddleware)
-		notesRoutes.GET("notes/:noteID/content", getNoteContent)
+		notesRoutes.GET("/:noteID", getNoteByID)
+		notesRoutes.PATCH("/:noteID", patchNoteByID, authRequiredMiddleware)
+		notesRoutes.DELETE("/:noteID", deleteNoteById, authRequiredMiddleware)
+		notesRoutes.PUT("/:noteID/restore", restoreNoteByID, authRequiredMiddleware)
+		notesRoutes.GET("/:noteID/content", getNoteContent)
 		notesRoutes.PUT(
-			"notes/:noteID/content",
+			"/:noteID/content",
 			updateNoteContent,
 			authRequiredMiddleware,
 			middleware.BodyLimit("1M"),

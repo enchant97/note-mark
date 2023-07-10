@@ -81,6 +81,10 @@ class Api {
   headerAuthorization(): Record<string, string> {
     return { "Authorization": `Bearer ${this.authToken}` }
   }
+  optionalHeaderAuthorization(): Record<string, string> {
+    if (!this.isAuthenticated()) return {}
+    return { "Authorization": `Bearer ${this.authToken}` }
+  }
   async getServerInfo(): Promise<Result<ServerInfo, ApiError>> {
     let reqURL = `${this.apiServer}/info`
     let resp = await handleFetchErrors(fetch(reqURL))
@@ -160,7 +164,7 @@ class Api {
   async getBooksBySlug(username: string): Promise<Result<Book[], ApiError>> {
     let reqURL = `${this.apiServer}/slug/@${username}/books`
     let resp = await handleFetchErrors(fetch(reqURL, {
-      headers: this.headerAuthorization(),
+      headers: this.optionalHeaderAuthorization(),
     }))
     if (resp instanceof Error) return resp
     if (!resp.ok) return new ApiError(resp.status)
@@ -169,7 +173,7 @@ class Api {
   async getBookBySlug(username: string, bookSlug: string): Promise<Result<Book, ApiError>> {
     let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}`
     let resp = await handleFetchErrors(fetch(reqURL, {
-      headers: this.headerAuthorization(),
+      headers: this.optionalHeaderAuthorization(),
     }))
     if (resp instanceof Error) return resp
     if (!resp.ok) return new ApiError(resp.status)
@@ -178,7 +182,7 @@ class Api {
   async getNotesBySlug(username: string, bookSlug: string): Promise<Result<Note[], ApiError>> {
     let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/notes`
     let resp = await handleFetchErrors(fetch(reqURL, {
-      headers: this.headerAuthorization(),
+      headers: this.optionalHeaderAuthorization(),
     }))
     if (resp instanceof Error) return resp
     if (!resp.ok) return new ApiError(resp.status)
@@ -187,7 +191,7 @@ class Api {
   async getNoteBySlug(username: string, bookSlug: string, noteSlug: string): Promise<Result<Note, ApiError>> {
     let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/notes/${noteSlug}`
     let resp = await handleFetchErrors(fetch(reqURL, {
-      headers: this.headerAuthorization(),
+      headers: this.optionalHeaderAuthorization(),
     }))
     if (resp instanceof Error) return resp
     if (!resp.ok) return new ApiError(resp.status)
@@ -199,7 +203,7 @@ class Api {
       reqURL += "?deleted=true"
     }
     let resp = await handleFetchErrors(fetch(reqURL, {
-      headers: this.headerAuthorization(),
+      headers: this.optionalHeaderAuthorization(),
     }))
     if (resp instanceof Error) return resp
     if (!resp.ok) return new ApiError(resp.status)
@@ -208,7 +212,7 @@ class Api {
   async getNoteContentById(noteId: string): Promise<Result<string, ApiError>> {
     let reqURL = `${this.apiServer}/notes/${noteId}/content`
     let resp = await handleFetchErrors(fetch(reqURL, {
-      headers: this.headerAuthorization(),
+      headers: this.optionalHeaderAuthorization(),
     }))
     if (resp instanceof Error) return resp
     if (!resp.ok) return new ApiError(resp.status)
