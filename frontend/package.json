@@ -29,6 +29,6 @@
     "dompurify": "^3.0.4",
     "feather-icons": "^4.29.0",
     "marked": "^5.1.0",
-    "solid-js": "^1.7.7"
+    "solid-js": "^1.7.11"
   }
 }
