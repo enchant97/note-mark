@@ -5,16 +5,16 @@ go 1.20
 require (
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/glebarez/sqlite v1.9.0
-	github.com/go-playground/validator/v10 v10.14.1
+	github.com/go-playground/validator/v10 v10.15.1
 	github.com/golang-jwt/jwt/v5 v5.0.0
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.3.1
 	github.com/labstack/echo-jwt/v4 v4.2.0
-	github.com/labstack/echo/v4 v4.10.2
+	github.com/labstack/echo/v4 v4.11.1
 	github.com/urfave/cli/v2 v2.25.7
-	golang.org/x/crypto v0.11.0
+	golang.org/x/crypto v0.12.0
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/driver/postgres v1.5.2
-	gorm.io/gorm v1.25.2
+	gorm.io/gorm v1.25.4
 )
 
 require (
@@ -41,8 +41,8 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	golang.org/x/net v0.12.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	modernc.org/libc v1.24.1 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
