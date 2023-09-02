@@ -2,6 +2,7 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 
 marked.use({
+  async: true,
   gfm: true,
   // disable deprecated (v5.0.0)
   headerIds: false,
@@ -11,7 +12,7 @@ marked.use({
 
 // Render markdown into HTML,
 // will sanitize input to prevent possible XSS attacks
-function render(content: string): string {
+async function render(content: string): Promise<string> {
   content = DOMPurify.sanitize(content)
   return marked.parse(content)
 }
