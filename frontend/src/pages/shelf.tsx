@@ -64,6 +64,19 @@ const Shelf: Component = () => {
     else return result
   })
 
+  const [noteContent, { mutate: setNoteContent }] = createResource(note, async (note) => {
+    let result = await api().getNoteContentById(note.id)
+    if (result instanceof ApiError) {
+      pushToast(apiErrorIntoToast(result, "getting note content"))
+      return
+    } else {
+      if (!result.endsWith("\n")) {
+        result += "\n"
+      }
+      return result
+    }
+  })
+
   const breadcrumb: () => Breadcrumb = () => {
     return {
       username: params.username,
@@ -184,7 +197,7 @@ const Shelf: Component = () => {
         </div>
         <NoteBreadcrumb class="flex-1" {...breadcrumb()} />
       </div>
-      <Show when={!note.loading} fallback={<LoadingBar />}>
+      <Show when={!note.loading && !noteContent.loading} fallback={<LoadingBar />}>
         <Show when={note()} fallback={
           <div class="hero pt-6 bg-base-200 rounded-md">
             <div class="hero-content text-center">
@@ -219,14 +232,16 @@ const Shelf: Component = () => {
                 >Editor</button>
               </div>
             </div>
-            <Switch fallback={<NoteViewRendered note={note()} />}>
-              <Match when={noteMode() === "plain"}>
-                <NoteViewPlain note={note()} />
-              </Match>
-              <Match when={noteMode() === "edit"}>
-                <NoteEdit note={note()} />
-              </Match>
-            </Switch>
+            <Show when={noteContent()}>
+              {content => <Switch fallback={<NoteViewRendered content={content} />}>
+                <Match when={noteMode() === "plain"}>
+                  <NoteViewPlain content={content} />
+                </Match>
+                <Match when={noteMode() === "edit"}>
+                  <NoteEdit note={note()} content={content} onChange={setNoteContent} />
+                </Match>
+              </Switch>}
+            </Show>
           </>
           }
         </Show>
