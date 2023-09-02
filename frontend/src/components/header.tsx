@@ -2,10 +2,8 @@ import { Component, For, createEffect, createSignal } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { A } from '@solidjs/router';
 import { useCurrentUser } from '../contexts/CurrentUserProvider';
-import { useModal } from '../contexts/ModalProvider';
 import { THEMES, getTheme, setTheme } from '../core/theme_switcher';
 import Icon from './icon';
-import { ServerInfo } from '../core/types';
 
 const ThemeSwitcher: Component = () => {
   const [currentTheme, setCurrentTheme] = createSignal(getTheme())
@@ -13,7 +11,7 @@ const ThemeSwitcher: Component = () => {
     setTheme(currentTheme())
   )
   return (
-    <div class="dropdown dropdown-end">
+    <div class="dropdown dropdown-end z-10">
       <label tabindex="0" class="btn btn-ghost shadow-lg flex gap-2">
         <Icon name="sun" />
         <Icon name="moon" />
@@ -69,7 +67,7 @@ const Header: Component = () => {
       <div class="flex gap-4">
         <ThemeSwitcher />
         <A activeClass="btn-disabled" class="btn btn-ghost btn-circle shadow-lg" end={true} href="/"><Icon name="home" /></A>
-        <div class="dropdown dropdown-end">
+        <div class="dropdown dropdown-end z-10">
           <label tabindex="0" class="btn btn-ghost btn-circle shadow-lg">
             <Icon name="user" />
           </label>
