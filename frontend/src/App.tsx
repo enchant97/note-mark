@@ -108,6 +108,7 @@ const MainApp: Component = () => {
                   <A
                     href={`/${params.username}/${book.slug}`}
                     class="whitespace-nowrap"
+                    end={true}
                   >{book.name}
                   </A></li>}
               </For>
@@ -121,6 +122,7 @@ const MainApp: Component = () => {
                   <A
                     href={`/${params.username}/${params.bookSlug}/${note.slug}`}
                     class="whitespace-nowrap"
+                    end={true}
                   >{note.name}
                   </A></li>}
               </For>
