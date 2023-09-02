@@ -12,12 +12,12 @@
   "devDependencies": {
     "@types/dompurify": "^3.0.2",
     "@types/feather-icons": "^4.29.1",
-    "@types/marked": "^5.0.0",
+    "@types/marked": "^5.0.1",
     "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.25",
+    "postcss": "^8.4.28",
     "tailwindcss": "^3.3.2",
     "typescript": "^5.1.6",
-    "vite": "^4.3.9",
+    "vite": "^4.4.9",
     "vite-plugin-solid": "^2.7.0"
   },
   "dependencies": {
@@ -26,9 +26,9 @@
     "@tailwindcss/typography": "^0.5.9",
     "codemirror": "^6.0.1",
     "daisyui": "^3.2.1",
-    "dompurify": "^3.0.4",
+    "dompurify": "^3.0.5",
     "feather-icons": "^4.29.0",
-    "marked": "^5.1.0",
-    "solid-js": "^1.7.7"
+    "marked": "^5.1.1",
+    "solid-js": "^1.7.11"
   }
 }
