@@ -1,0 +1,26 @@
+targets:
+  deps-frontend:
+    program: "npm"
+    args:
+      - i
+    cwd: frontend
+  deps-backend:
+    program: go
+    args:
+      - mod
+      - download
+    cwd: backend
+  dev-frontend:
+    program: npm
+    args:
+      - run
+      - dev
+    cwd: frontend
+  dev-backend:
+    program: go
+    args:
+      - run
+      - .
+      - serve
+    env_file: .env
+    cwd: backend
