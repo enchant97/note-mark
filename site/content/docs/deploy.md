@@ -1,3 +1,7 @@
+---
+title: "Deploy"
+---
+
 # Deploy
 This page documents how the app can be installed.
 

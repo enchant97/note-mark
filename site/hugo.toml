@@ -1,0 +1,28 @@
+baseURL = "https://note-mark.docs.enchantedcode.co.uk/"
+languageCode = "en"
+title = "Note Mark"
+copyright = "Leo Spratt"
+
+[markup.highlight]
+noClasses = false
+
+enableGitInfo = true
+
+[menu]
+[[menu.main]]
+name = "Home"
+url = "/"
+[[menu.main]]
+name = "Docs"
+url = "/docs/"
+[[menu.sub]]
+name = "Repository"
+url = "https://github.com/enchant97/note-mark"
+[[menu.sub.params]]
+icon = "git-branch"
+hideName = true
+
+
+[module]
+[[module.imports]]
+path = "github.com/enchant97/hugo-mysti-guides"

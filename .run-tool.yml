@@ -24,3 +24,9 @@ targets:
       - serve
     env_file: .env
     cwd: backend
+  dev-docs:
+    program: hugo
+    args:
+      - serve
+      - -D
+    cwd: site
