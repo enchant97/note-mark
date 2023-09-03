@@ -1,0 +1,62 @@
+---
+title: 01 - Install
+---
+
+## Docker (Official)
+Both the backend and frontend are distributed by as Docker images, making deployment easier.
+
+Below are the image names:
+
+```text
+ghcr.io/enchant97/note-mark-backend
+
+ghcr.io/enchant97/note-mark-frontend
+```
+
+The following labels are available:
+
+> *TIP* Image labels follow Semantic Versioning
+
+```text
+<major>
+
+<major>.<minor>
+
+<major>.<minor>.<patch>
+```
+
+Deploying both apps can be done using Docker Compose, shown below:
+
+> *TIP* Using a reverse proxy can allow you to have the app on a single domain & port
+
+```yaml
+# file: docker-compose.yml
+version: "3"
+
+volumes:
+  data:
+
+services:
+  backend:
+    image: ghcr.io/enchant97/note-mark-backend:0.6.
+    restart: unless-stopped
+    volumes:
+      - data:/data
+    environment:
+      # !!! REPLACE These !!!
+      JWT_SECRET: "bXktc2VjcmV0"
+      CORS_ORIGINS: "*"
+    ports:
+      - 8001:8000
+
+  frontend:
+    image: ghcr.io/enchant97/note-mark-frontend:0.6
+    restart: unless-stopped
+    ports:
+      - 8000:8080
+```
+
+Once running you should be able to visit at 8000 and see the UI. Navigate to the login page and change the port to 8001 and append `/api`. These steps would not be required if you ran the app over the same FQDN and port (using a reverse proxy).
+
+## Bare
+TBA

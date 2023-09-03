@@ -7,12 +7,10 @@
 
 Note Mark is a lighting fast and minimal; web-based Markdown notes app. Featuring a sleek and responsive web UI.
 
-> If you are looking for V0.5.0, navigate to before-0.6.0
-
 > Project currently in **"ALPHA"** stage of development:
 
 ## Docs
-Documentation is still a WIP, however you can view it here: [/docs](docs)
+Documentation is still a WIP, however you can view it here: [notemark.docs.enchantedcode.co.uk](https://notemark.docs.enchantedcode.co.uk/).
 
 > Checkout [here](https://github.com/enchant97/note-mark/issues/47) for the roadmap.
 
