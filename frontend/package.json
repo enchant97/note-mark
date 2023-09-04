@@ -28,7 +28,7 @@
     "daisyui": "^3.2.1",
     "dompurify": "^3.0.5",
     "feather-icons": "^4.29.0",
-    "marked": "^7.0.5",
+    "marked": "^8.0.0",
     "solid-js": "^1.7.11"
   }
 }
