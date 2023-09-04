@@ -53,10 +53,12 @@ services:
     image: ghcr.io/enchant97/note-mark-frontend:0.6
     restart: unless-stopped
     ports:
-      - 8000:8080
+      - 8000:8000
 ```
 
-Once running you should be able to visit at 8000 and see the UI. Navigate to the login page and change the port to 8001 and append `/api`. These steps would not be required if you ran the app over the same FQDN and port (using a reverse proxy).
+Once running you should be able to visit at `http://<your ip>:8000/` and see the UI. Navigate to the login page and change the port to `8001` and ensure the URL ends with `/api`. These steps would not be required if you ran the app over the same FQDN and port (using a reverse proxy).
+
+> *TIP* A reverse proxy is recommended so a FQDN can be used and tls can be setup to secure the traffic
 
 ## Bare
 TBA
