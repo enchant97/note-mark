@@ -60,5 +60,7 @@ Once running you should be able to visit at `http://<your ip>:8000/` and see the
 
 > *TIP* A reverse proxy is recommended so a FQDN can be used and tls can be setup to secure the traffic
 
+> *TIP* Take a look at the [example]({{< ref "examples" >}}) deployments
+
 ## Bare
 TBA

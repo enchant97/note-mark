@@ -1,0 +1,38 @@
+# file: docker-compose.yml
+version: "3"
+
+volumes:
+  backend_data:
+  db_data:
+
+services:
+  backend:
+    image: ghcr.io/enchant97/note-mark-backend:0.6
+    restart: unless-stopped
+    volumes:
+      - backend_data:/data
+    environment:
+      # !!! REPLACE These !!!
+      JWT_SECRET: "bXktc2VjcmV0"
+      CORS_ORIGINS: "*"
+      DB__TYPE: postgres
+      DB__URI: "host=db user=postgres password=postgres dbname=notemark port=5432 sslmode=disable TimeZone=Europe/London"
+    ports:
+      - 8001:8000
+
+  frontend:
+    image: ghcr.io/enchant97/note-mark-frontend:0.6
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: notemark
+      POSTGRES_USER: postgres
+      # !!! REPLACE !!!
+      POSTGRES_PASSWORD: postgres
