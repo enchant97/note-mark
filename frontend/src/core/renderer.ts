@@ -4,10 +4,6 @@ import DOMPurify from 'dompurify';
 marked.use({
   async: true,
   gfm: true,
-  // disable deprecated (v5.0.0)
-  headerIds: false,
-  mangle: false,
-
 })
 
 // Render markdown into HTML,
