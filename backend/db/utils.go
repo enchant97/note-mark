@@ -5,7 +5,6 @@ import (
 
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/glebarez/sqlite"
-	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -15,10 +14,6 @@ var DB *gorm.DB
 func getSQLite(conf config.DBConfig) (*gorm.DB, error) {
 	return gorm.Open(sqlite.Open(conf.URI), &gorm.Config{})
 
-}
-
-func getMySQL(conf config.DBConfig) (*gorm.DB, error) {
-	return gorm.Open(mysql.Open(conf.URI), &gorm.Config{})
 }
 
 func getPostgresSQL(conf config.DBConfig) (*gorm.DB, error) {
@@ -32,8 +27,6 @@ func InitDB(conf config.DBConfig) error {
 		DB, err = getSQLite(conf)
 		// https://www.sqlite.org/pragma.html#pragma_foreign_keys
 		DB.Exec("PRAGMA foreign_keys = '1';").Commit()
-	case "mysql":
-		DB, err = getMySQL(conf)
 	case "postgres":
 		DB, err = getPostgresSQL(conf)
 	default:
