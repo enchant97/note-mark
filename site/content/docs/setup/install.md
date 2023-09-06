@@ -38,7 +38,7 @@ volumes:
 
 services:
   backend:
-    image: ghcr.io/enchant97/note-mark-backend:0.6.
+    image: ghcr.io/enchant97/note-mark-backend:{{< app-version >}}
     restart: unless-stopped
     volumes:
       - data:/data
@@ -50,7 +50,7 @@ services:
       - 8001:8000
 
   frontend:
-    image: ghcr.io/enchant97/note-mark-frontend:0.6
+    image: ghcr.io/enchant97/note-mark-frontend:{{< app-version >}}
     restart: unless-stopped
     ports:
       - 8000:8000

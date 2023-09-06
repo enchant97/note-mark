@@ -1,4 +1,5 @@
 # file: docker-compose.yml
+# built-for: 0.6.0
 version: "3"
 
 volumes:
@@ -7,7 +8,7 @@ volumes:
 
 services:
   backend:
-    image: ghcr.io/enchant97/note-mark-backend:0.6
+    image: ghcr.io/enchant97/note-mark-backend
     restart: unless-stopped
     volumes:
       - backend_data:/data
@@ -21,7 +22,7 @@ services:
       - 8001:8000
 
   frontend:
-    image: ghcr.io/enchant97/note-mark-frontend:0.6
+    image: ghcr.io/enchant97/note-mark-frontend
     restart: unless-stopped
     ports:
       - 8000:8000
