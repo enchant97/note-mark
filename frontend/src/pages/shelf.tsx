@@ -180,6 +180,7 @@ const Shelf: Component = () => {
                 title="Notebook Settings"
               >
                 <Icon name="settings" />
+                <Icon name="folder" />
               </button>
             </Match>
             <Match when={book() && note()}>
@@ -191,6 +192,7 @@ const Shelf: Component = () => {
                 title="Note Settings"
               >
                 <Icon name="settings" />
+                <Icon name="file" />
               </button>
             </Match>
           </Switch>
