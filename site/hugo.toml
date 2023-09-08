@@ -25,6 +25,9 @@ hideName = true
 [params]
 appVersion = "0.6.0"
 
+[[params.favicon]]
+href = "icon.svg"
+
 [module]
 [[module.imports]]
 path = "github.com/enchant97/hugo-mysti-guides"
