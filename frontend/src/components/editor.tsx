@@ -101,7 +101,7 @@ const Editor: Component<EditorProps> = (props) => {
 
   return (
     <>
-      <ul class="menu menu-sm menu-horizontal gap-2 bg-base-200 rounded-md shadow-md p-2 w-full">
+      <menu class="menu menu-sm menu-horizontal gap-2 bg-base-200 rounded-md shadow-md p-2 w-full">
         <li><button
           class="btn btn-sm btn-square btn-outline"
           disabled={props.state.saving}
@@ -113,7 +113,7 @@ const Editor: Component<EditorProps> = (props) => {
           {props.state.saving && <span class="loading loading-spinner text-warning"></span>}
           {!props.state.saving && <Icon name="save" />}
         </button></li>
-      </ul>
+      </menu>
       <div ref={(el) => editorDiv = el}></div>
     </>
   )
