@@ -3,6 +3,7 @@ import { EditorState as InternalEditorState } from "@codemirror/state";
 import { Component, createEffect, onMount } from "solid-js";
 import { SetStoreFunction, Store } from "solid-js/store";
 import Icon from "./icon";
+import { keymap } from "@codemirror/view";
 
 const editorTheme = EditorView.baseTheme({
   "&.cm-editor": {
@@ -82,6 +83,13 @@ const Editor: Component<EditorProps> = (props) => {
               onInput(v.state)
             }
           }),
+          keymap.of([{
+            key: "Mod-s", run: () => {
+              if (!props.state.saving)
+                triggerSave()
+              return true
+            }
+          }]),
         ],
         doc: props.content,
       }),
