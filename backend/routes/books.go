@@ -124,14 +124,10 @@ func deleteBookByID(ctx echo.Context) error {
 		return err
 	}
 
-	// NOTE always permanent as deletion is only allowed when no notes exist
-
 	result := db.DB.
-		Unscoped().
 		Where("id = ? AND owner_id = ?", bookID, authenticatedUser.UserID).
 		Delete(&db.Book{})
 	if err := result.Error; err != nil {
-		// should error when relations to notes exist
 		return err
 	}
 	if result.RowsAffected == 0 {

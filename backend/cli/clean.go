@@ -21,15 +21,16 @@ func commandClean(appConfig config.AppConfig) error {
 		return err
 	}
 
-    log.Println("starting clean-up, this may take some time...")
+	log.Println("starting clean-up, this may take some time...")
 
 	// Delete Notes & Contents
 	log.Println("cleaning-up notes...")
 	var results []db.Note
 	if err := db.DB.Unscoped().
-		Model(&db.Note{}).
-		Where("deleted_at IS NOT NULL").
-		Select("id").
+		Preload("Book").
+		Joins("JOIN books ON books.id = notes.book_id").
+		Where("notes.deleted_at IS NOT NULL OR books.deleted_at IS NOT NULL").
+		Select("notes.id").
 		FindInBatches(&results, 1, func(tx *gorm.DB, batch int) error {
 			for _, result := range results {
 				if err := tx.Transaction(func(tx *gorm.DB) error {
@@ -65,7 +66,7 @@ func commandClean(appConfig config.AppConfig) error {
 		return err
 	}
 
-    log.Println("clean-up done")
+	log.Println("clean-up done")
 
 	return nil
 }
