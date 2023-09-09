@@ -12,10 +12,10 @@ const ThemeSwitcher: Component = () => {
   )
   return (
     <div class="dropdown dropdown-end z-10">
-      <label tabindex="0" class="btn btn-ghost shadow-lg flex gap-2">
+      <div tabindex="0" class="btn btn-ghost shadow-lg flex gap-2">
         <Icon name="sun" />
         <Icon name="moon" />
-      </label>
+      </div>
       <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 p-2 shadow bg-base-300 rounded-box">
         <For each={THEMES}>
           {(theme) => (
@@ -71,9 +71,9 @@ const Header: Component = () => {
         <ThemeSwitcher />
         <A activeClass="btn-disabled" class="btn btn-ghost btn-circle shadow-lg" end={true} href="/"><Icon name="home" /></A>
         <div class="dropdown dropdown-end z-10">
-          <label tabindex="0" class="btn btn-ghost btn-circle shadow-lg">
+          <div tabindex="0" class="btn btn-ghost btn-circle shadow-lg">
             <Icon name="user" />
-          </label>
+          </div>
           <ProfileDropdown />
         </div>
       </div>
