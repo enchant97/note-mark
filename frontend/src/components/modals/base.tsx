@@ -7,12 +7,10 @@ type BaseModalProps = {
 
 const BaseModal: Component<BaseModalProps> = (props) => {
   return (
-    <dialog class="modal modal-open" open>
-      <div class="modal-box">
-        <h3 class="font-bold text-lg">{props.title}</h3>
-        {props.children}
-      </div>
-    </dialog>
+    <div class="modal-box">
+      <h3 class="font-bold text-lg">{props.title}</h3>
+      {props.children}
+    </div>
   );
 };
 

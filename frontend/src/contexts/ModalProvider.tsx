@@ -1,39 +1,51 @@
-import { Component, Show, createContext, createSignal, useContext } from "solid-js"
+import { Component, Show, createContext, createEffect, createSignal, onMount, useContext } from "solid-js"
 import { optionExpect } from "../core/core"
 import { Dynamic, Portal } from "solid-js/web"
 
 type ModalProps<P = {}> = {
-    component: Component
-    props: P
+  component: Component
+  props: P
 }
 
 const makeModalContext = () => {
-    const [modal, setModal] = createSignal<ModalProps>()
+  const [modal, setModal] = createSignal<ModalProps>()
 
-    return { modal, setModal, clearModal: () => setModal(undefined) } as const
+  return { modal, setModal, clearModal: () => setModal(undefined) } as const
 }
 
 type ModalContextType = ReturnType<typeof makeModalContext>
 export const ModalContext = createContext<ModalContextType>()
 export const useModal = () => {
-    let ctx = useContext(ModalContext)
-    return optionExpect(ctx, "modal was undefined")
+  let ctx = useContext(ModalContext)
+  return optionExpect(ctx, "modal was undefined")
 }
 export const ModalProvider = (props: any) => {
-    return (
-        <ModalContext.Provider value={makeModalContext()}>
-            {props.children}
-        </ModalContext.Provider>
-    )
+  return (
+    <ModalContext.Provider value={makeModalContext()}>
+      {props.children}
+    </ModalContext.Provider>
+  )
 }
 
 export const Modal: Component = () => {
-    let { modal } = useModal()
-    return (
-        <Portal>
-            <Show when={modal()} keyed>
-                {modal => <Dynamic component={modal.component} {...modal.props} />}
-            </Show>
-        </Portal>
-    )
+  let dialog: HTMLDialogElement | undefined
+  let { modal, clearModal } = useModal()
+  onMount(() => {
+    dialog?.addEventListener("cancel", () => clearModal())
+  })
+  createEffect(_ => {
+    dialog?.close()
+    if (modal() !== undefined) {
+      dialog?.showModal();
+    }
+  })
+  return (
+    <Portal>
+      <dialog ref={dialog} class="modal">
+        <Show when={modal()} keyed>
+          {modal => <Dynamic component={modal.component} {...modal.props} />}
+        </Show>
+      </dialog>
+    </Portal>
+  )
 }
