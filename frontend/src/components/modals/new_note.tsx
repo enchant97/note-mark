@@ -2,7 +2,7 @@ import { Component, createSignal } from 'solid-js';
 import BaseModal from './base';
 import { Book, CreateNote, Note, User } from '../../core/types';
 import { createStore } from 'solid-js/store';
-import { toSlug } from '../../core/helpers';
+import { toSlug, toSlugWithSuffix } from '../../core/helpers';
 import { useApi } from '../../contexts/ApiProvider';
 import { useNavigate } from '@solidjs/router';
 import { ApiError } from '../../core/api';
@@ -41,7 +41,7 @@ const NewNoteModal: Component<NewNoteModalProps> = (props) => {
           <input
             oninput={(ev) => setForm({
               name: ev.currentTarget.value,
-              slug: toSlug(ev.currentTarget.value)
+              slug: toSlugWithSuffix(ev.currentTarget.value)
             })}
             value={form.name}
             class="input input-bordered w-full"
