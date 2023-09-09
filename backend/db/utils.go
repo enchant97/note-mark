@@ -12,12 +12,16 @@ import (
 var DB *gorm.DB
 
 func getSQLite(conf config.DBConfig) (*gorm.DB, error) {
-	return gorm.Open(sqlite.Open(conf.URI), &gorm.Config{})
+	return gorm.Open(sqlite.Open(conf.URI), &gorm.Config{
+		TranslateError: true,
+	})
 
 }
 
 func getPostgresSQL(conf config.DBConfig) (*gorm.DB, error) {
-	return gorm.Open(postgres.Open(conf.URI), &gorm.Config{})
+	return gorm.Open(postgres.Open(conf.URI), &gorm.Config{
+		TranslateError: true,
+	})
 }
 
 func InitDB(conf config.DBConfig) error {
