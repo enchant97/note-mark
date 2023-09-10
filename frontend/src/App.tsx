@@ -124,7 +124,7 @@ const MainApp: Component = () => {
           </DrawerProvider>
         </div>
       </div>
-      <div class="drawer-side">
+      <div class="drawer-side z-40">
         <label for="main-drawer" class="drawer-overlay"></label>
         <ul class="menu menu-sm gap-4 p-4 w-80 bg-base-300 text-base-content h-full">
           <li><SortSelect onChange={setSortChoice} selected={sortChoice()} /></li>
