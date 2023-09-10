@@ -1,5 +1,5 @@
 import { Routes, Route, Outlet, useParams, A } from '@solidjs/router';
-import { Component, For, Show, createResource, lazy } from 'solid-js';
+import { Component, For, Show, createResource, createSignal, lazy } from 'solid-js';
 import Header from './components/header';
 import { useApi } from './contexts/ApiProvider';
 import ProtectedRoute from './components/protected_route';
@@ -9,6 +9,8 @@ import { LoadingBar, LoadingSpin } from './components/loading';
 import { apiErrorIntoToast, useToast } from './contexts/ToastProvider';
 import { ApiError } from './core/api';
 import PreLogin from './pages/pre-login';
+import { SortChoice, SortSelect } from './components/inputs';
+import { compare } from './core/helpers';
 
 const Index = lazy(() => import("./pages/index"));
 const Login = lazy(() => import("./pages/login"));
@@ -17,10 +19,32 @@ const Logout = lazy(() => import("./pages/logout"));
 const Profile = lazy(() => import("./pages/profile"));
 const Shelf = lazy(() => import("./pages/shelf"));
 
+
+
+function performBookOrNoteSort(rows: Note[] | Book[], method: SortChoice) {
+  switch (method) {
+    case SortChoice.NAME_ASC:
+      return rows.sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base', numeric: true }))
+    case SortChoice.NAME_DEC:
+      return rows.sort((a, b) => b.name.localeCompare(a.name, 'en', { sensitivity: 'base', numeric: true }))
+    case SortChoice.UPDATED_ASC:
+      return rows.sort((a, b) => compare(a.updatedAt, b.updatedAt))
+    case SortChoice.UPDATED_DEC:
+      return rows.sort((a, b) => compare(b.updatedAt, a.updatedAt))
+    case SortChoice.CREATED_ASC:
+      return rows.sort((a, b) => compare(a.createdAt, b.createdAt))
+    case SortChoice.CREATED_DEC:
+      return rows.sort((a, b) => compare(b.createdAt, a.createdAt))
+    default:
+      return rows
+  }
+}
+
 const MainApp: Component = () => {
   const params = useParams()
   const { api } = useApi()
   const { pushToast } = useToast()
+  const [sortChoice, setSortChoice] = createSignal(SortChoice.NAME_ASC)
 
   // NOTE: `|| ""` required as resource source will only compare non-nullish/non-false
   const [booksById, { mutate: mutateBooks }] = createResource(() => params.username || "", async (username) => {
@@ -52,6 +76,9 @@ const MainApp: Component = () => {
     if (!byId) return []
     return Array.from(byId, (v) => v[1])
   }
+
+  const sortedBooks = () => performBookOrNoteSort([...books()], sortChoice())
+  const sortedNotes = () => performBookOrNoteSort([...notes()], sortChoice())
 
   return (
     <div class="drawer lg:drawer-open">
@@ -99,11 +126,12 @@ const MainApp: Component = () => {
       </div>
       <div class="drawer-side">
         <label for="main-drawer" class="drawer-overlay"></label>
-        <ul class="menu menu-sm lg:menu-md gap-4 p-4 w-80 bg-base-300 text-base-content h-full">
+        <ul class="menu menu-sm gap-4 p-4 w-80 bg-base-300 text-base-content h-full">
+          <li><SortSelect onChange={setSortChoice} selected={sortChoice()} /></li>
           <li class="menu-title"><span>NOTEBOOKS</span></li>
           <ul class="overflow-auto bg-base-100 flex-1 w-full rounded-lg">
             <Show when={!booksById.loading} fallback={<LoadingSpin />}>
-              <For each={books()}>
+              <For each={sortedBooks()}>
                 {(book) => <li>
                   <A
                     href={`/${params.username}/${book.slug}`}
@@ -117,7 +145,7 @@ const MainApp: Component = () => {
           <li class="menu-title"><span>NOTES</span></li>
           <ul class="overflow-auto bg-base-100 flex-1 w-full rounded-lg">
             <Show when={!notesById.loading} fallback={<LoadingSpin />}>
-              <For each={notes()}>
+              <For each={sortedNotes()}>
                 {(note) => <li>
                   <A
                     href={`/${params.username}/${params.bookSlug}/${note.slug}`}
