@@ -13,7 +13,9 @@ export type ApiDetails = ApiHandlerConfig & {
 const readApiDetails = (): ApiHandlerConfig => {
   let apiDetails = window.localStorage.getItem(api_details_key)
   if (apiDetails) {
-    return JSON.parse(apiDetails)
+    let parsed = JSON.parse(apiDetails)
+    if (parsed.apiDetails)
+      return parsed
   }
   return {
     authToken: undefined,
