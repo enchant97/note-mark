@@ -14,7 +14,7 @@ const readApiDetails = (): ApiHandlerConfig => {
   let apiDetails = window.localStorage.getItem(api_details_key)
   if (apiDetails) {
     let parsed = JSON.parse(apiDetails)
-    if (parsed.apiDetails)
+    if (parsed.apiServer)
       return parsed
   }
   return {
