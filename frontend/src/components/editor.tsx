@@ -1,6 +1,6 @@
 import { EditorView, basicSetup } from "codemirror";
 import { EditorState as InternalEditorState } from "@codemirror/state";
-import { Component, createEffect, onMount } from "solid-js";
+import { Component, createEffect, createSignal, onMount } from "solid-js";
 import { SetStoreFunction, Store } from "solid-js/store";
 import Icon from "./icon";
 import { keymap } from "@codemirror/view";
@@ -39,18 +39,22 @@ const Editor: Component<EditorProps> = (props) => {
   let editor: EditorView
   let autosaveTimeout: number;
 
+  const [autoSave, setAutoSave] = createSignal(true)
+
   const save = (state: InternalEditorState) => {
     props.onSave(state.doc.toString())
   }
 
   const onInput = (state: InternalEditorState) => {
     props.setState({ unsaved: true })
-    window.clearTimeout(autosaveTimeout)
-    autosaveTimeout = window.setTimeout(
-      save,
-      props.autoSaveTimeout,
-      state,
-    )
+    if (autoSave()) {
+      window.clearTimeout(autosaveTimeout)
+      autosaveTimeout = window.setTimeout(
+        save,
+        props.autoSaveTimeout,
+        state,
+      )
+    }
   }
 
   const triggerSave = () => {
@@ -101,7 +105,20 @@ const Editor: Component<EditorProps> = (props) => {
 
   return (
     <>
-      <menu class="menu menu-sm menu-horizontal gap-2 bg-base-200 rounded-md shadow-md p-2 w-full">
+      <menu class="menu menu-sm menu-horizontal gap-2 bg-base-200 rounded-md shadow-md p-2 w-full items-center">
+        <li><label class="form-control">
+          <span class="label-text cursor-pointer">Auto Save</span>
+          <input
+            class="toggle toggle-sm"
+            type="checkbox"
+            checked={autoSave()}
+            oninput={(ev) => {
+              let v = ev.currentTarget.checked
+              if (v && props.state.unsaved) { triggerSave() }
+              setAutoSave(v)
+            }}
+          />
+        </label></li>
         <li><button
           class="btn btn-sm btn-square btn-outline"
           disabled={props.state.saving}

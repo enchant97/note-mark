@@ -6,6 +6,8 @@ import { createStore } from 'solid-js/store';
 import { apiErrorIntoToast, useToast } from '../../contexts/ToastProvider';
 import { ApiError } from '../../core/api';
 
+const AUTO_SAVE_TIMEOUT = 2400;
+
 type NoteEditProps = {
   note: Note
   content: Accessor<string>
@@ -35,7 +37,7 @@ const NoteEdit: Component<NoteEditProps> = (props) => {
   return (
     <Editor
       content={untrack(props.content)}
-      autoSaveTimeout={6000}
+      autoSaveTimeout={AUTO_SAVE_TIMEOUT}
       onSave={save}
       state={state}
       setState={setState}
