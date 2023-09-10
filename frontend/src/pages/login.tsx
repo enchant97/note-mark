@@ -1,10 +1,11 @@
-import { Component, createSignal } from 'solid-js';
+import { Component, Show, createSignal } from 'solid-js';
 import { createStore } from "solid-js/store";
 import { useApi } from '../contexts/ApiProvider';
 import { A } from '@solidjs/router';
 import { ApiError } from '../core/api';
 import { apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
 import WithApiSelect from '../components/with_api_select';
+import Icon from '../components/icon';
 
 const Login: Component = () => {
   const { api, apiDetails, setApiDetails } = useApi()
@@ -67,6 +68,12 @@ const Login: Component = () => {
                     required
                   />
                 </div>
+                <Show when={!apiDetails().info}>
+                  <div class="alert my-4">
+                    <Icon name="info" />
+                    <span>No valid server set!</span>
+                  </div>
+                </Show>
                 <div class="join join-vertical w-full mt-5">
                   <button class="btn join-item btn-primary" disabled={loading() || !apiDetails().info} type="submit">
                     {loading() && <span class="loading loading-spinner"></span>}
