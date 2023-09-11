@@ -10,7 +10,7 @@ import NewNoteModal from '../components/modals/new_note';
 import UpdateBookModal from '../components/modals/edit_book';
 import UpdateNoteModal from '../components/modals/edit_note';
 import { useDrawer } from '../contexts/DrawerProvider';
-import { LoadingBar } from '../components/loading';
+import { LoadingRing } from '../components/loading';
 import { apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
 import { ApiError } from '../core/api';
 import Icon from '../components/icon';
@@ -76,11 +76,13 @@ const Shelf: Component = () => {
     }
   })
 
+  const globalLoading = () => book.loading || note.loading || noteContent.loading
+
   const breadcrumb: () => Breadcrumb = () => {
     return {
       username: params.username,
-      bookSlug: book()?.name,
-      noteSlug: note()?.name,
+      bookSlug: globalLoading() ? undefined : book()?.name,
+      noteSlug: globalLoading() ? undefined : note()?.name,
     }
   }
 
@@ -155,7 +157,7 @@ const Shelf: Component = () => {
             onclick={onNewBookClick}
             class="btn join-item btn-ghost"
             type="button"
-            disabled={!allowBookCreate()}
+            disabled={globalLoading() || !allowBookCreate()}
             title="Create New Notebook"
           >
             <Icon name="folder-plus" />
@@ -164,30 +166,30 @@ const Shelf: Component = () => {
             onclick={onNewNoteClick}
             class="btn join-item btn-ghost"
             type="button"
-            disabled={!allowNoteCreate()}
+            disabled={globalLoading() || !allowNoteCreate()}
             title="Create New Note"
           >
             <Icon name="file-plus" />
           </button>
           <Switch>
-            <Match when={book() && !note()}>
+            <Match when={slugParts().bookSlug && !slugParts().noteSlug}>
               <button
                 onclick={onUpdateBookClick}
                 class="btn join-item btn-ghost"
                 type="button"
-                disabled={!allowNoteCreate()}
+                disabled={globalLoading() || !allowNoteCreate()}
                 title="Notebook Settings"
               >
                 <Icon name="settings" />
                 <Icon name="folder" />
               </button>
             </Match>
-            <Match when={book() && note()}>
+            <Match when={slugParts().bookSlug && slugParts().noteSlug}>
               <button
                 onclick={onUpdateNoteClick}
                 class="btn join-item btn-ghost"
                 type="button"
-                disabled={!allowNoteCreate()}
+                disabled={globalLoading() || !allowNoteCreate()}
                 title="Note Settings"
               >
                 <Icon name="settings" />
@@ -198,7 +200,7 @@ const Shelf: Component = () => {
         </div>
         <NoteBreadcrumb class="flex-1" {...breadcrumb()} />
       </div>
-      <Show when={!note.loading && !noteContent.loading} fallback={<LoadingBar />}>
+      <Show when={!note.loading && !noteContent.loading} fallback={<LoadingRing />}>
         <Show when={note()} fallback={
           <div class="hero pt-6 bg-base-200 rounded-md">
             <div class="hero-content text-center">

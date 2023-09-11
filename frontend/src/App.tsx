@@ -1,5 +1,5 @@
 import { Routes, Route, Outlet, useParams, A } from '@solidjs/router';
-import { Component, For, Show, createResource, createSignal } from 'solid-js';
+import { Component, For, Show, Suspense, createResource, createSignal } from 'solid-js';
 import Header from './components/header';
 import { useApi } from './contexts/ApiProvider';
 import ProtectedRoute from './components/protected_route';
@@ -115,9 +115,7 @@ const MainApp: Component = () => {
               })
             }}
           >
-            <Show when={!booksById.loading && !notesById.loading} fallback={<LoadingBar />}>
-              <Outlet />
-            </Show>
+            <Outlet />
           </DrawerProvider>
         </div>
       </div>
@@ -141,7 +139,7 @@ const MainApp: Component = () => {
           </ul>
           <li class="menu-title"><span>NOTES</span></li>
           <ul class="overflow-auto bg-base-100 flex-1 w-full rounded-lg">
-            <Show when={!notesById.loading} fallback={<LoadingSpin />}>
+            <Show when={!notesById.loading && !booksById.loading} fallback={<LoadingSpin />}>
               <For each={sortedNotes()}>
                 {(note) => <li>
                   <A

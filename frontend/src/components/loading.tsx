@@ -8,6 +8,10 @@ export const LoadingSpin: Component = () => {
   return <span class="loading loading-spinner m-auto block mt-2"></span>
 }
 
+export const LoadingRing: Component = () => {
+  return <span class="loading loading-ring loading-ring-lg block m-auto"></span>
+}
+
 type LoadingScreenProps = {
   message?: string
 }
