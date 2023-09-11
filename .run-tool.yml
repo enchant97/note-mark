@@ -10,12 +10,20 @@ targets:
       - mod
       - download
     cwd: backend
+  build-frontend-wasm:
+    program: npm
+    args:
+      - run
+      - wasm
+    cwd: frontend
   dev-frontend:
     program: npm
     args:
       - run
       - dev
     cwd: frontend
+    before_hooks:
+      - build-frontend-wasm
   dev-backend:
     program: go
     args:

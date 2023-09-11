@@ -12,6 +12,8 @@ import { lazy } from 'solid-js';
 
 const App = lazy(() => import("./App"))
 
+import init from 'renderer';
+
 const root = document.getElementById('root');
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
@@ -19,6 +21,8 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
     'Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got misspelled?',
   );
 }
+
+init().then(() => console.debug("wasm backend loaded"))
 
 render(() => <>
   <Router>

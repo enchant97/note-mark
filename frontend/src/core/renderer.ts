@@ -1,16 +1,11 @@
-import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 
-marked.use({
-  async: true,
-  gfm: true,
-})
-
+import { markdown_to_html } from 'renderer';
 // Render markdown into HTML,
 // will sanitize input to prevent possible XSS attacks
-async function render(content: string): Promise<string> {
+function render(content: string): string {
   content = DOMPurify.sanitize(content)
-  return marked.parse(content)
+  return markdown_to_html(content)
 }
 
 export default render
