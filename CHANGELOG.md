@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2023-09-11
+### Added
+- #94; note and book sorting
+- shortcut to save with MOD+S
+### Changed
+- WASM markdown rendering (performance improvement)
+- better dialog accessibility
+- loading improvements
+- soft-delete notebooks for future feature
+- #91; notes and books now have a small random suffix for slug on creation
+- editor will now be focused on load
+- auto-save can now be toggled on and off
+- clearer message on login & signup pages when api has not been set
+### Fixed
+- prevent infinite re-loading if api cannot be accessed
+- #91; report SQL errors correctly
+- #88; todo spacing
+- drawer not always being on top
+
 ## [0.6.0] - 2023-09-08
 ### Added
 - proper docs for deployment
