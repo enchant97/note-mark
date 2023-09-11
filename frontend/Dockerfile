@@ -7,7 +7,8 @@ FROM node:20-bullseye as builder
     RUN \
         curl --proto '=https' --tlsv1.2 -sSf --output /tmp/rustup https://sh.rustup.rs && \
         chmod +x /tmp/rustup && \
-        /tmp/rustup -y
+        bash /tmp/rustup -y
+    ENV PATH=${HOME}/.cargo/bin:${PATH}
     RUN rustup target add wasm32-unknown-unknown
 
     COPY package.json package-lock.json ./
