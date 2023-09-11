@@ -8,12 +8,16 @@ export const LoadingSpin: Component = () => {
   return <span class="loading loading-spinner m-auto block mt-2"></span>
 }
 
-export const LoadingScreen: Component = () => {
+type LoadingScreenProps = {
+  message?: string
+}
+
+export const LoadingScreen: Component<LoadingScreenProps> = (props) => {
   return (
     <div class="hero min-h-screen bg-base-200">
       <div class="hero-content text-center">
         <div class="max-w-md">
-          <h1 class="text-5xl font-bold mb-4">Loading</h1>
+          <h1 class="text-5xl font-bold mb-4">{props.message || "Loading"}</h1>
           <div class="loading loading-spinner loading-lg"></div>
         </div>
       </div>

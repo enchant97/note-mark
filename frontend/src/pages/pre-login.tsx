@@ -23,7 +23,7 @@ const PreLogin: Component = () => {
     }
   })
 
-  return <LoadingScreen />
+  return <LoadingScreen message="Contacting Server" />
 }
 
 export default PreLogin

@@ -1,5 +1,5 @@
 import { Routes, Route, Outlet, useParams, A } from '@solidjs/router';
-import { Component, For, Show, createResource, createSignal, lazy } from 'solid-js';
+import { Component, For, Show, createResource, createSignal } from 'solid-js';
 import Header from './components/header';
 import { useApi } from './contexts/ApiProvider';
 import ProtectedRoute from './components/protected_route';
@@ -11,15 +11,12 @@ import { ApiError } from './core/api';
 import PreLogin from './pages/pre-login';
 import { SortChoice, SortSelect } from './components/inputs';
 import { compare } from './core/helpers';
-
-const Index = lazy(() => import("./pages/index"));
-const Login = lazy(() => import("./pages/login"));
-const Signup = lazy(() => import("./pages/signup"));
-const Logout = lazy(() => import("./pages/logout"));
-const Profile = lazy(() => import("./pages/profile"));
-const Shelf = lazy(() => import("./pages/shelf"));
-
-
+import Login from './pages/login';
+import Signup from './pages/signup';
+import Logout from './pages/logout';
+import Profile from './pages/profile';
+import Shelf from './pages/shelf';
+import Index from './pages/index';
 
 function performBookOrNoteSort(rows: Note[] | Book[], method: SortChoice) {
   switch (method) {

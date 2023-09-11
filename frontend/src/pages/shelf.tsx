@@ -1,4 +1,4 @@
-import { Component, Match, Show, Switch, createResource, lazy } from 'solid-js';
+import { Component, Match, Show, Switch, createResource } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { useParams, useSearchParams } from '@solidjs/router';
 import { Book, Breadcrumb, Note } from '../core/types';
@@ -14,10 +14,9 @@ import { LoadingBar } from '../components/loading';
 import { apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
 import { ApiError } from '../core/api';
 import Icon from '../components/icon';
-
-const NoteEdit = lazy(() => import("../components/note/edit"))
-const NoteViewRendered = lazy(() => import("../components/note/view_rendered"))
-const NoteViewPlain = lazy(() => import("../components/note/view_plain"))
+import NoteViewRendered from '../components/note/view_rendered';
+import NoteViewPlain from '../components/note/view_plain';
+import NoteEdit from '../components/note/edit';
 
 const Shelf: Component = () => {
   const params = useParams()

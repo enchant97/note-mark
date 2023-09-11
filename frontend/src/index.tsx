@@ -1,13 +1,16 @@
 /* @refresh reload */
 import './index.css';
-import { render } from 'solid-js/web';
+import { Suspense, render } from 'solid-js/web';
 
-import App from './App';
 import { ApiProvider } from './contexts/ApiProvider';
 import { Router } from '@solidjs/router';
 import { CurrentUserProvider } from './contexts/CurrentUserProvider';
 import { Modal, ModalProvider } from './contexts/ModalProvider';
 import { ToastProvider, Toasts } from './contexts/ToastProvider';
+import { LoadingScreen } from './components/loading';
+import { lazy } from 'solid-js';
+
+const App = lazy(() => import("./App"))
 
 const root = document.getElementById('root');
 
@@ -25,7 +28,9 @@ render(() => <>
         <ApiProvider>
           <CurrentUserProvider>
             <Modal />
-            <App />
+            <Suspense fallback={<LoadingScreen message="Loading App" />}>
+              <App />
+            </Suspense>
           </CurrentUserProvider>
         </ApiProvider>
       </ModalProvider>
