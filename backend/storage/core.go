@@ -24,6 +24,7 @@ type StorageController interface {
 	TearDown() error
 	WriteNote(noteID uuid.UUID, r io.Reader) error
 	ReadNote(noteID uuid.UUID) (io.ReadCloser, error)
+	ReadNoteChecksum(noteID uuid.UUID) (string, error)
 	DeleteNote(noteID uuid.UUID) error
 	GetNoteInfo(noteID uuid.UUID) (NoteInfo, error)
 }

@@ -173,15 +173,23 @@ func getNoteContent(ctx echo.Context) error {
 
 	storage_backend := ctx.Get("Storage").(storage.StorageController)
 
-	stream, err := storage_backend.ReadNote(noteID)
-	if err != nil {
+	if currentETag, err := storage_backend.ReadNoteChecksum(noteID); err != nil {
+		if !errors.Is(err, storage.ErrNotFound) {
+			return err
+		}
+	} else if needNewContent := core.HandleETag(ctx, currentETag); !needNewContent {
+		return ctx.NoContent(http.StatusNotModified)
+	}
+
+	if stream, err := storage_backend.ReadNote(noteID); err != nil {
 		if errors.Is(err, storage.ErrNotFound) {
 			return ctx.Blob(http.StatusOK, "text/markdown", []byte("\n"))
 		}
 		return err
+	} else {
+		defer stream.Close()
+		return ctx.Stream(http.StatusOK, "text/markdown", stream)
 	}
-	defer stream.Close()
-	return ctx.Stream(http.StatusOK, "text/markdown", stream)
 }
 
 func patchNoteByID(ctx echo.Context) error {

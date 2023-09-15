@@ -2,6 +2,8 @@ package storage
 
 import (
 	"errors"
+	"fmt"
+	"hash/crc64"
 	"io"
 	"io/fs"
 	"os"
@@ -74,6 +76,29 @@ func (c *DiskController) ReadNote(noteID uuid.UUID) (io.ReadCloser, error) {
 		return nil, errors.Join(err, ErrRead)
 	}
 	return f, nil
+}
+
+func (c *DiskController) ReadNoteChecksum(noteID uuid.UUID) (string, error) {
+	if reader, err := c.ReadNote(noteID); err != nil {
+		return "", err
+	} else {
+		defer reader.Close()
+		h := crc64.New(crc64.MakeTable(crc64.ISO))
+		buf := make([]byte, 1024)
+		for {
+			n, err := reader.Read(buf)
+			if err != nil && err != io.EOF {
+				return "", err
+			}
+			if n == 0 {
+				break
+			}
+			if _, err := h.Write(buf); err != nil {
+				return "", err
+			}
+		}
+		return fmt.Sprintf("%x", h.Sum64()), nil
+	}
 }
 
 func (c *DiskController) DeleteNote(noteID uuid.UUID) error {
