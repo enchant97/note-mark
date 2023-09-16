@@ -31,3 +31,6 @@ postgres:
 ```text
 host=localhost user=user password=pass dbname=notemark port=5432 sslmode=disable TimeZone=Europe/London
 ```
+
+## CORS
+For most people this should be set to your front-end URL. For example if you access your front-end via `https://example.com:8000` then you should enter that. You can also set the config to allow all origins via `*`, multiple origins can also be specified by providing a comma separated values. Learn more about CORS on [Wikipedia](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing).

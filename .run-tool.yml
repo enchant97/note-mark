@@ -32,7 +32,7 @@ targets:
       - serve
     env_file: .env
     cwd: backend
-  dev-docs:
+  dev-site:
     program: hugo
     args:
       - serve
