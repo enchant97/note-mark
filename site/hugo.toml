@@ -26,7 +26,7 @@ hideName = true
 appVersion = "0.7.0"
 
 [[params.favicon]]
-href = "icon.svg"
+href = "/icon.svg"
 
 [module]
 [[module.imports]]
