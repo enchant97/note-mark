@@ -14,8 +14,8 @@ services:
       - backend_data:/data
     environment:
       # !!! REPLACE These !!!
-      JWT_SECRET: "bXktc2VjcmV0"
-      CORS_ORIGINS: "*"
+      JWT_SECRET: "qDSFr/3Mq9zX+CVYtlSjpmJyYMNXYGBNLDSu51RAuNQ="
+      CORS_ORIGINS: "https://example.com:8000"
       DB__TYPE: postgres
       DB__URI: "host=db user=postgres password=postgres dbname=notemark port=5432 sslmode=disable TimeZone=Europe/London"
     ports:
