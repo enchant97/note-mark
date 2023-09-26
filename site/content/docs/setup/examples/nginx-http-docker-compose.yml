@@ -13,8 +13,8 @@ services:
       - data:/data
     environment:
       # !!! REPLACE These !!!
-      JWT_SECRET: "bXktc2VjcmV0"
-      CORS_ORIGINS: "*"
+      JWT_SECRET: "UL4/Yf2ix8dhxy8MDjutrhGN7DT8qnf2ZNNM9TPGGBw="
+      CORS_ORIGINS: "http://example.com"
 
   frontend:
     image: ghcr.io/enchant97/note-mark-frontend
