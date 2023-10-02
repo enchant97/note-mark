@@ -13,7 +13,7 @@ services:
       - data:/data
     environment:
       # !!! REPLACE These !!!
-      JWT_SECRET: "UL4/Yf2ix8dhxy8MDjutrhGN7DT8qnf2ZNNM9TPGGBw="
+      JWT_SECRET: "bXktc2VjcmV0"
       CORS_ORIGINS: "http://example.com"
 
   frontend:
