@@ -1,7 +1,7 @@
 import { Component, Match, Show, Switch, createResource } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { useParams, useSearchParams } from '@solidjs/router';
-import { Book, Breadcrumb, Note } from '../core/types';
+import { Book, Breadcrumb, Note as NoteDetails } from '../core/types';
 import NoteBreadcrumb from '../components/note/breadcrumb';
 import { useModal } from '../contexts/ModalProvider';
 import { useCurrentUser } from '../contexts/CurrentUserProvider';
@@ -14,9 +14,7 @@ import { LoadingRing } from '../components/loading';
 import { apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
 import { ApiError } from '../core/api';
 import Icon from '../components/icon';
-import NoteViewRendered from '../components/note/view_rendered';
-import NoteViewPlain from '../components/note/view_plain';
-import NoteEdit from '../components/note/edit';
+import Note, { NoteMode } from '../components/note';
 
 const Shelf: Component = () => {
   const params = useParams()
@@ -29,8 +27,9 @@ const Shelf: Component = () => {
 
   const noteMode = () => {
     let mode = searchParams.mode
-    if (mode === undefined) return "rendered"
-    else return mode
+    if (mode === undefined) return NoteMode.RENDERED
+    // XXX bit of a hack, does not check whether mode is valid
+    else return mode as NoteMode
   }
 
   const slugParts: () => Breadcrumb = () => {
@@ -101,7 +100,7 @@ const Shelf: Component = () => {
     setModal({
       component: NewNoteModal,
       props: {
-        onClose: (newNote?: Note) => {
+        onClose: (newNote?: NoteDetails) => {
           if (newNote) drawer.updateNote(newNote)
           clearModal()
         }, user: user(), book: book()
@@ -133,7 +132,7 @@ const Shelf: Component = () => {
     setModal({
       component: UpdateNoteModal,
       props: {
-        onClose: (newNote?: Note) => {
+        onClose: (newNote?: NoteDetails) => {
           if (newNote) {
             setNote(newNote)
             drawer.updateNote(newNote)
@@ -211,42 +210,17 @@ const Shelf: Component = () => {
             </div>
           </div>
         }>
-          {note => <>
-            <div class="bg-base-200 shadow-md rounded-md">
-              <div class="tabs justify-center">
-                <button
-                  onclick={() => setSearchParams({ mode: undefined })}
-                  class="tab"
-                  classList={{ "tab-active": noteMode() === "rendered" }}
-                  title="switch to rendered view"
-                >Rendered</button>
-                <button
-                  onclick={() => setSearchParams({ mode: "plain" })}
-                  class="tab"
-                  classList={{ "tab-active": noteMode() === "plain" }}
-                  title="switch to plain view"
-                >Plain</button>
-                <button
-                  onclick={() => setSearchParams({ mode: "edit" })}
-                  class="tab"
-                  disabled={!allowNoteCreate()}
-                  classList={{ "tab-active": noteMode() === "edit" }}
-                  title="switch to editor"
-                >Editor</button>
-              </div>
-            </div>
-            <Show when={noteContent()}>
-              {content => <Switch fallback={<NoteViewRendered content={content} />}>
-                <Match when={noteMode() === "plain"}>
-                  <NoteViewPlain content={content} />
-                </Match>
-                <Match when={noteMode() === "edit"}>
-                  <NoteEdit note={note()} content={content} onChange={setNoteContent} />
-                </Match>
-              </Switch>}
-            </Show>
-          </>
-          }
+          {note => <Note
+            mode={noteMode()}
+            setMode={(mode) => {
+              if (mode === NoteMode.RENDERED) { setSearchParams({ mode: undefined }) }
+              else { setSearchParams({ mode }) }
+            }}
+            noteDetails={note()}
+            content={noteContent}
+            setContent={setNoteContent}
+            isEditAllowed={allowNoteCreate() || false}
+          />}
         </Show>
       </Show>
     </div>

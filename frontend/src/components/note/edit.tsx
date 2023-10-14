@@ -11,7 +11,7 @@ const AUTO_SAVE_TIMEOUT = 2400;
 type NoteEditProps = {
   note: Note
   content: Accessor<string>
-  onChange: (newContent: string) => {}
+  onChange: (newContent: string) => any
 }
 
 const NoteEdit: Component<NoteEditProps> = (props) => {
