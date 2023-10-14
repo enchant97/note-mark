@@ -151,7 +151,7 @@ const Shelf: Component = () => {
 
   return (
     <div class="flex flex-col gap-4">
-      <div class="flex gap-4">
+      <div class="flex gap-4 flex-col sm:flex-row">
         <div class="join rounded-lg shadow-md bg-base-200">
           <button
             onclick={onNewBookClick}
