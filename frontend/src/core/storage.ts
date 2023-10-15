@@ -1,3 +1,5 @@
+import { createSignal } from "solid-js"
+
 function makeSettingKey(name: string): string {
   return `note_mark__${name}`
 }
@@ -24,6 +26,17 @@ class StorageHandler {
     } else {
       window.sessionStorage.setItem(key, value)
     }
+  }
+  static createSettingSignal(name: string, persistant = true) {
+    const [setting, setSetting] = createSignal(StorageHandler.readSetting(name))
+    return [
+      setting,
+      (value: string | null) => {
+        if (value === null) StorageHandler.clearSetting(name)
+        else StorageHandler.writeSetting(name, value, persistant)
+        setSetting(value)
+      }
+    ] as const
   }
 }
 

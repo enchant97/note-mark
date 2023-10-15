@@ -1,6 +1,6 @@
 import { Component, Match, Show, Switch, createResource } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
-import { useParams, useSearchParams } from '@solidjs/router';
+import { useParams } from '@solidjs/router';
 import { Book, Breadcrumb, Note as NoteDetails } from '../core/types';
 import NoteBreadcrumb from '../components/note/breadcrumb';
 import { useModal } from '../contexts/ModalProvider';
@@ -15,21 +15,23 @@ import { apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
 import { ApiError } from '../core/api';
 import Icon from '../components/icon';
 import Note, { NoteMode } from '../components/note';
+import StorageHandler from '../core/storage';
 
 const Shelf: Component = () => {
   const params = useParams()
   const { api } = useApi()
   const { pushToast } = useToast()
   const { user } = useCurrentUser()
-  const [searchParams, setSearchParams] = useSearchParams()
   const { setModal, clearModal } = useModal()
   const drawer = useDrawer()
+  const [noteModeSetting, setNoteModeSetting] = StorageHandler.createSettingSignal("note_mode", false)
 
   const noteMode = () => {
-    let mode = searchParams.mode
-    if (mode === undefined) return NoteMode.RENDERED
-    // XXX bit of a hack, does not check whether mode is valid
-    else return mode as NoteMode
+    let stored = noteModeSetting() as NoteMode | null
+    if ((stored === NoteMode.EDIT && !allowNoteCreate()) || stored === null) {
+      return NoteMode.RENDERED
+    }
+    return stored
   }
 
   const slugParts: () => Breadcrumb = () => {
@@ -213,8 +215,8 @@ const Shelf: Component = () => {
           {note => <Note
             mode={noteMode()}
             setMode={(mode) => {
-              if (mode === NoteMode.RENDERED) { setSearchParams({ mode: undefined }) }
-              else { setSearchParams({ mode }) }
+              if (mode === NoteMode.RENDERED) { setNoteModeSetting(null) }
+              else { setNoteModeSetting(mode) }
             }}
             noteDetails={note()}
             content={noteContent}
