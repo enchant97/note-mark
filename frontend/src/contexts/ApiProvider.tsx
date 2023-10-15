@@ -3,15 +3,16 @@ import Api, { ApiHandlerConfig } from "../core/api"
 import { optionExpect } from "../core/core"
 import { createStore } from "solid-js/store"
 import { ServerInfo } from "../core/types"
+import StorageHandler from "../core/storage"
 
-const api_details_key = "note_mark__api_details"
+const API_DETAILS_KEY = "api_details"
 
 export type ApiDetails = ApiHandlerConfig & {
   info?: ServerInfo
 }
 
 const readApiDetails = (): ApiHandlerConfig => {
-  let apiDetails = window.localStorage.getItem(api_details_key)
+  let apiDetails = StorageHandler.readSetting(API_DETAILS_KEY)
   if (apiDetails) {
     let parsed = JSON.parse(apiDetails)
     if (parsed.apiServer)
@@ -24,11 +25,11 @@ const readApiDetails = (): ApiHandlerConfig => {
 }
 
 const writeApiDetails = (details: ApiHandlerConfig) => {
-  window.localStorage.setItem(api_details_key, JSON.stringify(details))
+  StorageHandler.writeSetting(API_DETAILS_KEY, JSON.stringify(details))
 }
 
 const clearApiDetails = () => {
-  window.localStorage.removeItem(api_details_key)
+  StorageHandler.clearSetting(API_DETAILS_KEY)
 }
 
 const makeApiContext = () => {

@@ -1,3 +1,5 @@
+import StorageHandler from "./storage"
+
 export const THEMES = [
   {
     name: "dark",
@@ -9,13 +11,13 @@ export const THEMES = [
   },
 ]
 const DEFAULT_THEME = THEMES[0].name
-const CURRENT_THEME_KEY = "note_mark__theme"
+const CURRENT_THEME_KEY = "theme"
 
 export function setTheme(newTheme: string) {
-  window.localStorage.setItem(CURRENT_THEME_KEY, newTheme)
+  StorageHandler.writeSetting(CURRENT_THEME_KEY, newTheme)
   document.body.dataset.theme = newTheme
 }
 
 export function getTheme(): string {
-  return window.localStorage.getItem(CURRENT_THEME_KEY) || DEFAULT_THEME
+  return StorageHandler.readSetting(CURRENT_THEME_KEY) || DEFAULT_THEME
 }
