@@ -3,6 +3,7 @@ package core
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -29,6 +30,22 @@ func HandleETag(ctx echo.Context, currentETag string) bool {
 				return false
 			}
 		}
+	}
+	return true
+}
+
+// Handle If-Modified-Since stuff
+// Returns (need new content)
+func HandleIfModifedSince(ctx echo.Context, currentLastModified time.Time) bool {
+	loc, err := time.LoadLocation("GMT")
+	if err != nil {
+		panic("failed to load GMT timezone")
+	}
+	currentLastModifiedFormatted := currentLastModified.In(loc).Format(time.RFC1123)
+	ctx.Response().Header().Add("Cache-Control", "private, must-revalidate, max-age=0")
+	ctx.Response().Header().Add("Last-Modified", currentLastModifiedFormatted)
+	if ctx.Request().Header.Get("If-Modified-Since") == currentLastModifiedFormatted {
+		return false
 	}
 	return true
 }
