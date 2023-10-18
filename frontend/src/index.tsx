@@ -9,6 +9,13 @@ import { Modal, ModalProvider } from './contexts/ModalProvider';
 import { ToastProvider, Toasts } from './contexts/ToastProvider';
 import { LoadingScreen } from './components/loading';
 import { lazy } from 'solid-js';
+import { registerSW } from 'virtual:pwa-register'
+
+if ("serviceWorker" in navigator) {
+  registerSW()
+} else {
+  console.debug("Service Worker capability not found in browser, so not using")
+}
 
 const App = lazy(() => import("./App"))
 

@@ -8,10 +8,11 @@
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
     "types": [
-      "vite/client"
+      "vite/client",
+      "vite-plugin-pwa/client"
     ],
     "noEmit": true,
     "isolatedModules": true,
-    "strictNullChecks": true,
+    "strictNullChecks": true
   }
 }
