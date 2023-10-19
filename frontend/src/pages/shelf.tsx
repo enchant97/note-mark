@@ -153,52 +153,56 @@ const Shelf: Component = () => {
   return (
     <div class="flex flex-col gap-4">
       <div class="flex gap-4 flex-col sm:flex-row">
-        <div class="join rounded-lg shadow-md bg-base-200">
-          <button
-            onclick={onNewBookClick}
-            class="btn join-item btn-ghost"
-            type="button"
-            disabled={globalLoading() || !allowBookCreate()}
-            title="Create New Notebook"
-          >
-            <Icon name="folder-plus" />
-          </button>
-          <button
-            onclick={onNewNoteClick}
-            class="btn join-item btn-ghost"
-            type="button"
-            disabled={globalLoading() || !allowNoteCreate()}
-            title="Create New Note"
-          >
-            <Icon name="file-plus" />
-          </button>
-          <Switch>
-            <Match when={slugParts().bookSlug && !slugParts().noteSlug}>
-              <button
-                onclick={onUpdateBookClick}
-                class="btn join-item btn-ghost"
-                type="button"
-                disabled={globalLoading() || !allowNoteCreate()}
-                title="Notebook Settings"
-              >
-                <Icon name="settings" />
-                <Icon name="folder" />
-              </button>
-            </Match>
-            <Match when={slugParts().bookSlug && slugParts().noteSlug}>
-              <button
-                onclick={onUpdateNoteClick}
-                class="btn join-item btn-ghost"
-                type="button"
-                disabled={globalLoading() || !allowNoteCreate()}
-                title="Note Settings"
-              >
-                <Icon name="settings" />
-                <Icon name="file" />
-              </button>
-            </Match>
-          </Switch>
-        </div>
+        <menu class="menu menu-horizontal shadow-md rounded-lg bg-base-200">
+          <li classList={{ "disabled": globalLoading() || !allowBookCreate() }}>
+            <button
+              onclick={onNewBookClick}
+              type="button"
+              disabled={globalLoading() || !allowBookCreate()}
+              title="Create New Notebook"
+            >
+              <Icon name="folder-plus" />
+            </button>
+          </li>
+          <li classList={{ "disabled": globalLoading() || !allowNoteCreate() }}>
+            <button
+              onclick={onNewNoteClick}
+              type="button"
+              disabled={globalLoading() || !allowNoteCreate()}
+              title="Create New Note"
+            >
+              <Icon name="file-plus" />
+            </button>
+          </li>
+          <li classList={{ "disabled": globalLoading() }}>
+            <Show when={!globalLoading()} fallback={<div><Icon name="more-horizontal" /></div>}>
+              <details class="dropdown">
+                <summary><Icon name="more-horizontal" /></summary>
+                <ul class="p-2 shadow-lg menu dropdown-content z-[1] bg-base-300 rounded-box w-52">
+                  <Show when={slugParts().bookSlug && allowBookCreate()}>
+                    <li><button
+                      onclick={onUpdateBookClick}
+                      type="button"
+                    >
+                      <Icon name="folder" />
+                      Notebook Settings
+                    </button></li>
+                  </Show>
+                  <Show when={slugParts().bookSlug && slugParts().noteSlug && allowNoteCreate()}>
+                    <li><button
+                      onclick={onUpdateNoteClick}
+                      type="button"
+                      title="Note Settings"
+                    >
+                      <Icon name="file" />
+                      Note Settings
+                    </button></li>
+                  </Show>
+                </ul>
+              </details>
+            </Show>
+          </li>
+        </menu>
         <NoteBreadcrumb class="flex-1" {...breadcrumb()} />
       </div>
       <Show when={!note.loading && !noteContent.loading} fallback={<LoadingRing />}>
