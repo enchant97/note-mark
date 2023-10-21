@@ -7,6 +7,7 @@ import { useApi } from '../../contexts/ApiProvider';
 import { useNavigate } from '@solidjs/router';
 import { ApiError } from '../../core/api';
 import { apiErrorIntoToast, useToast } from '../../contexts/ToastProvider';
+import Icon from '../icon';
 
 type NewNoteModalProps = {
   onClose: (newNote?: Note) => void
@@ -65,7 +66,10 @@ const NewNoteModal: Component<NewNoteModalProps> = (props) => {
           />
         </label>
         <div class="modal-action">
-          <button class="btn btn-primary" classList={{ loading: loading() }} type="submit">Create</button>
+          <button class="btn btn-primary" classList={{ loading: loading() }} type="submit">
+            <Icon name="file-plus" />
+            Create
+          </button>
           <button onclick={() => props.onClose()} class="btn" type="button">Cancel</button>
         </div>
       </form>

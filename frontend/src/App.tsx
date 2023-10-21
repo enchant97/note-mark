@@ -1,11 +1,11 @@
 import { Routes, Route, Outlet, useParams, A } from '@solidjs/router';
-import { Component, For, Show, Suspense, createResource, createSignal } from 'solid-js';
+import { Component, For, Show, createResource, createSignal } from 'solid-js';
 import Header from './components/header';
 import { useApi } from './contexts/ApiProvider';
 import ProtectedRoute from './components/protected_route';
 import { DrawerProvider } from './contexts/DrawerProvider';
 import { Book, Note } from './core/types';
-import { LoadingBar, LoadingSpin } from './components/loading';
+import { LoadingSpin } from './components/loading';
 import { apiErrorIntoToast, useToast } from './contexts/ToastProvider';
 import { ApiError } from './core/api';
 import PreLogin from './pages/pre-login';
@@ -17,6 +17,7 @@ import Logout from './pages/logout';
 import Profile from './pages/profile';
 import Shelf from './pages/shelf';
 import Index from './pages/index';
+import Icon from './components/icon';
 
 function performBookOrNoteSort(rows: Note[] | Book[], method: SortChoice) {
   switch (method) {
@@ -122,7 +123,10 @@ const MainApp: Component = () => {
       <div class="drawer-side z-40">
         <label for="main-drawer" class="drawer-overlay"></label>
         <ul class="menu menu-sm gap-4 p-4 w-80 bg-base-300 text-base-content h-full">
-          <li><SortSelect onChange={setSortChoice} selected={sortChoice()} /></li>
+          <li><label aria-label="Sort Mode">
+            <Icon name="align-left" />
+            <SortSelect onChange={setSortChoice} selected={sortChoice()} />
+          </label></li>
           <li class="menu-title"><span>NOTEBOOKS</span></li>
           <ul class="overflow-auto bg-base-100 flex-1 w-full rounded-lg">
             <Show when={!booksById.loading} fallback={<LoadingSpin />}>

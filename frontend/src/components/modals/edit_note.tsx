@@ -7,6 +7,7 @@ import { useApi } from '../../contexts/ApiProvider';
 import { useNavigate } from '@solidjs/router';
 import { apiErrorIntoToast, useToast } from '../../contexts/ToastProvider';
 import { ApiError } from '../../core/api';
+import Icon from '../icon';
 
 type UpdateNoteModalProps = {
   onClose: (note?: Note) => void
@@ -88,9 +89,13 @@ const UpdateNoteModal: Component<UpdateNoteModalProps> = (props) => {
             class="btn btn-outline btn-error"
             disabled={loading()}
             type="button">
+            <Icon name="trash" />
             Delete
           </button>
-          <button class="btn btn-primary" disabled={loading()} classList={{ loading: loading() }} type="submit">Save</button>
+          <button class="btn btn-primary" disabled={loading()} classList={{ loading: loading() }} type="submit">
+            <Icon name="save" />
+            Save
+          </button>
           <button onclick={() => props.onClose()} class="btn" type="button">Cancel</button>
         </div>
       </form>
