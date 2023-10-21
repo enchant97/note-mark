@@ -39,22 +39,25 @@ const ProfileDropdown = () => {
   const { user } = useCurrentUser()
 
   return (
-    <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 p-2 shadow bg-base-300 rounded-box w-52">
-      <Show when={user()} fallback={<li>
-        <Show when={apiDetails().authToken} fallback={<A href="/login">Login</A>}>
-          <button onclick={() => {
-            setApiDetails({ authToken: undefined })
-            navigate("/login")
-          }}>Re-Login</button>
+    <details class="dropdown dropdown-end">
+      <summary class="btn btn-ghost btn-circle"><Icon name="user" /></summary>
+      <menu class="mt-2 p-2 shadow-lg menu dropdown-content z-[1] bg-base-300 rounded-box w-52">
+        <Show when={user()} fallback={<li>
+          <Show when={apiDetails().authToken} fallback={<A href="/login">Login</A>}>
+            <button onclick={() => {
+              setApiDetails({ authToken: undefined })
+              navigate("/login")
+            }}>Re-Login</button>
+          </Show>
+        </li>} keyed>
+          {user => <>
+            <li class="menu-title"><span>Logged In As: <span class="kbd kbd-sm">{user.username}</span></span></li>
+            <li><A href="/profile">My Profile</A></li>
+            <li><A href="/logout">Logout</A></li>
+          </>}
         </Show>
-      </li>} keyed>
-        {user => <>
-          <li class="menu-title"><span>Logged In As: <span class="kbd kbd-sm">{user.username}</span></span></li>
-          <li><A href="/profile">My Profile</A></li>
-          <li><A href="/logout">Logout</A></li>
-        </>}
-      </Show>
-    </ul>
+      </menu>
+    </details>
   )
 }
 
@@ -70,12 +73,7 @@ const Header: Component = () => {
       <div class="flex gap-4">
         <ThemeSwitcher />
         <A activeClass="btn-disabled" class="btn btn-ghost btn-circle shadow-lg" end={true} href="/"><Icon name="home" /></A>
-        <div class="dropdown dropdown-end z-10">
-          <div tabindex="0" class="btn btn-ghost btn-circle shadow-lg">
-            <Icon name="user" />
-          </div>
-          <ProfileDropdown />
-        </div>
+        <ProfileDropdown />
       </div>
     </div>
   );
