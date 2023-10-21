@@ -210,7 +210,6 @@ const Shelf: Component = () => {
                     <li><button
                       onclick={onUpdateNoteClick}
                       type="button"
-                      title="Note Settings"
                     >
                       <Icon name="file" />
                       Note Settings
