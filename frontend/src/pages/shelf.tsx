@@ -1,4 +1,4 @@
-import { Component, Match, Show, Switch, createResource } from 'solid-js';
+import { Component, Show, createResource } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { useParams } from '@solidjs/router';
 import { Book, Breadcrumb, Note as NoteDetails } from '../core/types';
@@ -11,7 +11,7 @@ import UpdateBookModal from '../components/modals/edit_book';
 import UpdateNoteModal from '../components/modals/edit_note';
 import { useDrawer } from '../contexts/DrawerProvider';
 import { LoadingRing } from '../components/loading';
-import { apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
+import { ToastType, apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
 import { ApiError } from '../core/api';
 import Icon from '../components/icon';
 import Note, { NoteMode } from '../components/note';
@@ -150,6 +150,17 @@ const Shelf: Component = () => {
     })
   }
 
+  const onShareClick = async () => {
+    if (!window.isSecureContext) {
+      pushToast({ message: "feature only available in secure contexts", type: ToastType.ERROR })
+    } else if ((await navigator.permissions.query({ name: "clipboard-write" as PermissionName })).state === "granted") {
+      await navigator.clipboard.writeText(location.href);
+      pushToast({ message: "copied to clipboard", type: ToastType.SUCCESS })
+    } else {
+      pushToast({ message: "clipboard access not granted", type: ToastType.ERROR })
+    }
+  }
+
   return (
     <div class="flex flex-col gap-4">
       <div class="flex gap-4 flex-col sm:flex-row">
@@ -179,6 +190,13 @@ const Shelf: Component = () => {
               <details class="dropdown">
                 <summary><Icon name="more-horizontal" /></summary>
                 <ul class="p-2 shadow-lg menu dropdown-content z-[1] bg-base-300 rounded-box w-52">
+                  <li><button
+                    onclick={onShareClick}
+                    type="button"
+                  >
+                    <Icon name="link" />
+                    Copy Page Link
+                  </button></li>
                   <Show when={slugParts().bookSlug && allowBookCreate()}>
                     <li><button
                       onclick={onUpdateBookClick}
