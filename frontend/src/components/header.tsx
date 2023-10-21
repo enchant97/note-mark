@@ -10,13 +10,14 @@ const ThemeSwitcher: Component = () => {
   createEffect(() =>
     setTheme(currentTheme())
   )
+
   return (
-    <div class="dropdown dropdown-end z-10">
-      <div tabindex="0" class="btn btn-ghost shadow-lg flex gap-2">
+    <details class="dropdown dropdown-end">
+      <summary class="btn btn-ghost shadow-lg flex gap-2">
         <Icon name="sun" />
         <Icon name="moon" />
-      </div>
-      <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 p-2 shadow bg-base-300 rounded-box">
+      </summary>
+      <menu class="mt-2 p-2 shadow-lg menu menu-sm dropdown-content z-[1] bg-base-300 rounded-box">
         <For each={THEMES}>
           {(theme) => (
             <li><button
@@ -28,8 +29,8 @@ const ThemeSwitcher: Component = () => {
             </button></li>
           )}
         </For>
-      </ul>
-    </div>
+      </menu>
+    </details>
   )
 }
 
@@ -40,7 +41,7 @@ const ProfileDropdown = () => {
 
   return (
     <details class="dropdown dropdown-end">
-      <summary class="btn btn-ghost btn-circle"><Icon name="user" /></summary>
+      <summary class="btn btn-ghost btn-circle shadow-lg"><Icon name="user" /></summary>
       <menu class="mt-2 p-2 shadow-lg menu dropdown-content z-[1] bg-base-300 rounded-box w-52">
         <Show when={user()} fallback={<li>
           <Show when={apiDetails().authToken} fallback={<A href="/login">Login</A>}>
