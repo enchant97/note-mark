@@ -5,7 +5,7 @@ import { useApi } from './contexts/ApiProvider';
 import ProtectedRoute from './components/protected_route';
 import { DrawerProvider } from './contexts/DrawerProvider';
 import { Book, Note } from './core/types';
-import { LoadingSpin } from './components/loading';
+import { LoadingRing } from './components/loading';
 import { apiErrorIntoToast, useToast } from './contexts/ToastProvider';
 import { ApiError } from './core/api';
 import PreLogin from './pages/pre-login';
@@ -122,36 +122,38 @@ const MainApp: Component = () => {
       </div>
       <div class="drawer-side z-40">
         <label for="main-drawer" class="drawer-overlay"></label>
-        <ul class="menu menu-sm gap-4 p-4 w-80 bg-base-300 text-base-content h-full">
+        <menu class="menu menu-sm gap-2 p-4 w-80 bg-base-300 text-base-content h-full">
           <li><label aria-label="Sort Mode">
             <Icon name="align-left" />
             <SortSelect onChange={setSortChoice} selected={sortChoice()} />
           </label></li>
-          <li class="menu-title"><span>NOTEBOOKS</span></li>
-          <ul class="overflow-auto bg-base-100 flex-1 w-full rounded-lg">
-            <Show when={!booksById.loading} fallback={<LoadingSpin />}>
+          <li class="menu-title">NOTEBOOKS</li>
+          <ul class="bg-base-100 flex-1 overflow-auto rounded-lg">
+            <Show when={!booksById.loading} fallback={<LoadingRing />}>
               <For each={sortedBooks()}>
                 {(book) => <li>
                   <A
                     href={`/${params.username}/${book.slug}`}
-                    class="whitespace-nowrap"
                     end={true}
-                  >{book.name}
-                  </A></li>}
-              </For>
-            </Show>
-          </ul>
-          <li class="menu-title"><span>NOTES</span></li>
-          <ul class="overflow-auto bg-base-100 flex-1 w-full rounded-lg">
-            <Show when={!notesById.loading && !booksById.loading} fallback={<LoadingSpin />}>
-              <For each={sortedNotes()}>
-                {(note) => <li>
-                  <A
-                    href={`/${params.username}/${params.bookSlug}/${note.slug}`}
-                    class="whitespace-nowrap"
-                    end={true}
-                  >{note.name}
-                  </A></li>}
+                  >
+                    <Icon name="folder" size={14} />
+                    {book.name}
+                  </A>
+                  <Show when={book.slug === params.bookSlug && !notesById.loading}>
+                    <ul>
+                      <For each={sortedNotes()}>
+                        {(note) => <li>
+                          <A
+                            href={`/${params.username}/${params.bookSlug}/${note.slug}`}
+                            end={true}
+                          >
+                            <Icon name="file" size={14} />
+                            {note.name}
+                          </A></li>}
+                      </For>
+                    </ul>
+                  </Show>
+                </li>}
               </For>
             </Show>
           </ul>
@@ -168,7 +170,7 @@ const MainApp: Component = () => {
               Licenced Under AGPL-3.0
             </a>
           </li>
-        </ul>
+        </menu>
       </div>
     </div>
   );
