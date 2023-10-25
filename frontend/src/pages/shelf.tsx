@@ -125,7 +125,9 @@ const Shelf: Component = () => {
           drawer.deleteBook(bookId)
           clearModal()
         },
-        user: user(), book: book()
+        user: user(),
+        book: book(),
+        restoreNote: drawer.updateNote,
       },
     })
   }

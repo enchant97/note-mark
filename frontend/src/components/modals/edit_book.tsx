@@ -1,6 +1,6 @@
 import { Component, For, Suspense, createResource, createSignal } from 'solid-js';
 import BaseModal from './base';
-import { Book, UpdateBook, User } from '../../core/types';
+import { Book, Note, UpdateBook, User } from '../../core/types';
 import { createStore } from 'solid-js/store';
 import { toSlug } from '../../core/helpers';
 import { useApi } from '../../contexts/ApiProvider';
@@ -12,6 +12,7 @@ import { LoadingSpin } from '../loading';
 
 type DeletedNotesProps = {
   bookId: string
+  restoreNote: (note: Note) => void
 }
 
 const DeletedNotes: Component<DeletedNotesProps> = (props) => {
@@ -43,6 +44,7 @@ const DeletedNotes: Component<DeletedNotesProps> = (props) => {
     else {
       let new_notes = notes()
       if (new_notes) {
+        props.restoreNote(new_notes[i])
         new_notes?.splice(i, 1)
         mutate([...new_notes])
       }
@@ -84,6 +86,7 @@ type UpdateBookModalProps = {
   onDeleteClose: (bookId: string) => void
   user: User
   book: Book
+  restoreNote: (note: Note) => void
 }
 
 const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
@@ -163,7 +166,7 @@ const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
             />
           </label>
         </div>
-        <DeletedNotes bookId={props.book.id} />
+        <DeletedNotes bookId={props.book.id} restoreNote={props.restoreNote} />
         <div class="modal-action">
           <button onclick={onDelete} class="btn btn-outline btn-error" disabled={loading()} type="button">
             <Icon name="trash" />
