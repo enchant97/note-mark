@@ -1,8 +1,9 @@
-import { Accessor, Component, Match, Show, Switch } from "solid-js";
+import { Accessor, Component, Match, Show, Switch, createSignal } from "solid-js";
 import { Note as NoteDetails } from "../core/types";
 import NoteViewPlain from "./note/view_plain";
 import NoteEdit from "./note/edit";
 import NoteViewRendered from "./note/view_rendered";
+import Icon from "./icon";
 
 export enum NoteMode {
   RENDERED = "rendered",
@@ -20,9 +21,18 @@ type NoteProps = {
 }
 
 const Note: Component<NoteProps> = (props) => {
+  const [isFullscreen, setIsFullscreen] = createSignal(false);
+
   return (
-    <>
-      <div class="bg-base-200 shadow-md rounded-md">
+    <div
+      class="flex flex-col gap-4 bg-base-100"
+      classList={{
+        "full-screen": isFullscreen(),
+        "p-4": isFullscreen(),
+        "min-h-screen": isFullscreen(),
+      }}
+    >
+      <div class="bg-base-200 shadow-md rounded-md flex justify-between">
         <div class="tabs justify-center">
           <button
             onclick={() => props.setMode(NoteMode.RENDERED)}
@@ -44,6 +54,15 @@ const Note: Component<NoteProps> = (props) => {
             title="switch to editor"
           >Editor</button>
         </div>
+        <label class="tab swap inline-grid">
+          <input
+            type="checkbox"
+            onchange={() => setIsFullscreen(!isFullscreen())}
+            checked={isFullscreen()}
+          />
+          <div class="swap-on"><Icon name="minimize-2" size={18} /></div>
+          <div class="swap-off"><Icon name="maximize-2" size={18} /></div>
+        </label>
       </div>
       <Show when={props.content()}>
         {content => <Switch fallback={<NoteViewRendered content={content} />}>
@@ -55,7 +74,7 @@ const Note: Component<NoteProps> = (props) => {
           </Match>
         </Switch>}
       </Show>
-    </>
+    </div>
   )
 }
 

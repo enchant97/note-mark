@@ -5,3 +5,13 @@
 .prose input {
     margin: 0 .4rem 0 0;
 }
+
+@layer utilities {
+    .full-screen {
+        z-index: 100;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+}
