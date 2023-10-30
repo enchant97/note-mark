@@ -32,6 +32,6 @@
     "daisyui": "^3.9.3",
     "dompurify": "^3.0.6",
     "feather-icons": "^4.29.1",
-    "solid-js": "^1.8.3"
+    "solid-js": "^1.8.4"
   }
 }
