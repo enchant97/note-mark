@@ -12,7 +12,7 @@ require (
 	github.com/labstack/echo/v4 v4.11.2
 	github.com/urfave/cli/v2 v2.25.7
 	golang.org/x/crypto v0.14.0
-	gorm.io/driver/postgres v1.5.3
+	gorm.io/driver/postgres v1.5.4
 	gorm.io/gorm v1.25.5
 )
 
