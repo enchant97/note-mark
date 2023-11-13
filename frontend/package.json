@@ -29,7 +29,7 @@
     "@solidjs/router": "^0.8.3",
     "@tailwindcss/typography": "^0.5.10",
     "codemirror": "^6.0.1",
-    "daisyui": "^3.9.3",
+    "daisyui": "^4.0.3",
     "dompurify": "^3.0.6",
     "feather-icons": "^4.29.1",
     "solid-js": "^1.8.3"
