@@ -1,6 +1,10 @@
 package db
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type CreateUser struct {
 	Username string  `json:"username" validate:"required,alphanum,min=3,max=30"`
@@ -46,7 +50,8 @@ func (n *CreateNote) IntoNote(bookID uuid.UUID) Note {
 }
 
 type UpdateUser struct {
-	Name *string `json:"name" validate:"omitempty,max=128"`
+	UpdatedAt time.Time `json:"-"`
+	Name      *string   `json:"name" validate:"omitempty,max=128"`
 }
 
 type UpdateUserPassword struct {
@@ -55,12 +60,14 @@ type UpdateUserPassword struct {
 }
 
 type UpdateBook struct {
-	Name     *string `json:"name,omitempty" validate:"omitempty,max=80"`
-	Slug     *string `json:"slug,omitempty" validate:"omitempty,max=80,slug"`
-	IsPublic *bool   `json:"isPublic,omitempty"`
+	UpdatedAt time.Time `json:"-"`
+	Name      *string   `json:"name,omitempty" validate:"omitempty,max=80"`
+	Slug      *string   `json:"slug,omitempty" validate:"omitempty,max=80,slug"`
+	IsPublic  *bool     `json:"isPublic,omitempty"`
 }
 
 type UpdateNote struct {
-	Name *string `json:"name,omitempty" validate:"omitempty,max=80"`
-	Slug *string `json:"slug,omitempty" validate:"omitempty,max=80,slug"`
+	UpdatedAt time.Time `json:"-"`
+	Name      *string   `json:"name,omitempty" validate:"omitempty,max=80"`
+	Slug      *string   `json:"slug,omitempty" validate:"omitempty,max=80,slug"`
 }
