@@ -15,23 +15,23 @@
     "@types/feather-icons": "^4.29.3",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
-    "tailwindcss": "^3.3.3",
+    "tailwindcss": "^3.3.5",
     "typescript": "^5.2.2",
     "vite": "^4.5.0",
-    "vite-plugin-pwa": "^0.16.5",
+    "vite-plugin-pwa": "^0.17.0",
     "vite-plugin-solid": "^2.7.2",
     "vite-plugin-wasm-pack": "^0.1.12",
     "wasm-pack": "^0.12.1"
   },
   "dependencies": {
     "@codemirror/state": "^6.3.1",
-    "@codemirror/view": "^6.21.3",
+    "@codemirror/view": "^6.22.0",
     "@solidjs/router": "^0.8.3",
     "@tailwindcss/typography": "^0.5.10",
     "codemirror": "^6.0.1",
-    "daisyui": "^3.9.3",
+    "daisyui": "^3.9.4",
     "dompurify": "^3.0.6",
     "feather-icons": "^4.29.1",
-    "solid-js": "^1.8.3"
+    "solid-js": "^1.8.5"
   }
 }
