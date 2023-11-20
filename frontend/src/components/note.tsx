@@ -33,7 +33,7 @@ const Note: Component<NoteProps> = (props) => {
       }}
     >
       <div class="bg-base-200 shadow-md rounded-md flex justify-between">
-        <div class="tabs justify-center">
+        <div class="tabs tabs-boxed">
           <button
             onclick={() => props.setMode(NoteMode.RENDERED)}
             class="tab"
