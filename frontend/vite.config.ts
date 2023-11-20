@@ -9,9 +9,23 @@ export default defineConfig({
     solidPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ["manifest.json"],
       workbox: {
         globPatterns: ['**/*.{js,wasm,css,html,svg}']
+      },
+      manifest: {
+        'short_name': 'Note Mark',
+        'icons': [
+          {
+            'src': '/icon.svg',
+            'type': 'image/svg+xml',
+            'sizes': '150x150'
+          }
+        ],
+        'start_url': '.',
+        'display': 'standalone',
+        'scope': '/',
+        'theme_color': '#2a76b7',
+        'description': 'Lighting Fast & Minimal Markdown Note Taking App'
       },
     }),
   ],
