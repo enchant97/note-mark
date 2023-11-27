@@ -24,7 +24,7 @@
     "wasm-pack": "^0.12.1"
   },
   "dependencies": {
-    "@codemirror/state": "^6.3.1",
+    "@codemirror/state": "^6.3.2",
     "@codemirror/view": "^6.22.0",
     "@solidjs/router": "^0.8.3",
     "@tailwindcss/typography": "^0.5.10",
