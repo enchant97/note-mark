@@ -276,9 +276,22 @@ func updateNoteContent(ctx echo.Context) error {
 
 	storage_backend := ctx.Get("Storage").(storage.StorageController)
 
-	body := ctx.Request().Body
-	defer body.Close()
-	if err := storage_backend.WriteNote(noteID, body); err != nil {
+    // put note saving in transaction so db changes can rollback automatically if read/write fails
+	if err := db.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.
+			Model(&db.Note{}).
+			Where("id = ?", noteID).
+			Update("UpdatedAt", db.DB.NowFunc()).
+			Error; err != nil {
+			return err
+		}
+		body := ctx.Request().Body
+		defer body.Close()
+		if err := storage_backend.WriteNote(noteID, body); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
 		return err
 	}
 
