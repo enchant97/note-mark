@@ -33,6 +33,49 @@ func Entrypoint(appVersion string) error {
 					return commandClean(appConfig)
 				},
 			},
+			{
+				Name:  "user",
+				Usage: "user management",
+				Subcommands: []*cli.Command{
+					{
+						Name:  "add",
+						Usage: "add a new user",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true},
+							&cli.StringFlag{Name: "password", Aliases: []string{"p"}, Required: true},
+						},
+						Action: func(ctx *cli.Context) error {
+							username := ctx.String("username")
+							password := ctx.String("password")
+							return commandUserAdd(appConfig, username, password)
+						},
+					},
+					{
+						Name:  "remove",
+						Usage: "remove a existing user",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true},
+						},
+						Action: func(ctx *cli.Context) error {
+							username := ctx.String("username")
+							return commandUserRemove(appConfig, username)
+						},
+					},
+					{
+						Name:  "set-password",
+						Usage: "set a existing users password",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true},
+							&cli.StringFlag{Name: "password", Aliases: []string{"p"}, Required: true},
+						},
+						Action: func(ctx *cli.Context) error {
+							username := ctx.String("username")
+							password := ctx.String("password")
+							return commandUserSetPassword(appConfig, username, password)
+						},
+					},
+				},
+			},
 		},
 	}
 
