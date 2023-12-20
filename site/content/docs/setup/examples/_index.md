@@ -5,6 +5,16 @@ Shown examples use official Docker images. Examples also show links to download 
 
 > Example deployments use insecure credentials, you **MUST** change them
 
+> You should specify a image tag for a version, **DO NOT** use latest
+
+## All-In-One
+This example shows how to use the all-in-one image with the built-in SQLite database.
+
+
+- [Download: docker-compose.yml](aio-docker-compose.yml)
+
+{{< highlight-resource file="aio-docker-compose.yml" lang="yml" >}}
+
 ## PostgreSQL
 This example shows how the backend can be configured using a PostgreSQL database.
 

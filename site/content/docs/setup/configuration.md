@@ -12,6 +12,7 @@ Configuration of the backend is done through environment variables. See the belo
 | JWT_SECRET   | base64 encoded secret                     |           |                 |
 | TOKEN_EXPIRY | seconds until a token expires             | 259200    | 259200          |
 | DATA_PATH    | Where to store app data                   |           | /data           |
+| STATIC_PATH  | Host static files                         |           |                 |
 | CORS_ORIGINS | Comma separated values of allowed origins |           |                 |
 | ALLOW_SIGNUP | Whether to enable new accounts            |  true     | true            |
 
