@@ -36,12 +36,12 @@ func commandServe(appConfig config.AppConfig) error {
 	// Connect to storage backend
 	storage_backend := storage.DiskController{}.New(appConfig.DataPath)
 	if err := storage_backend.Setup(); err != nil {
-	    return err
+		return err
 	}
 	defer storage_backend.TearDown()
 	// Connect to database
 	if err := db.InitDB(appConfig.DB); err != nil {
-	    return err
+		return err
 	}
 	// Create server
 	e := echo.New()
@@ -49,11 +49,6 @@ func commandServe(appConfig config.AppConfig) error {
 	// Register root middleware
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
-	corsConfig := middleware.DefaultCORSConfig
-	{
-		corsConfig.AllowOrigins = appConfig.CORSOrigins
-	}
-	e.Use(middleware.CORSWithConfig(corsConfig))
 	v := core.Validator{}.New()
 	e.Validator = &v
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {

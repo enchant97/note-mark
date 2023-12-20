@@ -87,8 +87,30 @@ func getServerInfo(ctx echo.Context) error {
 }
 
 func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
+	corsConfig := middleware.DefaultCORSConfig
+	{
+		corsConfig.AllowOrigins = appConfig.CORSOrigins
+	}
+	e.Use(
+		func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(c echo.Context) error {
+				c.Response().Header().Add("Server", "note-mark")
+				return next(c)
+			}
+		},
+	)
+	if len(appConfig.StaticPath) != 0 {
+		e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
+			Root:  appConfig.StaticPath,
+			HTML5: true,
+		}))
+		e.GET("api", func(c echo.Context) error { return c.NoContent(http.StatusNotFound) })
+		e.GET("api/", func(c echo.Context) error { return c.NoContent(http.StatusNotFound) })
+		e.GET("api/*", func(c echo.Context) error { return c.NoContent(http.StatusNotFound) })
+	}
 	apiRoutes := e.Group(
 		"/api",
+		middleware.CORSWithConfig(corsConfig),
 		createJwtMiddleware(appConfig.JWTSecret),
 		authHandlerMiddleware,
 	)

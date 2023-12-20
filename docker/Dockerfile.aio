@@ -1,0 +1,28 @@
+# syntax=docker/dockerfile:1.4
+
+FROM golang:1.20 as builder
+
+    WORKDIR /usr/src/note-mark
+
+    COPY ./backend/go.mod ./backend/go.sum ./
+    RUN go mod download && go mod verify
+
+    COPY ./backend .
+    RUN CGO_ENABLED=0 go build -o /note-mark
+
+FROM gcr.io/distroless/static-debian11
+
+    COPY --from=builder --link /note-mark /
+    COPY --link ./frontend/dist /static
+
+    EXPOSE 8000
+
+    ENV BIND__HOST=0.0.0.0
+    ENV BIND__PORT=8000
+    ENV DB__URI=/data/db.sqlite
+    ENV DB__TYPE=sqlite
+    ENV DATA_PATH=/data
+    ENV STATIC_PATH=/static
+
+    ENTRYPOINT [ "./note-mark" ]
+    CMD [ "serve" ]

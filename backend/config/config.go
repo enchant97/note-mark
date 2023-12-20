@@ -22,6 +22,7 @@ type AppConfig struct {
 	JWTSecret   Base64Decoded `env:"JWT_SECRET,notEmpty"`
 	TokenExpiry int64         `env:"TOKEN_EXPIRY" envDefault:"259200"`
 	DataPath    string        `env:"DATA_PATH,notEmpty"`
+	StaticPath  string        `env:"STATIC_PATH"`
 	CORSOrigins []string      `env:"CORS_ORIGINS,notEmpty" envSeparator:","`
 	AllowSignup bool          `env:"ALLOW_SIGNUP,notEmpty" envDefault:"true"`
 }
