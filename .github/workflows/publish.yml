@@ -50,10 +50,16 @@ jobs:
         service_name:
           - "backend"
           - "frontend"
+          - "aio"
         include:
           - service_name: backend
+            docker_context: ./backend
             docker_file: backend/Dockerfile
+          - service_name: aio
+            docker_context: ./
+            docker_file: docker/Dockerfile.aio
           - service_name: frontend
+            docker_context: ./frontend
             docker_file: frontend/Dockerfile.pre-built
     steps:
       - name: Checkout
@@ -87,7 +93,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: ./${{ matrix.service_name }}
+          context: ${{ matrix.docker_context }}
           file: ${{ matrix.docker_file }}
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
