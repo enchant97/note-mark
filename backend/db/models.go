@@ -20,7 +20,7 @@ func (base *UUIDBase) BeforeCreate(tx *gorm.DB) (err error) {
 type TimeBase struct {
 	CreatedAt time.Time      `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt time.Time      `gorm:"autoUpdateTime" json:"updatedAt"`
-    DeletedAt gorm.DeletedAt `gorm:"index" json:"deletedAt,omitempty"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"deletedAt,omitempty"`
 }
 
 type User struct {
@@ -63,5 +63,6 @@ type Book struct {
 	Slug     string    `gorm:"index:idx_book,unique;not null;type:varchar(80)" json:"slug"`
 	OwnerID  uuid.UUID `gorm:"index:idx_book,unique;not null;type:uuid" json:"ownerId"`
 	IsPublic bool      `gorm:"not null;default:false;type:boolean" json:"isPublic"`
+	Owner    User      `json:"owner,omitempty"`
 	Notes    []Note    `gorm:"foreignKey:BookID" json:"notes,omitempty"`
 }

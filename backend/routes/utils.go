@@ -120,6 +120,7 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 	}
 	notesRoutes := apiRoutes.Group("/notes")
 	{
+		notesRoutes.GET("/recent", getNotesRecent)
 		notesRoutes.GET("/:noteID", getNoteByID)
 		notesRoutes.PATCH("/:noteID", patchNoteByID, authRequiredMiddleware)
 		notesRoutes.DELETE("/:noteID", deleteNoteById, authRequiredMiddleware)

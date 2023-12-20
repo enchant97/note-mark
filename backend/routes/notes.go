@@ -2,6 +2,7 @@ package routes
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -42,6 +43,44 @@ func createNoteByBookID(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusCreated, note)
+}
+
+func getNotesRecent(ctx echo.Context) error {
+	userID := getAuthDetails(ctx).GetOptionalUserID()
+
+	tx := db.DB.
+		Model(&db.Note{}).
+		Order("notes.updated_at DESC").
+		Limit(6).
+		Preload("Book", "Book.Owner").
+		Joins("Book").
+		Joins("Book.Owner")
+
+	if userID == nil {
+		tx = tx.Where("is_public = ?", true)
+	} else {
+		tx = tx.Where("owner_id = ?", userID)
+	}
+
+	recentNotes := make([]db.ValueWithSlug, 0)
+
+	if rows, err := tx.Rows(); err != nil {
+		return err
+	} else {
+		defer rows.Close()
+		for rows.Next() {
+			var row db.Note
+			if err := db.DB.ScanRows(rows, &row); err != nil {
+				return err
+			}
+			recentNotes = append(recentNotes, db.ValueWithSlug{
+				Value: row,
+				Slug:  fmt.Sprintf("%s/%s/%s", row.Book.Owner.Username, row.Book.Slug, row.Slug),
+			})
+		}
+	}
+
+	return ctx.JSON(http.StatusOK, recentNotes)
 }
 
 // TODO Can this be removed (really only need access via slug)???
@@ -276,7 +315,7 @@ func updateNoteContent(ctx echo.Context) error {
 
 	storage_backend := ctx.Get("Storage").(storage.StorageController)
 
-    // put note saving in transaction so db changes can rollback automatically if read/write fails
+	// put note saving in transaction so db changes can rollback automatically if read/write fails
 	if err := db.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.
 			Model(&db.Note{}).

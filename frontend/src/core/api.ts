@@ -1,5 +1,5 @@
 import { Result } from "./core"
-import { Book, CreateBook, CreateNote, CreateUser, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, ServerInfo, UpdateBook, UpdateNote, UpdateUser, UpdateUserPassword, User } from "./types"
+import { Book, CreateBook, CreateNote, CreateUser, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, ServerInfo, UpdateBook, UpdateNote, UpdateUser, UpdateUserPassword, User, ValueWithSlug } from "./types"
 
 export enum HttpMethods {
   GET = "GET",
@@ -172,6 +172,15 @@ class Api {
   }
   async getBookBySlug(username: string, bookSlug: string): Promise<Result<Book, ApiError>> {
     let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      headers: this.optionalHeaderAuthorization(),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.json())
+  }
+  async getNotesRecents(): Promise<Result<ValueWithSlug<Note>[], ApiError>> {
+    let reqURL = `${this.apiServer}/notes/recent`
     let resp = await handleFetchErrors(fetch(reqURL, {
       headers: this.optionalHeaderAuthorization(),
     }))
