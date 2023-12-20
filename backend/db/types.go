@@ -49,6 +49,11 @@ func (n *CreateNote) IntoNote(bookID uuid.UUID) Note {
 	}
 }
 
+type ValueWithSlug struct {
+	Value any    `json:"value"`
+	Slug  string `json:"slug"`
+}
+
 type UpdateUser struct {
 	UpdatedAt time.Time `json:"-"`
 	Name      *string   `json:"name" validate:"omitempty,max=128"`

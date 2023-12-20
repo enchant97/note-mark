@@ -21,6 +21,11 @@ export type OAuth2AccessToken = {
   expires_in: number
 }
 
+export type ValueWithSlug<T> = {
+  value: T
+  slug: string
+}
+
 export type User = {
   id: string
   username: string
