@@ -50,12 +50,12 @@ const Index: Component = () => {
           </div>
         </div>
       </div>
-      <div class="mx-4 my-4">
+      <div class="mx-4 my-4 p-2 bg-base-100 rounded">
         <h2 class="text-lg font-bold text-center">Recent Notes</h2>
         <Suspense fallback=<LoadingSpin />>
           <ul class="flex gap-2 flex-col items-center mt-2">
             <For each={recentNotes()}>
-              {row => <li><A class="btn btn-neutral btn-wide" href={`/${row.slug}`}>{row.value.name}</A></li>}
+              {row => <li><A class="btn btn-wide" href={`/${row.slug}`}>{row.value.name}</A></li>}
             </For>
           </ul>
         </Suspense>
