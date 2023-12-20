@@ -1,0 +1,19 @@
+# file: docker-compose.yml
+# built-for: 0.10.0
+version: "3"
+
+volumes:
+  data:
+
+services:
+  note-mark:
+    image: ghcr.io/enchant97/note-mark-aio
+    restart: unless-stopped
+    volumes:
+      - data:/data
+    environment:
+      # !!! REPLACE These !!!
+      JWT_SECRET: "bXktc2VjcmV0"
+      CORS_ORIGINS: "https://example.com:8000"
+    ports:
+      - 80:8000
