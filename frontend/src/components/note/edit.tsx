@@ -1,7 +1,7 @@
 import { Accessor, Component, untrack } from 'solid-js';
 import { useApi } from '../../contexts/ApiProvider';
 import { Note } from '../../core/types';
-import Editor, { EditorState } from '../editor';
+import Editor, { EditorState } from '../editor/editor';
 import { createStore } from 'solid-js/store';
 import { apiErrorIntoToast, useToast } from '../../contexts/ToastProvider';
 import { ApiError } from '../../core/api';
@@ -12,6 +12,7 @@ type NoteEditProps = {
   note: Note
   content: Accessor<string>
   onChange: (newContent: string) => any
+  isFullscreen: Accessor<boolean>
 }
 
 const NoteEdit: Component<NoteEditProps> = (props) => {
@@ -41,6 +42,7 @@ const NoteEdit: Component<NoteEditProps> = (props) => {
       onSave={save}
       state={state}
       setState={setState}
+      isFullscreen={props.isFullscreen}
     />
   )
 }
