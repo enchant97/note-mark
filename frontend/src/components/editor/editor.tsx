@@ -1,9 +1,16 @@
+
 import { EditorView, basicSetup } from "codemirror";
 import { EditorSelection, EditorState as InternalEditorState } from "@codemirror/state";
+import { indentMore, indentLess } from "@codemirror/commands";
 import { Component, createEffect, createSignal, onMount } from "solid-js";
 import { SetStoreFunction, Store } from "solid-js/store";
-import Icon from "./icon";
+import Icon from "../icon";
 import { keymap } from "@codemirror/view";
+import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
+import { useModal } from "../../contexts/ModalProvider";
+import CreateLinkModal from "./modals/create_link";
+import CreateImageModal from "./modals/create_image";
+import CreateTableModal from "./modals/create_table";
 
 const editorTheme = EditorView.baseTheme({
   "&.cm-editor": {
@@ -18,7 +25,13 @@ const editorTheme = EditorView.baseTheme({
   },
   ".cm-activeLineGutter": {
     "background-color": "hsl(var(--b3))",
-  }
+  },
+  ".ͼ5,.ͼc": {
+    "color": "oklch(var(--in))",
+  },
+  ".ͼ7": {
+    "text-decoration": "none",
+  },
 })
 
 export type EditorState = {
@@ -39,6 +52,7 @@ const Editor: Component<EditorProps> = (props) => {
   let editor: EditorView
   let autosaveTimeout: number;
 
+  const { setModal, clearModal } = useModal()
   const [autoSave, setAutoSave] = createSignal(true)
 
   const save = (state: InternalEditorState) => {
@@ -73,6 +87,32 @@ const Editor: Component<EditorProps> = (props) => {
       }
     }))
     editor.dispatch(tx)
+    editor.focus()
+  }
+
+  const addPrefixToLine = (prefix: string) => {
+    let state = editor.state
+    let tx = state.update(state.changeByRange(range => {
+      let line = state.doc.lineAt(range.from)
+      return {
+        changes: { from: line.from, to: line.from, insert: prefix },
+        range: EditorSelection.range(line.from, line.from + prefix.length)
+      }
+    }))
+    editor.dispatch(tx)
+    editor.focus()
+  }
+
+  const replaceSelection = (replacement: string) => {
+    let state = editor.state
+    let tx = state.update(state.changeByRange(range => {
+      return {
+        changes: { from: range.from, to: range.to, insert: replacement },
+        range: EditorSelection.range(range.from, range.from + replacement.length)
+      }
+    }))
+    editor.dispatch(tx)
+    editor.focus()
   }
 
   createEffect(() => {
@@ -93,6 +133,9 @@ const Editor: Component<EditorProps> = (props) => {
       state: InternalEditorState.create({
         extensions: [
           basicSetup,
+          markdown({
+            base: markdownLanguage,
+          }),
           EditorView.lineWrapping,
           editorTheme,
           EditorView.updateListener.of((v) => {
@@ -177,6 +220,7 @@ const Editor: Component<EditorProps> = (props) => {
           <li><button
             class="btn btn-sm btn-square btn-outline"
             title="Header"
+            onClick={() => addPrefixToLine("# ")}
           >
             <Icon name="hash" />
           </button></li>
@@ -185,18 +229,27 @@ const Editor: Component<EditorProps> = (props) => {
           <li><button
             class="btn btn-sm btn-square btn-outline"
             title="Block Comment"
+            onClick={() => addPrefixToLine("> ")}
           >
             <Icon name="chevron-right" />
           </button></li>
           <li><button
             class="btn btn-sm btn-square btn-outline"
             title="De-Indent"
+            onClick={() => {
+              indentLess(editor)
+              editor.focus()
+            }}
           >
             <Icon name="chevrons-left" />
           </button></li>
           <li><button
             class="btn btn-sm btn-square btn-outline"
             title="Indent"
+            onClick={() => {
+              indentMore(editor)
+              editor.focus()
+            }}
           >
             <Icon name="chevrons-right" />
           </button></li>
@@ -205,18 +258,54 @@ const Editor: Component<EditorProps> = (props) => {
           <li><button
             class="btn btn-sm btn-square btn-outline"
             title="Insert Link"
+            onClick={() => setModal({
+              component: CreateLinkModal,
+              props: {
+                onClose: (content?: string) => {
+                  if (content) {
+                    replaceSelection(content)
+                  }
+                  clearModal()
+                  editor.focus()
+                }
+              }
+            })}
           >
             <Icon name="link" />
           </button></li>
           <li><button
             class="btn btn-sm btn-square btn-outline"
             title="Insert Image"
+            onClick={() => setModal({
+              component: CreateImageModal,
+              props: {
+                onClose: (content?: string) => {
+                  if (content) {
+                    replaceSelection(content)
+                  }
+                  clearModal()
+                  editor.focus()
+                }
+              }
+            })}
           >
             <Icon name="image" />
           </button></li>
           <li><button
             class="btn btn-sm btn-square btn-outline"
             title="Insert Table"
+            onClick={() => setModal({
+              component: CreateTableModal,
+              props: {
+                onClose: (content?: string) => {
+                  if (content) {
+                    replaceSelection(content)
+                  }
+                  clearModal()
+                  editor.focus()
+                }
+              }
+            })}
           >
             <Icon name="table" />
           </button></li>
