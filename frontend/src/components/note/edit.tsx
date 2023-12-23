@@ -12,6 +12,7 @@ type NoteEditProps = {
   note: Note
   content: Accessor<string>
   onChange: (newContent: string) => any
+  isFullscreen: Accessor<boolean>
 }
 
 const NoteEdit: Component<NoteEditProps> = (props) => {
@@ -41,6 +42,7 @@ const NoteEdit: Component<NoteEditProps> = (props) => {
       onSave={save}
       state={state}
       setState={setState}
+      isFullscreen={props.isFullscreen}
     />
   )
 }

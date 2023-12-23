@@ -70,7 +70,7 @@ const Note: Component<NoteProps> = (props) => {
             <NoteViewPlain content={content} />
           </Match>
           <Match when={props.mode === NoteMode.EDIT}>
-            <NoteEdit note={props.noteDetails} content={content} onChange={props.setContent} />
+            <NoteEdit note={props.noteDetails} content={content} onChange={props.setContent} isFullscreen={isFullscreen} />
           </Match>
         </Switch>}
       </Show>

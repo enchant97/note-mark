@@ -2,7 +2,7 @@
 import { EditorView, basicSetup } from "codemirror";
 import { EditorSelection, EditorState as InternalEditorState } from "@codemirror/state";
 import { indentMore, indentLess } from "@codemirror/commands";
-import { Component, For, createEffect, createSignal, onMount } from "solid-js";
+import { Accessor, Component, For, createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import { SetStoreFunction, Store } from "solid-js/store";
 import Icon from "../icon";
 import { keymap } from "@codemirror/view";
@@ -45,15 +45,21 @@ export type EditorProps = {
   onSave: (content: string) => void
   state: Store<EditorState>
   setState: SetStoreFunction<EditorState>
+  isFullscreen: Accessor<boolean>
 }
 
 const Editor: Component<EditorProps> = (props) => {
   let editorDiv: HTMLDivElement
   let editor: EditorView
+  let toolbarElement: HTMLElement
   let autosaveTimeout: number;
 
   const { setModal, clearModal } = useModal()
+  const [toolbarOffset, setToolbarOffset] = createSignal(0)
+  const [toolbarVisible, setToolbarVisible] = createSignal(true)
   const [autoSave, setAutoSave] = createSignal(true)
+
+  const stickyToolbar = () => { return !toolbarVisible() && props.isFullscreen() }
 
   const save = (state: InternalEditorState) => {
     props.onSave(state.doc.toString())
@@ -128,7 +134,26 @@ const Editor: Component<EditorProps> = (props) => {
     }
   })
 
+  createEffect(() => {
+    props.isFullscreen()
+    if (toolbarElement)
+      setToolbarOffset(toolbarElement.offsetTop)
+  })
+
+  const handleScroll = () => {
+    if (window.scrollY >= toolbarOffset()) {
+      setToolbarVisible(false)
+    } else {
+      setToolbarVisible(true)
+    }
+  }
+
+  onCleanup(() => {
+    window.removeEventListener("scroll", handleScroll)
+  })
+
   onMount(() => {
+    window.addEventListener("scroll", handleScroll)
     editor = new EditorView({
       state: InternalEditorState.create({
         extensions: [
@@ -175,7 +200,16 @@ const Editor: Component<EditorProps> = (props) => {
 
   return (
     <>
-      <menu class="menu menu-sm menu-horizontal flex-nowrap gap-6 bg-base-200 rounded-md shadow-md p-2 w-full items-center">
+      <menu
+        ref={toolbarElement}
+        class="menu menu-sm menu-horizontal flex-nowrap gap-6 bg-base-200 rounded-md shadow-md p-2 w-full items-center"
+        classList={{
+          "fixed": stickyToolbar(),
+          "top-0": stickyToolbar(),
+          "left-0": stickyToolbar(),
+          "z-[1]": stickyToolbar(),
+        }}
+      >
         <ul class="menu-horizontal gap-2 flex-nowrap">
           <li><label class="form-control">
             <span class="label-text cursor-pointer">Auto Save</span>
