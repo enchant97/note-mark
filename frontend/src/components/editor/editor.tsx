@@ -2,7 +2,7 @@
 import { EditorView, basicSetup } from "codemirror";
 import { EditorSelection, EditorState as InternalEditorState } from "@codemirror/state";
 import { indentMore, indentLess } from "@codemirror/commands";
-import { Component, createEffect, createSignal, onMount } from "solid-js";
+import { Component, For, createEffect, createSignal, onMount } from "solid-js";
 import { SetStoreFunction, Store } from "solid-js/store";
 import Icon from "../icon";
 import { keymap } from "@codemirror/view";
@@ -217,13 +217,22 @@ const Editor: Component<EditorProps> = (props) => {
           >
             <Icon name="italic" />
           </button></li>
-          <li><button
-            class="btn btn-sm btn-square btn-outline"
-            title="Header"
-            onClick={() => addPrefixToLine("# ")}
-          >
-            <Icon name="hash" />
-          </button></li>
+          <li><div class="dropdown dropdown-hover dropdown-bottom p-0">
+            <div tabindex="0" role="button" class="btn btn-sm btn-square btn-outline">
+              <Icon name="hash" />
+            </div>
+            <ul tabindex="0" class="dropdown-content z-[1] menu shadow-lg bg-base-300 rounded-box w-52">
+              <For each={[1, 2, 3, 4, 5, 6]}>
+                {(level) => (
+                  <li><button
+                    onClick={() => addPrefixToLine("#".repeat(level) + " ")}
+                  >
+                    H.{level}
+                  </button></li>
+                )}
+              </For>
+            </ul>
+          </div></li>
         </ul>
         <ul class="menu-horizontal gap-2 flex-nowrap hidden sm:flex">
           <li><button
