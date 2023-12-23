@@ -320,12 +320,14 @@ const Editor: Component<EditorProps> = (props) => {
           </button></li>
         </ul>
         <ul class="menu-horizontal gap-2 flex-nowrap ml-auto">
-          <li><button
+          <li><a
             class="btn btn-sm btn-square btn-outline"
             title="Open Help"
+            href="https://github.github.com/gfm/"
+            target="_blank"
           >
             <Icon name="help-circle" />
-          </button></li>
+          </a></li>
         </ul>
       </menu>
       <div ref={(el) => editorDiv = el}></div>
