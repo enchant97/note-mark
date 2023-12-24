@@ -26,5 +26,9 @@ type StorageController interface {
 	ReadNote(noteID uuid.UUID) (io.ReadCloser, error)
 	ReadNoteChecksum(noteID uuid.UUID) (string, error)
 	DeleteNote(noteID uuid.UUID) error
+	WriteNoteAsset(noteID uuid.UUID, assetID uuid.UUID, r io.Reader) error
+	ReadNoteAsset(noteID uuid.UUID, assetID uuid.UUID) (io.ReadCloser, error)
+	DeleteNoteAsset(noteID uuid.UUID, assetID uuid.UUID) error
+	GetNoteAssetIDs(noteID uuid.UUID) ([]uuid.UUID, error)
 	GetNoteInfo(noteID uuid.UUID) (NoteInfo, error)
 }

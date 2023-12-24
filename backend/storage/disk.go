@@ -22,6 +22,14 @@ func getNoteDirectory(base string, noteID uuid.UUID) string {
 	return dirPath
 }
 
+func getNoteAssetsDirectory(base string, noteID uuid.UUID) string {
+	return path.Join(getNoteDirectory(base, noteID), "assets/")
+}
+
+func getNoteAssetFileName(assetID uuid.UUID) string {
+	return assetID.String() + ".bin"
+}
+
 type DiskController struct {
 	baseDataPath string
 }
@@ -35,6 +43,10 @@ func (c DiskController) New(baseDataPath string) StorageController {
 
 func (c *DiskController) getNoteDirectory(noteID uuid.UUID) string {
 	return getNoteDirectory(c.baseDataPath, noteID)
+}
+
+func (c *DiskController) getNoteAssetsDirectory(noteID uuid.UUID) string {
+	return getNoteAssetsDirectory(c.baseDataPath, noteID)
 }
 
 func (c *DiskController) Setup() error {
@@ -107,6 +119,61 @@ func (c *DiskController) DeleteNote(noteID uuid.UUID) error {
 		return errors.Join(err, ErrWrite)
 	}
 	return nil
+}
+
+func (c *DiskController) WriteNoteAsset(noteID uuid.UUID, assetID uuid.UUID, r io.Reader) error {
+	dirPath := c.getNoteAssetsDirectory(noteID)
+	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+		return errors.Join(err, ErrWrite)
+	}
+	filePath := path.Join(dirPath, getNoteAssetFileName(assetID))
+	f, err := os.Create(filePath)
+	if err != nil {
+		errors.Join(err, ErrWrite)
+	}
+	defer f.Close()
+	_, err = io.Copy(f, r)
+	if err != nil {
+		return errors.Join(err, ErrWrite)
+	}
+	return nil
+}
+
+func (c *DiskController) ReadNoteAsset(noteID uuid.UUID, assetID uuid.UUID) (io.ReadCloser, error) {
+	filePath := path.Join(c.getNoteAssetsDirectory(noteID), getNoteAssetFileName(assetID))
+	f, err := os.Open(filePath)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil, errors.Join(err, ErrNotFound)
+		}
+		return nil, errors.Join(err, ErrRead)
+	}
+	return f, nil
+}
+
+func (c *DiskController) DeleteNoteAsset(noteID uuid.UUID, assetID uuid.UUID) error {
+	filePath := path.Join(c.getNoteAssetsDirectory(noteID), getNoteAssetFileName(assetID))
+	if err := os.Remove(filePath); err != nil {
+		return errors.Join(err, ErrWrite)
+	}
+	return nil
+}
+
+func (c *DiskController) GetNoteAssetIDs(noteID uuid.UUID) ([]uuid.UUID, error) {
+	dirPath := c.getNoteAssetsDirectory(noteID)
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return nil, errors.Join(err, ErrRead)
+	}
+	filtersEntries := make([]uuid.UUID, len(entries))
+	for _, entry := range entries {
+		if !entry.Type().IsRegular() && path.Ext(entry.Name()) == ".bin" {
+			if assetID, err := uuid.Parse(path.Base(entry.Name())); err == nil {
+				filtersEntries = append(filtersEntries, assetID)
+			}
+		}
+	}
+	return filtersEntries, nil
 }
 
 func (c *DiskController) GetNoteInfo(noteID uuid.UUID) (NoteInfo, error) {
