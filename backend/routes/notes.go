@@ -83,7 +83,6 @@ func getNotesRecent(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, recentNotes)
 }
 
-// TODO Can this be removed (really only need access via slug)???
 func getNotesByBookID(ctx echo.Context) error {
 	userID := getAuthDetails(ctx).GetOptionalUserID()
 	bookID, err := uuid.Parse(ctx.Param("bookID"))
@@ -412,6 +411,9 @@ func deleteNoteById(ctx echo.Context) error {
 		// performs hard deletion
 		storage_backend := ctx.Get("Storage").(storage.StorageController)
 		if err := db.DB.Transaction(func(tx *gorm.DB) error {
+			if err := tx.Unscoped().Delete(&db.NoteAsset{}, "note_id = ?", noteID).Error; err != nil {
+				return err
+			}
 			if err := tx.Unscoped().Delete(&db.Note{}, "id = ?", noteID).Error; err != nil {
 				return err
 			}

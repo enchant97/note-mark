@@ -155,4 +155,12 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 			middleware.BodyLimit("1M"),
 		)
 	}
+	assetsRoutes := apiRoutes.Group("/notes/:noteID/assets")
+	{
+
+		assetsRoutes.POST("", createNoteAsset, authRequiredMiddleware, middleware.BodyLimit("4M"))
+		assetsRoutes.GET("", getNoteAssets)
+		assetsRoutes.GET("/:assetID", getNoteAssetContentByID)
+		assetsRoutes.DELETE("/:assetID", deleteNoteAssetByID, authRequiredMiddleware)
+	}
 }

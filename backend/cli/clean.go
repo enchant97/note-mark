@@ -34,6 +34,9 @@ func commandClean(appConfig config.AppConfig) error {
 		FindInBatches(&results, 1, func(tx *gorm.DB, batch int) error {
 			for _, result := range results {
 				if err := tx.Transaction(func(tx *gorm.DB) error {
+					if err := tx.Unscoped().Delete(&db.NoteAsset{}, "note_id = ?", result.ID).Error; err != nil {
+						return err
+					}
 					if err := tx.Unscoped().Delete(&result).Error; err != nil {
 						return err
 					}

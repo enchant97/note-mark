@@ -18,6 +18,14 @@ func BindAndValidate(ctx echo.Context, i interface{}) error {
 	return nil
 }
 
+func TimeIntoHTTPFormat(t time.Time) string {
+	if loc, err := time.LoadLocation("GMT"); err != nil {
+		panic("failed to load GMT timezone")
+	} else {
+		return t.In(loc).Format(time.RFC1123)
+	}
+}
+
 // Handle ETag stuff
 // Returns (need new content)
 func HandleETag(ctx echo.Context, currentETag string) bool {
@@ -37,11 +45,7 @@ func HandleETag(ctx echo.Context, currentETag string) bool {
 // Handle If-Modified-Since stuff
 // Returns (need new content)
 func HandleIfModifedSince(ctx echo.Context, currentLastModified time.Time) bool {
-	loc, err := time.LoadLocation("GMT")
-	if err != nil {
-		panic("failed to load GMT timezone")
-	}
-	currentLastModifiedFormatted := currentLastModified.In(loc).Format(time.RFC1123)
+	currentLastModifiedFormatted := TimeIntoHTTPFormat(currentLastModified)
 	ctx.Response().Header().Add("Cache-Control", "private, must-revalidate, max-age=0")
 	ctx.Response().Header().Add("Last-Modified", currentLastModifiedFormatted)
 	if ctx.Request().Header.Get("If-Modified-Since") == currentLastModifiedFormatted {

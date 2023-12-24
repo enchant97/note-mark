@@ -1,5 +1,5 @@
 import { Result } from "./core"
-import { Book, CreateBook, CreateNote, CreateUser, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, ServerInfo, UpdateBook, UpdateNote, UpdateUser, UpdateUserPassword, User, ValueWithSlug } from "./types"
+import { Book, CreateBook, CreateNote, CreateUser, Note, NoteAsset, OAuth2AccessToken, OAuth2AccessTokenRequest, ServerInfo, UpdateBook, UpdateNote, UpdateUser, UpdateUserPassword, User, ValueWithSlug } from "./types"
 
 export enum HttpMethods {
   GET = "GET",
@@ -85,6 +85,9 @@ class Api {
     if (!this.isAuthenticated()) return {}
     return { "Authorization": `Bearer ${this.authToken}` }
   }
+  //
+  // Server
+  //
   async getServerInfo(): Promise<Result<ServerInfo, ApiError>> {
     let reqURL = `${this.apiServer}/info`
     let resp = await handleFetchErrors(fetch(reqURL))
@@ -92,6 +95,9 @@ class Api {
     if (!resp.ok) return new ApiError(resp.status)
     return handleBodyErrors(resp.json())
   }
+  //
+  // Authentication
+  //
   async postToken(details: OAuth2AccessTokenRequest): Promise<Result<OAuth2AccessToken, ApiError>> {
     let reqURL = `${this.apiServer}/auth/token`
     let resp = await handleFetchErrors(fetch(reqURL, {
@@ -106,6 +112,9 @@ class Api {
   async postTokenPasswordFlow(username: string, password: string): Promise<Result<OAuth2AccessToken, ApiError>> {
     return await this.postToken({ grant_type: "password", username, password })
   }
+  //
+  // User
+  //
   async createUser(user: CreateUser): Promise<Result<User, ApiError>> {
     let reqURL = `${this.apiServer}/users`
     let resp = await handleFetchErrors(fetch(reqURL, {
@@ -113,13 +122,6 @@ class Api {
       body: JSON.stringify(user),
       headers: HEADER_JSON,
     }))
-    if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
-    return handleBodyErrors(resp.json())
-  }
-  async getUsersSearch(username: string): Promise<Result<string[], ApiError>> {
-    let reqURL = `${this.apiServer}/users/search?username=${username}`
-    let resp = await handleFetchErrors(fetch(reqURL))
     if (resp instanceof Error) return resp
     if (!resp.ok) return new ApiError(resp.status)
     return handleBodyErrors(resp.json())
@@ -133,113 +135,12 @@ class Api {
     if (!resp.ok) return new ApiError(resp.status)
     return handleBodyErrors(resp.json())
   }
-  async createBook(book: CreateBook): Promise<Result<Book, ApiError>> {
-    let reqURL = `${this.apiServer}/books`
-    let resp = await handleFetchErrors(fetch(reqURL, {
-      method: HttpMethods.POST,
-      headers: {
-        ...HEADER_JSON,
-        ...this.headerAuthorization(),
-      },
-      body: JSON.stringify(book),
-    }))
+  async getUsersSearch(username: string): Promise<Result<string[], ApiError>> {
+    let reqURL = `${this.apiServer}/users/search?username=${username}`
+    let resp = await handleFetchErrors(fetch(reqURL))
     if (resp instanceof Error) return resp
     if (!resp.ok) return new ApiError(resp.status)
     return handleBodyErrors(resp.json())
-  }
-  async createNote(bookId: string, note: CreateNote): Promise<Result<Note, ApiError>> {
-    let reqURL = `${this.apiServer}/books/${bookId}/notes`
-    let resp = await handleFetchErrors(fetch(reqURL, {
-      method: HttpMethods.POST,
-      headers: {
-        ...HEADER_JSON,
-        ...this.headerAuthorization(),
-      },
-      body: JSON.stringify(note),
-    }))
-    if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
-    return handleBodyErrors(resp.json())
-  }
-  async getBooksBySlug(username: string): Promise<Result<Book[], ApiError>> {
-    let reqURL = `${this.apiServer}/slug/@${username}/books`
-    let resp = await handleFetchErrors(fetch(reqURL, {
-      headers: this.optionalHeaderAuthorization(),
-    }))
-    if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
-    return handleBodyErrors(resp.json())
-  }
-  async getBookBySlug(username: string, bookSlug: string): Promise<Result<Book, ApiError>> {
-    let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}`
-    let resp = await handleFetchErrors(fetch(reqURL, {
-      headers: this.optionalHeaderAuthorization(),
-    }))
-    if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
-    return handleBodyErrors(resp.json())
-  }
-  async getNotesRecents(): Promise<Result<ValueWithSlug<Note>[], ApiError>> {
-    let reqURL = `${this.apiServer}/notes/recent`
-    let resp = await handleFetchErrors(fetch(reqURL, {
-      headers: this.optionalHeaderAuthorization(),
-    }))
-    if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
-    return handleBodyErrors(resp.json())
-  }
-  async getNotesBySlug(username: string, bookSlug: string): Promise<Result<Note[], ApiError>> {
-    let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/notes`
-    let resp = await handleFetchErrors(fetch(reqURL, {
-      headers: this.optionalHeaderAuthorization(),
-    }))
-    if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
-    return handleBodyErrors(resp.json())
-  }
-  async getNoteBySlug(username: string, bookSlug: string, noteSlug: string): Promise<Result<Note, ApiError>> {
-    let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/notes/${noteSlug}`
-    let resp = await handleFetchErrors(fetch(reqURL, {
-      headers: this.optionalHeaderAuthorization(),
-    }))
-    if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
-    return handleBodyErrors(resp.json())
-  }
-  async getNotesByBookId(bookId: string, deleted: boolean = false): Promise<Result<Note[], ApiError>> {
-    let reqURL = `${this.apiServer}/books/${bookId}/notes`
-    if (deleted === true) {
-      reqURL += "?deleted=true"
-    }
-    let resp = await handleFetchErrors(fetch(reqURL, {
-      headers: this.optionalHeaderAuthorization(),
-    }))
-    if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
-    return handleBodyErrors(resp.json())
-  }
-  async getNoteContentById(noteId: string): Promise<Result<string, ApiError>> {
-    let reqURL = `${this.apiServer}/notes/${noteId}/content`
-    let resp = await handleFetchErrors(fetch(reqURL, {
-      headers: this.optionalHeaderAuthorization(),
-    }))
-    if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
-    return handleBodyErrors(resp.text())
-  }
-  async updateBook(bookId: string, book: UpdateBook): Promise<Result<undefined, ApiError>> {
-    let reqURL = `${this.apiServer}/books/${bookId}`
-    let resp = await handleFetchErrors(fetch(reqURL, {
-      method: HttpMethods.PATCH,
-      headers: {
-        ...HEADER_JSON,
-        ...this.headerAuthorization(),
-      },
-      body: JSON.stringify(book),
-    }))
-    if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
-    return undefined
   }
   async updateUser(user: UpdateUser): Promise<Result<undefined, ApiError>> {
     let reqURL = `${this.apiServer}/users/me`
@@ -268,6 +169,94 @@ class Api {
     if (resp instanceof Error) return resp
     if (!resp.ok) return new ApiError(resp.status)
     return undefined
+  }
+  //
+  // Book
+  //
+  async createBook(book: CreateBook): Promise<Result<Book, ApiError>> {
+    let reqURL = `${this.apiServer}/books`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      method: HttpMethods.POST,
+      headers: {
+        ...HEADER_JSON,
+        ...this.headerAuthorization(),
+      },
+      body: JSON.stringify(book),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.json())
+  }
+  async updateBook(bookId: string, book: UpdateBook): Promise<Result<undefined, ApiError>> {
+    let reqURL = `${this.apiServer}/books/${bookId}`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      method: HttpMethods.PATCH,
+      headers: {
+        ...HEADER_JSON,
+        ...this.headerAuthorization(),
+      },
+      body: JSON.stringify(book),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return undefined
+  }
+  async deleteBook(bookId: string): Promise<Result<undefined, ApiError>> {
+    let reqURL = `${this.apiServer}/books/${bookId}`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      method: HttpMethods.DELETE,
+      headers: this.headerAuthorization(),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return undefined
+  }
+  //
+  // Note
+  //
+  async createNote(bookId: string, note: CreateNote): Promise<Result<Note, ApiError>> {
+    let reqURL = `${this.apiServer}/books/${bookId}/notes`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      method: HttpMethods.POST,
+      headers: {
+        ...HEADER_JSON,
+        ...this.headerAuthorization(),
+      },
+      body: JSON.stringify(note),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.json())
+  }
+  async getNotesRecents(): Promise<Result<ValueWithSlug<Note>[], ApiError>> {
+    let reqURL = `${this.apiServer}/notes/recent`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      headers: this.optionalHeaderAuthorization(),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.json())
+  }
+  async getNotesByBookId(bookId: string, deleted: boolean = false): Promise<Result<Note[], ApiError>> {
+    let reqURL = `${this.apiServer}/books/${bookId}/notes`
+    if (deleted === true) {
+      reqURL += "?deleted=true"
+    }
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      headers: this.optionalHeaderAuthorization(),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.json())
+  }
+  async getNoteContentById(noteId: string): Promise<Result<string, ApiError>> {
+    let reqURL = `${this.apiServer}/notes/${noteId}/content`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      headers: this.optionalHeaderAuthorization(),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.text())
   }
   async updateNote(noteId: string, book: UpdateNote): Promise<Result<undefined, ApiError>> {
     let reqURL = `${this.apiServer}/notes/${noteId}`
@@ -304,16 +293,6 @@ class Api {
     if (!resp.ok) return new ApiError(resp.status)
     return undefined
   }
-  async deleteBook(bookId: string): Promise<Result<undefined, ApiError>> {
-    let reqURL = `${this.apiServer}/books/${bookId}`
-    let resp = await handleFetchErrors(fetch(reqURL, {
-      method: HttpMethods.DELETE,
-      headers: this.headerAuthorization(),
-    }))
-    if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
-    return undefined
-  }
   async deleteNote(noteId: string, permanent: boolean = false): Promise<Result<undefined, ApiError>> {
     let reqURL = `${this.apiServer}/notes/${noteId}?permanent=${permanent}`
     let resp = await handleFetchErrors(fetch(reqURL, {
@@ -323,6 +302,87 @@ class Api {
     if (resp instanceof Error) return resp
     if (!resp.ok) return new ApiError(resp.status)
     return undefined
+  }
+  //
+  // Note Assets
+  //
+  async createNoteAsset(noteId: string, file: File, name: string): Promise<Result<NoteAsset, ApiError>> {
+    let reqURL = `${this.apiServer}/notes/${noteId}/assets`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      method: HttpMethods.POST,
+      headers: {
+        ...this.headerAuthorization(),
+        "X-Name": name,
+      },
+      body: file,
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.json())
+  }
+  getNoteAssetAccessUrl(noteId: string, assetId: string): string {
+    return `${this.apiServer}/notes/${noteId}/assets/${assetId}`
+  }
+  async getNoteAssets(noteId: string): Promise<Result<NoteAsset[], ApiError>> {
+    let reqURL = `${this.apiServer}/notes/${noteId}/assets`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      method: HttpMethods.GET,
+      headers: {
+        ...this.optionalHeaderAuthorization(),
+      },
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.json())
+  }
+  async deleteNoteAsset(noteId: string, assetId: string): Promise<Result<undefined, ApiError>> {
+    let reqURL = `${this.apiServer}/notes/${noteId}/assets/${assetId}`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      method: HttpMethods.DELETE,
+      headers: this.headerAuthorization(),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return undefined
+  }
+  //
+  // Slug Access
+  //
+  async getBooksBySlug(username: string): Promise<Result<Book[], ApiError>> {
+    let reqURL = `${this.apiServer}/slug/@${username}/books`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      headers: this.optionalHeaderAuthorization(),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.json())
+  }
+  async getBookBySlug(username: string, bookSlug: string): Promise<Result<Book, ApiError>> {
+    let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      headers: this.optionalHeaderAuthorization(),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.json())
+  }
+  async getNotesBySlug(username: string, bookSlug: string): Promise<Result<Note[], ApiError>> {
+    let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/notes`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      headers: this.optionalHeaderAuthorization(),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.json())
+  }
+  async getNoteBySlug(username: string, bookSlug: string, noteSlug: string): Promise<Result<Note, ApiError>> {
+    let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/notes/${noteSlug}`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      headers: this.optionalHeaderAuthorization(),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.json())
   }
 }
 
