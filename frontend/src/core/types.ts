@@ -26,6 +26,12 @@ export type ValueWithSlug<T> = {
   slug: string
 }
 
+export type FileInfo = {
+  contentLength: number
+  lastModified: string
+  checksum: string
+}
+
 export type User = {
   id: string
   username: string
@@ -45,6 +51,11 @@ export type Note = {
   name: string
   slug: string
   bookId: string
+}
+
+export type Asset = {
+  id: string
+  info: FileInfo
 }
 
 export type CreateUser = {

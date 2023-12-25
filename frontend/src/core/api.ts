@@ -1,5 +1,5 @@
 import { Result } from "./core"
-import { Book, CreateBook, CreateNote, CreateUser, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, ServerInfo, UpdateBook, UpdateNote, UpdateUser, UpdateUserPassword, User, ValueWithSlug } from "./types"
+import { Asset, Book, CreateBook, CreateNote, CreateUser, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, ServerInfo, UpdateBook, UpdateNote, UpdateUser, UpdateUserPassword, User, ValueWithSlug } from "./types"
 
 export enum HttpMethods {
   GET = "GET",
@@ -316,6 +316,44 @@ class Api {
   }
   async deleteNote(noteId: string, permanent: boolean = false): Promise<Result<undefined, ApiError>> {
     let reqURL = `${this.apiServer}/notes/${noteId}?permanent=${permanent}`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      method: HttpMethods.DELETE,
+      headers: this.headerAuthorization(),
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return undefined
+  }
+  //
+  // Note Assets
+  //
+  async createNoteAsset(noteId: string, file: File): Promise<Result<Asset, ApiError>> {
+    let reqURL = `${this.apiServer}/notes/${noteId}/assets`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      method: HttpMethods.POST,
+      headers: {
+        ...this.headerAuthorization(),
+      },
+      body: file,
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.json())
+  }
+  async getNoteAssets(noteId: string): Promise<Result<Asset[], ApiError>> {
+    let reqURL = `${this.apiServer}/notes/${noteId}/assets`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      method: HttpMethods.GET,
+      headers: {
+        ...this.optionalHeaderAuthorization(),
+      },
+    }))
+    if (resp instanceof Error) return resp
+    if (!resp.ok) return new ApiError(resp.status)
+    return handleBodyErrors(resp.json())
+  }
+  async deleteNoteAsset(noteId: string, assetId: string): Promise<Result<undefined, ApiError>> {
+    let reqURL = `${this.apiServer}/notes/${noteId}/assets/${assetId}`
     let resp = await handleFetchErrors(fetch(reqURL, {
       method: HttpMethods.DELETE,
       headers: this.headerAuthorization(),
