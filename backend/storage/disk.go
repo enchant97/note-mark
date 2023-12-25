@@ -2,8 +2,6 @@ package storage
 
 import (
 	"errors"
-	"fmt"
-	"hash/crc64"
 	"io"
 	"io/fs"
 	"os"
@@ -95,21 +93,7 @@ func (c *DiskController) ReadNoteChecksum(noteID uuid.UUID) (string, error) {
 		return "", err
 	} else {
 		defer reader.Close()
-		h := crc64.New(crc64.MakeTable(crc64.ISO))
-		buf := make([]byte, 1024)
-		for {
-			n, err := reader.Read(buf)
-			if err != nil && err != io.EOF {
-				return "", err
-			}
-			if n == 0 {
-				break
-			}
-			if _, err := h.Write(buf); err != nil {
-				return "", err
-			}
-		}
-		return fmt.Sprintf("%x", h.Sum64()), nil
+		return MakeChecksum(reader)
 	}
 }
 
@@ -151,6 +135,15 @@ func (c *DiskController) ReadNoteAsset(noteID uuid.UUID, assetID uuid.UUID) (io.
 	return f, nil
 }
 
+func (c *DiskController) ReadNoteAssetChecksum(noteID uuid.UUID, assetID uuid.UUID) (string, error) {
+	if reader, err := c.ReadNoteAsset(noteID, assetID); err != nil {
+		return "", err
+	} else {
+		defer reader.Close()
+		return MakeChecksum(reader)
+	}
+}
+
 func (c *DiskController) DeleteNoteAsset(noteID uuid.UUID, assetID uuid.UUID) error {
 	filePath := path.Join(c.getNoteAssetsDirectory(noteID), getNoteAssetFileName(assetID))
 	if err := os.Remove(filePath); err != nil {
@@ -185,12 +178,16 @@ func (c *DiskController) GetNoteInfo(noteID uuid.UUID) (NoteFileInfo, error) {
 		}
 		return NoteFileInfo{}, errors.Join(err, ErrRead)
 	}
-	info := NoteFileInfo{
-		ContentLength: i.Size(),
-		LastModified:  i.ModTime(),
+	if checksum, err := c.ReadNoteChecksum(noteID); err != nil {
+		return NoteFileInfo{}, err
+	} else {
+		info := NoteFileInfo{
+			ContentLength: i.Size(),
+			LastModified:  i.ModTime(),
+			Checksum:      checksum,
+		}
+		return info, nil
 	}
-
-	return info, nil
 }
 
 func (c *DiskController) GetNoteAssetInfo(noteID uuid.UUID, assetID uuid.UUID) (AssetFileInfo, error) {
@@ -202,10 +199,14 @@ func (c *DiskController) GetNoteAssetInfo(noteID uuid.UUID, assetID uuid.UUID) (
 		}
 		return AssetFileInfo{}, errors.Join(err, ErrRead)
 	}
-	info := AssetFileInfo{
-		ContentLength: i.Size(),
-		LastModified:  i.ModTime(),
+	if checksum, err := c.ReadNoteAssetChecksum(noteID, assetID); err != nil {
+		return AssetFileInfo{}, err
+	} else {
+		info := AssetFileInfo{
+			ContentLength: i.Size(),
+			LastModified:  i.ModTime(),
+			Checksum:      checksum,
+		}
+		return info, nil
 	}
-
-	return info, nil
 }

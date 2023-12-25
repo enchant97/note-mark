@@ -2,6 +2,8 @@ package storage
 
 import (
 	"errors"
+	"fmt"
+	"hash/crc32"
 	"io"
 	"time"
 
@@ -15,8 +17,9 @@ var (
 )
 
 type FileInfo struct {
-	ContentLength int64
-	LastModified  time.Time
+	ContentLength int64     `json:"contentLength"`
+	LastModified  time.Time `json:"lastModified"`
+	Checksum      string    `json:"checksum"`
 }
 
 type NoteFileInfo = FileInfo
@@ -32,8 +35,27 @@ type StorageController interface {
 	DeleteNote(noteID uuid.UUID) error
 	WriteNoteAsset(noteID uuid.UUID, assetID uuid.UUID, r io.Reader) error
 	ReadNoteAsset(noteID uuid.UUID, assetID uuid.UUID) (io.ReadCloser, error)
+	ReadNoteAssetChecksum(noteID uuid.UUID, assetID uuid.UUID) (string, error)
 	DeleteNoteAsset(noteID uuid.UUID, assetID uuid.UUID) error
 	GetNoteAssetIDs(noteID uuid.UUID) ([]uuid.UUID, error)
 	GetNoteInfo(noteID uuid.UUID) (NoteFileInfo, error)
 	GetNoteAssetInfo(noteID uuid.UUID, assetID uuid.UUID) (AssetFileInfo, error)
+}
+
+func MakeChecksum(r io.Reader) (string, error) {
+	h := crc32.New(crc32.MakeTable(crc32.IEEE))
+	buf := make([]byte, 1024)
+	for {
+		n, err := r.Read(buf)
+		if err != nil && err != io.EOF {
+			return "", err
+		}
+		if n == 0 {
+			break
+		}
+		if _, err := h.Write(buf); err != nil {
+			return "", err
+		}
+	}
+	return fmt.Sprintf("crc32-%x", h.Sum32()), nil
 }

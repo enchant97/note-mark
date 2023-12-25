@@ -9,6 +9,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type CreatedAsset struct {
+	AssetID  uuid.UUID             `json:"assetId"`
+	FileInfo storage.AssetFileInfo `json:"fileInfo"`
+}
+
 func createNoteAsset(ctx echo.Context) error {
 	authenticatedUserID := getAuthDetails(ctx).GetAuthenticatedUser()
 	noteID, err := uuid.Parse(ctx.Param("noteID"))
