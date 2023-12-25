@@ -1,17 +1,19 @@
 package routes
 
 import (
+	"errors"
 	"net/http"
 
+	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
-type CreatedAsset struct {
-	AssetID  uuid.UUID             `json:"assetId"`
-	FileInfo storage.AssetFileInfo `json:"fileInfo"`
+type StoredAsset struct {
+	ID   uuid.UUID             `json:"id"`
+	Info storage.AssetFileInfo `json:"info"`
 }
 
 func createNoteAsset(ctx echo.Context) error {
@@ -45,7 +47,14 @@ func createNoteAsset(ctx echo.Context) error {
 		return err
 	}
 
-	return ctx.JSON(http.StatusCreated, assetID)
+	if info, err := storage_backend.GetNoteAssetInfo(noteID, assetID); err != nil {
+		return err
+	} else {
+		return ctx.JSON(http.StatusCreated, StoredAsset{
+			ID:   assetID,
+			Info: info,
+		})
+	}
 }
 
 func getNoteAssets(ctx echo.Context) error {
@@ -75,7 +84,18 @@ func getNoteAssets(ctx echo.Context) error {
 	if assetIDs, err := storage_backend.GetNoteAssetIDs(noteID); err != nil {
 		return err
 	} else {
-		return ctx.JSON(http.StatusOK, assetIDs)
+		storedAssets := make([]StoredAsset, len(assetIDs))
+		for _, assetID := range assetIDs {
+			if info, err := storage_backend.GetNoteAssetInfo(noteID, assetID); err != nil {
+				return err
+			} else {
+				storedAssets = append(storedAssets, StoredAsset{
+					ID:   assetID,
+					Info: info,
+				})
+			}
+		}
+		return ctx.JSON(http.StatusOK, storedAssets)
 	}
 }
 
@@ -103,6 +123,14 @@ func getNoteAssetContentByID(ctx echo.Context) error {
 	}
 
 	storage_backend := ctx.Get("Storage").(storage.StorageController)
+
+	if currentETag, err := storage_backend.ReadNoteAssetChecksum(noteID, assetID); err != nil {
+		if !errors.Is(err, storage.ErrNotFound) {
+			return err
+		}
+	} else if needNewContent := core.HandleETag(ctx, currentETag); !needNewContent {
+		return ctx.NoContent(http.StatusNotModified)
+	}
 
 	if stream, err := storage_backend.ReadNoteAsset(noteID, assetID); err != nil {
 		return err
