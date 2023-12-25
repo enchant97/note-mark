@@ -14,10 +14,14 @@ var (
 	ErrNotFound = errors.New("failed to locate entry in storage backend")
 )
 
-type NoteInfo struct {
+type FileInfo struct {
 	ContentLength int64
 	LastModified  time.Time
 }
+
+type NoteFileInfo = FileInfo
+
+type AssetFileInfo = FileInfo
 
 type StorageController interface {
 	Setup() error
@@ -30,5 +34,6 @@ type StorageController interface {
 	ReadNoteAsset(noteID uuid.UUID, assetID uuid.UUID) (io.ReadCloser, error)
 	DeleteNoteAsset(noteID uuid.UUID, assetID uuid.UUID) error
 	GetNoteAssetIDs(noteID uuid.UUID) ([]uuid.UUID, error)
-	GetNoteInfo(noteID uuid.UUID) (NoteInfo, error)
+	GetNoteInfo(noteID uuid.UUID) (NoteFileInfo, error)
+	GetNoteAssetInfo(noteID uuid.UUID, assetID uuid.UUID) (AssetFileInfo, error)
 }

@@ -176,16 +176,33 @@ func (c *DiskController) GetNoteAssetIDs(noteID uuid.UUID) ([]uuid.UUID, error) 
 	return filtersEntries, nil
 }
 
-func (c *DiskController) GetNoteInfo(noteID uuid.UUID) (NoteInfo, error) {
+func (c *DiskController) GetNoteInfo(noteID uuid.UUID) (NoteFileInfo, error) {
 	filePath := path.Join(c.getNoteDirectory(noteID), diskStorageNoteFileName)
 	i, err := os.Stat(filePath)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			return NoteInfo{}, errors.Join(err, ErrNotFound)
+			return NoteFileInfo{}, errors.Join(err, ErrNotFound)
 		}
-		return NoteInfo{}, errors.Join(err, ErrRead)
+		return NoteFileInfo{}, errors.Join(err, ErrRead)
 	}
-	info := NoteInfo{
+	info := NoteFileInfo{
+		ContentLength: i.Size(),
+		LastModified:  i.ModTime(),
+	}
+
+	return info, nil
+}
+
+func (c *DiskController) GetNoteAssetInfo(noteID uuid.UUID, assetID uuid.UUID) (AssetFileInfo, error) {
+	filePath := path.Join(c.getNoteAssetsDirectory(noteID), getNoteAssetFileName(assetID))
+	i, err := os.Stat(filePath)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return AssetFileInfo{}, errors.Join(err, ErrNotFound)
+		}
+		return AssetFileInfo{}, errors.Join(err, ErrRead)
+	}
+	info := AssetFileInfo{
 		ContentLength: i.Size(),
 		LastModified:  i.ModTime(),
 	}
