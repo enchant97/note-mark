@@ -32,6 +32,10 @@ export type FileInfo = {
   checksum: string
 }
 
+export type AssetFileInfo = FileInfo & {
+  mimeType: string
+}
+
 export type User = {
   id: string
   username: string
@@ -53,9 +57,11 @@ export type Note = {
   bookId: string
 }
 
-export type Asset = {
+export type NoteAsset = {
   id: string
-  info: FileInfo
+  name: string
+  createdAt: string
+  info: AssetFileInfo
 }
 
 export type CreateUser = {

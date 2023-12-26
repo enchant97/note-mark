@@ -45,5 +45,6 @@ func InitDB(conf config.DBConfig) error {
 		&User{},
 		&Book{},
 		&Note{},
+		&NoteAsset{},
 	)
 }

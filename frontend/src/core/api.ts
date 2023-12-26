@@ -1,5 +1,5 @@
 import { Result } from "./core"
-import { Asset, Book, CreateBook, CreateNote, CreateUser, Note, OAuth2AccessToken, OAuth2AccessTokenRequest, ServerInfo, UpdateBook, UpdateNote, UpdateUser, UpdateUserPassword, User, ValueWithSlug } from "./types"
+import { Book, CreateBook, CreateNote, CreateUser, Note, NoteAsset, OAuth2AccessToken, OAuth2AccessTokenRequest, ServerInfo, UpdateBook, UpdateNote, UpdateUser, UpdateUserPassword, User, ValueWithSlug } from "./types"
 
 export enum HttpMethods {
   GET = "GET",
@@ -306,12 +306,13 @@ class Api {
   //
   // Note Assets
   //
-  async createNoteAsset(noteId: string, file: File): Promise<Result<Asset, ApiError>> {
+  async createNoteAsset(noteId: string, file: File, name: string): Promise<Result<NoteAsset, ApiError>> {
     let reqURL = `${this.apiServer}/notes/${noteId}/assets`
     let resp = await handleFetchErrors(fetch(reqURL, {
       method: HttpMethods.POST,
       headers: {
         ...this.headerAuthorization(),
+        "X-Name": name,
       },
       body: file,
     }))
@@ -319,7 +320,10 @@ class Api {
     if (!resp.ok) return new ApiError(resp.status)
     return handleBodyErrors(resp.json())
   }
-  async getNoteAssets(noteId: string): Promise<Result<Asset[], ApiError>> {
+  getNoteAssetAccessUrl(noteId: string, assetId: string): string {
+    return `${this.apiServer}/notes/${noteId}/assets/${assetId}`
+  }
+  async getNoteAssets(noteId: string): Promise<Result<NoteAsset[], ApiError>> {
     let reqURL = `${this.apiServer}/notes/${noteId}/assets`
     let resp = await handleFetchErrors(fetch(reqURL, {
       method: HttpMethods.GET,

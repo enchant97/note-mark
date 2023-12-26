@@ -16,6 +16,7 @@ import { ApiError } from '../core/api';
 import Icon from '../components/icon';
 import Note, { NoteMode } from '../components/note';
 import StorageHandler from '../core/storage';
+import AssetsModal from '../components/modals/assets';
 
 const Shelf: Component = () => {
   const params = useParams()
@@ -152,6 +153,16 @@ const Shelf: Component = () => {
     })
   }
 
+  const onNoteAssetsClick = () => {
+    setModal({
+      component: AssetsModal,
+      props: {
+        onClose: clearModal,
+        noteId: note()?.id
+      },
+    })
+  }
+
   const onShareClick = async () => {
     if (!window.isSecureContext) {
       pushToast({ message: "feature only available in secure contexts", type: ToastType.ERROR })
@@ -215,6 +226,13 @@ const Shelf: Component = () => {
                     >
                       <Icon name="file" />
                       Note Settings
+                    </button></li>
+                    <li><button
+                      onClick={onNoteAssetsClick}
+                      type="button"
+                    >
+                      <Icon name="image" />
+                      Note Assets
                     </button></li>
                   </Show>
                 </ul>
