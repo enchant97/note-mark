@@ -6,7 +6,7 @@ require (
 	github.com/caarlos0/env/v6 v6.10.1
 	github.com/glebarez/sqlite v1.10.0
 	github.com/go-playground/validator/v10 v10.16.0
-	github.com/golang-jwt/jwt/v5 v5.1.0
+	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/google/uuid v1.4.0
 	github.com/h2non/filetype v1.1.3
 	github.com/labstack/echo-jwt/v4 v4.2.0
