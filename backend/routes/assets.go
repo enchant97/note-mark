@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/enchant97/note-mark/backend/core"
@@ -124,11 +123,12 @@ func getNoteAssetContentByID(ctx echo.Context) error {
 
 	storage_backend := ctx.Get("Storage").(storage.StorageController)
 
-	if currentETag, err := storage_backend.ReadNoteAssetChecksum(noteID, assetID); err != nil {
-		if !errors.Is(err, storage.ErrNotFound) {
-			return err
-		}
-	} else if needNewContent := core.HandleETag(ctx, currentETag); !needNewContent {
+	assetInfo, err := storage_backend.GetNoteAssetInfo(noteID, assetID)
+	if err != nil {
+		return err
+	}
+
+	if needNewContent := core.HandleETag(ctx, assetInfo.Checksum); !needNewContent {
 		return ctx.NoContent(http.StatusNotModified)
 	}
 
@@ -136,7 +136,8 @@ func getNoteAssetContentByID(ctx echo.Context) error {
 		return err
 	} else {
 		defer stream.Close()
-		return ctx.Stream(http.StatusOK, "application/octet-stream", stream)
+		// TODO add Last-Modified header here
+		return ctx.Stream(http.StatusOK, assetInfo.MimeType, stream)
 	}
 }
 

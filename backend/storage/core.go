@@ -24,7 +24,10 @@ type FileInfo struct {
 
 type NoteFileInfo = FileInfo
 
-type AssetFileInfo = FileInfo
+type AssetFileInfo struct {
+	FileInfo
+	MimeType string `json:"mimeType"`
+}
 
 type StorageController interface {
 	Setup() error
@@ -36,6 +39,7 @@ type StorageController interface {
 	WriteNoteAsset(noteID uuid.UUID, assetID uuid.UUID, r io.Reader) error
 	ReadNoteAsset(noteID uuid.UUID, assetID uuid.UUID) (io.ReadCloser, error)
 	ReadNoteAssetChecksum(noteID uuid.UUID, assetID uuid.UUID) (string, error)
+	ReadNoteAssetMimeType(noteID uuid.UUID, assetID uuid.UUID) (string, error)
 	DeleteNoteAsset(noteID uuid.UUID, assetID uuid.UUID) error
 	GetNoteAssetIDs(noteID uuid.UUID) ([]uuid.UUID, error)
 	GetNoteInfo(noteID uuid.UUID) (NoteFileInfo, error)

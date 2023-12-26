@@ -8,6 +8,7 @@ import (
 	"path"
 
 	"github.com/google/uuid"
+	"github.com/h2non/filetype"
 )
 
 const diskStorageNoteFileName = "note.md"
@@ -144,6 +145,19 @@ func (c *DiskController) ReadNoteAssetChecksum(noteID uuid.UUID, assetID uuid.UU
 	}
 }
 
+func (c *DiskController) ReadNoteAssetMimeType(noteID uuid.UUID, assetID uuid.UUID) (string, error) {
+	if r, err := c.ReadNoteAsset(noteID, assetID); err != nil {
+		return "", err
+	} else {
+		defer r.Close()
+		if kind, err := filetype.MatchReader(r); err != nil {
+			return "", err
+		} else {
+			return kind.MIME.Value, nil
+		}
+	}
+}
+
 func (c *DiskController) DeleteNoteAsset(noteID uuid.UUID, assetID uuid.UUID) error {
 	filePath := path.Join(c.getNoteAssetsDirectory(noteID), getNoteAssetFileName(assetID))
 	if err := os.Remove(filePath); err != nil {
@@ -202,11 +216,18 @@ func (c *DiskController) GetNoteAssetInfo(noteID uuid.UUID, assetID uuid.UUID) (
 	if checksum, err := c.ReadNoteAssetChecksum(noteID, assetID); err != nil {
 		return AssetFileInfo{}, err
 	} else {
-		info := AssetFileInfo{
-			ContentLength: i.Size(),
-			LastModified:  i.ModTime(),
-			Checksum:      checksum,
+		if mimeType, err := c.ReadNoteAssetMimeType(noteID, assetID); err != nil {
+			return AssetFileInfo{}, err
+		} else {
+			info := AssetFileInfo{
+				FileInfo: FileInfo{
+					ContentLength: i.Size(),
+					LastModified:  i.ModTime(),
+					Checksum:      checksum,
+				},
+				MimeType: mimeType,
+			}
+			return info, nil
 		}
-		return info, nil
 	}
 }
