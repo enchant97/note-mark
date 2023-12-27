@@ -19,8 +19,6 @@ if ("serviceWorker" in navigator) {
 
 const App = lazy(() => import("./App"))
 
-import init from 'renderer';
-
 const root = document.getElementById('root');
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
@@ -29,7 +27,7 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-init().then(() => console.debug("wasm backend loaded"))
+import("../renderer/pkg").then(() => { console.debug("wasm backend loaded") })
 
 render(() => <>
   <Router>

@@ -8,7 +8,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 pulldown-cmark = { version = "0.9.3", default-features = false }
-wasm-bindgen = "0.2.87"
+wasm-bindgen = "0.2.89"
 
 [profile.release]
 lto = true

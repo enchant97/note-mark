@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
-import wasmPack from 'vite-plugin-wasm-pack';
 import { VitePWA } from 'vite-plugin-pwa'
+import wasm from "vite-plugin-wasm";
 
 export default defineConfig({
   plugins: [
-    wasmPack(["./renderer"]),
+    wasm(),
     solidPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
