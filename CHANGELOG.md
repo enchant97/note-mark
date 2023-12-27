@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2023-12-27
+### Added
+- All-in-one docker image, highly requested feature to make deployment easier
+- Recent notes are now on the home screen
+- Note assets, upload and use assets in your notes
+- User management via CLI
+### Changed
+- Fully featured editor toolbar, now also follows you down the page
+- Update Docker image versions
+- New syntax highlighting for markdown editor
+### Fixed
+- Ensure some fields never get converted to JSON
+- Ensure every time a note is modified the updated time is changed
+
 ## [0.9.0] - 2023-11-20
 ### Added
 - Add ability to put current note in full-screen
