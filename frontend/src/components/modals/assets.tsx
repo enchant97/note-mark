@@ -13,6 +13,8 @@ type AssetsModalProps = {
 }
 
 const AssetsModal: Component<AssetsModalProps> = (props) => {
+  let assetUploadInput: HTMLInputElement
+
   const { api } = useApi()
   const { pushToast } = useToast()
   const [assets, { mutate }] = createResource(props.noteId, async (noteId) => {
@@ -44,6 +46,11 @@ const AssetsModal: Component<AssetsModalProps> = (props) => {
         pushToast(apiErrorIntoToast(result, "uploading asset"))
       } else {
         mutate([...assets() || [], result])
+        assetUploadInput.value = null
+        setForm({
+          name: "",
+          file: null,
+        })
       }
     }
     setModifyLoading(false)
@@ -69,6 +76,7 @@ const AssetsModal: Component<AssetsModalProps> = (props) => {
             <label class="form-control">
               <span class="label">Asset</span>
               <input
+                ref={assetUploadInput}
                 onChange={(ev) => {
                   const file = ev.currentTarget.files?.item(0) || null
                   setForm({ file, name: "" })
