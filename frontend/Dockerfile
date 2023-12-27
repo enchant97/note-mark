@@ -20,7 +20,7 @@ FROM node:20-bullseye as builder
     RUN npm run wasm
     RUN npm run build
 
-FROM nginxinc/nginx-unprivileged:1.24-alpine
+FROM nginxinc/nginx-unprivileged:1.25-alpine3.18
 
     COPY --from=builder --link /app/dist /usr/share/nginx/html
     COPY --link nginx.conf /etc/nginx/conf.d/default.conf
