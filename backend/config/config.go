@@ -17,12 +17,14 @@ type DBConfig struct {
 }
 
 type AppConfig struct {
-	Bind        BindConfig    `envPrefix:"BIND__"`
-	DB          DBConfig      `envPrefix:"DB__"`
-	JWTSecret   Base64Decoded `env:"JWT_SECRET,notEmpty"`
-	TokenExpiry int64         `env:"TOKEN_EXPIRY" envDefault:"259200"`
-	DataPath    string        `env:"DATA_PATH,notEmpty"`
-	StaticPath  string        `env:"STATIC_PATH"`
-	CORSOrigins []string      `env:"CORS_ORIGINS,notEmpty" envSeparator:","`
-	AllowSignup bool          `env:"ALLOW_SIGNUP,notEmpty" envDefault:"true"`
+	Bind           BindConfig    `envPrefix:"BIND__"`
+	DB             DBConfig      `envPrefix:"DB__"`
+	JWTSecret      Base64Decoded `env:"JWT_SECRET,notEmpty"`
+	TokenExpiry    int64         `env:"TOKEN_EXPIRY" envDefault:"259200"`
+	DataPath       string        `env:"DATA_PATH,notEmpty"`
+	StaticPath     string        `env:"STATIC_PATH"`
+	CORSOrigins    []string      `env:"CORS_ORIGINS,notEmpty" envSeparator:","`
+	AllowSignup    bool          `env:"ALLOW_SIGNUP,notEmpty" envDefault:"true"`
+	NoteSizeLimit  string        `env:"NOTE_SIZE_LIMIT,notEmpty" envDefault:"1M"`
+	AssetSizeLimit string        `env:"ASSET_SIZE_LIMIT,notEmpty" envDefault:"12M"`
 }

@@ -81,7 +81,7 @@ func getServerInfo(ctx echo.Context) error {
 	appConfig := ctx.Get("AppConfig").(config.AppConfig)
 
 	return ctx.JSON(http.StatusOK, core.ServerInfo{
-		MinSupportedVersion: "0.6.0",
+		MinSupportedVersion: "0.9.0",
 		AllowSignup:         appConfig.AllowSignup,
 	})
 }
@@ -152,13 +152,18 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 			"/:noteID/content",
 			updateNoteContent,
 			authRequiredMiddleware,
-			middleware.BodyLimit("1M"),
+			middleware.BodyLimit(appConfig.NoteSizeLimit),
 		)
 	}
 	assetsRoutes := apiRoutes.Group("/notes/:noteID/assets")
 	{
 
-		assetsRoutes.POST("", createNoteAsset, authRequiredMiddleware, middleware.BodyLimit("4M"))
+		assetsRoutes.POST(
+			"",
+			createNoteAsset,
+			authRequiredMiddleware,
+			middleware.BodyLimit(appConfig.AssetSizeLimit),
+		)
 		assetsRoutes.GET("", getNoteAssets)
 		assetsRoutes.GET("/:assetID", getNoteAssetContentByID)
 		assetsRoutes.DELETE("/:assetID", deleteNoteAssetByID, authRequiredMiddleware)
