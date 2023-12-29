@@ -1,0 +1,9 @@
+**/node_modules
+dist/**
+build/**
+
+*Dockerfile
+**/.DS_Store
+
+pkg
+pkg/mod
