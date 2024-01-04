@@ -20,7 +20,7 @@ Note Mark is a lighting fast and minimal; web-based Markdown notes app. Featurin
 - Upload and attach assets
 
 ## Showcase
-![Preview Image Showing App](site/static/preview.png)
+![Preview Image Showing App](site/static/preview.webp)
 
 ## Demo Video
 [![Demo Video](https://img.youtube.com/vi/rwL99Ac5g98/0.jpg)](https://youtu.be/rwL99Ac5g98 "Demo Video")
