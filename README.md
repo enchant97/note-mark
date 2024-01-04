@@ -14,12 +14,18 @@ Note Mark is a lighting fast and minimal; web-based Markdown notes app. Featurin
 - Friendly "Slug" based URLs for cleaner links
 - Dark & Light Theme
 - Notebook Sharing
-- Custom flat-file based storage system (easy to backup and synchronize)
+- Custom flat-file based storage system
 - Multiple views for a note (rendered, plain)
-- Editor with shortcuts
+- Simple editor with shortcuts
+- Upload and attach assets
 
-## Preview
+## Showcase
 ![Preview Image Showing App](site/static/preview.png)
+
+## Demo Video
+[![Demo Video](https://img.youtube.com/vi/rwL99Ac5g98/0.jpg)](https://youtu.be/rwL99Ac5g98 "Demo Video")
+
+<https://youtu.be/rwL99Ac5g98>
 
 ## Docs
 Documentation is available here: [notemark.docs.enchantedcode.co.uk](https://notemark.docs.enchantedcode.co.uk/).

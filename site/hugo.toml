@@ -15,6 +15,9 @@ url = "/"
 [[menu.main]]
 name = "Docs"
 url = "/docs/"
+[[menu.main]]
+name = "About"
+url = "/about/"
 [[menu.sub]]
 name = "Repository"
 url = "https://github.com/enchant97/note-mark"

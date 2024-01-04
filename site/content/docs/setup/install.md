@@ -5,6 +5,8 @@ title: 01 - Install
 ## Docker (Official)
 Both the backend and frontend are distributed by as Docker images, making deployment consistent. Using the all-in-one image may be preferred as everything is bundled together.
 
+> Stuck? Watch the [demo video](https://youtu.be/rwL99Ac5g98).
+
 Below are the image names:
 
 ```text

@@ -1,0 +1,21 @@
+---
+title: "About"
+---
+Note Mark is a lighting fast and minimal; web-based Markdown notes app. Featuring a sleek and responsive web UI. It's Open Source by design; ensuring you always own your notes and can transfer at any time.
+
+Like what you hear? Take a look below:
+
+## Showcase
+![Preview Image Showing App](/preview.png)
+
+## Demo Video
+[![Demo Video](https://img.youtube.com/vi/rwL99Ac5g98/0.jpg)](https://youtu.be/rwL99Ac5g98 "Demo Video")
+
+<https://youtu.be/rwL99Ac5g98>
+
+## What's The Future Look Like?
+- Revision history
+- S3 storage backend
+- Offline functionality
+- Live synchronization
+- A CLI app/daemon (bring your own editor)

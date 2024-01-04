@@ -1,32 +1,46 @@
 ---
-title: Welcome
+title: Welcome To Note Mark
 ---
 Note Mark is a lighting fast and minimal; web-based Markdown notes app. Featuring a sleek and responsive web UI.
 
-- [Setup Guide]({{< ref "docs/setup/install">}})
-- [User Guide]({{< ref "docs/usage">}})
+## Top Features
 
-## Features
-- Markdown (GitHub Flavored Markdown, see spec [here](https://github.github.com/gfm/))
-- HTML sanitisation, minimizing XSS attacks
-- Mobile Friendly
-- Friendly "Slug" based URLs for cleaner links
-- Dark & Light Theme
-- Notebook Sharing
-- Custom flat-file based storage system (easy to backup and synchronize)
-- Multiple views for a note (rendered, plain)
-- Editor with shortcuts
+{{< container/container type="grid" classes="center" >}}
 
-### Future
-- revision history
-- S3 storage backend
-- Ability to upload assets (e.g. images)
-- Offline functionality
-- Live synchronization
-- A CLI app/daemon (bring your own editor)
 
-### Not Implementing
-- Unlimited nesting of notebooks/notes
-- Encrypted end-to-end notes
-- Any-other note type apart from markdown
-- WYSIWYG editor
+{{% container/element %}}
+### Fast ⚡️
+Uses the latest web tech, including a WASM powered markdown render.
+{{% /container/element %}}
+
+{{% container/element %}}
+### Open Source 🌐
+Allowing for community improvement and inspection.
+{{% /container/element %}}
+
+{{% container/element %}}
+### Themes 🌙
+Includes both light and dark mode, to suite your preference.
+{{% /container/element %}}
+
+{{% container/element %}}
+### Assets 📷
+Upload and attach files to your notes.
+{{% /container/element %}}
+
+{{% container/element %}}
+### Markdown Powered
+View and edit your notes in beautifully styled [GFM](https://github.github.com/gfm/).
+{{% /container/element %}}
+
+{{% container/element %}}
+### Note Sharing
+Integrated notebook sharing.
+{{% /container/element %}}
+
+
+{{< /container/container >}}
+
+## Like What You See?
+- [Tell Me More]({{< ref "about" >}})
+- [How Do I Install]({{< ref "docs/setup/install" >}})
