@@ -84,7 +84,7 @@ const MainApp: Component = () => {
   return (
     <div class="drawer lg:drawer-open">
       <input id="main-drawer" type="checkbox" class="drawer-toggle" />
-      <div class="drawer-content pb-8">
+      <div class="drawer-content min-h-screen pb-8">
         <Header />
         <div class="px-6">
           <DrawerProvider
