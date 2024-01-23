@@ -197,8 +197,8 @@ const App: Component = () => {
       <ProtectedRoute path="/login" redirectPath="/" condition={() => hasNoAuth()} component={Login} />
       <ProtectedRoute path="/signup" redirectPath="/login" condition={() => hasNoAuth() && apiDetails().info?.allowSignup !== false} component={Signup} />
       <ProtectedRoute path="/logout" redirectPath="/" condition={hasAuth} component={Logout} />
+      <Route path="/" element={<Show when={user() === undefined} fallback={<Redirect to={`/${user()?.username}`} />}><Home /></Show>} />
       <ProtectedRoute path="/" redirectPath="/pre-login" condition={() => apiDetails().info !== undefined} component={MainApp}>
-        <Route path="/" element={<Show when={user() === undefined} fallback={<Redirect to={`/${user()?.username}`} />}><Home /></Show>} />
         <ProtectedRoute path="/profile" redirectPath="/" condition={hasAuth} component={Profile} />
         <Route path="/:username" component={User} />
         <Route path="/:username/:bookSlug?/:noteSlug?" component={Shelf} />

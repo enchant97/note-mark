@@ -21,7 +21,7 @@ const Home: Component = () => {
   }
 
   return (
-    <div class="bg-base-200 py-6">
+    <div class="bg-base-200 py-6 min-h-screen">
       <div class="text-center">
         <div class="max-w-md mx-auto">
           <img class="mb-4 mx-auto max-w-xs" src="/icon.svg" alt="Note Mark Icon" />
@@ -40,9 +40,11 @@ const Home: Component = () => {
           </div>
         </div>
       </div>
-      <div class="mx-4 my-4 p-2 bg-base-100 rounded">
-        <h2 class="text-lg font-bold text-center">Recent Notes</h2>
-        <RecentNotes />
+      <div class="max-w-lg mx-auto">
+        <div class="mx-4 my-4 p-2 bg-base-100 rounded">
+          <h2 class="text-lg font-bold text-center">Recent Notes</h2>
+          <RecentNotes />
+        </div>
       </div>
     </div>
   );
