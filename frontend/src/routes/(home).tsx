@@ -21,29 +21,31 @@ const Home: Component = () => {
   }
 
   return (
-    <div class="bg-base-200 py-6 min-h-screen">
-      <div class="text-center">
-        <div class="max-w-md mx-auto">
-          <img class="mb-4 mx-auto max-w-xs" src="/icon.svg" alt="Note Mark Icon" />
-          <h1 class="text-5xl font-bold">Note Mark</h1>
-          <p class="py-6">Lighting Fast & Minimal Markdown Note Taking App.</p>
-          <div class="join">
-            {!apiDetails().authToken && <A href="/login" class="btn join-item btn-outline">Login</A>}
-            {user() && <A class="btn join-item btn-outline" href={`/${user()?.username}`}>My Notes</A>}
-            <button
-              onclick={() => openUserSearchModal()}
-              class="btn join-item btn-outline"
-              type="button"
-            >
-              Find User
-            </button>
+    <div class="min-h-screen bg-base-200">
+      <div class="w-full flex-col p-4">
+        <div class="card flex-shrink-0 w-full max-w-md mx-auto shadow-2xl bg-base-100">
+          <div class="card-body text-center">
+            <img class="mb-4 mx-auto max-w-xs" src="/icon.svg" alt="Note Mark Icon" />
+            <h1 class="text-5xl font-bold">Note Mark</h1>
+            <p class="py-6">Lighting Fast & Minimal Markdown Note Taking App.</p>
+            <div class="join justify-center">
+              {!apiDetails().authToken && <A href="/login" class="btn join-item btn-outline">Login</A>}
+              {user() && <A class="btn join-item btn-outline" href={`/${user()?.username}`}>My Notes</A>}
+              <button
+                onclick={() => openUserSearchModal()}
+                class="btn join-item btn-outline"
+                type="button"
+              >
+                Find User
+              </button>
+            </div>
+            <div class="max-w-lg mx-auto">
+              <div class="mx-4 my-4">
+                <h2 class="text-lg font-bold text-center">Recent Notes</h2>
+                <RecentNotes />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <div class="max-w-lg mx-auto">
-        <div class="mx-4 my-4 p-2 bg-base-100 rounded">
-          <h2 class="text-lg font-bold text-center">Recent Notes</h2>
-          <RecentNotes />
         </div>
       </div>
     </div>
