@@ -18,3 +18,24 @@ export function compare(a: any, b: any): number {
   if (a > b) return 1;
   return 0;
 }
+
+export class StringSource {
+  readonly content: string
+  readonly contentType: string
+  constructor(content: string, contentType: string = "text/plain") {
+    this.content = content
+    this.contentType = contentType
+  }
+  blob() {
+    return new Blob([this.content], { type: this.contentType })
+  }
+}
+
+export function download(object: File | Blob | MediaSource | StringSource, filename: string) {
+  if (object instanceof StringSource) { object = object.blob() }
+  // NOTE: this should be garbage collected since it's not added to the DOM
+  let a = window.document.createElement("a")
+  a.href = URL.createObjectURL(object)
+  a.download = filename
+  a.click()
+}

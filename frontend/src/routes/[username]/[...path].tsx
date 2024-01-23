@@ -17,6 +17,7 @@ import Icon from '../../components/icon';
 import Note, { NoteMode } from '../../components/note';
 import StorageHandler from '../../core/storage';
 import AssetsModal from '../../components/modals/assets';
+import { StringSource, download } from '../../core/helpers';
 
 const Shelf: Component = () => {
   const params = useParams()
@@ -236,6 +237,24 @@ const Shelf: Component = () => {
                     >
                       <Icon name="image" />
                       Note Assets
+                    </button></li>
+                  </Show>
+                  <Show when={slugParts().bookSlug && slugParts().noteSlug}>
+                    <li><button
+                      onClick={() => {
+                        let content = noteContent()
+                        if (content) {
+                          download(
+                            new StringSource(content, "text/markdown"),
+                            `${book()?.slug}_${note()?.slug}.md`,
+                          )
+                        }
+                      }}
+                      type="button"
+                      classList={{ "loading": noteContent.loading }}
+                    >
+                      <Icon name="download" />
+                      Download Note
                     </button></li>
                   </Show>
                 </ul>
