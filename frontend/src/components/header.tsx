@@ -63,6 +63,8 @@ const ProfileDropdown = () => {
 }
 
 const Header: Component = () => {
+  const { user } = useCurrentUser()
+
   return (
     <div class="w-full navbar bg-base-100">
       <div class="flex-none lg:hidden">
@@ -73,10 +75,15 @@ const Header: Component = () => {
       <span class="flex-1 px-2 mx-2 text-xl">Note Mark</span>
       <div class="flex gap-4">
         <ThemeSwitcher />
-        <A activeClass="btn-disabled" class="btn btn-ghost btn-circle shadow-lg" end={true} href="/"><Icon name="home" /></A>
+        <A
+          activeClass="btn-disabled"
+          class="btn btn-ghost btn-circle shadow-lg"
+          end={true}
+          href={user() === undefined ? "/" : `/${user()?.username}`}
+        ><Icon name="home" /></A>
         <ProfileDropdown />
       </div>
-    </div>
+    </div >
   );
 };
 

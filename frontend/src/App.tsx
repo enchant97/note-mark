@@ -8,16 +8,19 @@ import { Book, Note } from './core/types';
 import { LoadingRing } from './components/loading';
 import { apiErrorIntoToast, useToast } from './contexts/ToastProvider';
 import { ApiError } from './core/api';
-import PreLogin from './pages/pre-login';
 import { SortChoice, SortSelect } from './components/inputs';
 import { compare } from './core/helpers';
-import Login from './pages/login';
-import Signup from './pages/signup';
-import Logout from './pages/logout';
-import Profile from './pages/profile';
-import Shelf from './pages/shelf';
-import Index from './pages/index';
+import PreLogin from './routes/pre-login';
+import Login from './routes/login';
+import Signup from './routes/signup';
+import Logout from './routes/logout';
+import Profile from './routes/profile';
+import Shelf from './routes/[username]/[...path]';
+import User from './routes/[username]/(user)';
+import Home from './routes/(home)';
 import Icon from './components/icon';
+import { useCurrentUser } from './contexts/CurrentUserProvider';
+import Redirect from './components/redirect';
 
 function performBookOrNoteSort(rows: Note[] | Book[], method: SortChoice) {
   switch (method) {
@@ -178,6 +181,7 @@ const MainApp: Component = () => {
 
 const App: Component = () => {
   const { apiDetails } = useApi()
+  const { user } = useCurrentUser()
 
   const hasAuth = () => {
     return apiDetails().authToken !== undefined
@@ -194,8 +198,9 @@ const App: Component = () => {
       <ProtectedRoute path="/signup" redirectPath="/login" condition={() => hasNoAuth() && apiDetails().info?.allowSignup !== false} component={Signup} />
       <ProtectedRoute path="/logout" redirectPath="/" condition={hasAuth} component={Logout} />
       <ProtectedRoute path="/" redirectPath="/pre-login" condition={() => apiDetails().info !== undefined} component={MainApp}>
-        <Route path="/" component={Index} />
+        <Route path="/" element={<Show when={user() === undefined} fallback={<Redirect to={`/${user()?.username}`} />}><Home /></Show>} />
         <ProtectedRoute path="/profile" redirectPath="/" condition={hasAuth} component={Profile} />
+        <Route path="/:username" component={User} />
         <Route path="/:username/:bookSlug?/:noteSlug?" component={Shelf} />
       </ProtectedRoute>
     </Routes>

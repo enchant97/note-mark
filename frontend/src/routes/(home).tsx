@@ -1,25 +1,15 @@
 import { A } from '@solidjs/router';
-import { Component, For, Suspense, createResource } from 'solid-js';
+import { Component } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { useCurrentUser } from '../contexts/CurrentUserProvider';
 import { useModal } from '../contexts/ModalProvider';
 import UserSearchModal from '../components/modals/user_search';
-import { ApiError } from '../core/api';
-import { LoadingSpin } from '../components/loading';
+import RecentNotes from '../components/recent_notes';
 
-const Index: Component = () => {
-  const { api, apiDetails } = useApi()
+const Home: Component = () => {
+  const { apiDetails } = useApi()
   const { setModal, clearModal } = useModal()
   const { user } = useCurrentUser()
-
-  const [recentNotes] = createResource(api, async (api) => {
-    let recentNotes = await api.getNotesRecents()
-    if (recentNotes instanceof ApiError) {
-      return []
-    } else {
-      return recentNotes
-    }
-  })
 
   const openUserSearchModal = () => {
     setModal({
@@ -52,16 +42,10 @@ const Index: Component = () => {
       </div>
       <div class="mx-4 my-4 p-2 bg-base-100 rounded">
         <h2 class="text-lg font-bold text-center">Recent Notes</h2>
-        <Suspense fallback={<LoadingSpin />}>
-          <ul class="flex gap-2 flex-col items-center mt-2">
-            <For each={recentNotes()}>
-              {row => <li><A class="btn btn-wide" href={`/${row.slug}`}>{row.value.name}</A></li>}
-            </For>
-          </ul>
-        </Suspense>
+        <RecentNotes />
       </div>
     </div>
   );
 };
 
-export default Index;
+export default Home;

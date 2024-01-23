@@ -1,22 +1,22 @@
 import { Component, Show, createResource } from 'solid-js';
-import { useApi } from '../contexts/ApiProvider';
+import { useApi } from '../../contexts/ApiProvider';
 import { useParams } from '@solidjs/router';
-import { Book, Breadcrumb, Note as NoteDetails } from '../core/types';
-import NoteBreadcrumb from '../components/note/breadcrumb';
-import { useModal } from '../contexts/ModalProvider';
-import { useCurrentUser } from '../contexts/CurrentUserProvider';
-import NewBookModal from '../components/modals/new_book';
-import NewNoteModal from '../components/modals/new_note';
-import UpdateBookModal from '../components/modals/edit_book';
-import UpdateNoteModal from '../components/modals/edit_note';
-import { useDrawer } from '../contexts/DrawerProvider';
-import { LoadingRing } from '../components/loading';
-import { ToastType, apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
-import { ApiError } from '../core/api';
-import Icon from '../components/icon';
-import Note, { NoteMode } from '../components/note';
-import StorageHandler from '../core/storage';
-import AssetsModal from '../components/modals/assets';
+import { Book, Breadcrumb, Note as NoteDetails } from '../../core/types';
+import NoteBreadcrumb from '../../components/note/breadcrumb';
+import { useModal } from '../../contexts/ModalProvider';
+import { useCurrentUser } from '../../contexts/CurrentUserProvider';
+import NewBookModal from '../../components/modals/new_book';
+import NewNoteModal from '../../components/modals/new_note';
+import UpdateBookModal from '../../components/modals/edit_book';
+import UpdateNoteModal from '../../components/modals/edit_note';
+import { useDrawer } from '../../contexts/DrawerProvider';
+import { LoadingRing } from '../../components/loading';
+import { ToastType, apiErrorIntoToast, useToast } from '../../contexts/ToastProvider';
+import { ApiError } from '../../core/api';
+import Icon from '../../components/icon';
+import Note, { NoteMode } from '../../components/note';
+import StorageHandler from '../../core/storage';
+import AssetsModal from '../../components/modals/assets';
 
 const Shelf: Component = () => {
   const params = useParams()
