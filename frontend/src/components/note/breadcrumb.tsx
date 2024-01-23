@@ -1,8 +1,9 @@
 import { Component, Show } from 'solid-js';
-import { Breadcrumb } from '../../core/types';
+import { BreadcrumbWithNames } from '../../core/types';
 import Icon from '../icon';
+import { A } from '@solidjs/router';
 
-type NoteBreadcrumbProps = Breadcrumb & {
+type NoteBreadcrumbProps = BreadcrumbWithNames & {
   class?: string
 }
 
@@ -16,18 +17,36 @@ const NoteBreadcrumb: Component<NoteBreadcrumbProps> = (props) => {
       <ul>
         <Show when={props.username}>
           <li>
-            <Icon name="user" size={16} />
-            <span class="ml-1">{props.username}</span>
+            <A
+              activeClass="btn-disabled"
+              end={true}
+              href={`/${props.username}`}
+            >
+              <Icon name="user" size={16} />
+              <span class="ml-1">{props.username}</span>
+            </A>
           </li>
           <Show when={props.bookSlug}>
             <li>
-              <Icon name="folder" size={16} />
-              <span class="ml-1">{props.bookSlug}</span>
+              <A
+                activeClass="btn-disabled"
+                end={true}
+                href={`/${props.username}/${props.bookSlug}`}
+              >
+                <Icon name="folder" size={16} />
+                <span class="ml-1">{props.bookName}</span>
+              </A>
             </li>
             <Show when={props.noteSlug}>
               <li>
-                <Icon name="file" size={16} />
-                <span class="ml-1">{props.noteSlug}</span>
+                <A
+                  activeClass="btn-disabled"
+                  end={true}
+                  href={`/${props.username}/${props.bookSlug}/${props.noteSlug}`}
+                >
+                  <Icon name="file" size={16} />
+                  <span class="ml-1">{props.noteName}</span>
+                </A>
               </li>
             </Show>
           </Show>

@@ -1,7 +1,7 @@
 import { Component, Show, createResource } from 'solid-js';
 import { useApi } from '../../contexts/ApiProvider';
 import { useParams } from '@solidjs/router';
-import { Book, Breadcrumb, Note as NoteDetails } from '../../core/types';
+import { Book, Breadcrumb, BreadcrumbWithNames, Note as NoteDetails } from '../../core/types';
 import NoteBreadcrumb from '../../components/note/breadcrumb';
 import { useModal } from '../../contexts/ModalProvider';
 import { useCurrentUser } from '../../contexts/CurrentUserProvider';
@@ -80,11 +80,13 @@ const Shelf: Component = () => {
 
   const globalLoading = () => book.loading || note.loading || noteContent.loading
 
-  const breadcrumb: () => Breadcrumb = () => {
+  const breadcrumb: () => BreadcrumbWithNames = () => {
     return {
       username: params.username,
-      bookSlug: globalLoading() ? undefined : book()?.name,
-      noteSlug: globalLoading() ? undefined : note()?.name,
+      bookSlug: globalLoading() ? undefined : book()?.slug,
+      bookName: globalLoading() ? undefined : book()?.name,
+      noteSlug: globalLoading() ? undefined : note()?.slug,
+      noteName: globalLoading() ? undefined : note()?.name,
     }
   }
 

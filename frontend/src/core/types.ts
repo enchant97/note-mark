@@ -4,6 +4,11 @@ export type Breadcrumb = {
   noteSlug?: string
 }
 
+export type BreadcrumbWithNames = Breadcrumb & {
+  bookName?: string
+  noteName?: string
+}
+
 export type ServerInfo = {
   minSupportedVersion: string
   allowSignup: boolean
