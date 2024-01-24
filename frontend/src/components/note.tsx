@@ -23,6 +23,15 @@ type NoteProps = {
 const Note: Component<NoteProps> = (props) => {
   const [isFullscreen, setIsFullscreen] = createSignal(false);
 
+  const copyContentsToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(props.content() || "")
+    } catch (err) {
+      console.error(err)
+      alert(err.message)
+    }
+  }
+
   return (
     <div
       class="flex flex-col gap-4 bg-base-100"
@@ -54,15 +63,24 @@ const Note: Component<NoteProps> = (props) => {
             title="switch to editor"
           >Editor</button>
         </div>
-        <label class="tab swap inline-grid">
-          <input
-            type="checkbox"
-            onchange={() => setIsFullscreen(!isFullscreen())}
-            checked={isFullscreen()}
-          />
-          <div class="swap-on"><Icon name="minimize-2" size={18} /></div>
-          <div class="swap-off"><Icon name="maximize-2" size={18} /></div>
-        </label>
+        <div class="join p-1">
+          <button
+            class="join-item btn btn-sm"
+            type="button"
+            title="Copy Note To Clipboard"
+            onClick={copyContentsToClipboard}
+          ><Icon name="copy" />
+          </button>
+          <label class="join-item btn btn-sm swap">
+            <input
+              type="checkbox"
+              onchange={() => setIsFullscreen(!isFullscreen())}
+              checked={isFullscreen()}
+            />
+            <div class="swap-on"><Icon name="minimize-2" size={18} /></div>
+            <div class="swap-off"><Icon name="maximize-2" size={18} /></div>
+          </label>
+        </div>
       </div>
       <Show when={props.content()}>
         {content => <Switch fallback={<NoteViewRendered content={content} />}>
