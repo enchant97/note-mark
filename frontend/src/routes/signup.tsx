@@ -6,6 +6,7 @@ import { ToastType, apiErrorIntoToast, useToast } from '../contexts/ToastProvide
 import { ApiError, HttpErrors } from '../core/api';
 import WithApiSelect from '../components/with_api_select';
 import Icon from '../components/icon';
+import Header from '../components/header';
 
 const Signup: Component = () => {
   const { api, apiDetails } = useApi()
@@ -43,15 +44,14 @@ const Signup: Component = () => {
   const passwordsMatch = () => formDetails.password === formDetails.passwordConfirm
 
   return (
-    <div class="hero min-h-screen bg-base-200">
-      <div class="hero-content w-full flex-col">
-        <div class="card flex-shrink-0 w-full max-w-md shadow-2xl bg-base-100">
-          <div class="card-body">
+    <div class="min-h-screen">
+      <Header />
+      <div class="bg-base-200 p-6 mx-6">
+        <div class="card w-full max-w-md mx-auto bg-base-100">
+          <div class="card-body text-center">
             <img class="mb-2 mx-auto w-36" src="/icon.svg" alt="Note Mark Icon" />
-            <div class="text-center">
-              <h1 class="text-5xl font-bold">Note Mark</h1>
-              <p class="py-6">Create your account here.</p>
-            </div>
+            <h1 class="text-5xl font-bold">Note Mark</h1>
+            <p class="py-6">Create your account here.</p>
             <form onSubmit={onSubmit}>
               <WithApiSelect>
                 <div class="form-control">

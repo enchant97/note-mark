@@ -6,6 +6,7 @@ import { useModal } from '../contexts/ModalProvider';
 import { User } from '../core/types';
 import { A } from '@solidjs/router';
 import Icon from '../components/icon';
+import Header from '../components/header';
 
 const Profile: Component = () => {
   const { setModal, clearModal } = useModal()
@@ -37,11 +38,12 @@ const Profile: Component = () => {
   }
 
   return (
-    <div class="min-h-screen bg-base-200">
-      <div class="w-full flex-col p-4">
-        <div class="card flex-shrink-0 w-full max-w-md mx-auto shadow-2xl bg-base-100">
+    <div class="min-h-screen">
+      <Header />
+      <div class="bg-base-200 p-6 mx-6">
+        <h1 class="text-4xl text-center font-bold mb-4">My Profile</h1>
+        <div class="card w-full max-w-md mx-auto bg-base-100">
           <div class="card-body">
-            <h1 class="text-5xl text-center font-bold mb-2">My Profile</h1>
             <div>username: {user()?.username}</div>
             <div class="mb-2">full-name: {user()?.name || ""}</div>
             <div class="join">

@@ -67,11 +67,6 @@ const Header: Component = () => {
 
   return (
     <div class="w-full navbar bg-base-100">
-      <div class="flex-none lg:hidden">
-        <label for="main-drawer" class="btn btn-square btn-ghost">
-          <Icon name="menu" />
-        </label>
-      </div>
       <span class="flex-1 px-2 mx-2 text-xl">Note Mark</span>
       <div class="flex gap-4">
         <ThemeSwitcher />

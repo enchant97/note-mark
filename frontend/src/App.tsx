@@ -85,7 +85,12 @@ const MainApp: Component = () => {
     <div class="drawer lg:drawer-open">
       <input id="main-drawer" type="checkbox" class="drawer-toggle" />
       <div class="drawer-content min-h-screen pb-8">
-        <Header />
+        <div class="flex items-center px-2">
+          <label for="main-drawer" class="lg:hidden btn btn-square btn-ghost">
+            <Icon name="menu" />
+          </label>
+          <Header />
+        </div>
         <div class="px-6">
           <DrawerProvider
             updateBook={(newBook: Book) => {

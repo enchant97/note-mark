@@ -5,6 +5,7 @@ import { useCurrentUser } from '../contexts/CurrentUserProvider';
 import { useModal } from '../contexts/ModalProvider';
 import UserSearchModal from '../components/modals/user_search';
 import RecentNotes from '../components/recent_notes';
+import Header from '../components/header';
 
 const Home: Component = () => {
   const { apiDetails } = useApi()
@@ -21,11 +22,12 @@ const Home: Component = () => {
   }
 
   return (
-    <div class="min-h-screen bg-base-200">
-      <div class="w-full flex-col p-4">
-        <div class="card flex-shrink-0 w-full max-w-md mx-auto shadow-2xl bg-base-100">
+    <div class="min-h-screen">
+      <Header />
+      <div class="bg-base-200 p-6 mx-6">
+        <div class="card w-full max-w-md mx-auto bg-base-100">
           <div class="card-body text-center">
-            <img class="mb-4 mx-auto max-w-xs" src="/icon.svg" alt="Note Mark Icon" />
+            <img class="mb-2 mx-auto w-36" src="/icon.svg" alt="Note Mark Icon" />
             <h1 class="text-5xl font-bold">Note Mark</h1>
             <p class="py-6">Lighting Fast & Minimal Markdown Note Taking App.</p>
             <div class="join justify-center">
