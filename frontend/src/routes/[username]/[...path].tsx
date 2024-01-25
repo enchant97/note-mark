@@ -17,7 +17,7 @@ import Icon from '../../components/icon';
 import Note, { NoteMode } from '../../components/note';
 import StorageHandler from '../../core/storage';
 import AssetsModal from '../../components/modals/assets';
-import { StringSource, download } from '../../core/helpers';
+import { StringSource, copyToClipboard, download } from '../../core/helpers';
 
 const Shelf: Component = () => {
   const params = useParams()
@@ -168,13 +168,11 @@ const Shelf: Component = () => {
   }
 
   const onShareClick = async () => {
-    if (!window.isSecureContext) {
-      pushToast({ message: "feature only available in secure contexts", type: ToastType.ERROR })
-    } else if ((await navigator.permissions.query({ name: "clipboard-write" as PermissionName })).state === "granted") {
-      await navigator.clipboard.writeText(location.href);
+    try {
+      await copyToClipboard(location.href)
       pushToast({ message: "copied to clipboard", type: ToastType.SUCCESS })
-    } else {
-      pushToast({ message: "clipboard access not granted", type: ToastType.ERROR })
+    } catch (err) {
+      pushToast({ message: err.message, type: ToastType.ERROR })
     }
   }
 
@@ -210,6 +208,7 @@ const Shelf: Component = () => {
                   <li><button
                     onclick={onShareClick}
                     type="button"
+                    classList={{ "hidden": !window.isSecureContext }}
                   >
                     <Icon name="link" />
                     Copy Page Link

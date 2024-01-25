@@ -4,6 +4,8 @@ import NoteViewPlain from "./note/view_plain";
 import NoteEdit from "./note/edit";
 import NoteViewRendered from "./note/view_rendered";
 import Icon from "./icon";
+import { copyToClipboard } from "../core/helpers";
+import { ToastType, useToast } from "../contexts/ToastProvider";
 
 export enum NoteMode {
   RENDERED = "rendered",
@@ -21,14 +23,15 @@ type NoteProps = {
 }
 
 const Note: Component<NoteProps> = (props) => {
+  const { pushToast } = useToast()
   const [isFullscreen, setIsFullscreen] = createSignal(false);
 
   const copyContentsToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(props.content() || "")
+      await copyToClipboard(props.content() || "")
+      pushToast({ message: "copied to clipboard", type: ToastType.SUCCESS })
     } catch (err) {
-      console.error(err)
-      alert(err.message)
+      pushToast({ message: err.message, type: ToastType.ERROR })
     }
   }
 
@@ -68,6 +71,7 @@ const Note: Component<NoteProps> = (props) => {
             class="join-item btn btn-sm"
             type="button"
             title="Copy Note To Clipboard"
+            classList={{ "hidden": !window.isSecureContext }}
             onClick={copyContentsToClipboard}
           ><Icon name="copy" />
           </button>

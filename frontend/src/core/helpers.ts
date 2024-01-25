@@ -39,3 +39,17 @@ export function download(object: File | Blob | MediaSource | StringSource, filen
   a.download = filename
   a.click()
 }
+
+/*
+ * copies given object to clipboard,
+ * throws an `Error` with reason on failure
+*/
+export async function copyToClipboard(content: string) {
+  if (!window.isSecureContext) {
+    throw new Error("clipboard only available in secure contexts")
+  }
+  if ((await navigator.permissions.query({ name: "clipboard-write" as PermissionName })).state !== "granted") {
+    throw new Error("clipboard permission not granted")
+  }
+  await navigator.clipboard.writeText(content);
+}
