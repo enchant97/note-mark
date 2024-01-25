@@ -18,6 +18,7 @@ import Note, { NoteMode } from '../../components/note';
 import StorageHandler from '../../core/storage';
 import AssetsModal from '../../components/modals/assets';
 import { StringSource, copyToClipboard, download } from '../../core/helpers';
+import PrintNoteModal from '../../components/modals/print_note';
 
 const Shelf: Component = () => {
   const params = useParams()
@@ -176,6 +177,16 @@ const Shelf: Component = () => {
     }
   }
 
+  const onNotePrintClick = async () => {
+    setModal({
+      component: PrintNoteModal,
+      props: {
+        onClose: clearModal,
+        content: noteContent() || "",
+      },
+    })
+  }
+
   return (
     <div class="flex flex-col gap-4">
       <div class="flex gap-4 flex-col sm:flex-row">
@@ -254,6 +265,13 @@ const Shelf: Component = () => {
                     >
                       <Icon name="download" />
                       Download Note
+                    </button></li>
+                    <li><button
+                      onClick={onNotePrintClick}
+                      type="button"
+                    >
+                      <Icon name="printer" />
+                      Print Note
                     </button></li>
                   </Show>
                 </ul>
