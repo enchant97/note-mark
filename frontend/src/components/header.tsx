@@ -71,6 +71,12 @@ const Header: Component = () => {
       <div class="flex gap-4">
         <ThemeSwitcher />
         <A
+          class="btn btn-ghost btn-circle shadow-lg"
+          activeClass="btn-disabled"
+          href="/scratch-pad"
+          title="Scratch Pad"
+        ><Icon name="file-text" /></A>
+        <A
           activeClass="btn-disabled"
           class="btn btn-ghost btn-circle shadow-lg"
           end={true}

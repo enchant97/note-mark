@@ -21,6 +21,7 @@ import Home from './routes/(home)';
 import Icon from './components/icon';
 import { useCurrentUser } from './contexts/CurrentUserProvider';
 import Redirect from './components/redirect';
+import ScratchPad from './routes/scratch-pad';
 
 function performBookOrNoteSort(rows: Note[] | Book[], method: SortChoice) {
   switch (method) {
@@ -204,6 +205,7 @@ const App: Component = () => {
       <ProtectedRoute path="/logout" redirectPath="/" condition={hasAuth} component={Logout} />
       <Route path="/" element={<Show when={user() === undefined} fallback={<Redirect to={`/${user()?.username}`} />}><Home /></Show>} />
       <ProtectedRoute path="/profile" redirectPath="/" condition={hasAuth} component={Profile} />
+      <Route path="/scratch-pad" component={ScratchPad} />
       <ProtectedRoute path="/" redirectPath="/pre-login" condition={() => apiDetails().info !== undefined} component={MainApp}>
         <Route path="/:username" component={User} />
         <Route path="/:username/:bookSlug?/:noteSlug?" component={Shelf} />
