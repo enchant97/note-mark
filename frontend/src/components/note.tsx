@@ -1,11 +1,13 @@
-import { Accessor, Component, Match, Show, Switch, createSignal } from "solid-js";
-import { Note as NoteDetails } from "../core/types";
+import { Accessor, Component, Match, Switch, createSignal, untrack } from "solid-js";
 import NoteViewPlain from "./note/view_plain";
-import NoteEdit from "./note/edit";
 import NoteViewRendered from "./note/view_rendered";
 import Icon from "./icon";
 import { copyToClipboard } from "../core/helpers";
 import { ToastType, useToast } from "../contexts/ToastProvider";
+import { SetStoreFunction, Store } from "solid-js/store";
+import Editor, { EditorState } from "./editor/editor";
+
+const AUTO_SAVE_TIMEOUT = 2400;
 
 export enum NoteMode {
   RENDERED = "rendered",
@@ -16,10 +18,12 @@ export enum NoteMode {
 type NoteProps = {
   mode: NoteMode,
   setMode: (mode: NoteMode) => any,
-  noteDetails: NoteDetails,
-  content: Accessor<string | undefined>,
+  content: Accessor<string>,
   setContent: (content: string) => any,
   isEditAllowed: boolean,
+  state: Store<EditorState>
+  setState: SetStoreFunction<EditorState>
+  onSave: (content: string) => any
 }
 
 const Note: Component<NoteProps> = (props) => {
@@ -86,16 +90,21 @@ const Note: Component<NoteProps> = (props) => {
           </label>
         </div>
       </div>
-      <Show when={props.content()}>
-        {content => <Switch fallback={<NoteViewRendered content={content} />}>
-          <Match when={props.mode === NoteMode.PLAIN}>
-            <NoteViewPlain content={content} />
-          </Match>
-          <Match when={props.mode === NoteMode.EDIT}>
-            <NoteEdit note={props.noteDetails} content={content} onChange={props.setContent} isFullscreen={isFullscreen} />
-          </Match>
-        </Switch>}
-      </Show>
+      <Switch fallback={<NoteViewRendered content={props.content} />}>
+        <Match when={props.mode === NoteMode.PLAIN}>
+          <NoteViewPlain content={props.content} />
+        </Match>
+        <Match when={props.mode === NoteMode.EDIT}>
+          <Editor
+            content={untrack(props.content)}
+            autoSaveTimeout={AUTO_SAVE_TIMEOUT}
+            onSave={props.onSave}
+            state={props.state}
+            setState={props.setState}
+            isFullscreen={isFullscreen}
+          />
+        </Match>
+      </Switch>
     </div>
   )
 }

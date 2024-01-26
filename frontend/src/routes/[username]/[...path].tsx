@@ -19,6 +19,8 @@ import StorageHandler from '../../core/storage';
 import AssetsModal from '../../components/modals/assets';
 import { StringSource, copyToClipboard, download } from '../../core/helpers';
 import PrintNoteModal from '../../components/modals/print_note';
+import { createStore } from 'solid-js/store';
+import { EditorState } from '../../components/editor/editor';
 
 const Shelf: Component = () => {
   const params = useParams()
@@ -36,6 +38,11 @@ const Shelf: Component = () => {
     }
     return stored
   }
+
+  const [state, setState] = createStore<EditorState>({
+    saving: false,
+    unsaved: false,
+  })
 
   const slugParts: () => Breadcrumb = () => {
     return {
@@ -187,6 +194,17 @@ const Shelf: Component = () => {
     })
   }
 
+  const saveNote = async (noteId: string, content: string) => {
+    setState({ saving: true })
+    let result = await api().updateNoteContent(noteId, content)
+    setState({ saving: false })
+    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "saving note"))
+    else {
+      setState({ unsaved: false })
+      setNoteContent(content)
+    }
+  }
+
   return (
     <div class="flex flex-col gap-4">
       <div class="flex gap-4 flex-col sm:flex-row">
@@ -298,10 +316,12 @@ const Shelf: Component = () => {
               if (mode === NoteMode.RENDERED) { setNoteModeSetting(null) }
               else { setNoteModeSetting(mode) }
             }}
-            noteDetails={note()}
-            content={noteContent}
+            content={() => noteContent() || ""}
             setContent={setNoteContent}
             isEditAllowed={allowNoteCreate() || false}
+            state={state}
+            setState={setState}
+            onSave={(content) => saveNote(note().id, content)}
           />}
         </Show>
       </Show>
