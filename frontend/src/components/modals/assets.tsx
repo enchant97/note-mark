@@ -1,10 +1,11 @@
 import { Component, For, Match, Show, Switch, createResource, createSignal } from "solid-js";
 import BaseModal from "./base";
 import { useApi } from "../../contexts/ApiProvider";
-import { apiErrorIntoToast, useToast } from "../../contexts/ToastProvider";
+import { ToastType, apiErrorIntoToast, useToast } from "../../contexts/ToastProvider";
 import { ApiError } from "../../core/api";
 import { createStore } from "solid-js/store";
 import Icon from "../icon";
+import { copyToClipboard } from "../../core/helpers";
 
 type AssetsModalProps = {
   onClose: () => any
@@ -130,6 +131,21 @@ const AssetsModal: Component<AssetsModalProps> = (props) => {
                       </Switch></td>
                       <td>
                         <div class="join flex justify-end">
+                          <button
+                            class="btn join-item"
+                            title={`Copy Link "${asset.name}"`}
+                            onClick={async () => {
+                              let assetUrl = api().getNoteAssetAccessUrl(props.noteId, asset.id)
+                              try {
+                                await copyToClipboard(assetUrl)
+                                pushToast({ message: "copied to clipboard", type: ToastType.SUCCESS })
+                              } catch (err) {
+                                pushToast({ message: err.message, type: ToastType.ERROR })
+                              }
+                            }}
+                          >
+                            <Icon name="link" />
+                          </button>
                           <a
                             class="btn join-item"
                             href={api().getNoteAssetAccessUrl(props.noteId, asset.id)}
