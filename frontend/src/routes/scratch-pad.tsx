@@ -6,6 +6,7 @@ import { EditorState } from "../components/editor/editor";
 import StorageHandler from "../core/storage";
 import { useCurrentUser } from "../contexts/CurrentUserProvider";
 import Icon from "../components/icon";
+import Footer from "../components/footer";
 
 const SCRATCH_PAD_CONTENT_KEY = "scratch_pad_content"
 
@@ -52,6 +53,7 @@ const ScratchPad: Component = () => {
           onSave={onSave}
         />
       </div>
+      <Footer />
     </div>
   )
 }

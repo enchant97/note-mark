@@ -6,6 +6,7 @@ import { useModal } from '../contexts/ModalProvider';
 import UserSearchModal from '../components/modals/user_search';
 import RecentNotes from '../components/recent_notes';
 import Header from '../components/header';
+import Footer from '../components/footer';
 
 const Home: Component = () => {
   const { apiDetails } = useApi()
@@ -50,6 +51,7 @@ const Home: Component = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

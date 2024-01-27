@@ -176,7 +176,7 @@ const MainApp: Component = () => {
               Powered By
               <span class="font-bold"> Note Mark</span>
               <br />
-              Licenced Under AGPL-3.0
+              Licensed Under AGPL-3.0
             </a>
           </li>
         </menu>

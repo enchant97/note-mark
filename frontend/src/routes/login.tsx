@@ -7,6 +7,7 @@ import { apiErrorIntoToast, useToast } from '../contexts/ToastProvider';
 import WithApiSelect from '../components/with_api_select';
 import Icon from '../components/icon';
 import Header from '../components/header';
+import Footer from '../components/footer';
 
 const Login: Component = () => {
   const { api, apiDetails, setApiDetails } = useApi()
@@ -87,6 +88,7 @@ const Login: Component = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import { User } from '../core/types';
 import { A } from '@solidjs/router';
 import Icon from '../components/icon';
 import Header from '../components/header';
+import Footer from '../components/footer';
 
 const Profile: Component = () => {
   const { setModal, clearModal } = useModal()
@@ -68,6 +69,7 @@ const Profile: Component = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

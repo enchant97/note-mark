@@ -7,6 +7,7 @@ import { ApiError, HttpErrors } from '../core/api';
 import WithApiSelect from '../components/with_api_select';
 import Icon from '../components/icon';
 import Header from '../components/header';
+import Footer from '../components/footer';
 
 const Signup: Component = () => {
   const { api, apiDetails } = useApi()
@@ -132,6 +133,7 @@ const Signup: Component = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
