@@ -18,6 +18,10 @@ class StorageHandler {
     window.sessionStorage.removeItem(key)
     window.localStorage.removeItem(key)
   }
+  static clearSettings() {
+    window.sessionStorage.clear()
+    window.localStorage.clear()
+  }
   static writeSetting(name: string, value: string, persistant = true) {
     let key = makeSettingKey(name)
     StorageHandler.clearSetting(name)
