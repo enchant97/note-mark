@@ -20,11 +20,11 @@ const editorTheme = EditorView.baseTheme({
     "font-family": "monospace",
   },
   ".cm-gutters": {
-    "background-color": "hsl(var(--b2))",
-    "border-right": "hsl(var(--b2))",
+    "background-color": "oklch(var(--b2))",
+    "border-right": "oklch(var(--b2))",
   },
   ".cm-activeLineGutter": {
-    "background-color": "hsl(var(--b3))",
+    "background-color": "oklch(var(--b3))",
   },
   ".ͼ5,.ͼc": {
     "color": "oklch(var(--in))",
