@@ -13,7 +13,7 @@ const ThemeSwitcher: Component = () => {
 
   return (
     <details class="dropdown dropdown-end">
-      <summary class="btn btn-ghost shadow-lg flex gap-2">
+      <summary class="btn btn-ghost shadow flex gap-2">
         <Icon name="sun" />
         <Icon name="moon" />
       </summary>
@@ -41,7 +41,7 @@ const ProfileDropdown = () => {
 
   return (
     <details class="dropdown dropdown-end">
-      <summary class="btn btn-ghost btn-circle shadow-lg"><Icon name="user" /></summary>
+      <summary class="btn btn-ghost btn-circle shadow"><Icon name="user" /></summary>
       <menu class="mt-2 p-2 shadow-lg menu dropdown-content z-[1] bg-base-300 rounded-box w-52">
         <Show when={user()} fallback={<li>
           <Show when={apiDetails().authToken} fallback={<A href="/login">Login</A>}>
@@ -66,19 +66,22 @@ const Header: Component = () => {
   const { user } = useCurrentUser()
 
   return (
-    <div class="w-full navbar bg-base-100">
+    <div class="w-full navbar bg-base-300-blur shadow-lg sticky top-0 z-10">
+      <label for="main-drawer" class="lg:hidden btn btn-square btn-ghost shadow">
+        <Icon name="menu" />
+      </label>
       <span class="flex-1 px-2 mx-2 text-xl">Note Mark</span>
       <div class="flex gap-4">
         <ThemeSwitcher />
         <A
-          class="btn btn-ghost btn-circle shadow-lg"
+          class="btn btn-ghost btn-circle shadow"
           activeClass="btn-disabled"
           href="/scratch-pad"
           title="Scratch Pad"
         ><Icon name="file-text" /></A>
         <A
           activeClass="btn-disabled"
-          class="btn btn-ghost btn-circle shadow-lg"
+          class="btn btn-ghost btn-circle shadow"
           end={true}
           href={user() === undefined ? "/" : `/${user()?.username}`}
         ><Icon name="home" /></A>

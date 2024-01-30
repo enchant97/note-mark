@@ -74,13 +74,8 @@ const MainApp: Component = (props) => {
     <div class="drawer lg:drawer-open">
       <input id="main-drawer" type="checkbox" class="drawer-toggle" />
       <div class="drawer-content min-h-screen pb-8">
-        <div class="flex items-center px-2">
-          <label for="main-drawer" class="lg:hidden btn btn-square btn-ghost">
-            <Icon name="menu" />
-          </label>
-          <Header />
-        </div>
-        <div class="px-6">
+        <Header />
+        <div class="px-6 mt-2">
           <DrawerProvider
             updateBook={(newBook: Book) => {
               mutateBooks((v) => {
@@ -119,7 +114,7 @@ const MainApp: Component = (props) => {
       </div>
       <div class="drawer-side z-40">
         <label for="main-drawer" class="drawer-overlay"></label>
-        <menu class="menu menu-sm gap-2 p-4 w-80 bg-base-300 text-base-content h-full">
+        <menu class="menu menu-sm gap-2 p-4 w-80 bg-base-300-blur text-base-content h-full">
           <li><label aria-label="Sort Mode">
             <Icon name="align-left" />
             <SortSelect onChange={setSortChoice} selected={sortChoice()} />
@@ -169,7 +164,7 @@ const MainApp: Component = (props) => {
           </li>
         </menu>
       </div>
-    </div>
+    </div >
   );
 }
 

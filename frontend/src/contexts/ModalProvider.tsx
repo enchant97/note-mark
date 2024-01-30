@@ -41,7 +41,7 @@ export const Modal: Component = () => {
   })
   return (
     <Portal>
-      <dialog ref={dialog} class="modal">
+      <dialog ref={dialog} class="modal backdrop-blur">
         <Show when={modal()} keyed>
           {modal => <Dynamic component={modal.component} {...modal.props} />}
         </Show>

@@ -15,3 +15,9 @@
         width: 100%;
     }
 }
+
+@layer components {
+    .bg-base-300-blur {
+        @apply bg-base-300/[.5] backdrop-blur-md;
+    }
+}
