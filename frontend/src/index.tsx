@@ -1,15 +1,21 @@
 /* @refresh reload */
 import './index.css';
-import { Suspense, render } from 'solid-js/web';
+import { render } from 'solid-js/web';
 
-import { ApiProvider } from './contexts/ApiProvider';
-import { Router } from '@solidjs/router';
-import { CurrentUserProvider } from './contexts/CurrentUserProvider';
-import { Modal, ModalProvider } from './contexts/ModalProvider';
-import { ToastProvider, Toasts } from './contexts/ToastProvider';
-import { LoadingScreen } from './components/loading';
-import { lazy } from 'solid-js';
+import { Route, Router } from '@solidjs/router';
 import { registerSW } from 'virtual:pwa-register'
+import Wrapper from './wrapper';
+import PreLogin from './routes/pre-login';
+import Login from './routes/login';
+import Logout from './routes/logout';
+import Shelf from './routes/[username]/[...path]';
+import User from './routes/[username]/(user)';
+import MainApp from './MainApp';
+import ScratchPad from './routes/scratch-pad';
+import Profile from './routes/profile';
+import Home from './routes/(home)';
+import Signup from './routes/signup';
+import { RequireApiSetupGuard, RequireAuthGuard, RequireNoAuthGuard, RequireSignupAllowedGuard } from './contexts/ApiProvider';
 
 if ("serviceWorker" in navigator) {
   registerSW()
@@ -17,32 +23,31 @@ if ("serviceWorker" in navigator) {
   console.debug("Service Worker capability not found in browser, so not using")
 }
 
-const App = lazy(() => import("./App"))
-
-const root = document.getElementById('root');
-
-if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
-  throw new Error(
-    'Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got misspelled?',
-  );
-}
+const root = document.getElementById('root')!
+root.innerHTML = ""
 
 import("../renderer/pkg").then(() => { console.debug("wasm backend loaded") })
 
-render(() => <>
+render(() => (
   <Router>
-    <ToastProvider>
-      <Toasts />
-      <ModalProvider>
-        <ApiProvider>
-          <CurrentUserProvider>
-            <Modal />
-            <Suspense fallback={<LoadingScreen message="Loading App" />}>
-              <App />
-            </Suspense>
-          </CurrentUserProvider>
-        </ApiProvider>
-      </ModalProvider>
-    </ToastProvider>
+    <Route path="/" component={Wrapper}>
+      <Route path="/" component={Home} />
+      <Route path="/scratch-pad" component={ScratchPad} />
+      <Route path="/pre-login" component={PreLogin} />
+      <Route component={RequireNoAuthGuard}>
+        <Route path="/signup" component={() => <RequireSignupAllowedGuard><Signup /></RequireSignupAllowedGuard>} />
+        <Route path="/login" component={Login} />
+      </Route>
+      <Route component={RequireAuthGuard}>
+        <Route path="/logout" component={Logout} />
+        <Route path="/profile" component={Profile} />
+      </Route>
+      <Route component={RequireApiSetupGuard}>
+        <Route path="/" component={MainApp}>
+          <Route path="/:username" component={User} />
+          <Route path="/:username/:bookSlug?/:noteSlug?" component={Shelf} />
+        </Route>
+      </Route>
+    </Route>
   </Router>
-</>, root!);
+), root);

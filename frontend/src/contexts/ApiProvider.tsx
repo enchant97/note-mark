@@ -4,6 +4,7 @@ import { optionExpect } from "../core/core"
 import { createStore } from "solid-js/store"
 import { ServerInfo } from "../core/types"
 import StorageHandler from "../core/storage"
+import ShowOrRedirect from "../components/show_or_redirect"
 
 const API_DETAILS_KEY = "api_details"
 
@@ -67,4 +68,28 @@ export const ApiProvider = (props: any) => {
       {props.children}
     </ApiContext.Provider>
   )
+}
+
+export function RequireAuthGuard(props) {
+  const { apiDetails } = useApi()
+  const check = () => apiDetails().authToken !== undefined
+  return <ShowOrRedirect when={check} redirectTo="/login">{props.children}</ShowOrRedirect>
+}
+
+export function RequireNoAuthGuard(props) {
+  const { apiDetails } = useApi()
+  const check = () => apiDetails().authToken === undefined
+  return <ShowOrRedirect when={check} redirectTo="/">{props.children}</ShowOrRedirect>
+}
+
+export function RequireSignupAllowedGuard(props) {
+  const { apiDetails } = useApi()
+  const check = () => apiDetails().info?.allowSignup === true
+  return <ShowOrRedirect when={check} redirectTo="/login">{props.children}</ShowOrRedirect>
+}
+
+export function RequireApiSetupGuard(props) {
+  const { apiDetails } = useApi()
+  const check = () => apiDetails().info !== undefined
+  return <ShowOrRedirect when={check} redirectTo="/pre-login">{props.children}</ShowOrRedirect>
 }

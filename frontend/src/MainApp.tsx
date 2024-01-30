@@ -1,27 +1,15 @@
-import { Routes, Route, Outlet, useParams, A } from '@solidjs/router';
+import { useParams, A } from '@solidjs/router';
 import { Component, For, Show, createResource, createSignal } from 'solid-js';
 import Header from './components/header';
 import { useApi } from './contexts/ApiProvider';
-import ProtectedRoute from './components/protected_route';
 import { DrawerProvider } from './contexts/DrawerProvider';
 import { Book, Note } from './core/types';
 import { LoadingRing } from './components/loading';
-import { apiErrorIntoToast, useToast } from './contexts/ToastProvider';
 import { ApiError } from './core/api';
 import { SortChoice, SortSelect } from './components/inputs';
 import { compare } from './core/helpers';
-import PreLogin from './routes/pre-login';
-import Login from './routes/login';
-import Signup from './routes/signup';
-import Logout from './routes/logout';
-import Profile from './routes/profile';
-import Shelf from './routes/[username]/[...path]';
-import User from './routes/[username]/(user)';
-import Home from './routes/(home)';
 import Icon from './components/icon';
-import { useCurrentUser } from './contexts/CurrentUserProvider';
-import Redirect from './components/redirect';
-import ScratchPad from './routes/scratch-pad';
+import { apiErrorIntoToast, useToast } from './contexts/ToastProvider';
 
 function performBookOrNoteSort(rows: Note[] | Book[], method: SortChoice) {
   switch (method) {
@@ -42,7 +30,7 @@ function performBookOrNoteSort(rows: Note[] | Book[], method: SortChoice) {
   }
 }
 
-const MainApp: Component = () => {
+const MainApp: Component = (props) => {
   const params = useParams()
   const { api } = useApi()
   const { pushToast } = useToast()
@@ -125,7 +113,7 @@ const MainApp: Component = () => {
               })
             }}
           >
-            <Outlet />
+            {props.children}
           </DrawerProvider>
         </div>
       </div>
@@ -185,33 +173,4 @@ const MainApp: Component = () => {
   );
 }
 
-const App: Component = () => {
-  const { apiDetails } = useApi()
-  const { user } = useCurrentUser()
-
-  const hasAuth = () => {
-    return apiDetails().authToken !== undefined
-  }
-
-  const hasNoAuth = () => {
-    return !hasAuth()
-  }
-
-  return (
-    <Routes>
-      <Route path="/pre-login" component={PreLogin} />
-      <ProtectedRoute path="/login" redirectPath="/" condition={() => hasNoAuth()} component={Login} />
-      <ProtectedRoute path="/signup" redirectPath="/login" condition={() => hasNoAuth() && apiDetails().info?.allowSignup !== false} component={Signup} />
-      <ProtectedRoute path="/logout" redirectPath="/" condition={hasAuth} component={Logout} />
-      <Route path="/" element={<Show when={user() === undefined} fallback={<Redirect to={`/${user()?.username}`} />}><Home /></Show>} />
-      <ProtectedRoute path="/profile" redirectPath="/" condition={hasAuth} component={Profile} />
-      <Route path="/scratch-pad" component={ScratchPad} />
-      <ProtectedRoute path="/" redirectPath="/pre-login" condition={() => apiDetails().info !== undefined} component={MainApp}>
-        <Route path="/:username" component={User} />
-        <Route path="/:username/:bookSlug?/:noteSlug?" component={Shelf} />
-      </ProtectedRoute>
-    </Routes>
-  );
-};
-
-export default App;
+export default MainApp;

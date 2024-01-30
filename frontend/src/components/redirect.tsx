@@ -1,14 +1,15 @@
 import { useNavigate } from '@solidjs/router';
-import { Component } from 'solid-js';
 
 export type RedirectProps = {
-  to: string
+  href: string
 }
 
-const Redirect: Component<RedirectProps> = (props) => {
+/*
+ * Can be used the same as `<Navigate />`,
+ * however adds to the browser history
+ */
+export default function Redirect(props: RedirectProps) {
   let navigate = useNavigate()
-  navigate(props.to)
+  navigate(props.href)
   return <></>
 }
-
-export default Redirect;

@@ -28,7 +28,7 @@
     "@codemirror/lang-markdown": "^6.2.3",
     "@codemirror/state": "^6.3.3",
     "@codemirror/view": "^6.22.3",
-    "@solidjs/router": "^0.9.1",
+    "@solidjs/router": "^0.10.10",
     "@tailwindcss/typography": "^0.5.10",
     "codemirror": "^6.0.1",
     "daisyui": "^4.4.24",
