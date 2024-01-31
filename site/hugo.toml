@@ -26,7 +26,7 @@ icon = "git-branch"
 hideName = true
 
 [params]
-appVersion = "0.10.0"
+appVersion = "0.11.0"
 
 [[params.favicon]]
 href = "/icon.svg"
