@@ -1,10 +1,12 @@
-import { createContext, createEffect, createMemo, useContext } from "solid-js"
-import Api, { ApiHandlerConfig } from "../core/api"
+import { ParentProps, Show, createContext, createEffect, createMemo, onMount, useContext } from "solid-js"
+import Api, { ApiError, ApiHandlerConfig, HttpErrors } from "../core/api"
 import { optionExpect } from "../core/core"
 import { createStore } from "solid-js/store"
 import { ServerInfo } from "../core/types"
 import StorageHandler from "../core/storage"
 import ShowOrRedirect from "../components/show_or_redirect"
+import { useNavigate } from "@solidjs/router"
+import { LoadingScreen } from "../components/loading"
 
 const API_DETAILS_KEY = "api_details"
 
@@ -70,26 +72,46 @@ export const ApiProvider = (props: any) => {
   )
 }
 
-export function RequireAuthGuard(props) {
+export function RequireAuthGuard(props: ParentProps) {
   const { apiDetails } = useApi()
   const check = () => apiDetails().authToken !== undefined
   return <ShowOrRedirect when={check} redirectTo="/login">{props.children}</ShowOrRedirect>
 }
 
-export function RequireNoAuthGuard(props) {
+export function RequireNoAuthGuard(props: ParentProps) {
   const { apiDetails } = useApi()
   const check = () => apiDetails().authToken === undefined
   return <ShowOrRedirect when={check} redirectTo="/">{props.children}</ShowOrRedirect>
 }
 
-export function RequireSignupAllowedGuard(props) {
+export function RequireSignupAllowedGuard(props: ParentProps) {
   const { apiDetails } = useApi()
   const check = () => apiDetails().info?.allowSignup === true
   return <ShowOrRedirect when={check} redirectTo="/login">{props.children}</ShowOrRedirect>
 }
 
-export function RequireApiSetupGuard(props) {
-  const { apiDetails } = useApi()
-  const check = () => apiDetails().info !== undefined
-  return <ShowOrRedirect when={check} redirectTo="/pre-login">{props.children}</ShowOrRedirect>
+export function RequireApiSetupGuard(props: ParentProps) {
+  const { apiDetails, setApiDetails, clearDetails } = useApi()
+  const navigate = useNavigate()
+
+  onMount(async () => {
+    let result = await new Api({ apiServer: apiDetails().apiServer }).getServerInfo()
+    if (result instanceof ApiError) {
+      if (result.status !== HttpErrors.Unauthorized) {
+        // something odd happened, reset stored details
+        clearDetails()
+      }
+      navigate("/login")
+    } else {
+      setApiDetails({ info: result })
+    }
+  })
+
+  return (
+    <Show when={apiDetails().info !== undefined} fallback={
+      <LoadingScreen message="Contacting Server" />
+    }>
+      {props.children}
+    </Show>
+  )
 }

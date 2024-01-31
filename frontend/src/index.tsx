@@ -5,7 +5,6 @@ import { render } from 'solid-js/web';
 import { Route, Router } from '@solidjs/router';
 import { registerSW } from 'virtual:pwa-register'
 import Wrapper from './wrapper';
-import PreLogin from './routes/pre-login';
 import Login from './routes/login';
 import Logout from './routes/logout';
 import Shelf from './routes/[username]/[...path]';
@@ -33,7 +32,6 @@ render(() => (
     <Route path="/" component={Wrapper}>
       <Route path="/" component={Home} />
       <Route path="/scratch-pad" component={ScratchPad} />
-      <Route path="/pre-login" component={PreLogin} />
       <Route component={RequireNoAuthGuard}>
         <Route path="/signup" component={() => <RequireSignupAllowedGuard><Signup /></RequireSignupAllowedGuard>} />
         <Route path="/login" component={Login} />
