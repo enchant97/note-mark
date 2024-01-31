@@ -14,26 +14,26 @@
   "devDependencies": {
     "@types/dompurify": "^3.0.5",
     "@types/feather-icons": "^4.29.4",
-    "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32",
-    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
-    "vite": "^5.0.10",
-    "vite-plugin-pwa": "^0.17.4",
-    "vite-plugin-solid": "^2.8.0",
+    "vite": "^5.0.12",
+    "vite-plugin-pwa": "^0.17.5",
+    "vite-plugin-solid": "^2.9.1",
     "vite-plugin-wasm": "^3.3.0",
     "wasm-pack": "^0.12.1"
   },
   "dependencies": {
-    "@codemirror/lang-markdown": "^6.2.3",
-    "@codemirror/state": "^6.3.3",
-    "@codemirror/view": "^6.22.3",
+    "@codemirror/lang-markdown": "^6.2.4",
+    "@codemirror/state": "^6.4.0",
+    "@codemirror/view": "^6.23.1",
     "@solidjs/router": "^0.10.10",
     "@tailwindcss/typography": "^0.5.10",
     "codemirror": "^6.0.1",
-    "daisyui": "^4.4.24",
-    "dompurify": "^3.0.6",
+    "daisyui": "^4.6.1",
+    "dompurify": "^3.0.8",
     "feather-icons": "^4.29.1",
-    "solid-js": "^1.8.7"
+    "solid-js": "^1.8.12"
   }
 }
