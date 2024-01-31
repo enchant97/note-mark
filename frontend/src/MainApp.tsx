@@ -1,5 +1,5 @@
 import { useParams, A } from '@solidjs/router';
-import { Component, For, Show, createResource, createSignal } from 'solid-js';
+import { Component, For, ParentProps, Show, createResource, createSignal } from 'solid-js';
 import Header from './components/header';
 import { useApi } from './contexts/ApiProvider';
 import { DrawerProvider } from './contexts/DrawerProvider';
@@ -30,7 +30,7 @@ function performBookOrNoteSort(rows: Note[] | Book[], method: SortChoice) {
   }
 }
 
-const MainApp: Component = (props) => {
+const MainApp: Component<ParentProps> = (props) => {
   const params = useParams()
   const { api } = useApi()
   const { pushToast } = useToast()

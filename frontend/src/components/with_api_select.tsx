@@ -1,13 +1,9 @@
-import { Component, JSX, createSignal, onMount } from "solid-js";
+import { Component, ParentProps, createSignal, onMount } from "solid-js";
 import { useApi } from "../contexts/ApiProvider";
 import { ToastType, useToast } from "../contexts/ToastProvider";
 import Api from "../core/api";
 
-type WithApiSelectProps = {
-  children: JSX.Element
-}
-
-const WithApiSelect: Component<WithApiSelectProps> = (props) => {
+const WithApiSelect: Component<ParentProps> = (props) => {
   const { apiDetails, setApiDetails } = useApi()
   const { pushToast } = useToast()
   const [apiUrl, setApiUrl] = createSignal(apiDetails().apiServer)

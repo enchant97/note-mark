@@ -1,8 +1,7 @@
-import type { Component, JSX } from 'solid-js';
+import type { Component, ParentProps } from 'solid-js';
 
-type BaseModalProps = {
+type BaseModalProps = ParentProps & {
   title: string
-  children: JSX.Element
 }
 
 const BaseModal: Component<BaseModalProps> = (props) => {

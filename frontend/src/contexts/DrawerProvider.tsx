@@ -1,4 +1,4 @@
-import { JSX, createContext, useContext } from "solid-js"
+import { ParentProps, createContext, useContext } from "solid-js"
 import { optionExpect } from "../core/core"
 import { Book, Note } from "../core/types"
 
@@ -20,8 +20,7 @@ export const useDrawer = () => {
   return optionExpect(ctx, "current drawer context was undefined")
 }
 
-type DrawerProviderProps = DrawerContextProps & {
-  children: JSX.Element
+type DrawerProviderProps = DrawerContextProps & ParentProps & {
 }
 
 export const DrawerProvider = (props: DrawerProviderProps) => {
