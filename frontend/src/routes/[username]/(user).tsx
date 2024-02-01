@@ -4,17 +4,34 @@ import UserSearchModal from "../../components/modals/user_search";
 import { useModal } from "../../contexts/ModalProvider";
 import { useCurrentUser } from "../../contexts/CurrentUserProvider";
 import { Show } from "solid-js";
+import Icon from "../../components/icon";
+import NewBookModal from "../../components/modals/new_book";
+import { Book } from "../../core/types";
+import { useDrawer } from "../../contexts/DrawerProvider";
 
 const User = () => {
   const params = useParams()
   const { setModal, clearModal } = useModal()
   const { user } = useCurrentUser()
+  const drawer = useDrawer()
 
   const openUserSearchModal = () => {
     setModal({
       component: UserSearchModal,
       props: {
         onClose: () => clearModal(),
+      },
+    })
+  }
+
+  const onNewBookClick = () => {
+    setModal({
+      component: NewBookModal,
+      props: {
+        onClose: (newBook?: Book) => {
+          if (newBook) drawer.updateBook(newBook)
+          clearModal()
+        }, user: user()
       },
     })
   }
@@ -28,11 +45,21 @@ const User = () => {
             when={user() !== undefined} fallback={
               <A class="btn join-item btn-outline" href="/login">Login</A>
             }>
-            <A
-              class="btn join-item btn-outline"
-              activeClass="btn-disabled"
-              href={`/${user()?.username}`}
-            >My Notes</A>
+            <Show when={user()?.username === params.username} fallback={
+              <A
+                class="btn join-item btn-outline"
+                href={`/${user()?.username}`}
+              >My Notes</A>
+            }>
+              <button
+                onClick={onNewBookClick}
+                class="btn join-item btn-outline"
+                type="button"
+              >
+                <Icon name="folder-plus" />
+                New Book
+              </button>
+            </Show>
           </Show>
           <button
             onclick={() => openUserSearchModal()}
