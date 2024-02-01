@@ -7,6 +7,7 @@ import UserSearchModal from '../components/modals/user_search';
 import RecentNotes from '../components/recent_notes';
 import Header from '../components/header';
 import Footer from '../components/footer';
+import Icon from '../components/icon';
 
 const Home: Component = () => {
   const { apiDetails } = useApi()
@@ -40,6 +41,7 @@ const Home: Component = () => {
                   class="btn join-item btn-outline"
                   type="button"
                 >
+                  <Icon name="users" />
                   Find User
                 </button>
               </div>

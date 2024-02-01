@@ -66,6 +66,7 @@ const User = () => {
             class="btn join-item btn-outline"
             type="button"
           >
+            <Icon name="users" />
             Find User
           </button>
         </div>
