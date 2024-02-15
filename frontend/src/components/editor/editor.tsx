@@ -6,6 +6,7 @@ import { Accessor, Component, For, createEffect, createSignal, onCleanup, onMoun
 import { SetStoreFunction, Store } from "solid-js/store";
 import Icon from "../icon";
 import { keymap } from "@codemirror/view";
+import {indentWithTab} from "@codemirror/commands"
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { useModal } from "../../contexts/ModalProvider";
 import CreateLinkModal from "./modals/create_link";
@@ -169,6 +170,7 @@ const Editor: Component<EditorProps> = (props) => {
             }
           }),
           keymap.of([
+            indentWithTab,
             {
               key: "Mod-s", run: () => {
                 if (!props.state.saving)

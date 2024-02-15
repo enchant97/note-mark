@@ -25,6 +25,7 @@
     "wasm-pack": "^0.12.1"
   },
   "dependencies": {
+    "@codemirror/commands": "^6.3.3",
     "@codemirror/lang-markdown": "^6.2.4",
     "@codemirror/state": "^6.4.0",
     "@codemirror/view": "^6.23.1",
