@@ -6,7 +6,9 @@ import (
 
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
+	"github.com/enchant97/note-mark/backend/db"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -28,6 +30,12 @@ func jwtIntoAuthenticatedUser(ctx echo.Context) (*core.AuthenticatedUser, error)
 	tokenClaims := userToken.Claims.(*core.JWTClaims)
 	user, err := tokenClaims.ToAuthenticatedUser()
 	return &user, err
+}
+
+func canUserAuthenticate(userID uuid.UUID) (bool, error) {
+	var count int64
+	err := db.DB.Model(&db.User{}).Where("id = ?", userID).Limit(1).Count(&count).Error
+	return count == 1, err
 }
 
 // create JWT middleware, allowing for missing token
@@ -56,7 +64,14 @@ func authHandlerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			// invalid token contents
 			return ctx.NoContent(http.StatusUnauthorized)
 		}
-		// TODO validate username & userID match in database (if authenticatedUser is not nil)
+		if authenticatedUser != nil {
+			if allowed, err := canUserAuthenticate(authenticatedUser.UserID); err != nil {
+				return err
+			} else if !allowed {
+				// user does not exist or is not allowed to login
+				return ctx.NoContent(http.StatusUnauthorized)
+			}
+		}
 		authDetails := core.AuthenticationDetails{}.New(authenticatedUser)
 		ctx.Set(AuthDetailsKey, &authDetails)
 		return next(ctx)
