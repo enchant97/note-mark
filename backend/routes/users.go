@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
@@ -35,6 +36,29 @@ func getUserMe(ctx echo.Context) error {
 	var user db.User
 	if err := db.DB.
 		First(&user, "id = ?", authenticatedUser.UserID).Error; err != nil {
+		return err
+	}
+
+	return ctx.JSON(http.StatusOK, user)
+}
+
+func getUserByUsername(ctx echo.Context) error {
+	username := ctx.Param("username")
+	optionalUserID := getAuthDetails(ctx).GetOptionalUserID()
+	include := strings.ToLower(ctx.QueryParam("include"))
+
+	query := db.DB
+
+	if include == "books" || include == "notes" {
+		query = query.Preload("Books", "owner_id = ? OR is_public = ?", optionalUserID, true)
+	}
+
+	if include == "notes" {
+		query = query.Preload("Books.Notes")
+	}
+
+	var user db.User
+	if err := query.First(&user, "username = ?", username).Error; err != nil {
 		return err
 	}
 

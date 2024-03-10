@@ -133,6 +133,7 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 	apiRoutes.POST("/auth/token", postToken)
 	slugRoutes := apiRoutes.Group("/slug/@:username")
 	{
+		slugRoutes.GET("", getUserByUsername)
 		slugRoutes.GET("/books", getBooksByUsername)
 		slugRoutes.GET("/books/:bookSlug", getBookBySlug)
 		slugRoutes.GET("/books/:bookSlug/notes", getNotesBySlug)

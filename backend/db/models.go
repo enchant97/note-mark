@@ -29,7 +29,7 @@ type User struct {
 	Username string  `gorm:"uniqueIndex;not null;type:varchar(30)" json:"username"`
 	Password []byte  `gorm:"not null" json:"-"`
 	Name     *string `gorm:"size:128" json:"name"`
-	Books    []Book  `gorm:"foreignKey:OwnerID" json:"-"`
+	Books    []Book  `gorm:"foreignKey:OwnerID" json:"books,omitempty"`
 }
 
 func (u *User) SetPassword(newPlainPassword string) {
@@ -54,7 +54,7 @@ type Note struct {
 	Slug   string      `gorm:"index:idx_note,unique;not null;type:varchar(80)" json:"slug"`
 	BookID uuid.UUID   `gorm:"index:idx_note,unique;not null;type:uuid" json:"bookId"`
 	Book   Book        `gorm:"foreignKey:BookID" json:"-"`
-	Assets []NoteAsset `gorm:"foreignKey:NoteID" json:"-"`
+	Assets []NoteAsset `gorm:"foreignKey:NoteID" json:"assets,omitempty"`
 }
 
 type NoteAsset struct {
@@ -73,5 +73,5 @@ type Book struct {
 	OwnerID  uuid.UUID `gorm:"index:idx_book,unique;not null;type:uuid" json:"ownerId"`
 	IsPublic bool      `gorm:"not null;default:false;type:boolean" json:"isPublic"`
 	Owner    User      `json:"-"`
-	Notes    []Note    `gorm:"foreignKey:BookID" json:"-"`
+	Notes    []Note    `gorm:"foreignKey:BookID" json:"notes,omitempty"`
 }
