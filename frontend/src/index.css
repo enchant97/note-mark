@@ -6,6 +6,10 @@
     margin: 0 .4rem 0 0;
 }
 
+.prose table {
+    width: auto;
+}
+
 @layer utilities {
     .full-screen {
         z-index: 100;
