@@ -29,6 +29,7 @@ const Shelf: Component = () => {
   const { user } = useCurrentUser()
   const { setModal, clearModal } = useModal()
   const drawer = useDrawer()
+  const { currentUser, currentBook: book, currentNote: note } = drawer
   const [noteModeSetting, setNoteModeSetting] = StorageHandler.createSettingSignal("note_mode", false)
 
   const noteMode = () => {
@@ -60,20 +61,6 @@ const Shelf: Component = () => {
     return user() && (book() && user()?.id === book()?.ownerId)
   }
 
-  const [book, { mutate: setBook }] = createResource(slugParts, async ({ username, bookSlug }) => {
-    if (!username || !bookSlug) return undefined
-    let result = await api().getBookBySlug(username, bookSlug)
-    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, `loading book ${username}/${bookSlug}`))
-    else return result
-  })
-
-  const [note, { mutate: setNote }] = createResource(slugParts, async ({ username, bookSlug, noteSlug }) => {
-    if (!username || !bookSlug || !noteSlug) return undefined
-    let result = await api().getNoteBySlug(username, bookSlug, noteSlug)
-    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, `loading note ${username}/${bookSlug}/${noteSlug}`))
-    else return result
-  })
-
   const [noteContent, { mutate: setNoteContent }] = createResource(note, async (note) => {
     let result = await api().getNoteContentById(note.id)
     if (result instanceof ApiError) {
@@ -87,11 +74,12 @@ const Shelf: Component = () => {
     }
   })
 
-  const globalLoading = () => book.loading || note.loading || noteContent.loading
+  const globalLoading = () => noteContent.loading
 
   const breadcrumb: () => BreadcrumbWithNames = () => {
     return {
       username: params.username,
+      fullName: currentUser()?.name,
       bookSlug: globalLoading() ? undefined : book()?.slug,
       bookName: globalLoading() ? undefined : book()?.name,
       noteSlug: globalLoading() ? undefined : note()?.slug,
@@ -128,7 +116,6 @@ const Shelf: Component = () => {
       props: {
         onClose: (newBook?: Book) => {
           if (newBook) {
-            setBook(newBook)
             drawer.updateBook(newBook)
           }
           clearModal()
@@ -150,7 +137,6 @@ const Shelf: Component = () => {
       props: {
         onClose: (newNote?: NoteDetails) => {
           if (newNote) {
-            setNote(newNote)
             drawer.updateNote(newNote)
           }
           clearModal()
@@ -299,7 +285,7 @@ const Shelf: Component = () => {
         </menu>
         <NoteBreadcrumb class="flex-1" {...breadcrumb()} />
       </div>
-      <Show when={!note.loading && !noteContent.loading} fallback={<LoadingRing />}>
+      <Show when={!noteContent.loading} fallback={<LoadingRing />}>
         <Show when={note()} fallback={
           <div class="hero pt-6 bg-base-200 rounded-md">
             <div class="hero-content text-center">

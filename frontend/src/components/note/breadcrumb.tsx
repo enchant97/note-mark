@@ -23,7 +23,7 @@ const NoteBreadcrumb: Component<NoteBreadcrumbProps> = (props) => {
               href={`/${props.username}`}
             >
               <Icon name="user" size={16} />
-              <span class="ml-1">{props.username}</span>
+              <span class="ml-1">{props.fullName || props.username}</span>
             </A>
           </li>
           <Show when={props.bookSlug}>

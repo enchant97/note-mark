@@ -5,6 +5,7 @@ export type Breadcrumb = {
 }
 
 export type BreadcrumbWithNames = Breadcrumb & {
+  fullName?: string
   bookName?: string
   noteName?: string
 }
@@ -45,6 +46,8 @@ export type User = {
   id: string
   username: string
   name?: string
+
+  books?: Book[]
 }
 
 export type Book = {
@@ -53,6 +56,8 @@ export type Book = {
   slug: string
   ownerId: string
   isPublic: boolean
+
+  notes?: Note[]
 }
 
 export type Note = {

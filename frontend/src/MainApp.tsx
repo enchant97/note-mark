@@ -3,7 +3,7 @@ import { Component, For, ParentProps, Show, createResource, createSignal } from 
 import Header from './components/header';
 import { useApi } from './contexts/ApiProvider';
 import { DrawerProvider } from './contexts/DrawerProvider';
-import { Book, Note } from './core/types';
+import { Book, Note, User } from './core/types';
 import { LoadingRing } from './components/loading';
 import { ApiError } from './core/api';
 import { SortChoice, SortSelect } from './components/inputs';
@@ -30,41 +30,73 @@ function performBookOrNoteSort(rows: Note[] | Book[], method: SortChoice) {
   }
 }
 
+type MappedBook = Book & {
+  notes: Map<string, Note>
+}
+
+type MappedUser = User & {
+  books: Map<string, MappedBook>
+}
+
 const MainApp: Component<ParentProps> = (props) => {
   const params = useParams()
   const { api } = useApi()
   const { pushToast } = useToast()
   const [sortChoice, setSortChoice] = createSignal(SortChoice.NAME_ASC)
 
-  // NOTE: `|| ""` required as resource source will only compare non-nullish/non-false
-  const [booksById, { mutate: mutateBooks }] = createResource(() => params.username || "", async (username) => {
-    if (!username) return []
-    let result = await api().getBooksBySlug(username)
+  const [userData, { mutate: mutateUserData }] = createResource(() => params.username, async (username) => {
+    let result = await api().getUserByUsername(username, "notes")
     if (result instanceof ApiError) {
-      pushToast(apiErrorIntoToast(result, `loading books for ${username}`))
-      return []
-    } else return new Map(result.map((v) => [v.id, v]))
+      pushToast(apiErrorIntoToast(result, `loading data for ${username}`))
+    } else {
+      let data = new Map<string, MappedUser>(Object.entries(result))
+      let books = new Map(Object.entries(result.books!).map((v) => {
+        let book = new Map(Object.entries(v[1]))
+        book.set("notes", new Map(v[1].notes?.map((v) => [v.id, v])) || new Map())
+        return [v[1].id, book]
+      }))
+      data.set("books", books)
+      return data
+    }
   })
 
-  const books = () => {
-    let byId = booksById()
-    if (!byId) return []
-    return Array.from(byId, (v) => v[1])
+  const currentUser = () => {
+    let user = userData()
+    if (user !== undefined) {
+      user = new Map(user)
+      user.delete("books")
+      return Object.fromEntries(user.entries())
+    }
   }
 
-  const [notesById, { mutate: mutateNotes }] = createResource(() => [params.username, params.bookSlug], async ([username, bookSlug]) => {
-    if (!username || !bookSlug) return []
-    let result = await api().getNotesBySlug(username, bookSlug)
+  const [currentBook] = createResource(() => [params.username, params.bookSlug], async ([username, bookSlug]) => {
+    if (!bookSlug) { return }
+    let result = await api().getBookBySlug(username, bookSlug)
     if (result instanceof ApiError) {
-      pushToast(apiErrorIntoToast(result, `loading notes for ${username}/${bookSlug}}`))
-      return []
-    } else return new Map(result.map((v) => [v.id, v]))
+      pushToast(apiErrorIntoToast(result, "fetching lookup for book"))
+    } else { return result }
   })
 
+  const [currentNote] = createResource(() => [params.username, params.bookSlug, params.noteSlug], async ([username, bookSlug, noteSlug]) => {
+    if (!noteSlug) { return }
+    let result = await api().getNoteBySlug(username, bookSlug, noteSlug)
+    if (result instanceof ApiError) {
+      pushToast(apiErrorIntoToast(result, "fetching lookup for note"))
+    } else { return result }
+  })
+
+  const currentBookId = () => currentBook()?.id
+
+  const books = () => {
+    let b: Map<string, MappedBook> = userData()?.get("books")
+    if (!b) return []
+    return Array.from<Book>(b.values().map(v => Object.fromEntries(v)))
+  }
+
   const notes = () => {
-    let byId = notesById()
-    if (!byId) return []
-    return Array.from(byId, (v) => v[1])
+    let n: Map<string, MappedBook> | undefined = userData()?.get("books")?.get(currentBookId())?.get("notes")
+    if (!n) { return [] }
+    return Array.from<Note>(n.values())
   }
 
   const sortedBooks = () => performBookOrNoteSort([...books()], sortChoice())
@@ -77,33 +109,36 @@ const MainApp: Component<ParentProps> = (props) => {
         <Header />
         <div class="px-6 mt-2">
           <DrawerProvider
+            currentUser={currentUser}
+            currentBook={currentBook}
+            currentNote={currentNote}
             updateBook={(newBook: Book) => {
-              mutateBooks((v) => {
-                if (Array.isArray(v)) { v = new Map() }
-                v?.set(newBook.id, newBook)
+              mutateUserData((v) => {
+                let notes = v.get("books")?.get(newBook.id)?.get("notes")
+                if (notes === undefined) {
+                  v.get("books").set(newBook.id, new Map(Object.entries({ "notes": new Map(), ...newBook })))
+                } else {
+                  v.get("books").set(newBook.id, new Map(Object.entries({ ...newBook, notes })))
+                }
                 return new Map(v)
               })
             }}
             updateNote={(newNote: Note) => {
-              mutateNotes((v) => {
-                if (Array.isArray(v)) { v = new Map() }
-                v?.set(newNote.id, newNote)
+              mutateUserData((v) => {
+                v.get("books").get(currentBookId())?.get("notes").delete(newNote.id)
+                v.get("books").get(newNote.bookId)?.get("notes").set(newNote.id, newNote)
                 return new Map(v)
               })
             }}
             deleteBook={(id) => {
-              mutateBooks((v) => {
-                if (!Array.isArray(v)) {
-                  v?.delete(id)
-                }
+              mutateUserData((v) => {
+                v.get("books").delete(id)
                 return new Map(v)
               })
             }}
             deleteNote={(id) => {
-              mutateNotes((v) => {
-                if (!Array.isArray(v)) {
-                  v?.delete(id)
-                }
+              mutateUserData((v) => {
+                v.get("books").get(currentBookId())?.get("notes").delete(id)
                 return new Map(v)
               })
             }}
@@ -121,7 +156,7 @@ const MainApp: Component<ParentProps> = (props) => {
           </label></li>
           <li class="menu-title">NOTEBOOKS</li>
           <ul class="bg-base-100 flex-1 overflow-auto rounded-lg">
-            <Show when={!booksById.loading} fallback={<LoadingRing />}>
+            <Show when={!userData.loading} fallback={<LoadingRing />}>
               <For each={sortedBooks()}>
                 {(book) => <li>
                   <A
@@ -131,7 +166,7 @@ const MainApp: Component<ParentProps> = (props) => {
                     <Icon name="folder" size={14} />
                     {book.name}
                   </A>
-                  <Show when={book.slug === params.bookSlug && !notesById.loading}>
+                  <Show when={book.slug === params.bookSlug}>
                     <ul>
                       <For each={sortedNotes()}>
                         {(note) => <li>

@@ -1,8 +1,11 @@
-import { ParentProps, createContext, useContext } from "solid-js"
+import { Accessor, ParentProps, createContext, useContext } from "solid-js"
 import { optionExpect } from "../core/core"
-import { Book, Note } from "../core/types"
+import { Book, Note, User } from "../core/types"
 
 type DrawerContextProps = {
+  currentUser: Accessor<User | undefined>
+  currentBook: Accessor<Book | undefined>
+  currentNote: Accessor<Note | undefined>
   updateBook: (newBook: Book) => void
   updateNote: (newNote: Note) => void
   deleteBook: (bookId: string) => void
