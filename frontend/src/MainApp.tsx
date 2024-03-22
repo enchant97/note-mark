@@ -166,7 +166,7 @@ const MainApp: Component<ParentProps> = (props) => {
                     <Icon name="folder" size={14} />
                     {book.name}
                   </A>
-                  <Show when={book.slug === params.bookSlug}>
+                  <Show when={!currentBook.loading && book.slug === params.bookSlug}>
                     <ul>
                       <For each={sortedNotes()}>
                         {(note) => <li>
