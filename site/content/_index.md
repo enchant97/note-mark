@@ -44,3 +44,6 @@ Integrated notebook sharing.
 ## Like What You See?
 - [Tell Me More]({{< ref "about" >}})
 - [How Do I Install]({{< ref "docs/setup/install" >}})
+
+## Support My Work
+Like this project? Consider supporting me financially so I can continue development. You can do that by [buying me a coffee](https://www.buymeacoffee.com/leospratt).

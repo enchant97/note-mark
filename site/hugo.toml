@@ -24,6 +24,11 @@ url = "https://github.com/enchant97/note-mark"
 [[menu.sub.params]]
 icon = "git-branch"
 hideName = true
+[[menu.sub]]
+name = "Support The Project"
+url = "https://www.buymeacoffee.com/leospratt"
+[[menu.sub.params]]
+icon = "coffee"
 
 [params]
 appVersion = "0.11.1"

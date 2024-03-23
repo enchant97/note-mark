@@ -3,7 +3,6 @@
 # Note Mark
 ![License: AGPL V3](https://img.shields.io/github/license/enchant97/note-mark?style=flat-square)
 ![GitHub Latest Release](https://img.shields.io/github/v/release/enchant97/note-mark?include_prereleases&label=latest%20release&style=flat-square)
-[![Go Report Card](https://goreportcard.com/badge/github.com/enchant97/note-mark/backend?style=flat-square)](https://goreportcard.com/report/github.com/enchant97/note-mark/backend)
 
 Note Mark is a lighting fast and minimal; web-based Markdown notes app. Featuring a sleek and responsive web UI.
 
@@ -11,12 +10,12 @@ Note Mark is a lighting fast and minimal; web-based Markdown notes app. Featurin
 - Markdown (GitHub Flavored Markdown, see spec [here](https://github.github.com/gfm/))
 - HTML sanitisation, minimizing XSS attacks
 - Mobile Friendly
-- Friendly "Slug" based URLs for cleaner links
+- Friendly URLs for cleaner links
 - Dark & Light Theme
 - Notebook Sharing
 - Custom flat-file based storage system
 - Multiple views for a note (rendered, plain)
-- Simple editor with shortcuts
+- Lighting fast editor with shortcuts
 - Upload and attach assets
 
 ## Showcase
@@ -32,8 +31,13 @@ Documentation is available here: [notemark.docs.enchantedcode.co.uk](https://not
 
 > Checkout [here](https://github.com/enchant97/note-mark/issues/47) for the roadmap.
 
+## Support Me
+Like this project? Consider supporting me financially so I can continue development.
+
+<a href="https://www.buymeacoffee.com/leospratt" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" height=60></a>
+
 ## License
-This project is Copyright (c) 2023 Leo Spratt, licences shown below:
+This project is Copyright (c) 2024 Leo Spratt, licences shown below:
 
 Code
 
