@@ -3,7 +3,6 @@ package routes
 import (
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
@@ -24,47 +23,6 @@ func createBook(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusCreated, book)
-}
-
-func getBooksByUsername(ctx echo.Context) error {
-	userID := getAuthDetails(ctx).GetOptionalUserID()
-	username := ctx.Param("username")
-
-	var bookOwner db.User
-	if err := db.DB.
-		Select("id").
-		First(&bookOwner, "username = ?", username).
-		Error; err != nil {
-		return err
-	}
-
-	var lastModified time.Time
-
-	if err := db.DB.Model(&db.Book{}).
-		Where(
-			db.DB.Where("owner_id = ?", bookOwner.ID),
-			db.DB.Where("owner_id = ? OR is_public = ?", userID, true),
-		).
-		Order("updated_at DESC").Limit(1).Pluck("updated_at", &lastModified).Error; err != nil {
-		return err
-	}
-
-	if !core.HandleIfModifedSince(ctx, lastModified) {
-		return ctx.NoContent(http.StatusNotModified)
-	}
-
-	var books []db.Book
-	if err := db.DB.
-		Where(
-			db.DB.Where("owner_id = ?", bookOwner.ID),
-			db.DB.Where("owner_id = ? OR is_public = ?", userID, true),
-		).
-		Find(&books).
-		Error; err != nil {
-		return err
-	}
-
-	return ctx.JSON(http.StatusOK, books)
 }
 
 func getBookByID(ctx echo.Context) error {

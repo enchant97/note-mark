@@ -358,15 +358,6 @@ class Api {
     if (!resp.ok) return new ApiError(resp.status)
     return handleBodyErrors(resp.json())
   }
-  async getBooksBySlug(username: string): Promise<Result<Book[], ApiError>> {
-    let reqURL = `${this.apiServer}/slug/@${username}/books`
-    let resp = await handleFetchErrors(fetch(reqURL, {
-      headers: this.optionalHeaderAuthorization(),
-    }))
-    if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
-    return handleBodyErrors(resp.json())
-  }
   async getBookBySlug(username: string, bookSlug: string, include?: "notes"): Promise<Result<Book, ApiError>> {
     let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}`
     if (include) { reqURL = `${reqURL}?include=${include}` }
