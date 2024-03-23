@@ -4,6 +4,7 @@ import { useApi } from '../../contexts/ApiProvider';
 import { createStore } from 'solid-js/store';
 import { apiErrorIntoToast, ToastType, useToast } from '../../contexts/ToastProvider';
 import { ApiError, HttpErrors } from '../../core/api';
+import { useCurrentUser } from '../../contexts/CurrentUserProvider';
 
 type UpdateUserPasswordModalProps = {
   onClose: () => void
@@ -12,6 +13,7 @@ type UpdateUserPasswordModalProps = {
 const UpdateUserPasswordModal: Component<UpdateUserPasswordModalProps> = (props) => {
   const { api } = useApi()
   const { pushToast } = useToast()
+  const { user } = useCurrentUser()
   const [form, setForm] = createStore({
     existingPassword: "",
     newPassword: "",
@@ -48,6 +50,7 @@ const UpdateUserPasswordModal: Component<UpdateUserPasswordModalProps> = (props)
     <BaseModal title="Update Password">
 
       <form onsubmit={onSubmit}>
+        <input type="text" autocomplete="username" value={user()!.username} readonly class="hidden" />
         <label class="form-control">
           <span class="label"><span class="label-text">Current Password</span></span>
           <input
