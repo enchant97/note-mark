@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
@@ -110,52 +109,6 @@ func getNotesByBookID(ctx echo.Context) error {
 	}
 	var notes []db.Note
 	if err := tx.
-		Find(&notes).Error; err != nil {
-		return err
-	}
-
-	return ctx.JSON(http.StatusOK, notes)
-}
-
-func getNotesBySlug(ctx echo.Context) error {
-	userID := getAuthDetails(ctx).GetOptionalUserID()
-	username := ctx.Param("username")
-	bookSlug := ctx.Param("bookSlug")
-
-	var bookOwner db.User
-	if err := db.DB.
-		Select("id").
-		First(&bookOwner, "username = ?", username).Error; err != nil {
-		return err
-	}
-
-	var lastModified time.Time
-
-	if err := db.DB.
-		Model(&db.Note{}).
-		Joins("JOIN books ON books.id = notes.book_id").
-		Where(
-			db.DB.Where("books.slug = ? AND owner_id = ?", bookSlug, bookOwner.ID),
-			db.DB.Where("owner_id = ? OR is_public = ?", userID, true),
-		).
-		Order("notes.updated_at DESC").
-		Limit(1).
-		Pluck("notes.updated_at", &lastModified).Error; err != nil {
-		return err
-	}
-
-	if !core.HandleIfModifedSince(ctx, lastModified) {
-		return ctx.NoContent(http.StatusNotModified)
-	}
-
-	var notes []db.Note
-	if err := db.DB.
-		Preload("Book").
-		Joins("JOIN books ON books.id = notes.book_id").
-		Where(
-			db.DB.Where("books.slug = ? AND owner_id = ?", bookSlug, bookOwner.ID),
-			db.DB.Where("owner_id = ? OR is_public = ?", userID, true),
-		).
 		Find(&notes).Error; err != nil {
 		return err
 	}

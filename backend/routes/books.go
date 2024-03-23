@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/enchant97/note-mark/backend/core"
@@ -85,9 +86,10 @@ func getBookByID(ctx echo.Context) error {
 }
 
 func getBookBySlug(ctx echo.Context) error {
-	userID := getAuthDetails(ctx).GetOptionalUserID()
+	optionalUserID := getAuthDetails(ctx).GetOptionalUserID()
 	username := ctx.Param("username")
 	bookSlug := ctx.Param("bookSlug")
+	include := strings.ToLower(ctx.QueryParam("include"))
 
 	var bookOwner db.User
 	if err := db.DB.
@@ -97,9 +99,15 @@ func getBookBySlug(ctx echo.Context) error {
 		return err
 	}
 
+	query := db.DB
+
+	if include == "notes" {
+		query = query.Preload("Notes")
+	}
+
 	var book db.Book
-	if err := db.DB.
-		Where("owner_id = ? OR is_public = ?", userID, true).
+	if err := query.
+		Where("owner_id = ? OR is_public = ?", optionalUserID, true).
 		First(&book, "slug = ? AND owner_id = ?", bookSlug, bookOwner.ID).
 		Error; err != nil {
 		return err

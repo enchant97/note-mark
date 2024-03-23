@@ -136,7 +136,6 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 		slugRoutes.GET("", getUserByUsername)
 		slugRoutes.GET("/books", getBooksByUsername)
 		slugRoutes.GET("/books/:bookSlug", getBookBySlug)
-		slugRoutes.GET("/books/:bookSlug/notes", getNotesBySlug)
 		slugRoutes.GET("/books/:bookSlug/notes/:noteSlug", getNoteBySlug)
 	}
 	usersRoutes := apiRoutes.Group("/users")
