@@ -6,7 +6,7 @@ import { Accessor, Component, For, createEffect, createSignal, onCleanup, onMoun
 import { SetStoreFunction, Store } from "solid-js/store";
 import Icon from "../icon";
 import { keymap } from "@codemirror/view";
-import {indentWithTab} from "@codemirror/commands"
+import { indentWithTab } from "@codemirror/commands"
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { useModal } from "../../contexts/ModalProvider";
 import CreateLinkModal from "./modals/create_link";
@@ -71,7 +71,11 @@ const Editor: Component<EditorProps> = (props) => {
     if (autoSave()) {
       window.clearTimeout(autosaveTimeout)
       autosaveTimeout = window.setTimeout(
-        save,
+        (state: InternalEditorState) => {
+          if (autoSave()) {
+            save(state)
+          }
+        },
         props.autoSaveTimeout,
         state,
       )
@@ -203,13 +207,12 @@ const Editor: Component<EditorProps> = (props) => {
   return (
     <>
       <menu
-        ref={toolbarElement}
-        class="menu menu-sm menu-horizontal flex-nowrap gap-6 bg-base-300-blur rounded-md shadow-md p-2 w-full items-center"
+        ref={(el) => toolbarElement = el}
+        class="menu menu-horizontal flex-nowrap gap-6 bg-base-300-blur rounded-md shadow-md p-2 w-full items-center z-[1]"
         classList={{
           "fixed": stickyToolbar(),
           "top-0": stickyToolbar(),
           "left-0": stickyToolbar(),
-          "z-[1]": stickyToolbar(),
         }}
       >
         <ul class="menu-horizontal gap-2 flex-nowrap">
@@ -257,7 +260,7 @@ const Editor: Component<EditorProps> = (props) => {
             <div tabindex="0" role="button" class="btn btn-sm btn-square btn-outline">
               <Icon name="hash" />
             </div>
-            <ul tabindex="0" class="dropdown-content z-[1] menu shadow-lg bg-base-300 rounded-box w-52">
+            <ul tabindex="0" class="dropdown-content z-[1] menu menu-sm shadow-lg bg-base-300 rounded-box w-52">
               <For each={[1, 2, 3, 4, 5, 6]}>
                 {(level) => (
                   <li><button
