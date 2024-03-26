@@ -1,5 +1,5 @@
 import { useParams, A, useNavigate } from '@solidjs/router';
-import { Component, For, ParentProps, Show, createResource, createSignal } from 'solid-js';
+import { Component, For, ParentProps, Show, createResource, createSignal, onCleanup, onMount } from 'solid-js';
 import Header from './components/header';
 import { useApi } from './contexts/ApiProvider';
 import { DrawerProvider } from './contexts/DrawerProvider';
@@ -44,9 +44,15 @@ const MainApp: Component<ParentProps> = (props) => {
   const params = useParams()
   const { api } = useApi()
   const { pushToast } = useToast()
-  const { setModal, clearModal } = useModal()
+  const { setModal, clearModal, modal: currentModal } = useModal()
   const navigator = useNavigate()
   const [sortChoice, setSortChoice] = createSignal(SortChoice.NAME_ASC)
+
+  function handleShortcuts(ev: KeyboardEvent) {
+    if (ev.key == "k" && ev.ctrlKey && !currentModal()) {
+      onSearchOpen()
+    }
+  }
 
   const [userData, { mutate: mutateUserData }] = createResource(() => params.username, async (username) => {
     let result = await api().getUserByUsername(username, "notes")
@@ -141,6 +147,11 @@ const MainApp: Component<ParentProps> = (props) => {
       }
     })
   }
+
+  onMount(() => {
+    window.addEventListener("keyup", handleShortcuts)
+    onCleanup(() => window.removeEventListener("keyup", handleShortcuts))
+  })
 
   return (
     <div class="drawer lg:drawer-open">
