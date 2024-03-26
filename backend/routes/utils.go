@@ -96,7 +96,7 @@ func getServerInfo(ctx echo.Context) error {
 	appConfig := ctx.Get("AppConfig").(config.AppConfig)
 
 	return ctx.JSON(http.StatusOK, core.ServerInfo{
-		MinSupportedVersion: "0.9.0",
+		MinSupportedVersion: "0.12.0",
 		AllowSignup:         appConfig.AllowSignup,
 	})
 }

@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2024-03-26
+### Added
+- Search for notes & books
+### Changed
+- All user, notebook & notes data in drawer is now loaded together in one request
+- Indentation control in editor can now be used via `<tab>` and `<shift><tab>`, thanks @RobViren
+- Optimised routes
+    - Reducing the amount of requests needed
+    - Reduce the need to get things via their slug's, using item ids instead
+### Fixed
+- Table no-longer takes up 100% of the width, unless it's needed
+- Editor UI improvements/fixes
+- Autocomplete for username & password change form
+### Security
+- Validation for if user still exists when authentication token is still valid)
+
 ## [0.11.1] - 2024-02-01
 ### Fixed
 - #181; Can't create notebook when one does not already exist
