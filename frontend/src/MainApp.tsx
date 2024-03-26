@@ -1,4 +1,4 @@
-import { useParams, A } from '@solidjs/router';
+import { useParams, A, useNavigate } from '@solidjs/router';
 import { Component, For, ParentProps, Show, createResource, createSignal } from 'solid-js';
 import Header from './components/header';
 import { useApi } from './contexts/ApiProvider';
@@ -10,6 +10,8 @@ import { SortChoice, SortSelect } from './components/inputs';
 import { compare } from './core/helpers';
 import Icon from './components/icon';
 import { apiErrorIntoToast, useToast } from './contexts/ToastProvider';
+import { useModal } from './contexts/ModalProvider';
+import ContentSearchModal, { SearchableBook, SearchableNote } from './components/modals/content_search';
 
 function performBookOrNoteSort(rows: Note[] | Book[], method: SortChoice) {
   switch (method) {
@@ -42,6 +44,8 @@ const MainApp: Component<ParentProps> = (props) => {
   const params = useParams()
   const { api } = useApi()
   const { pushToast } = useToast()
+  const { setModal, clearModal } = useModal()
+  const navigator = useNavigate()
   const [sortChoice, setSortChoice] = createSignal(SortChoice.NAME_ASC)
 
   const [userData, { mutate: mutateUserData }] = createResource(() => params.username, async (username) => {
@@ -90,7 +94,10 @@ const MainApp: Component<ParentProps> = (props) => {
   const books = () => {
     let b: Map<string, MappedBook> = userData()?.get("books")
     if (!b) return []
-    return Array.from<Book>(b.values().map(v => Object.fromEntries(v)))
+    return Array.from<Book>(b.values().map(v => Object.fromEntries(v)).map(v => {
+      v.notes = Array.from<Note>(v.notes.values())
+      return v
+    }))
   }
 
   const notes = () => {
@@ -101,6 +108,39 @@ const MainApp: Component<ParentProps> = (props) => {
 
   const sortedBooks = () => performBookOrNoteSort([...books()], sortChoice())
   const sortedNotes = () => performBookOrNoteSort([...notes()], sortChoice())
+
+  const onSearchOpen = () => {
+    let searchableBooks: SearchableBook[] = books().map(v => {
+      return {
+        value: v.name.toLowerCase(),
+        book_title: v.name,
+        book_id: v.id,
+      }
+    })
+    let searchableNotes: SearchableNote[] = new Array().concat(...books().map(v => v.notes === undefined ? [] : v.notes.map(note => {
+      return {
+        value: note.name.toLowerCase(),
+        book_id: v.id,
+        note_title: note.name,
+        note_id: note.id,
+      }
+    })))
+    setModal({
+      component: ContentSearchModal,
+      props: {
+        books: searchableBooks,
+        notes: searchableNotes,
+        onFound: (book_id: string, note_id?: string) => {
+          let book = userData().get("books").get(book_id)
+          let url = `${params.username}/${book.get("slug")}`
+          if (note_id) { url = `${url}/${book.get("notes").get(note_id).slug}` }
+          navigator(url)
+          clearModal()
+        },
+        onClose: clearModal,
+      }
+    })
+  }
 
   return (
     <div class="drawer lg:drawer-open">
@@ -154,6 +194,13 @@ const MainApp: Component<ParentProps> = (props) => {
             <Icon name="align-left" />
             <SortSelect onChange={setSortChoice} selected={sortChoice()} />
           </label></li>
+          <li><button
+            onClick={() => onSearchOpen()}
+            class="btn btn-sm shadow bg-base-100"
+            type="button">
+            <Icon name="search" />
+            Search
+          </button></li>
           <li class="menu-title">NOTEBOOKS</li>
           <ul class="bg-base-100 flex-1 overflow-auto rounded-lg">
             <Show when={!userData.loading} fallback={<LoadingRing />}>
