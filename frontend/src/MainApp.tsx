@@ -98,7 +98,7 @@ const MainApp: Component<ParentProps> = (props) => {
   const currentBookId = () => currentBook()?.id
 
   const books = () => {
-    let b: Map<string, MappedBook> = userData()?.get("books")
+    let b: Map<string, MappedBook> | undefined = userData()?.get("books")
     if (!b) return []
     return Array.from<Book>(b.values().map(v => Object.fromEntries(v)).map(v => {
       v.notes = Array.from<Note>(v.notes.values())

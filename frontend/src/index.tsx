@@ -1,7 +1,9 @@
 /* @refresh reload */
+// START POLLYFILL GLOBALS
+import 'core-js/actual';
+// END POLLYFILL GLOBALS
 import './index.css';
 import { render } from 'solid-js/web';
-
 import { Route, Router } from '@solidjs/router';
 import { registerSW } from 'virtual:pwa-register'
 import Wrapper from './wrapper';
