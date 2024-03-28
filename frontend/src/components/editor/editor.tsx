@@ -208,11 +208,12 @@ const Editor: Component<EditorProps> = (props) => {
     <>
       <menu
         ref={(el) => toolbarElement = el}
-        class="menu menu-horizontal flex-nowrap gap-6 bg-base-300-blur rounded-md shadow-md p-2 w-full items-center z-[1]"
+        class="menu menu-horizontal flex-nowrap gap-6 bg-base-300-blur rounded-md shadow-md p-2 w-full items-center"
         classList={{
           "fixed": stickyToolbar(),
           "top-0": stickyToolbar(),
           "left-0": stickyToolbar(),
+          "z-[1]": stickyToolbar(),
         }}
       >
         <ul class="menu-horizontal gap-2 flex-nowrap">
