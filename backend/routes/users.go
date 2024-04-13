@@ -73,7 +73,11 @@ func updateUserMe(ctx echo.Context) error {
 		return err
 	}
 
-	if err := db.DB.First(&db.User{}, "id = ?", authenticatedUser.UserID).Updates(userData).Error; err != nil {
+	if err := db.DB.
+		Model(&db.User{}).
+		Where("id = ?", authenticatedUser.UserID).
+		Updates(userData).
+		Error; err != nil {
 		return err
 	}
 
