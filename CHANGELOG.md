@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.12.1] - 2023-03-28
+## [0.12.2] - 2024-04-13
+### Changed
+- Prevent app from starting if static directory does not exist, if one has been set
+### Fixed
+- #195; cannot update user profile
+- #191; attachments cannot be opened
+
+## [0.12.1] - 2024-03-28
 ### Changed
 - Add users name if set on their area homepage
 ### Fixed
