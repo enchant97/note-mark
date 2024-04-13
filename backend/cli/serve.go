@@ -59,7 +59,9 @@ func commandServe(appConfig config.AppConfig) error {
 		}
 	})
 	// Init routes
-	routes.InitRoutes(e, appConfig)
+	if err := routes.InitRoutes(e, appConfig); err != nil {
+		return err
+	}
 	// Start server
 	return e.Start(appConfig.Bind.AsAddress())
 }

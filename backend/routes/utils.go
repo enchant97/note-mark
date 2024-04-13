@@ -3,6 +3,7 @@ package routes
 import (
 	"errors"
 	"net/http"
+	"os"
 
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
@@ -101,7 +102,7 @@ func getServerInfo(ctx echo.Context) error {
 	})
 }
 
-func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
+func InitRoutes(e *echo.Echo, appConfig config.AppConfig) error {
 	corsConfig := middleware.DefaultCORSConfig
 	{
 		corsConfig.AllowOrigins = appConfig.CORSOrigins
@@ -115,6 +116,9 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 		},
 	)
 	if len(appConfig.StaticPath) != 0 {
+		if _, err := os.Stat(appConfig.StaticPath); errors.Is(err, os.ErrNotExist) {
+			return err
+		}
 		e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 			Root:  appConfig.StaticPath,
 			HTML5: true,
@@ -182,4 +186,5 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) {
 		assetsRoutes.GET("/:assetID", getNoteAssetContentByID)
 		assetsRoutes.DELETE("/:assetID", deleteNoteAssetByID, authRequiredMiddleware)
 	}
+	return nil
 }
