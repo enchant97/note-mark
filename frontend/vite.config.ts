@@ -10,7 +10,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {
-        globPatterns: ['**/*.{js,wasm,css,html,svg}']
+        globPatterns: ['**/*.{js,wasm,css,html,svg}'],
+        navigateFallbackDenylist: [/^\/api/],
       },
       manifest: {
         'short_name': 'Note Mark',
