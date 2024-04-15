@@ -70,7 +70,8 @@ const Header: Component = () => {
       <label for="main-drawer" class="lg:hidden btn btn-square btn-ghost shadow">
         <Icon name="menu" />
       </label>
-      <span class="flex-1 px-2 mx-2 text-xl">Note Mark</span>
+      <span class="px-2 mx-2 text-xl hidden sm:block">Note Mark</span>
+      <div class="flex-1"></div>
       <div class="flex gap-4">
         <ThemeSwitcher />
         <A

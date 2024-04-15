@@ -1,4 +1,3 @@
-
 import { EditorView, basicSetup } from "codemirror";
 import { EditorSelection, EditorState as InternalEditorState } from "@codemirror/state";
 import { indentMore, indentLess } from "@codemirror/commands";
@@ -208,7 +207,7 @@ const Editor: Component<EditorProps> = (props) => {
     <>
       <menu
         ref={(el) => toolbarElement = el}
-        class="menu menu-horizontal flex-nowrap gap-6 bg-base-300-blur rounded-md shadow-md p-2 w-full items-center"
+        class="menu menu-horizontal flex-nowrap gap-6 bg-base-300-blur rounded-md shadow-md p-2 w-full items-center overflow-x-auto overflow-y-clip"
         classList={{
           "fixed": stickyToolbar(),
           "top-0": stickyToolbar(),
@@ -216,7 +215,7 @@ const Editor: Component<EditorProps> = (props) => {
           "z-[1]": stickyToolbar(),
         }}
       >
-        <ul class="menu-horizontal gap-2 flex-nowrap">
+        <ul class="menu-horizontal gap-2 flex-nowrap items-center">
           <li><label class="form-control">
             <span class="label-text cursor-pointer">Auto Save</span>
             <input
@@ -274,7 +273,7 @@ const Editor: Component<EditorProps> = (props) => {
             </ul>
           </div></li>
         </ul>
-        <ul class="menu-horizontal gap-2 flex-nowrap hidden sm:flex">
+        <ul class="menu-horizontal gap-2 flex-nowrap flex">
           <li><button
             class="btn btn-sm btn-square btn-outline"
             title="Block Comment"
@@ -303,7 +302,7 @@ const Editor: Component<EditorProps> = (props) => {
             <Icon name="chevrons-right" />
           </button></li>
         </ul>
-        <ul class="menu-horizontal gap-2 flex-nowrap hidden md:flex">
+        <ul class="menu-horizontal gap-2 flex-nowrap flex">
           <li><button
             class="btn btn-sm btn-square btn-outline"
             title="Insert Link"

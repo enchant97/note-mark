@@ -10,7 +10,7 @@ const NoteViewRendered: Component<NoteViewRenderedProps> = (props) => {
   const [contentRendered] = createResource(props.content, render)
 
   return (
-    <div class="prose max-w-none" innerHTML={contentRendered()}></div>
+    <div class="prose max-w-none break-words" innerHTML={contentRendered()}></div>
   )
 }
 
