@@ -154,6 +154,8 @@ const Editor: Component<EditorProps> = (props) => {
 
   onCleanup(() => {
     window.removeEventListener("scroll", handleScroll)
+    clearTimeout(autosaveTimeout)
+    props.setState({ unsaved: false })
   })
 
   onMount(() => {

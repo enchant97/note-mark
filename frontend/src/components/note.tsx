@@ -39,6 +39,13 @@ const Note: Component<NoteProps> = (props) => {
     }
   }
 
+  const query_navigation_allowed = () => {
+    return (
+      !props.state.unsaved ||
+      props.state.unsaved && confirm("Note not saved, are you sure?")
+    )
+  }
+
   return (
     <div
       class="flex flex-col gap-4 bg-base-100"
@@ -51,13 +58,21 @@ const Note: Component<NoteProps> = (props) => {
       <div class="bg-base-200 shadow-md rounded-md flex justify-between">
         <div class="tabs tabs-boxed">
           <button
-            onclick={() => props.setMode(NoteMode.RENDERED)}
+            onclick={() => {
+              if (query_navigation_allowed()) {
+                props.setMode(NoteMode.RENDERED)
+              }
+            }}
             class="tab"
             classList={{ "tab-active": props.mode === NoteMode.RENDERED }}
             title="switch to rendered view"
           >Rendered</button>
           <button
-            onclick={() => props.setMode(NoteMode.PLAIN)}
+            onclick={() => {
+              if (query_navigation_allowed()) {
+                props.setMode(NoteMode.PLAIN)
+              }
+            }}
             class="tab"
             classList={{ "tab-active": props.mode === NoteMode.PLAIN }}
             title="switch to plain view"
