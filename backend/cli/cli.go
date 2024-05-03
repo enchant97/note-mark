@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"os"
 
 	"github.com/enchant97/note-mark/backend/config"
@@ -72,6 +73,39 @@ func Entrypoint(appVersion string) error {
 							username := ctx.String("username")
 							password := ctx.String("password")
 							return commandUserSetPassword(appConfig, username, password)
+						},
+					},
+				},
+			},
+			{
+				Name:  "migrate",
+				Usage: "import and export data out of the app",
+				Subcommands: []*cli.Command{
+					{
+						Name:    "import",
+						Aliases: []string{"i"},
+						Usage:   "import data into the app",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "import-dir", Aliases: []string{"d"}, Required: true},
+						},
+						Action: func(ctx *cli.Context) error {
+							importDir := ctx.String("import-dir")
+							if _, err := os.Stat(importDir); errors.Is(err, os.ErrNotExist) {
+								return cli.Exit("import-dir does not exist, or has no read permissions", 1)
+							}
+							return commandMigrateImportData(appConfig, importDir)
+						},
+					},
+					{
+						Name:    "export",
+						Aliases: []string{"e"},
+						Usage:   "export data from the app",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "export-dir", Aliases: []string{"d"}, Required: true},
+						},
+						Action: func(ctx *cli.Context) error {
+							exportDir := ctx.String("export-dir")
+							return commandMigrateExportData(appConfig, exportDir)
 						},
 					},
 				},

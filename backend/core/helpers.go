@@ -2,11 +2,21 @@ package core
 
 import (
 	"errors"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
 )
+
+// / Check whether directory is empty.
+// / Will return true if directory does not exist.
+func IsDirEmpty(name string) bool {
+	if files, err := os.ReadDir(name); err == nil && len(files) != 0 {
+		return false
+	}
+	return true
+}
 
 // Ease of use method, when binding & validation is needed.
 func BindAndValidate(ctx echo.Context, i interface{}) error {

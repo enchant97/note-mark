@@ -51,7 +51,7 @@ type Note struct {
 	UUIDBase
 	TimeBase
 	Name   string      `gorm:"not null;type:varchar(80)" json:"name"`
-	Slug   string      `gorm:"index:idx_note,unique;not null;type:varchar(80)" json:"slug"`
+	Slug   string      `gorm:"index:idx_note,unique;not null;type:varchar(80)" json:"slug" validate:"slug"`
 	BookID uuid.UUID   `gorm:"index:idx_note,unique;not null;type:uuid" json:"bookId"`
 	Book   Book        `gorm:"foreignKey:BookID" json:"-"`
 	Assets []NoteAsset `gorm:"foreignKey:NoteID" json:"assets,omitempty"`
@@ -69,7 +69,7 @@ type Book struct {
 	UUIDBase
 	TimeBase
 	Name     string    `gorm:"not null;type:varchar(80)" json:"name"`
-	Slug     string    `gorm:"index:idx_book,unique;not null;type:varchar(80)" json:"slug"`
+	Slug     string    `gorm:"index:idx_book,unique;not null;type:varchar(80)" json:"slug" validate:"slug"`
 	OwnerID  uuid.UUID `gorm:"index:idx_book,unique;not null;type:uuid" json:"ownerId"`
 	IsPublic bool      `gorm:"not null;default:false;type:boolean" json:"isPublic"`
 	Owner    User      `json:"-"`
