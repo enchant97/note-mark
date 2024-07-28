@@ -31,7 +31,7 @@ url = "https://www.buymeacoffee.com/leospratt"
 icon = "coffee"
 
 [params]
-appVersion = "0.13.0"
+appVersion = "0.13.1"
 
 [[params.favicon]]
 href = "/icon.svg"
