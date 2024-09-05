@@ -1,31 +1,28 @@
-package routes
+package services
 
 import (
-	"net/http"
+	"errors"
 	"time"
 
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
-	"github.com/labstack/echo/v4"
 )
 
-func postToken(ctx echo.Context) error {
-	appConfig := ctx.Get("AppConfig").(config.AppConfig)
-	var loginData core.AccessTokenRequest
-	if err := core.BindAndValidate(ctx, &loginData); err != nil {
-		return err
-	}
+var AuthServiceInvalidCredentialsError = errors.New("invalid username or password")
 
+type AuthService struct{}
+
+func (s AuthService) GetAccessToken(appConfig config.AppConfig, username string, password string) (core.AccessToken, error) {
 	var user db.User
 	if err := db.DB.
-		First(&user, "username = ?", loginData.Username).
+		First(&user, "username = ?", username).
 		Select("id", "password").Error; err != nil {
-		return ctx.NoContent(http.StatusUnauthorized)
+		return core.AccessToken{}, AuthServiceInvalidCredentialsError
 	}
 
-	if !user.IsPasswordMatch(loginData.Password) {
-		return ctx.NoContent(http.StatusUnauthorized)
+	if !user.IsPasswordMatch(password) {
+		return core.AccessToken{}, AuthServiceInvalidCredentialsError
 	}
 
 	authenticationData := core.AuthenticatedUser{
@@ -38,8 +35,8 @@ func postToken(ctx echo.Context) error {
 		[]byte(appConfig.JWTSecret),
 		time.Duration(int64(time.Second)*appConfig.TokenExpiry),
 	); err != nil {
-		return err
+		return core.AccessToken{}, err
 	} else {
-		return ctx.JSON(http.StatusOK, token)
+		return token, nil
 	}
 }

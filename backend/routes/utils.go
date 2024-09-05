@@ -8,6 +8,7 @@ import (
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
+	"github.com/enchant97/note-mark/backend/handlers"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
@@ -133,42 +134,47 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) error {
 		createJwtMiddleware(appConfig.JWTSecret),
 		authHandlerMiddleware,
 	)
+	authHandler := handlers.AuthHandler{}
+	userHandler := handlers.UsersHandler{}
+	booksHandler := handlers.BooksHandler{}
+	notesHandler := handlers.NotesHandler{}
+	assetsHandler := handlers.AssetsHandler{}
+	apiRoutes.POST("/auth/token", authHandler.PostToken)
 	apiRoutes.GET("/info", getServerInfo)
-	apiRoutes.POST("/auth/token", postToken)
 	slugRoutes := apiRoutes.Group("/slug/@:username")
 	{
-		slugRoutes.GET("", getUserByUsername)
-		slugRoutes.GET("/books/:bookSlug", getBookBySlug)
-		slugRoutes.GET("/books/:bookSlug/notes/:noteSlug", getNoteBySlug)
+		slugRoutes.GET("", userHandler.GetUserByUsername)
+		slugRoutes.GET("/books/:bookSlug", booksHandler.GetBookBySlug)
+		slugRoutes.GET("/books/:bookSlug/notes/:noteSlug", notesHandler.GetNoteBySlug)
 	}
 	usersRoutes := apiRoutes.Group("/users")
 	{
-		usersRoutes.POST("", postCreateUser)
-		usersRoutes.GET("/search", searchForUser)
-		usersRoutes.GET("/me", getUserMe, authRequiredMiddleware)
-		usersRoutes.PATCH("/me", updateUserMe, authRequiredMiddleware)
-		usersRoutes.PUT("/me/password", updateUserMePassword, authRequiredMiddleware)
+		usersRoutes.POST("", userHandler.PostCreateUser)
+		usersRoutes.GET("/search", userHandler.GetSearchForUser)
+		usersRoutes.GET("/me", userHandler.GetCurrentUser, authRequiredMiddleware)
+		usersRoutes.PATCH("/me", userHandler.PatchCurrentUser, authRequiredMiddleware)
+		usersRoutes.PUT("/me/password", userHandler.PatchCurrentUserPassword, authRequiredMiddleware)
 	}
 	booksRoutes := apiRoutes.Group("/books")
 	{
-		booksRoutes.POST("", createBook, authRequiredMiddleware)
-		booksRoutes.GET("/:bookID", getBookByID)
-		booksRoutes.PATCH("/:bookID", patchBookByID, authRequiredMiddleware)
-		booksRoutes.DELETE("/:bookID", deleteBookByID, authRequiredMiddleware)
-		booksRoutes.GET("/:bookID/notes", getNotesByBookID)
-		booksRoutes.POST("/:bookID/notes", createNoteByBookID, authRequiredMiddleware)
+		booksRoutes.POST("", booksHandler.PostBook, authRequiredMiddleware)
+		booksRoutes.GET("/:bookID", booksHandler.GetBookByID)
+		booksRoutes.PATCH("/:bookID", booksHandler.PatchBookByID, authRequiredMiddleware)
+		booksRoutes.DELETE("/:bookID", booksHandler.DeleteBookByID, authRequiredMiddleware)
+		booksRoutes.GET("/:bookID/notes", notesHandler.GetNotesByBookID)
+		booksRoutes.POST("/:bookID/notes", notesHandler.PostNoteByBookID, authRequiredMiddleware)
 	}
 	notesRoutes := apiRoutes.Group("/notes")
 	{
-		notesRoutes.GET("/recent", getNotesRecent)
-		notesRoutes.GET("/:noteID", getNoteByID)
-		notesRoutes.PATCH("/:noteID", patchNoteByID, authRequiredMiddleware)
-		notesRoutes.DELETE("/:noteID", deleteNoteById, authRequiredMiddleware)
-		notesRoutes.PUT("/:noteID/restore", restoreNoteByID, authRequiredMiddleware)
-		notesRoutes.GET("/:noteID/content", getNoteContent)
+		notesRoutes.GET("/recent", notesHandler.GetNotesRecent)
+		notesRoutes.GET("/:noteID", notesHandler.GetNoteByID)
+		notesRoutes.PATCH("/:noteID", notesHandler.PatchNoteByID, authRequiredMiddleware)
+		notesRoutes.DELETE("/:noteID", notesHandler.DeleteNoteByID, authRequiredMiddleware)
+		notesRoutes.PUT("/:noteID/restore", notesHandler.RestoreNoteByID, authRequiredMiddleware)
+		notesRoutes.GET("/:noteID/content", notesHandler.GetNoteContentByID)
 		notesRoutes.PUT(
 			"/:noteID/content",
-			updateNoteContent,
+			notesHandler.UpdateNoteContentByID,
 			authRequiredMiddleware,
 			middleware.BodyLimit(appConfig.NoteSizeLimit),
 		)
@@ -178,13 +184,13 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) error {
 
 		assetsRoutes.POST(
 			"",
-			createNoteAsset,
+			assetsHandler.PostNoteAsset,
 			authRequiredMiddleware,
 			middleware.BodyLimit(appConfig.AssetSizeLimit),
 		)
-		assetsRoutes.GET("", getNoteAssets)
-		assetsRoutes.GET("/:assetID", getNoteAssetContentByID)
-		assetsRoutes.DELETE("/:assetID", deleteNoteAssetByID, authRequiredMiddleware)
+		assetsRoutes.GET("", assetsHandler.GetNoteAssets)
+		assetsRoutes.GET("/:assetID", assetsHandler.GetNoteAssetContentByID)
+		assetsRoutes.DELETE("/:assetID", assetsHandler.DeleteNoteAssetByID, authRequiredMiddleware)
 	}
 	return nil
 }
