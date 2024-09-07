@@ -244,6 +244,16 @@ const MainApp: Component<ParentProps> = (props) => {
           </ul>
           <li>
             <a
+              href="https://buymeacoffee.com/leospratt"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-sm shadow bg-base-100"
+            >
+              Support My Work (Donate)
+            </a>
+          </li>
+          <li>
+            <a
               href="https://github.com/enchant97/note-mark"
               target="_blank"
               rel="noopener noreferrer"
