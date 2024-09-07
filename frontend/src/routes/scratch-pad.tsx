@@ -36,7 +36,7 @@ const ScratchPad: Component = () => {
 
   return (
     <div class="min-h-screen">
-      <Header />
+      <Header disableDrawerToggle={true} />
       <h1 class="text-4xl font-bold mb-4 flex justify-center items-center gap-2 mx-auto">
         <Icon name="file-text" />
         Scratch Pad

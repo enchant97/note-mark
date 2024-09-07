@@ -26,7 +26,7 @@ const Home: Component = () => {
   return (
     <Show when={user() === undefined} fallback={<Navigate href={`/${user()?.username}`} />}>
       <div class="min-h-screen">
-        <Header />
+        <Header disableDrawerToggle={true} />
         <div class="bg-base-200 p-6 mx-6">
           <div class="card w-full max-w-md mx-auto bg-base-100">
             <div class="card-body text-center">

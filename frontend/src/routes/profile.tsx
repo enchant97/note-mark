@@ -40,7 +40,7 @@ const Profile: Component = () => {
 
   return (
     <div class="min-h-screen">
-      <Header />
+      <Header disableDrawerToggle={true} />
       <div class="bg-base-200 p-6 mx-6">
         <h1 class="text-4xl text-center font-bold mb-4">My Profile</h1>
         <div class="card w-full max-w-md mx-auto bg-base-100">

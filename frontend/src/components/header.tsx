@@ -62,14 +62,20 @@ const ProfileDropdown = () => {
   )
 }
 
-const Header: Component = () => {
+export type HeaderProps = {
+  disableDrawerToggle?: boolean,
+}
+
+const Header: Component<HeaderProps> = (props) => {
   const { user } = useCurrentUser()
 
   return (
     <div class="w-full navbar bg-base-300-blur shadow-lg sticky top-0 z-10">
-      <label for="main-drawer" class="lg:hidden btn btn-square btn-ghost shadow">
-        <Icon name="menu" />
-      </label>
+      <Show when={!props.disableDrawerToggle}>
+        <label for="main-drawer" class="lg:hidden btn btn-square btn-ghost shadow">
+          <Icon name="menu" />
+        </label>
+      </Show>
       <span class="px-2 mx-2 text-xl hidden sm:block">Note Mark</span>
       <div class="flex-1"></div>
       <div class="flex gap-4">
