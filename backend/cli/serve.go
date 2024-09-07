@@ -5,7 +5,7 @@ import (
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
-	"github.com/enchant97/note-mark/backend/routes"
+	"github.com/enchant97/note-mark/backend/handlers"
 	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -59,7 +59,7 @@ func commandServe(appConfig config.AppConfig) error {
 		}
 	})
 	// Init routes
-	if err := routes.InitRoutes(e, appConfig); err != nil {
+	if err := handlers.InitRoutes(e, appConfig); err != nil {
 		return err
 	}
 	// Start server
