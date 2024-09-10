@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/services"
 	"github.com/enchant97/note-mark/backend/storage"
@@ -14,6 +15,8 @@ import (
 
 type AssetsHandler struct {
 	services.AssetsService
+	AppConfig config.AppConfig
+	Storage   storage.StorageController
 }
 
 func (h AssetsHandler) PostNoteAsset(ctx echo.Context) error {
@@ -29,7 +32,6 @@ func (h AssetsHandler) PostNoteAsset(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusBadRequest)
 	}
 
-	storage_backend := ctx.Get("Storage").(storage.StorageController)
 	body := ctx.Request().Body
 	defer body.Close()
 
@@ -38,7 +40,7 @@ func (h AssetsHandler) PostNoteAsset(ctx echo.Context) error {
 		noteID,
 		name,
 		body,
-		storage_backend); err != nil {
+		h.Storage); err != nil {
 		if errors.Is(err, services.AssetsServiceNotFoundError) {
 			return ctx.NoContent(http.StatusNotFound)
 		} else {
@@ -56,12 +58,10 @@ func (h AssetsHandler) GetNoteAssets(ctx echo.Context) error {
 		return err
 	}
 
-	storage_backend := ctx.Get("Storage").(storage.StorageController)
-
 	if assets, err := h.AssetsService.GetNoteAssets(
 		optionalUserID,
 		noteID,
-		storage_backend); err != nil {
+		h.Storage); err != nil {
 		return err
 	} else {
 		return ctx.JSON(http.StatusOK, assets)
@@ -79,12 +79,10 @@ func (h AssetsHandler) GetNoteAssetContentByID(ctx echo.Context) error {
 		return err
 	}
 
-	storage_backend := ctx.Get("Storage").(storage.StorageController)
-
 	if asset, info, stream, err := h.AssetsService.GetNoteAssetContentByID(
 		noteID,
 		assetID,
-		storage_backend); err != nil {
+		h.Storage); err != nil {
 		return err
 	} else {
 		defer stream.Close()
@@ -114,13 +112,11 @@ func (h AssetsHandler) DeleteNoteAssetByID(ctx echo.Context) error {
 		return err
 	}
 
-	storage_backend := ctx.Get("Storage").(storage.StorageController)
-
 	if err := h.AssetsService.DeleteNoteAssetByID(
 		authenticatedUser.UserID,
 		noteID,
 		assetID,
-		storage_backend); err != nil {
+		h.Storage); err != nil {
 		if errors.Is(err, services.AssetsServiceNotFoundError) {
 			return ctx.NoContent(http.StatusNotFound)
 		} else {

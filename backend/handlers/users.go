@@ -14,17 +14,16 @@ import (
 
 type UsersHandler struct {
 	services.UsersService
+	AppConfig config.AppConfig
 }
 
 func (h UsersHandler) PostCreateUser(ctx echo.Context) error {
-	appConfig := ctx.Get("AppConfig").(config.AppConfig)
-
 	var userData db.CreateUser
 	if err := core.BindAndValidate(ctx, &userData); err != nil {
 		return err
 	}
 
-	if user, err := h.UsersService.CreateUser(appConfig, userData); err != nil {
+	if user, err := h.UsersService.CreateUser(h.AppConfig, userData); err != nil {
 		if errors.Is(err, services.UsersServiceUserSignupDisabledError) {
 			return ctx.NoContent(http.StatusForbidden)
 		} else {

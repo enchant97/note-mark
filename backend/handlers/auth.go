@@ -12,16 +12,16 @@ import (
 
 type AuthHandler struct {
 	services.AuthService
+	AppConfig config.AppConfig
 }
 
 func (h AuthHandler) PostToken(ctx echo.Context) error {
-	appConfig := ctx.Get("AppConfig").(config.AppConfig)
 	var loginData core.AccessTokenRequest
 	if err := core.BindAndValidate(ctx, &loginData); err != nil {
 		return err
 	}
 
-	if token, err := h.AuthService.GetAccessToken(appConfig, loginData.Username, loginData.Password); err != nil {
+	if token, err := h.AuthService.GetAccessToken(h.AppConfig, loginData.Username, loginData.Password); err != nil {
 		if errors.Is(err, services.AuthServiceInvalidCredentialsError) {
 			return ctx.NoContent(http.StatusUnauthorized)
 		} else {

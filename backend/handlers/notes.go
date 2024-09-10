@@ -14,6 +14,7 @@ import (
 
 type NotesHandler struct {
 	services.NotesService
+	Storage storage.StorageController
 }
 
 func (h NotesHandler) PostNoteByBookID(ctx echo.Context) error {
@@ -97,9 +98,7 @@ func (h NotesHandler) GetNoteContentByID(ctx echo.Context) error {
 		return err
 	}
 
-	storage_backend := ctx.Get("Storage").(storage.StorageController)
-
-	if checksum, stream, err := h.NotesService.GetNoteContent(optionalUserID, noteID, storage_backend); err != nil {
+	if checksum, stream, err := h.NotesService.GetNoteContent(optionalUserID, noteID, h.Storage); err != nil {
 		if errors.Is(err, services.NoteServiceNotFoundError) {
 			return ctx.NoContent(http.StatusNotFound)
 		}
@@ -143,8 +142,6 @@ func (h NotesHandler) UpdateNoteContentByID(ctx echo.Context) error {
 		return err
 	}
 
-	storage_backend := ctx.Get("Storage").(storage.StorageController)
-
 	body := ctx.Request().Body
 	defer body.Close()
 
@@ -152,7 +149,7 @@ func (h NotesHandler) UpdateNoteContentByID(ctx echo.Context) error {
 		authenticatedUser.UserID,
 		noteID,
 		body,
-		storage_backend); err != nil {
+		h.Storage); err != nil {
 		if errors.Is(err, services.NoteServiceNotFoundError) {
 			return ctx.NoContent(http.StatusNotFound)
 		} else {
@@ -183,7 +180,6 @@ func (h NotesHandler) DeleteNoteByID(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	storage_backend := ctx.Get("Storage").(storage.StorageController)
 
 	var params core.DeleteParams
 	if err := core.BindAndValidate(ctx, &params); err != nil {
@@ -194,7 +190,7 @@ func (h NotesHandler) DeleteNoteByID(ctx echo.Context) error {
 		authenticatedUser.UserID,
 		noteID,
 		params.Permanent,
-		storage_backend); err != nil {
+		h.Storage); err != nil {
 		if errors.Is(err, services.NoteServiceNotFoundError) {
 			return ctx.NoContent(http.StatusNotFound)
 		} else {

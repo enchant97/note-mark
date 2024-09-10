@@ -8,6 +8,7 @@ import (
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
+	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
@@ -93,16 +94,10 @@ func getAuthDetails(ctx echo.Context) *core.AuthenticationDetails {
 	return ctx.Get(AuthDetailsKey).(*core.AuthenticationDetails)
 }
 
-func getServerInfo(ctx echo.Context) error {
-	appConfig := ctx.Get("AppConfig").(config.AppConfig)
-
-	return ctx.JSON(http.StatusOK, core.ServerInfo{
-		MinSupportedVersion: "0.12.0",
-		AllowSignup:         appConfig.AllowSignup,
-	})
-}
-
-func InitRoutes(e *echo.Echo, appConfig config.AppConfig) error {
+func InitRoutes(
+	e *echo.Echo,
+	appConfig config.AppConfig,
+	storage_backend storage.StorageController) error {
 	corsConfig := middleware.DefaultCORSConfig
 	{
 		corsConfig.AllowOrigins = appConfig.CORSOrigins
@@ -134,14 +129,25 @@ func InitRoutes(e *echo.Echo, appConfig config.AppConfig) error {
 		authHandlerMiddleware,
 	)
 
-	authHandler := AuthHandler{}
+	// TODO make these SetupXHandler() methods instead (with route config)
+	miscHandler := MiscHandler{
+		AppConfig: appConfig,
+	}
+	authHandler := AuthHandler{
+		AppConfig: appConfig,
+	}
 	userHandler := UsersHandler{}
 	booksHandler := BooksHandler{}
-	notesHandler := NotesHandler{}
-	assetsHandler := AssetsHandler{}
+	notesHandler := NotesHandler{
+		Storage: storage_backend,
+	}
+	assetsHandler := AssetsHandler{
+		AppConfig: appConfig,
+		Storage:   storage_backend,
+	}
 
 	apiRoutes.POST("/auth/token", authHandler.PostToken)
-	apiRoutes.GET("/info", getServerInfo)
+	apiRoutes.GET("/info", miscHandler.GetServerInfo)
 	slugRoutes := apiRoutes.Group("/slug/@:username")
 	{
 		slugRoutes.GET("", userHandler.GetUserByUsername)

@@ -51,15 +51,8 @@ func commandServe(appConfig config.AppConfig) error {
 	e.Use(middleware.Logger())
 	v := core.Validator{}.New()
 	e.Validator = &v
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(ctx echo.Context) error {
-			ctx.Set("AppConfig", appConfig)
-			ctx.Set("Storage", storage_backend)
-			return next(ctx)
-		}
-	})
 	// Init routes
-	if err := handlers.InitRoutes(e, appConfig); err != nil {
+	if err := handlers.InitRoutes(e, appConfig, storage_backend); err != nil {
 		return err
 	}
 	// Start server
