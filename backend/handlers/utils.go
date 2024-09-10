@@ -94,7 +94,7 @@ func getAuthDetails(ctx echo.Context) *core.AuthenticationDetails {
 	return ctx.Get(AuthDetailsKey).(*core.AuthenticationDetails)
 }
 
-func InitRoutes(
+func SetupHandlers(
 	e *echo.Echo,
 	appConfig config.AppConfig,
 	storage_backend storage.StorageController) error {
@@ -128,76 +128,11 @@ func InitRoutes(
 		createJwtMiddleware(appConfig.JWTSecret),
 		authHandlerMiddleware,
 	)
-
-	// TODO make these SetupXHandler() methods instead (with route config)
-	miscHandler := MiscHandler{
-		AppConfig: appConfig,
-	}
-	authHandler := AuthHandler{
-		AppConfig: appConfig,
-	}
-	userHandler := UsersHandler{}
-	booksHandler := BooksHandler{}
-	notesHandler := NotesHandler{
-		Storage: storage_backend,
-	}
-	assetsHandler := AssetsHandler{
-		AppConfig: appConfig,
-		Storage:   storage_backend,
-	}
-
-	apiRoutes.POST("/auth/token", authHandler.PostToken)
-	apiRoutes.GET("/info", miscHandler.GetServerInfo)
-	slugRoutes := apiRoutes.Group("/slug/@:username")
-	{
-		slugRoutes.GET("", userHandler.GetUserByUsername)
-		slugRoutes.GET("/books/:bookSlug", booksHandler.GetBookBySlug)
-		slugRoutes.GET("/books/:bookSlug/notes/:noteSlug", notesHandler.GetNoteBySlug)
-	}
-	usersRoutes := apiRoutes.Group("/users")
-	{
-		usersRoutes.POST("", userHandler.PostCreateUser)
-		usersRoutes.GET("/search", userHandler.GetSearchForUser)
-		usersRoutes.GET("/me", userHandler.GetCurrentUser, authRequiredMiddleware)
-		usersRoutes.PATCH("/me", userHandler.PatchCurrentUser, authRequiredMiddleware)
-		usersRoutes.PUT("/me/password", userHandler.PatchCurrentUserPassword, authRequiredMiddleware)
-	}
-	booksRoutes := apiRoutes.Group("/books")
-	{
-		booksRoutes.POST("", booksHandler.PostBook, authRequiredMiddleware)
-		booksRoutes.GET("/:bookID", booksHandler.GetBookByID)
-		booksRoutes.PATCH("/:bookID", booksHandler.PatchBookByID, authRequiredMiddleware)
-		booksRoutes.DELETE("/:bookID", booksHandler.DeleteBookByID, authRequiredMiddleware)
-		booksRoutes.GET("/:bookID/notes", notesHandler.GetNotesByBookID)
-		booksRoutes.POST("/:bookID/notes", notesHandler.PostNoteByBookID, authRequiredMiddleware)
-	}
-	notesRoutes := apiRoutes.Group("/notes")
-	{
-		notesRoutes.GET("/recent", notesHandler.GetNotesRecent)
-		notesRoutes.GET("/:noteID", notesHandler.GetNoteByID)
-		notesRoutes.PATCH("/:noteID", notesHandler.PatchNoteByID, authRequiredMiddleware)
-		notesRoutes.DELETE("/:noteID", notesHandler.DeleteNoteByID, authRequiredMiddleware)
-		notesRoutes.PUT("/:noteID/restore", notesHandler.RestoreNoteByID, authRequiredMiddleware)
-		notesRoutes.GET("/:noteID/content", notesHandler.GetNoteContentByID)
-		notesRoutes.PUT(
-			"/:noteID/content",
-			notesHandler.UpdateNoteContentByID,
-			authRequiredMiddleware,
-			middleware.BodyLimit(appConfig.NoteSizeLimit),
-		)
-	}
-	assetsRoutes := apiRoutes.Group("/notes/:noteID/assets")
-	{
-
-		assetsRoutes.POST(
-			"",
-			assetsHandler.PostNoteAsset,
-			authRequiredMiddleware,
-			middleware.BodyLimit(appConfig.AssetSizeLimit),
-		)
-		assetsRoutes.GET("", assetsHandler.GetNoteAssets)
-		assetsRoutes.GET("/:assetID", assetsHandler.GetNoteAssetContentByID)
-		assetsRoutes.DELETE("/:assetID", assetsHandler.DeleteNoteAssetByID, authRequiredMiddleware)
-	}
+	SetupMiscHandler(apiRoutes, appConfig)
+	SetupAuthHandler(apiRoutes, appConfig)
+	SetupUsersHandler(apiRoutes, appConfig)
+	SetupBooksHandler(apiRoutes)
+	SetupNotesHandler(apiRoutes, appConfig, storage_backend)
+	SetupAssetsHandler(apiRoutes, appConfig, storage_backend)
 	return nil
 }

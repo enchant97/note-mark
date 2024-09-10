@@ -10,6 +10,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func SetupAuthHandler(g *echo.Group, appConfig config.AppConfig) {
+	authHandler := AuthHandler{
+		AppConfig: appConfig,
+	}
+	g.POST("/auth/token", authHandler.PostToken)
+}
+
 type AuthHandler struct {
 	services.AuthService
 	AppConfig config.AppConfig

@@ -52,7 +52,7 @@ func commandServe(appConfig config.AppConfig) error {
 	v := core.Validator{}.New()
 	e.Validator = &v
 	// Init routes
-	if err := handlers.InitRoutes(e, appConfig, storage_backend); err != nil {
+	if err := handlers.SetupHandlers(e, appConfig, storage_backend); err != nil {
 		return err
 	}
 	// Start server

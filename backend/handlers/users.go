@@ -12,6 +12,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func SetupUsersHandler(g *echo.Group, appConfig config.AppConfig) {
+	userHandler := UsersHandler{}
+	g.GET("/slug/@:username", userHandler.GetUserByUsername)
+	usersRoutes := g.Group("/users")
+	{
+		usersRoutes.POST("", userHandler.PostCreateUser)
+		usersRoutes.GET("/search", userHandler.GetSearchForUser)
+		usersRoutes.GET("/me", userHandler.GetCurrentUser, authRequiredMiddleware)
+		usersRoutes.PATCH("/me", userHandler.PatchCurrentUser, authRequiredMiddleware)
+		usersRoutes.PUT("/me/password", userHandler.PatchCurrentUserPassword, authRequiredMiddleware)
+	}
+}
+
 type UsersHandler struct {
 	services.UsersService
 	AppConfig config.AppConfig

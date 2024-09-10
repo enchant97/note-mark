@@ -11,7 +11,31 @@ import (
 	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
+
+func SetupAssetsHandler(
+	g *echo.Group,
+	appConfig config.AppConfig,
+	storage_backend storage.StorageController) {
+	assetsHandler := AssetsHandler{
+		AppConfig: appConfig,
+		Storage:   storage_backend,
+	}
+	assetsRoutes := g.Group("/notes/:noteID/assets")
+	{
+
+		assetsRoutes.POST(
+			"",
+			assetsHandler.PostNoteAsset,
+			authRequiredMiddleware,
+			middleware.BodyLimit(appConfig.AssetSizeLimit),
+		)
+		assetsRoutes.GET("", assetsHandler.GetNoteAssets)
+		assetsRoutes.GET("/:assetID", assetsHandler.GetNoteAssetContentByID)
+		assetsRoutes.DELETE("/:assetID", assetsHandler.DeleteNoteAssetByID, authRequiredMiddleware)
+	}
+}
 
 type AssetsHandler struct {
 	services.AssetsService

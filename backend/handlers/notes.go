@@ -4,13 +4,39 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/services"
 	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
+
+func SetupNotesHandler(g *echo.Group, appConfig config.AppConfig, storage_backend storage.StorageController) {
+	notesHandler := NotesHandler{
+		Storage: storage_backend,
+	}
+	g.GET("/slug/@:username/books/:bookSlug/notes/:noteSlug", notesHandler.GetNoteBySlug)
+	g.GET("/books/:bookID/notes", notesHandler.GetNotesByBookID)
+	g.POST("/books/:bookID/notes", notesHandler.PostNoteByBookID, authRequiredMiddleware)
+	notesRoutes := g.Group("/notes")
+	{
+		notesRoutes.GET("/recent", notesHandler.GetNotesRecent)
+		notesRoutes.GET("/:noteID", notesHandler.GetNoteByID)
+		notesRoutes.PATCH("/:noteID", notesHandler.PatchNoteByID, authRequiredMiddleware)
+		notesRoutes.DELETE("/:noteID", notesHandler.DeleteNoteByID, authRequiredMiddleware)
+		notesRoutes.PUT("/:noteID/restore", notesHandler.RestoreNoteByID, authRequiredMiddleware)
+		notesRoutes.GET("/:noteID/content", notesHandler.GetNoteContentByID)
+		notesRoutes.PUT(
+			"/:noteID/content",
+			notesHandler.UpdateNoteContentByID,
+			authRequiredMiddleware,
+			middleware.BodyLimit(appConfig.NoteSizeLimit),
+		)
+	}
+}
 
 type NotesHandler struct {
 	services.NotesService

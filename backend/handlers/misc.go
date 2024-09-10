@@ -8,6 +8,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func SetupMiscHandler(g *echo.Group, appConfig config.AppConfig) {
+	miscHandler := MiscHandler{
+		AppConfig: appConfig,
+	}
+	g.GET("/info", miscHandler.GetServerInfo)
+}
+
 type MiscHandler struct {
 	AppConfig config.AppConfig
 }

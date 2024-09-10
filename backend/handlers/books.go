@@ -12,6 +12,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func SetupBooksHandler(g *echo.Group) {
+	booksHandler := BooksHandler{}
+	g.GET("/slug/@:username/books/:bookSlug", booksHandler.GetBookBySlug)
+	booksRoutes := g.Group("/books")
+	{
+		booksRoutes.POST("", booksHandler.PostBook, authRequiredMiddleware)
+		booksRoutes.GET("/:bookID", booksHandler.GetBookByID)
+		booksRoutes.PATCH("/:bookID", booksHandler.PatchBookByID, authRequiredMiddleware)
+		booksRoutes.DELETE("/:bookID", booksHandler.DeleteBookByID, authRequiredMiddleware)
+	}
+}
+
 type BooksHandler struct {
 	BooksService services.BooksService
 }
