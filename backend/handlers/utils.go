@@ -14,6 +14,7 @@ import (
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"gorm.io/gorm"
 )
 
 const (
@@ -94,10 +95,36 @@ func getAuthDetails(ctx echo.Context) *core.AuthenticationDetails {
 	return ctx.Get(AuthDetailsKey).(*core.AuthenticationDetails)
 }
 
+// HTTP error handler, to handle unexpected errors
+func httpErrorHandler(err error, ctx echo.Context) {
+	if e, ok := err.(*echo.HTTPError); ok {
+		// normal HTTP error
+		ctx.JSON(e.Code, e.Message)
+		return
+	}
+	ctx.Logger().Error(err)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		ctx.NoContent(http.StatusNotFound)
+	} else if errors.Is(err, gorm.ErrDuplicatedKey) {
+		ctx.NoContent(http.StatusConflict)
+	} else if errors.Is(err, core.ErrBind) || errors.Is(err, core.ErrValidation) {
+		ctx.NoContent(http.StatusUnprocessableEntity)
+	} else {
+		ctx.NoContent(http.StatusInternalServerError)
+	}
+}
+
 func SetupHandlers(
-	e *echo.Echo,
 	appConfig config.AppConfig,
-	storage_backend storage.StorageController) error {
+	storage_backend storage.StorageController) (*echo.Echo, error) {
+	// Create server
+	e := echo.New()
+	e.HTTPErrorHandler = httpErrorHandler
+	// Register root middleware
+	e.Use(middleware.Recover())
+	e.Use(middleware.Logger())
+	v := core.Validator{}.New()
+	e.Validator = &v
 	corsConfig := middleware.DefaultCORSConfig
 	{
 		corsConfig.AllowOrigins = appConfig.CORSOrigins
@@ -112,7 +139,7 @@ func SetupHandlers(
 	)
 	if len(appConfig.StaticPath) != 0 {
 		if _, err := os.Stat(appConfig.StaticPath); errors.Is(err, os.ErrNotExist) {
-			return err
+			return nil, err
 		}
 		e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 			Root:  appConfig.StaticPath,
@@ -134,5 +161,5 @@ func SetupHandlers(
 	SetupBooksHandler(apiRoutes)
 	SetupNotesHandler(apiRoutes, appConfig, storage_backend)
 	SetupAssetsHandler(apiRoutes, appConfig, storage_backend)
-	return nil
+	return e, nil
 }
