@@ -45,25 +45,13 @@ type AccessToken struct {
 //
 // only supporting 'Resource Owner Password Flow'
 type AccessTokenRequest struct {
-	GrantType string `json:"grant_type" query:"grant_type" form:"grant_type" validate:"required,eq=password"`
-	Username  string `json:"username" query:"username" form:"username" validate:"required"`
-	Password  string `json:"password" query:"password" form:"password" validate:"required"`
-}
-
-type FindUserParams struct {
-	Username string `query:"username" validate:"required"`
+	GrantType string `json:"grant_type" query:"grant_type" form:"grant_type" required:"true" enum:"password"`
+	Username  string `json:"username" query:"username" form:"username" required:"true"`
+	Password  string `json:"password" query:"password" form:"password" required:"true"`
 }
 
 type ServerInfo struct {
 	MinSupportedVersion       string `json:"minSupportedVersion"`
 	AllowSignup               bool   `json:"allowSignup"`
 	EnableAnonymousUserSearch bool   `json:"enableAnonymousUserSearch"`
-}
-
-type DeleteParams struct {
-	Permanent bool `query:"permanent" validate:"omitempty,required"`
-}
-
-type NoteFilterParams struct {
-	Deleted bool `query:"deleted" validate:"omitempty,required"`
 }

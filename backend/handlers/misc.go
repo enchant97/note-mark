@@ -1,28 +1,33 @@
 package handlers
 
 import (
-	"net/http"
+	"context"
 
+	"github.com/danielgtaylor/huma/v2"
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
-	"github.com/labstack/echo/v4"
 )
 
-func SetupMiscHandler(g *echo.Group, appConfig config.AppConfig) {
+func SetupMiscHandler(api huma.API, appConfig config.AppConfig) {
 	miscHandler := MiscHandler{
 		AppConfig: appConfig,
 	}
-	g.GET("/info", miscHandler.GetServerInfo)
+	huma.Get(api, "/api/info", miscHandler.GetServerInfo)
+}
+
+type GetServerInfoOutput struct {
+	Body core.ServerInfo
 }
 
 type MiscHandler struct {
 	AppConfig config.AppConfig
 }
 
-func (h MiscHandler) GetServerInfo(ctx echo.Context) error {
-	return ctx.JSON(http.StatusOK, core.ServerInfo{
-		MinSupportedVersion:		"0.12.0",
-		AllowSignup:				h.AppConfig.AllowSignup,
-		EnableAnonymousUserSearch:  h.AppConfig.EnableAnonymousUserSearch,
-	})
+func (h MiscHandler) GetServerInfo(ctx context.Context, input *struct{}) (*GetServerInfoOutput, error) {
+	return &GetServerInfoOutput{
+		Body: core.ServerInfo{
+			MinSupportedVersion:       "0.12.0",
+			AllowSignup:               h.AppConfig.AllowSignup,
+			EnableAnonymousUserSearch: h.AppConfig.EnableAnonymousUserSearch,
+		}}, nil
 }

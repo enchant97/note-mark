@@ -1,20 +1,28 @@
 package handlers
 
 import (
+	"context"
 	"errors"
-	"net/http"
 
+	"github.com/danielgtaylor/huma/v2"
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/services"
-	"github.com/labstack/echo/v4"
 )
 
-func SetupAuthHandler(g *echo.Group, appConfig config.AppConfig) {
+func SetupAuthHandler(api huma.API, appConfig config.AppConfig) {
 	authHandler := AuthHandler{
 		AppConfig: appConfig,
 	}
-	g.POST("/auth/token", authHandler.PostToken)
+	huma.Post(api, "/api/auth/token", authHandler.PostToken)
+}
+
+type PostTokenInput struct {
+	Body core.AccessTokenRequest
+}
+
+type PostTokenOutput struct {
+	Body core.AccessToken
 }
 
 type AuthHandler struct {
@@ -22,19 +30,16 @@ type AuthHandler struct {
 	AppConfig config.AppConfig
 }
 
-func (h AuthHandler) PostToken(ctx echo.Context) error {
-	var loginData core.AccessTokenRequest
-	if err := core.BindAndValidate(ctx, &loginData); err != nil {
-		return err
-	}
-
-	if token, err := h.AuthService.GetAccessToken(h.AppConfig, loginData.Username, loginData.Password); err != nil {
+func (h AuthHandler) PostToken(ctx context.Context, input *PostTokenInput) (*PostTokenOutput, error) {
+	if token, err := h.AuthService.GetAccessToken(h.AppConfig, input.Body.Username, input.Body.Password); err != nil {
 		if errors.Is(err, services.AuthServiceInvalidCredentialsError) {
-			return ctx.NoContent(http.StatusUnauthorized)
+			return nil, huma.Error401Unauthorized("invalid credentials given")
 		} else {
-			return err
+			return nil, err
 		}
 	} else {
-		return ctx.JSON(http.StatusOK, token)
+		return &PostTokenOutput{
+			Body: token,
+		}, nil
 	}
 }

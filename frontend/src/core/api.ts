@@ -349,7 +349,7 @@ class Api {
   // Slug Access
   //
   async getUserByUsername(username: string, include?: "books" | "notes"): Promise<Result<User, ApiError>> {
-    let reqURL = `${this.apiServer}/slug/@${username}`
+    let reqURL = `${this.apiServer}/slug/${username}`
     if (include) { reqURL = `${reqURL}?include=${include}` }
     let resp = await handleFetchErrors(fetch(reqURL, {
       headers: this.optionalHeaderAuthorization(),
@@ -359,7 +359,7 @@ class Api {
     return handleBodyErrors(resp.json())
   }
   async getBookBySlug(username: string, bookSlug: string, include?: "notes"): Promise<Result<Book, ApiError>> {
-    let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}`
+    let reqURL = `${this.apiServer}/slug/${username}/books/${bookSlug}`
     if (include) { reqURL = `${reqURL}?include=${include}` }
     let resp = await handleFetchErrors(fetch(reqURL, {
       headers: this.optionalHeaderAuthorization(),
@@ -369,7 +369,7 @@ class Api {
     return handleBodyErrors(resp.json())
   }
   async getNoteBySlug(username: string, bookSlug: string, noteSlug: string): Promise<Result<Note, ApiError>> {
-    let reqURL = `${this.apiServer}/slug/@${username}/books/${bookSlug}/notes/${noteSlug}`
+    let reqURL = `${this.apiServer}/slug/${username}/books/${bookSlug}/notes/${noteSlug}`
     let resp = await handleFetchErrors(fetch(reqURL, {
       headers: this.optionalHeaderAuthorization(),
     }))

@@ -1,152 +1,166 @@
 package handlers
 
 import (
+	"bytes"
+	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/conditional"
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
+	"github.com/enchant97/note-mark/backend/middleware"
 	"github.com/enchant97/note-mark/backend/services"
 	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 func SetupAssetsHandler(
-	g *echo.Group,
+	api huma.API,
 	appConfig config.AppConfig,
-	storage_backend storage.StorageController) {
+	storage_backend storage.StorageController,
+	authProvider middleware.AuthDetailsProvider,
+) {
 	assetsHandler := AssetsHandler{
-		AppConfig: appConfig,
-		Storage:   storage_backend,
+		AppConfig:    appConfig,
+		Storage:      storage_backend,
+		AuthProvider: authProvider,
 	}
-	assetsRoutes := g.Group("/notes/:noteID/assets")
-	{
+	huma.Register(api, huma.Operation{
+		Method:        http.MethodPost,
+		Path:          "/api/notes/{noteID}/assets",
+		Middlewares:   huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		MaxBodyBytes:  int64(appConfig.AssetSizeLimit),
+		DefaultStatus: http.StatusCreated,
+	}, assetsHandler.PostNoteAsset)
+	huma.Get(api, "/api/notes/{noteID}/assets", assetsHandler.GetNoteAssets)
+	huma.Get(api, "/api/notes/{noteID}/assets/{assetID}", assetsHandler.GetNoteAssetContentByID)
+	huma.Register(api, huma.Operation{
+		Method:      http.MethodDelete,
+		Path:        "/api/notes/{noteID}/assets/{assetID}",
+		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+	}, assetsHandler.DeleteNoteAssetByID)
+}
 
-		assetsRoutes.POST(
-			"",
-			assetsHandler.PostNoteAsset,
-			authRequiredMiddleware,
-			middleware.BodyLimit(appConfig.AssetSizeLimit),
-		)
-		assetsRoutes.GET("", assetsHandler.GetNoteAssets)
-		assetsRoutes.GET("/:assetID", assetsHandler.GetNoteAssetContentByID)
-		assetsRoutes.DELETE("/:assetID", assetsHandler.DeleteNoteAssetByID, authRequiredMiddleware)
-	}
+type PostNoteAssetInput struct {
+	NoteID  uuid.UUID `path:"noteID" format:"uuid"`
+	Name    string    `header:"X-Name" required:"true"`
+	RawBody []byte    `required:"true"`
+}
+
+type PostNoteAssetOutput struct {
+	Body services.StoredAsset
+}
+
+type GetNoteAssetsInput struct {
+	NoteID uuid.UUID `path:"noteID" format:"uuid"`
+}
+
+type GetNoteAssetsOutput struct {
+	Body []services.StoredAsset
+}
+
+type GetNoteAssetContentByIDInput struct {
+	conditional.Params
+	NoteID  uuid.UUID `path:"noteID" format:"uuid"`
+	AssetID uuid.UUID `path:"assetID" format:"uuid"`
+}
+
+type DeleteNoteAssetByIDInput struct {
+	NoteID  uuid.UUID `path:"noteID" format:"uuid"`
+	AssetID uuid.UUID `path:"assetID" format:"uuid"`
 }
 
 type AssetsHandler struct {
 	services.AssetsService
-	AppConfig config.AppConfig
-	Storage   storage.StorageController
+	AppConfig    config.AppConfig
+	Storage      storage.StorageController
+	AuthProvider middleware.AuthDetailsProvider
 }
 
-func (h AssetsHandler) PostNoteAsset(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
-	noteID, err := uuid.Parse(ctx.Param("noteID"))
-	if err != nil {
-		return err
-	}
-
-	name := ctx.Request().Header.Get("X-Name")
-
-	if name == "" {
-		return ctx.NoContent(http.StatusBadRequest)
-	}
-
-	body := ctx.Request().Body
-	defer body.Close()
-
+func (h AssetsHandler) PostNoteAsset(
+	ctx context.Context,
+	input *PostNoteAssetInput) (*PostNoteAssetOutput, error) {
+	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
+	body := bytes.NewReader(input.RawBody)
 	if asset, err := h.AssetsService.CreateNoteAsset(
-		authenticatedUser.UserID,
-		noteID,
-		name,
+		authDetails.GetAuthenticatedUser().UserID,
+		input.NoteID,
+		input.Name,
 		body,
 		h.Storage); err != nil {
 		if errors.Is(err, services.AssetsServiceNotFoundError) {
-			return ctx.NoContent(http.StatusNotFound)
+			return nil, huma.Error404NotFound("note does not exist or you do not have access")
 		} else {
-			return err
+			return nil, err
 		}
 	} else {
-		return ctx.JSON(http.StatusCreated, asset)
+		return &PostNoteAssetOutput{Body: asset}, nil
 	}
 }
 
-func (h AssetsHandler) GetNoteAssets(ctx echo.Context) error {
-	optionalUserID := getAuthDetails(ctx).GetOptionalUserID()
-	noteID, err := uuid.Parse(ctx.Param("noteID"))
-	if err != nil {
-		return err
-	}
-
+func (h AssetsHandler) GetNoteAssets(
+	ctx context.Context,
+	input *GetNoteAssetsInput) (*GetNoteAssetsOutput, error) {
+	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	if assets, err := h.AssetsService.GetNoteAssets(
-		optionalUserID,
-		noteID,
+		authDetails.GetOptionalUserID(),
+		input.NoteID,
 		h.Storage); err != nil {
-		return err
+		return nil, err
 	} else {
-		return ctx.JSON(http.StatusOK, assets)
+		return &GetNoteAssetsOutput{Body: assets}, nil
 	}
 }
 
 // TODO Work out way to authenticate this
-func (h AssetsHandler) GetNoteAssetContentByID(ctx echo.Context) error {
-	noteID, err := uuid.Parse(ctx.Param("noteID"))
-	if err != nil {
-		return err
-	}
-	assetID, err := uuid.Parse(ctx.Param("assetID"))
-	if err != nil {
-		return err
-	}
-
+func (h AssetsHandler) GetNoteAssetContentByID(
+	ctx context.Context,
+	input *GetNoteAssetContentByIDInput) (*huma.StreamResponse, error) {
 	if asset, info, stream, err := h.AssetsService.GetNoteAssetContentByID(
-		noteID,
-		assetID,
+		input.NoteID,
+		input.AssetID,
 		h.Storage); err != nil {
-		return err
+		return nil, err
 	} else {
-		defer stream.Close()
-		if needNewContent := core.HandleETag(ctx, info.Checksum); !needNewContent {
-			return ctx.NoContent(http.StatusNotModified)
+		if input.HasConditionalParams() {
+			if err := input.PreconditionFailed(info.Checksum, info.FileInfo.LastModified); err != nil {
+				stream.Close()
+				return nil, err
+			}
 		}
-		ctx.Response().Header().Set(
-			"Last-Modified",
-			core.TimeIntoHTTPFormat(info.LastModified),
-		)
-		ctx.Response().Header().Set(
-			"Content-Disposition",
-			fmt.Sprintf("inline; filename=\"%s\"", asset.Name),
-		)
-		return ctx.Stream(http.StatusOK, info.MimeType, stream)
+		return &huma.StreamResponse{
+			Body: func(ctx huma.Context) {
+				ctx.SetHeader("Content-Type", info.MimeType)
+				ctx.SetHeader(
+					"Last-Modified",
+					core.TimeIntoHTTPFormat(info.LastModified))
+				ctx.SetHeader(
+					"Content-Disposition",
+					fmt.Sprintf("inline; filename=\"%s\"", asset.Name))
+				writer := ctx.BodyWriter()
+				io.Copy(writer, stream)
+				stream.Close()
+			}}, nil
 	}
 }
 
-func (h AssetsHandler) DeleteNoteAssetByID(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
-	noteID, err := uuid.Parse(ctx.Param("noteID"))
-	if err != nil {
-		return err
-	}
-	assetID, err := uuid.Parse(ctx.Param("assetID"))
-	if err != nil {
-		return err
-	}
-
+func (h AssetsHandler) DeleteNoteAssetByID(ctx context.Context, input *DeleteNoteAssetByIDInput) (*struct{}, error) {
+	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	if err := h.AssetsService.DeleteNoteAssetByID(
-		authenticatedUser.UserID,
-		noteID,
-		assetID,
+		authDetails.GetAuthenticatedUser().UserID,
+		input.NoteID,
+		input.AssetID,
 		h.Storage); err != nil {
 		if errors.Is(err, services.AssetsServiceNotFoundError) {
-			return ctx.NoContent(http.StatusNotFound)
+			return nil, huma.Error404NotFound("note asset does not exist or you do not have access")
 		} else {
-			return err
+			return nil, err
 		}
 	} else {
-		return ctx.NoContent(http.StatusNoContent)
+		return nil, nil
 	}
 }

@@ -26,6 +26,6 @@ type AppConfig struct {
 	CORSOrigins               []string      `env:"CORS_ORIGINS,notEmpty" envSeparator:","`
 	AllowSignup               bool          `env:"ALLOW_SIGNUP,notEmpty" envDefault:"true"`
 	EnableAnonymousUserSearch bool          `env:"ENABLE_ANONYMOUS_USER_SEARCH,notEmpty" envDefault:"true"`
-	NoteSizeLimit             string        `env:"NOTE_SIZE_LIMIT,notEmpty" envDefault:"1M"`
-	AssetSizeLimit            string        `env:"ASSET_SIZE_LIMIT,notEmpty" envDefault:"12M"`
+	NoteSizeLimit             Bytes         `env:"NOTE_SIZE_LIMIT,notEmpty" envDefault:"1M"`
+	AssetSizeLimit            Bytes         `env:"ASSET_SIZE_LIMIT,notEmpty" envDefault:"12M"`
 }

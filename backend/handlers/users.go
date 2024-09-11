@@ -1,130 +1,173 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"net/http"
-	"strings"
 
+	"github.com/danielgtaylor/huma/v2"
 	"github.com/enchant97/note-mark/backend/config"
-	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
+	"github.com/enchant97/note-mark/backend/middleware"
 	"github.com/enchant97/note-mark/backend/services"
-	"github.com/labstack/echo/v4"
 )
 
-func SetupUsersHandler(g *echo.Group, appConfig config.AppConfig) {
+func SetupUsersHandler(
+	api huma.API,
+	appConfig config.AppConfig,
+	authProvider middleware.AuthDetailsProvider,
+) {
 	userHandler := UsersHandler{
-		AppConfig: appConfig,
+		AppConfig:    appConfig,
+		AuthProvider: authProvider,
 	}
-	g.GET("/slug/@:username", userHandler.GetUserByUsername)
-	usersRoutes := g.Group("/users")
-	{
-		usersRoutes.POST("", userHandler.PostCreateUser)
-		usersRoutes.GET("/search", userHandler.GetSearchForUser)
-		usersRoutes.GET("/me", userHandler.GetCurrentUser, authRequiredMiddleware)
-		usersRoutes.PATCH("/me", userHandler.PatchCurrentUser, authRequiredMiddleware)
-		usersRoutes.PUT("/me/password", userHandler.PatchCurrentUserPassword, authRequiredMiddleware)
-	}
+	huma.Register(api, huma.Operation{
+		Method:        http.MethodPost,
+		Path:          "/api/users",
+		DefaultStatus: http.StatusCreated,
+	}, userHandler.PostCreateUser)
+	huma.Register(api, huma.Operation{
+		Method: http.MethodGet,
+		Path:   "/api/slug/{username}",
+		Middlewares: func() huma.Middlewares {
+			if appConfig.EnableAnonymousUserSearch {
+				return huma.Middlewares{}
+			} else {
+				return huma.Middlewares{authProvider.AuthRequiredMiddleware}
+			}
+		}(),
+	}, userHandler.GetUserByUsername)
+	huma.Get(api, "/api/users/search", userHandler.GetSearchForUser)
+	huma.Register(api, huma.Operation{
+		Method:      http.MethodGet,
+		Path:        "/api/users/me",
+		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+	}, userHandler.GetCurrentUser)
+	huma.Register(api, huma.Operation{
+		Method:      http.MethodPatch,
+		Path:        "/api/users/me",
+		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+	}, userHandler.PatchCurrentUser)
+	huma.Register(api, huma.Operation{
+		Method:      http.MethodPut,
+		Path:        "/api/users/me/password",
+		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+	}, userHandler.PutCurrentUserPassword)
 }
 
 type UsersHandler struct {
 	services.UsersService
-	AppConfig config.AppConfig
+	AppConfig    config.AppConfig
+	AuthProvider middleware.AuthDetailsProvider
 }
 
-func (h UsersHandler) PostCreateUser(ctx echo.Context) error {
-	var userData db.CreateUser
-	if err := core.BindAndValidate(ctx, &userData); err != nil {
-		return err
-	}
+type PostCreateUserInput struct {
+	Body db.CreateUser
+}
 
-	if user, err := h.UsersService.CreateUser(h.AppConfig, userData); err != nil {
+type PostCreateUserOutput struct {
+	Body db.User
+}
+
+type GetUserOutput struct {
+	Body db.User
+}
+
+type GetUserByUsername struct {
+	Username string `path:"username"`
+	Include  string `query:"include" enum:"books,notes"`
+}
+
+type PatchUserInput struct {
+	Body db.UpdateUser
+}
+
+type PutUserPasswordInput struct {
+	Body db.UpdateUserPassword
+}
+
+type GetSearchForUserInput struct {
+	Username string `query:"username" required:"true"`
+}
+
+type GetSearchForUserOutput struct {
+	Body []string
+}
+
+func (h UsersHandler) PostCreateUser(ctx context.Context, input *PostCreateUserInput) (*PostCreateUserOutput, error) {
+	if user, err := h.UsersService.CreateUser(h.AppConfig, input.Body); err != nil {
 		if errors.Is(err, services.UsersServiceUserSignupDisabledError) {
-			return ctx.NoContent(http.StatusForbidden)
+			return nil, huma.Error403Forbidden("user signup has been disabled by the administrator")
 		} else {
-			return err
+			return nil, err
 		}
 	} else {
-		return ctx.JSON(http.StatusCreated, user)
+		return &PostCreateUserOutput{
+			Body: user,
+		}, nil
 	}
 }
 
-func (h UsersHandler) GetCurrentUser(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
-	if user, err := h.UsersService.GetUserProfileByID(authenticatedUser.UserID); err != nil {
-		return err
+func (h UsersHandler) GetCurrentUser(ctx context.Context, input *struct{}) (*GetUserOutput, error) {
+	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
+	userID := authDetails.GetAuthenticatedUser().UserID
+	if user, err := h.UsersService.GetUserProfileByID(userID); err != nil {
+		return nil, err
 	} else {
-		return ctx.JSON(http.StatusOK, user)
+		return &GetUserOutput{
+			Body: user,
+		}, nil
 	}
 }
 
-func (h UsersHandler) GetUserByUsername(ctx echo.Context) error {
-	username := ctx.Param("username")
-	optionalUserID := getAuthDetails(ctx).GetOptionalUserID()
-	include := strings.ToLower(ctx.QueryParam("include"))
-
-	includeBooks := include == "books" || include == "notes"
-	includeNotes := include == "notes"
-
+func (h UsersHandler) GetUserByUsername(ctx context.Context, input *GetUserByUsername) (*GetUserOutput, error) {
+	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
+	optionalUserID := authDetails.GetOptionalUserID()
+	includeBooks := input.Include == "books" || input.Include == "notes"
+	includeNotes := input.Include == "notes"
 	if user, err := h.UsersService.GetUserByUsername(
 		optionalUserID,
-		username,
+		input.Username,
 		includeBooks,
 		includeNotes); err != nil {
-		return err
+		return nil, err
 	} else {
-		return ctx.JSON(http.StatusOK, user)
+		return &GetUserOutput{
+			Body: user,
+		}, nil
 	}
 }
 
-func (h UsersHandler) PatchCurrentUser(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
-
-	var userData db.UpdateUser
-	if err := core.BindAndValidate(ctx, &userData); err != nil {
-		return err
-	}
-
-	if err := h.UsersService.UpdateUserProfile(authenticatedUser.UserID, userData); err != nil {
-		return err
+func (h UsersHandler) PatchCurrentUser(ctx context.Context, input *PatchUserInput) (*struct{}, error) {
+	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
+	userID := authDetails.GetAuthenticatedUser().UserID
+	if err := h.UsersService.UpdateUserProfile(userID, input.Body); err != nil {
+		return nil, err
 	} else {
-		return ctx.NoContent(http.StatusOK)
+		return nil, nil
 	}
 }
 
-func (h UsersHandler) PatchCurrentUserPassword(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
-
-	var userData db.UpdateUserPassword
-	if err := core.BindAndValidate(ctx, &userData); err != nil {
-		return err
-	}
-
-	if err := h.UsersService.UpdateUserPassword(authenticatedUser.UserID, userData); err != nil {
+func (h UsersHandler) PutCurrentUserPassword(ctx context.Context, input *PutUserPasswordInput) (*struct{}, error) {
+	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
+	userID := authDetails.GetAuthenticatedUser().UserID
+	if err := h.UsersService.UpdateUserPassword(userID, input.Body); err != nil {
 		if errors.Is(err, services.UsersServiceUserPasswordInvalid) {
-			return ctx.NoContent(http.StatusForbidden)
+			return nil, huma.Error403Forbidden("current password invalid")
 		} else {
-			return err
+			return nil, err
 		}
 	} else {
-
-		return ctx.NoContent(http.StatusOK)
+		return nil, nil
 	}
 }
 
-func (h UsersHandler) GetSearchForUser(ctx echo.Context) error {
-	if !h.AppConfig.EnableAnonymousUserSearch && !getAuthDetails(ctx).IsAuthenticated() {
-		return ctx.NoContent(http.StatusUnauthorized)
-	}
-
-	var params core.FindUserParams
-	if err := core.BindAndValidate(ctx, &params); err != nil {
-		return err
-	}
-
-	if users, err := h.UsersService.GetSearchForUser(params.Username); err != nil {
-		return err
+func (h UsersHandler) GetSearchForUser(ctx context.Context, input *GetSearchForUserInput) (*GetSearchForUserOutput, error) {
+	if users, err := h.UsersService.GetSearchForUser(input.Username); err != nil {
+		return nil, err
 	} else {
-		return ctx.JSON(http.StatusOK, users)
+		return &GetSearchForUserOutput{
+			Body: users,
+		}, nil
 	}
 }

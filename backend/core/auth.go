@@ -1,17 +1,23 @@
 package core
 
 import (
+	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
+var (
+	JWTClaimsNotValidError  = errors.New("invalid jwt claims")
+	DefaultJwtSigningMethod = jwt.SigningMethodHS256
+)
+
 // Create token for authentication
 func CreateAuthenticationToken(user AuthenticatedUser, secretKey []byte, expiresDuration time.Duration) (AccessToken, error) {
 	expiresAt := time.Now().Add(expiresDuration)
 	claims := user.IntoClaims(expiresAt)
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token := jwt.NewWithClaims(DefaultJwtSigningMethod, claims)
 	rawToken, err := token.SignedString(secretKey)
 	if err != nil {
 		return AccessToken{}, err
@@ -21,6 +27,23 @@ func CreateAuthenticationToken(user AuthenticatedUser, secretKey []byte, expires
 		TokenType:   "Bearer",
 		ExpiresIn:   uint(expiresDuration.Seconds()),
 	}, nil
+}
+
+// Parse a token and convert into a authenticated user
+func ParseAuthenticationToken(tokenString string, secretKey []byte) (AuthenticatedUser, error) {
+	if token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return secretKey, nil
+	},
+		jwt.WithValidMethods([]string{DefaultJwtSigningMethod.Alg()}),
+		jwt.WithExpirationRequired()); err != nil {
+		return AuthenticatedUser{}, err
+	} else {
+		if claims, ok := token.Claims.(*JWTClaims); !ok {
+			return AuthenticatedUser{}, JWTClaimsNotValidError
+		} else {
+			return claims.ToAuthenticatedUser()
+		}
+	}
 }
 
 type AuthenticationDetails struct {

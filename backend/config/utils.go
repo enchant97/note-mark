@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/caarlos0/env/v6"
+	"github.com/labstack/gommon/bytes"
 )
 
 // Load the config from OS
@@ -24,4 +25,15 @@ func (b *Base64Decoded) UnmarshalText(text []byte) error {
 	}
 	*b = decoded
 	return nil
+}
+
+type Bytes int64
+
+func (b *Bytes) UnmarshalText(text []byte) error {
+	if v, err := bytes.Parse(string(text)); err != nil {
+		return err
+	} else {
+		*b = Bytes(v)
+		return nil
+	}
 }

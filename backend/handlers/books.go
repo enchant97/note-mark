@@ -1,118 +1,147 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"net/http"
-	"strings"
 
-	"github.com/enchant97/note-mark/backend/core"
+	"github.com/danielgtaylor/huma/v2"
 	"github.com/enchant97/note-mark/backend/db"
+	"github.com/enchant97/note-mark/backend/middleware"
 	"github.com/enchant97/note-mark/backend/services"
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 )
 
-func SetupBooksHandler(g *echo.Group) {
+func SetupBooksHandler(
+	api huma.API,
+	authProvider middleware.AuthDetailsProvider,
+) {
 	booksHandler := BooksHandler{}
-	g.GET("/slug/@:username/books/:bookSlug", booksHandler.GetBookBySlug)
-	booksRoutes := g.Group("/books")
-	{
-		booksRoutes.POST("", booksHandler.PostBook, authRequiredMiddleware)
-		booksRoutes.GET("/:bookID", booksHandler.GetBookByID)
-		booksRoutes.PATCH("/:bookID", booksHandler.PatchBookByID, authRequiredMiddleware)
-		booksRoutes.DELETE("/:bookID", booksHandler.DeleteBookByID, authRequiredMiddleware)
-	}
+	huma.Register(api, huma.Operation{
+		Method:        http.MethodPost,
+		Path:          "/api/books",
+		Middlewares:   huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		DefaultStatus: http.StatusCreated,
+	}, booksHandler.PostBook)
+	huma.Get(api, "/api/books/{bookID}", booksHandler.GetBookByID)
+	huma.Get(api, "/api/slug/{username}/books/{bookSlug}", booksHandler.GetBookBySlug)
+	huma.Register(api, huma.Operation{
+		Method:      http.MethodPatch,
+		Path:        "/api/books/{bookID}",
+		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+	}, booksHandler.PatchBookByID)
+	huma.Register(api, huma.Operation{
+		Method:      http.MethodDelete,
+		Path:        "/api/books/{bookID}",
+		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+	}, booksHandler.DeleteBookByID)
+}
+
+type PostBookInput struct {
+	Body db.CreateBook
+}
+
+type BookOutput struct {
+	Body db.Book
+}
+
+type GetBookByIDInput struct {
+	BookID uuid.UUID `path:"bookID" format:"uuid"`
+}
+
+type GetBookBySlugInput struct {
+	Username string `path:"username"`
+	BookSlug string `path:"bookSlug"`
+	Include  string `query:"include" enum:"notes"`
+}
+
+type PatchBookByIDInput struct {
+	BookID uuid.UUID `path:"bookID" format:"uuid"`
+	Body   db.UpdateBook
+}
+
+type DeleteBookByIDInput struct {
+	BookID uuid.UUID `path:"bookID" format:"uuid"`
 }
 
 type BooksHandler struct {
 	BooksService services.BooksService
+	AuthProvider middleware.AuthDetailsProvider
 }
 
-func (h BooksHandler) PostBook(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
-	var bookData db.CreateBook
-	if err := core.BindAndValidate(ctx, &bookData); err != nil {
-		return err
-	}
-
-	if book, err := h.BooksService.CreateBook(authenticatedUser.UserID, bookData); err != nil {
-		return err
+func (h BooksHandler) PostBook(ctx context.Context, input *PostBookInput) (*BookOutput, error) {
+	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
+	userID := authDetails.GetAuthenticatedUser().UserID
+	if book, err := h.BooksService.CreateBook(userID, input.Body); err != nil {
+		return nil, err
 	} else {
-		return ctx.JSON(http.StatusCreated, book)
+		return &BookOutput{
+			Body: book,
+		}, nil
 	}
 }
 
-func (h BooksHandler) GetBookByID(ctx echo.Context) error {
-	userID := getAuthDetails(ctx).GetOptionalUserID()
-	bookID, err := uuid.Parse(ctx.Param("bookID"))
-	if err != nil {
-		return err
-	}
-
-	if book, err := h.BooksService.GetBookByID(userID, bookID); err != nil {
+func (h BooksHandler) GetBookByID(ctx context.Context, input *GetBookByIDInput) (*BookOutput, error) {
+	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
+	optionalUserID := authDetails.GetOptionalUserID()
+	if book, err := h.BooksService.GetBookByID(optionalUserID, input.BookID); err != nil {
 		if errors.Is(err, services.BooksServiceNotFoundError) {
-			return ctx.NoContent(http.StatusNotFound)
+			return nil, huma.Error404NotFound("book does not exist or you do not have access")
 		} else {
-			return err
+			return nil, err
 		}
 	} else {
-		return ctx.JSON(http.StatusOK, book)
+		return &BookOutput{
+			Body: book,
+		}, nil
 	}
 }
 
-func (h BooksHandler) GetBookBySlug(ctx echo.Context) error {
-	optionalUserID := getAuthDetails(ctx).GetOptionalUserID()
-	username := ctx.Param("username")
-	bookSlug := ctx.Param("bookSlug")
-	includeNotes := strings.ToLower(ctx.QueryParam("include")) == "notes"
-
-	if book, err := h.BooksService.GetBookBySlug(optionalUserID, username, bookSlug, includeNotes); err != nil {
+func (h BooksHandler) GetBookBySlug(ctx context.Context, input *GetBookBySlugInput) (*BookOutput, error) {
+	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
+	optionalUserID := authDetails.GetOptionalUserID()
+	if book, err := h.BooksService.GetBookBySlug(
+		optionalUserID,
+		input.Username,
+		input.BookSlug,
+		input.Include == "notes",
+	); err != nil {
 		if errors.Is(err, services.BooksServiceNotFoundError) {
-			return ctx.NoContent(http.StatusNotFound)
+			return nil, huma.Error404NotFound("book does not exist or you do not have access")
 		} else {
-			return err
+			return nil, err
 		}
 	} else {
-		return ctx.JSON(http.StatusOK, book)
+		return &BookOutput{
+			Body: book,
+		}, nil
 	}
 }
 
-func (h BooksHandler) PatchBookByID(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
-	bookID, err := uuid.Parse(ctx.Param("bookID"))
-	if err != nil {
-		return err
-	}
-	var bookData db.UpdateBook
-	if err := core.BindAndValidate(ctx, &bookData); err != nil {
-		return err
-	}
-
-	if err := h.BooksService.UpdateBookByID(authenticatedUser.UserID, bookID, bookData); err != nil {
+func (h BooksHandler) PatchBookByID(ctx context.Context, input *PatchBookByIDInput) (*struct{}, error) {
+	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
+	userID := authDetails.GetAuthenticatedUser().UserID
+	if err := h.BooksService.UpdateBookByID(userID, input.BookID, input.Body); err != nil {
 		if errors.Is(err, services.BooksServiceNotFoundError) {
-			return ctx.NoContent(http.StatusNotFound)
+			return nil, huma.Error404NotFound("book does not exist or you do not have access")
 		} else {
-			return err
+			return nil, err
 		}
 	} else {
-		return ctx.NoContent(http.StatusNoContent)
+		return nil, nil
 	}
 }
 
-func (h BooksHandler) DeleteBookByID(ctx echo.Context) error {
-	authenticatedUser := getAuthDetails(ctx).GetAuthenticatedUser()
-	bookID, err := uuid.Parse(ctx.Param("bookID"))
-	if err != nil {
-		return err
-	}
-
-	if err := h.BooksService.DeleteBookByID(authenticatedUser.UserID, bookID); err != nil {
+func (h BooksHandler) DeleteBookByID(ctx context.Context, input *DeleteBookByIDInput) (*struct{}, error) {
+	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
+	userID := authDetails.GetAuthenticatedUser().UserID
+	if err := h.BooksService.DeleteBookByID(userID, input.BookID); err != nil {
 		if errors.Is(err, services.BooksServiceNotFoundError) {
-			return ctx.NoContent(http.StatusNotFound)
+			return nil, huma.Error404NotFound("book does not exist or you do not have access")
 		} else {
-			return err
+			return nil, err
 		}
 	} else {
-		return ctx.NoContent(http.StatusNoContent)
+		return nil, nil
 	}
 }
