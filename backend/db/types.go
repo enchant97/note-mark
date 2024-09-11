@@ -7,9 +7,9 @@ import (
 )
 
 type CreateUser struct {
-	Username string  `json:"username" validate:"required,alphanum,min=3,max=30"`
-	Password string  `json:"password" validate:"required"`
-	Name     *string `json:"name" validate:"omitempty,max=128"`
+	Username string  `json:"username" minLength:"3" maxLength:"30" pattern:"[a-zA-Z0-9]+"`
+	Password string  `json:"password"`
+	Name     *string `json:"name" require:"false" maxLength:"128"`
 }
 
 func (u *CreateUser) IntoUser() User {
@@ -22,9 +22,9 @@ func (u *CreateUser) IntoUser() User {
 }
 
 type CreateBook struct {
-	Name     string `json:"name" validate:"required,max=80"`
-	Slug     string `json:"slug" validate:"required,max=80,slug"`
-	IsPublic bool   `json:"isPublic"`
+	Name     string `json:"name" required:"true" minLength:"1" maxLength:"80"`
+	Slug     string `json:"slug" required:"true" minLength:"1" maxLength:"80" pattern:"[a-z0-9-]+"`
+	IsPublic bool   `json:"isPublic,omitempty" default:"false"`
 }
 
 func (b *CreateBook) IntoBook(ownerID uuid.UUID) Book {
@@ -37,8 +37,8 @@ func (b *CreateBook) IntoBook(ownerID uuid.UUID) Book {
 }
 
 type CreateNote struct {
-	Name string `json:"name" validate:"required,max=80"`
-	Slug string `json:"slug" validate:"required,max=80,slug"`
+	Name string `json:"name" required:"true" minLength:"1" maxLength:"80"`
+	Slug string `json:"slug" required:"true" minLength:"1" maxLength:"80" pattern:"[a-z0-9-]+"`
 }
 
 func (n *CreateNote) IntoNote(bookID uuid.UUID) Note {
@@ -55,8 +55,8 @@ type ValueWithSlug struct {
 }
 
 type UpdateUser struct {
-	UpdatedAt time.Time `json:"-"`
-	Name      *string   `json:"name" validate:"omitempty,max=128"`
+	UpdatedAt time.Time `json:"-" hidden:"true" readOnly:"true"`
+	Name      *string   `json:"name" require:"false" maxLength:"128"`
 }
 
 type UpdateUserPassword struct {
@@ -65,14 +65,14 @@ type UpdateUserPassword struct {
 }
 
 type UpdateBook struct {
-	UpdatedAt time.Time `json:"-"`
-	Name      *string   `json:"name,omitempty" validate:"omitempty,max=80"`
-	Slug      *string   `json:"slug,omitempty" validate:"omitempty,max=80,slug"`
+	UpdatedAt time.Time `json:"-" hidden:"true" readOnly:"true"`
+	Name      *string   `json:"name,omitempty" minLength:"1" maxLength:"80"`
+	Slug      *string   `json:"slug,omitempty" minLength:"1" maxLength:"80" pattern:"[a-z0-9-]+"`
 	IsPublic  *bool     `json:"isPublic,omitempty"`
 }
 
 type UpdateNote struct {
-	UpdatedAt time.Time `json:"-"`
-	Name      *string   `json:"name,omitempty" validate:"omitempty,max=80"`
-	Slug      *string   `json:"slug,omitempty" validate:"omitempty,max=80,slug"`
+	UpdatedAt time.Time `json:"-" hidden:"true" readOnly:"true"`
+	Name      *string   `json:"name,omitempty" minLength:"1" maxLength:"80"`
+	Slug      *string   `json:"slug,omitempty" minLength:"1" maxLength:"80" pattern:"[a-z0-9-]+"`
 }

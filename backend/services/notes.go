@@ -6,7 +6,6 @@ import (
 	"io"
 	"strings"
 
-	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/google/uuid"
@@ -71,9 +70,9 @@ func (s NotesService) GetRecentNotes(currentUserID *uuid.UUID) ([]db.ValueWithSl
 	return recentNotes, nil
 }
 
-func (s NotesService) GetNotesByBookID(currentUserID *uuid.UUID, bookID uuid.UUID, filters core.NoteFilterParams) ([]db.Note, error) {
+func (s NotesService) GetNotesByBookID(currentUserID *uuid.UUID, bookID uuid.UUID, deleted bool) ([]db.Note, error) {
 	tx := db.DB
-	if filters.Deleted {
+	if deleted {
 		tx = tx.Unscoped()
 	}
 	tx = tx.
@@ -83,7 +82,7 @@ func (s NotesService) GetNotesByBookID(currentUserID *uuid.UUID, bookID uuid.UUI
 			db.DB.Where("books.id = ?", bookID),
 			db.DB.Where("owner_id = ? OR is_public = ?", currentUserID, true),
 		)
-	if filters.Deleted {
+	if deleted {
 		tx = tx.Where("notes.deleted_at IS NOT NULL")
 	}
 	var notes []db.Note

@@ -27,7 +27,7 @@ type User struct {
 	UUIDBase
 	TimeBase
 	Username string  `gorm:"uniqueIndex;not null;type:varchar(30)" json:"username"`
-	Password []byte  `gorm:"not null" json:"-"`
+	Password []byte  `gorm:"not null" json:"-" hidden:"true" readOnly:"true"`
 	Name     *string `gorm:"size:128" json:"name"`
 	Books    []Book  `gorm:"foreignKey:OwnerID" json:"books,omitempty"`
 }

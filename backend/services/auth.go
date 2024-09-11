@@ -32,7 +32,7 @@ func (s AuthService) GetAccessToken(appConfig config.AppConfig, username string,
 	// user is valid, create a token
 	if token, err := core.CreateAuthenticationToken(
 		authenticationData,
-		[]byte(appConfig.JWTSecret),
+		appConfig.JWTSecret,
 		time.Duration(int64(time.Second)*appConfig.TokenExpiry),
 	); err != nil {
 		return core.AccessToken{}, err

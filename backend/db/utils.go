@@ -5,6 +5,7 @@ import (
 
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/glebarez/sqlite"
+	"github.com/google/uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -47,4 +48,10 @@ func InitDB(conf config.DBConfig) error {
 		&Note{},
 		&NoteAsset{},
 	)
+}
+
+func CanUserAuthenticate(userID uuid.UUID) (bool, error) {
+	var count int64
+	err := DB.Model(&User{}).Where("id = ?", userID).Limit(1).Count(&count).Error
+	return count == 1, err
 }
