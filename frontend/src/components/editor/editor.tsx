@@ -7,6 +7,7 @@ import Icon from "../icon";
 import { keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands"
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
+import { Vim, vim } from "@replit/codemirror-vim";
 import { useModal } from "../../contexts/ModalProvider";
 import CreateLinkModal from "./modals/create_link";
 import CreateImageModal from "./modals/create_image";
@@ -31,6 +32,26 @@ const editorTheme = EditorView.baseTheme({
   },
   ".ͼ7": {
     "text-decoration": "none",
+  },
+  // bottom terminal (vim)
+  '.cm-panels, .cm-panels-bottom': {
+    borderTop: 'none !important',
+    backgroundColor: '#202020',
+    padding: '0.2em 0.4em',
+    borderRadius: '0.4em',
+  },
+  // vim fatty cursor
+  '.cm-fat-cursor': {
+    position: 'absolute',
+    background: '#1d4ed8',
+    border: 'none',
+    whiteSpace: 'pre',
+    color: '#FAFAFA !important',
+  },
+  '&:not(.cm-focused) .cm-fat-cursor': {
+    background: 'none',
+    outline: 'solid 1px #1d4ed8',
+    color: 'transparent !important',
   },
 })
 
@@ -58,6 +79,7 @@ const Editor: Component<EditorProps> = (props) => {
   const [toolbarOffset, setToolbarOffset] = createSignal(0)
   const [toolbarVisible, setToolbarVisible] = createSignal(true)
   const [autoSave, setAutoSave] = createSignal(true)
+  const [vimInput, setVimInput] = createSignal(false)
 
   const stickyToolbar = () => { return !toolbarVisible() && props.isFullscreen() }
 
@@ -160,6 +182,7 @@ const Editor: Component<EditorProps> = (props) => {
 
   onMount(() => {
     window.addEventListener("scroll", handleScroll)
+    Vim.defineEx('write', 'w', triggerSave()) // :w
     editor = new EditorView({
       state: InternalEditorState.create({
         extensions: [
@@ -196,6 +219,8 @@ const Editor: Component<EditorProps> = (props) => {
               }
             },
           ]),
+          // enable vim input mode based on the vimInput signal
+          ...(vimInput() ? [vim()] : [])
         ],
         doc: props.content,
       }),
@@ -360,7 +385,19 @@ const Editor: Component<EditorProps> = (props) => {
             <Icon name="table" />
           </button></li>
         </ul>
-        <ul class="menu-horizontal gap-2 flex-nowrap ml-auto">
+        <ul class="menu-horizontal gap-2 flex-nowrap ml-auto items-center">
+          <li><label class="form-control">
+            <span class="label-text cursor-pointer">Vim</span>
+            <input
+              class="toggle toggle-sm"
+              type="checkbox"
+              checked={vimInput()}
+              oninput={(ev) => {
+                let v = ev.currentTarget.checked
+                setVimInput(v)
+              }}
+            />
+          </label></li>
           <li><a
             class="btn btn-sm btn-square btn-outline"
             title="Open Help"
