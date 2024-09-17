@@ -29,6 +29,7 @@
     "@codemirror/lang-markdown": "^6.2.4",
     "@codemirror/state": "^6.4.0",
     "@codemirror/view": "^6.23.1",
+    "@replit/codemirror-vim": "^6.2.1",
     "@solidjs/router": "^0.13.1",
     "@tailwindcss/typography": "^0.5.10",
     "codemirror": "^6.0.1",
