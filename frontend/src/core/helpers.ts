@@ -48,8 +48,10 @@ export async function copyToClipboard(content: string) {
   if (!window.isSecureContext) {
     throw new Error("clipboard only available in secure contexts")
   }
-  if ((await navigator.permissions.query({ name: "clipboard-write" as PermissionName })).state !== "granted") {
-    throw new Error("clipboard permission not granted")
+  try {
+    await navigator.clipboard.writeText(content);
+  } catch (err) {
+    console.error("failure to copy text to clipboard", err)
+    throw new Error("unable to access clipboard, permission may not be granted?")
   }
-  await navigator.clipboard.writeText(content);
 }
