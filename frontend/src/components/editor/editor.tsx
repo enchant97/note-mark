@@ -39,8 +39,12 @@ const editorTheme = EditorView.baseTheme({
     backgroundColor: 'oklch(var(--b2))',
     color: 'oklch(var(--bc))',
   },
+  '.cm-cursor': {
+    "border-color": "oklch(var(--bc))",
+    "border-left-width": "2px",
+  },
   '.cm-fat-cursor': {
-    color: '#FAFAFA !important',
+    "color": "white !important",
   },
 })
 
