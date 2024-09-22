@@ -1,5 +1,5 @@
 import { EditorView, basicSetup } from "codemirror";
-import { EditorSelection, EditorState as InternalEditorState } from "@codemirror/state";
+import { Compartment, EditorSelection, EditorState as InternalEditorState } from "@codemirror/state";
 import { indentMore, indentLess } from "@codemirror/commands";
 import { Accessor, Component, For, createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import { SetStoreFunction, Store } from "solid-js/store";
@@ -33,25 +33,13 @@ const editorTheme = EditorView.baseTheme({
   ".ͼ7": {
     "text-decoration": "none",
   },
-  // bottom terminal (vim)
   '.cm-panels, .cm-panels-bottom': {
-    borderTop: 'none !important',
-    backgroundColor: '#202020',
-    padding: '0.2em 0.4em',
-    borderRadius: '0.4em',
+    borderTop: 'none',
+    backgroundColor: 'oklch(var(--b2))',
+    color: 'oklch(var(--bc))',
   },
-  // vim fatty cursor
   '.cm-fat-cursor': {
-    position: 'absolute',
-    background: '#1d4ed8',
-    border: 'none',
-    whiteSpace: 'pre',
     color: '#FAFAFA !important',
-  },
-  '&:not(.cm-focused) .cm-fat-cursor': {
-    background: 'none',
-    outline: 'solid 1px #1d4ed8',
-    color: 'transparent !important',
   },
 })
 
@@ -74,6 +62,8 @@ const Editor: Component<EditorProps> = (props) => {
   let editor: EditorView
   let toolbarElement: HTMLElement
   let autosaveTimeout: number;
+
+  let vimCompartment = new Compartment()
 
   const { setModal, clearModal } = useModal()
   const [toolbarOffset, setToolbarOffset] = createSignal(0)
@@ -166,6 +156,18 @@ const Editor: Component<EditorProps> = (props) => {
       setToolbarOffset(toolbarElement.offsetTop)
   })
 
+  createEffect(() => {
+    if (vimInput()) {
+      let transaction = editor.state.update({ effects: vimCompartment.reconfigure(vim({ status: true })) })
+      editor.update([transaction])
+    } else {
+      if (editor) {
+        let transaction = editor.state.update({ effects: vimCompartment.reconfigure([]) })
+        editor.update([transaction])
+      }
+    }
+  })
+
   const handleScroll = () => {
     if (window.scrollY >= toolbarOffset()) {
       setToolbarVisible(false)
@@ -182,7 +184,7 @@ const Editor: Component<EditorProps> = (props) => {
 
   onMount(() => {
     window.addEventListener("scroll", handleScroll)
-    Vim.defineEx('write', 'w', triggerSave()) // :w
+    Vim.defineEx('write', 'w', triggerSave) // :w
     editor = new EditorView({
       state: InternalEditorState.create({
         extensions: [
@@ -220,7 +222,7 @@ const Editor: Component<EditorProps> = (props) => {
             },
           ]),
           // enable vim input mode based on the vimInput signal
-          ...(vimInput() ? [vim()] : [])
+          vimCompartment.of(vimInput() ? vim({ status: true }) : []),
         ],
         doc: props.content,
       }),
