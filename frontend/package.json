@@ -22,7 +22,7 @@
     "vite-plugin-pwa": "^0.19.7",
     "vite-plugin-solid": "^2.9.1",
     "vite-plugin-wasm": "^3.3.0",
-    "wasm-pack": "^0.12.1"
+    "wasm-pack": "^0.13.0"
   },
   "dependencies": {
     "@codemirror/commands": "^6.3.3",
