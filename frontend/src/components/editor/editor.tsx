@@ -166,8 +166,9 @@ const Editor: Component<EditorProps> = (props) => {
   })
 
   createEffect(() => {
+    const enableVim = vimInput()
     if (editor) {
-      if (vimInput()) {
+      if (enableVim) {
         let transaction = editor.state.update({ effects: vimCompartment.reconfigure(vim({ status: true })) })
         editor.update([transaction])
       } else {
