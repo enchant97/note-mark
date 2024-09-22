@@ -12,6 +12,7 @@ import { useModal } from "../../contexts/ModalProvider";
 import CreateLinkModal from "./modals/create_link";
 import CreateImageModal from "./modals/create_image";
 import CreateTableModal from "./modals/create_table";
+import StorageHandler from "../../core/storage";
 
 const editorTheme = EditorView.baseTheme({
   "&.cm-editor": {
@@ -68,10 +69,14 @@ const Editor: Component<EditorProps> = (props) => {
   const { setModal, clearModal } = useModal()
   const [toolbarOffset, setToolbarOffset] = createSignal(0)
   const [toolbarVisible, setToolbarVisible] = createSignal(true)
-  const [autoSave, setAutoSave] = createSignal(true)
-  const [vimInput, setVimInput] = createSignal(false)
+  const [vimInputSetting, setvimInputSetting] = StorageHandler.createSettingSignal("editor_vim_mode_enabled", false)
+  const [autoSaveSetting, setAutoSaveSetting] = StorageHandler.createSettingSignal("editor_autosave_enabled", false)
 
   const stickyToolbar = () => { return !toolbarVisible() && props.isFullscreen() }
+  const vimInput = () => JSON.parse(vimInputSetting() || "false") as boolean
+  const setVimInput = (v: unknown) => setvimInputSetting(JSON.stringify(v))
+  const autoSave = () => JSON.parse((autoSaveSetting()) || "true") as boolean
+  const setAutoSave = (v: unknown) => setAutoSaveSetting(JSON.stringify(v))
 
   const save = (state: InternalEditorState) => {
     props.onSave(state.doc.toString())
@@ -157,11 +162,11 @@ const Editor: Component<EditorProps> = (props) => {
   })
 
   createEffect(() => {
-    if (vimInput()) {
-      let transaction = editor.state.update({ effects: vimCompartment.reconfigure(vim({ status: true })) })
-      editor.update([transaction])
-    } else {
-      if (editor) {
+    if (editor) {
+      if (vimInput()) {
+        let transaction = editor.state.update({ effects: vimCompartment.reconfigure(vim({ status: true })) })
+        editor.update([transaction])
+      } else {
         let transaction = editor.state.update({ effects: vimCompartment.reconfigure([]) })
         editor.update([transaction])
       }
