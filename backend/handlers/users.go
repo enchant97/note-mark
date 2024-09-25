@@ -13,7 +13,9 @@ import (
 )
 
 func SetupUsersHandler(g *echo.Group, appConfig config.AppConfig) {
-	userHandler := UsersHandler{}
+	userHandler := UsersHandler{
+		AppConfig: appConfig,
+	}
 	g.GET("/slug/@:username", userHandler.GetUserByUsername)
 	usersRoutes := g.Group("/users")
 	{
