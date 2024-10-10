@@ -9,7 +9,7 @@ import (
 	"github.com/enchant97/note-mark/backend/db"
 )
 
-var AuthServiceInvalidCredentialsError = errors.New("invalid username or password")
+var InvalidCredentialsError = errors.New("invalid username or password")
 
 type AuthService struct{}
 
@@ -18,11 +18,11 @@ func (s AuthService) GetAccessToken(appConfig config.AppConfig, username string,
 	if err := db.DB.
 		First(&user, "username = ?", username).
 		Select("id", "password").Error; err != nil {
-		return core.AccessToken{}, AuthServiceInvalidCredentialsError
+		return core.AccessToken{}, InvalidCredentialsError
 	}
 
 	if !user.IsPasswordMatch(password) {
-		return core.AccessToken{}, AuthServiceInvalidCredentialsError
+		return core.AccessToken{}, InvalidCredentialsError
 	}
 
 	authenticationData := core.AuthenticatedUser{

@@ -92,7 +92,7 @@ func (h AssetsHandler) PostNoteAsset(
 		input.Name,
 		body,
 		h.Storage); err != nil {
-		if errors.Is(err, services.AssetsServiceNotFoundError) {
+		if errors.Is(err, services.NotFoundError) {
 			return nil, huma.Error404NotFound("note does not exist or you do not have access")
 		} else {
 			return nil, err
@@ -155,7 +155,7 @@ func (h AssetsHandler) DeleteNoteAssetByID(ctx context.Context, input *DeleteNot
 		input.NoteID,
 		input.AssetID,
 		h.Storage); err != nil {
-		if errors.Is(err, services.AssetsServiceNotFoundError) {
+		if errors.Is(err, services.NotFoundError) {
 			return nil, huma.Error404NotFound("note asset does not exist or you do not have access")
 		} else {
 			return nil, err

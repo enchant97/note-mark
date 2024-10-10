@@ -96,7 +96,7 @@ type GetSearchForUserOutput struct {
 
 func (h UsersHandler) PostCreateUser(ctx context.Context, input *PostCreateUserInput) (*PostCreateUserOutput, error) {
 	if user, err := h.UsersService.CreateUser(h.AppConfig, input.Body); err != nil {
-		if errors.Is(err, services.UsersServiceUserSignupDisabledError) {
+		if errors.Is(err, services.UserSignupDisabledError) {
 			return nil, huma.Error403Forbidden("user signup has been disabled by the administrator")
 		} else {
 			return nil, err
@@ -152,7 +152,7 @@ func (h UsersHandler) PutCurrentUserPassword(ctx context.Context, input *PutUser
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	userID := authDetails.GetAuthenticatedUser().UserID
 	if err := h.UsersService.UpdateUserPassword(userID, input.Body); err != nil {
-		if errors.Is(err, services.UsersServiceUserPasswordInvalid) {
+		if errors.Is(err, services.UserPasswordInvalid) {
 			return nil, huma.Error403Forbidden("current password invalid")
 		} else {
 			return nil, err

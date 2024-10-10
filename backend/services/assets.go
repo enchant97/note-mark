@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"io"
 
 	"github.com/enchant97/note-mark/backend/db"
@@ -9,8 +8,6 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
-
-var AssetsServiceNotFoundError = errors.New("note not found")
 
 type StoredAsset struct {
 	db.NoteAsset
@@ -36,7 +33,7 @@ func (s AssetsService) CreateNoteAsset(
 		return StoredAsset{}, err
 	}
 	if count == 0 {
-		return StoredAsset{}, AssetsServiceNotFoundError
+		return StoredAsset{}, NotFoundError
 	}
 
 	noteAsset := db.NoteAsset{
@@ -136,7 +133,7 @@ func (s AssetsService) DeleteNoteAssetByID(
 		return err
 	}
 	if count == 0 {
-		return AssetsServiceNotFoundError
+		return NotFoundError
 	}
 
 	return db.DB.Transaction(func(tx *gorm.DB) error {

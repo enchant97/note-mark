@@ -1,13 +1,9 @@
 package services
 
 import (
-	"errors"
-
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/google/uuid"
 )
-
-var BooksServiceNotFoundError = errors.New("not found")
 
 type BooksService struct{}
 
@@ -60,7 +56,7 @@ func (s BooksService) UpdateBookByID(
 		return err
 	}
 	if result.RowsAffected == 0 {
-		return BooksServiceNotFoundError
+		return NotFoundError
 	}
 	return nil
 }
@@ -73,7 +69,7 @@ func (s BooksService) DeleteBookByID(currentUserID uuid.UUID, bookID uuid.UUID) 
 		return err
 	}
 	if result.RowsAffected == 0 {
-		return BooksServiceNotFoundError
+		return NotFoundError
 	}
 	return nil
 }

@@ -12,8 +12,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var NoteServiceNotFoundError = errors.New("not found")
-
 type NotesService struct{}
 
 func (s NotesService) CreateNote(
@@ -29,7 +27,7 @@ func (s NotesService) CreateNote(
 		return db.Note{}, err
 	}
 	if count == 0 {
-		return db.Note{}, NoteServiceNotFoundError
+		return db.Note{}, NotFoundError
 	}
 	note := toCreate.IntoNote(bookID)
 	return note, db.DB.Create(&note).Error
@@ -134,7 +132,7 @@ func (s NotesService) GetNoteContent(
 		return "", nil, err
 	}
 	if count == 0 {
-		return "", nil, NoteServiceNotFoundError
+		return "", nil, NotFoundError
 	}
 
 	checksum, err := storage_backend.ReadNoteChecksum(noteID)
@@ -164,7 +162,7 @@ func (s NotesService) UpdateNoteByID(
 		return err
 	}
 	if count == 0 {
-		return NoteServiceNotFoundError
+		return NotFoundError
 	}
 
 	result := db.DB.
@@ -175,7 +173,7 @@ func (s NotesService) UpdateNoteByID(
 		return err
 	}
 	if result.RowsAffected == 0 {
-		return NoteServiceNotFoundError
+		return NotFoundError
 	}
 	return nil
 }
@@ -196,7 +194,7 @@ func (s NotesService) UpdateNoteContentByID(
 		return err
 	}
 	if count == 0 {
-		return NoteServiceNotFoundError
+		return NotFoundError
 	}
 
 	// put note saving in transaction so db changes can rollback automatically if read/write fails
@@ -266,7 +264,7 @@ func (s NotesService) DeleteNoteByID(
 		return err
 	}
 	if count == 0 {
-		return NoteServiceNotFoundError
+		return NotFoundError
 	}
 
 	if permanent {
