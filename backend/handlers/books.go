@@ -85,7 +85,7 @@ func (h BooksHandler) GetBookByID(ctx context.Context, input *GetBookByIDInput) 
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	optionalUserID := authDetails.GetOptionalUserID()
 	if book, err := h.BooksService.GetBookByID(optionalUserID, input.BookID); err != nil {
-		if errors.Is(err, services.BooksServiceNotFoundError) {
+		if errors.Is(err, services.NotFoundError) {
 			return nil, huma.Error404NotFound("book does not exist or you do not have access")
 		} else {
 			return nil, err
@@ -106,7 +106,7 @@ func (h BooksHandler) GetBookBySlug(ctx context.Context, input *GetBookBySlugInp
 		input.BookSlug,
 		input.Include == "notes",
 	); err != nil {
-		if errors.Is(err, services.BooksServiceNotFoundError) {
+		if errors.Is(err, services.NotFoundError) {
 			return nil, huma.Error404NotFound("book does not exist or you do not have access")
 		} else {
 			return nil, err
@@ -122,7 +122,7 @@ func (h BooksHandler) PatchBookByID(ctx context.Context, input *PatchBookByIDInp
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	userID := authDetails.GetAuthenticatedUser().UserID
 	if err := h.BooksService.UpdateBookByID(userID, input.BookID, input.Body); err != nil {
-		if errors.Is(err, services.BooksServiceNotFoundError) {
+		if errors.Is(err, services.NotFoundError) {
 			return nil, huma.Error404NotFound("book does not exist or you do not have access")
 		} else {
 			return nil, err
@@ -136,7 +136,7 @@ func (h BooksHandler) DeleteBookByID(ctx context.Context, input *DeleteBookByIDI
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	userID := authDetails.GetAuthenticatedUser().UserID
 	if err := h.BooksService.DeleteBookByID(userID, input.BookID); err != nil {
-		if errors.Is(err, services.BooksServiceNotFoundError) {
+		if errors.Is(err, services.NotFoundError) {
 			return nil, huma.Error404NotFound("book does not exist or you do not have access")
 		} else {
 			return nil, err

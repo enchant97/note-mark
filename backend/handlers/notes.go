@@ -188,7 +188,7 @@ func (h NotesHandler) GetNoteContentByID(ctx context.Context, input *GetNoteCont
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	optionalUserID := authDetails.GetOptionalUserID()
 	if checksum, stream, err := h.NotesService.GetNoteContent(optionalUserID, input.NoteID, h.Storage); err != nil {
-		if errors.Is(err, services.NoteServiceNotFoundError) {
+		if errors.Is(err, services.NotFoundError) {
 			return nil, huma.Error404NotFound("note does not exist or you do not have access")
 		}
 		return nil, err
@@ -214,7 +214,7 @@ func (h NotesHandler) PatchNoteByID(ctx context.Context, input *PatchNoteByIDInp
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	userID := authDetails.GetAuthenticatedUser().UserID
 	if err := h.NotesService.UpdateNoteByID(userID, input.NoteID, input.Body); err != nil {
-		if errors.Is(err, services.NoteServiceNotFoundError) {
+		if errors.Is(err, services.NotFoundError) {
 			return nil, huma.Error404NotFound("note does not exit or you do not have access")
 		} else {
 			return nil, err
@@ -233,7 +233,7 @@ func (h NotesHandler) UpdateNoteContentByID(ctx context.Context, input *UpdateNo
 		input.NoteID,
 		body,
 		h.Storage); err != nil {
-		if errors.Is(err, services.NoteServiceNotFoundError) {
+		if errors.Is(err, services.NotFoundError) {
 			return nil, huma.Error404NotFound("note does not exit or you do not have access")
 		} else {
 			return nil, err
@@ -261,7 +261,7 @@ func (h NotesHandler) DeleteNoteByID(ctx context.Context, input *DeleteNoteByIDI
 		input.NoteID,
 		input.Permanent,
 		h.Storage); err != nil {
-		if errors.Is(err, services.NoteServiceNotFoundError) {
+		if errors.Is(err, services.NotFoundError) {
 			return nil, huma.Error404NotFound("note does not exit or you do not have access")
 		} else {
 			return nil, err

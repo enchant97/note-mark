@@ -32,7 +32,7 @@ type AuthHandler struct {
 
 func (h AuthHandler) PostToken(ctx context.Context, input *PostTokenInput) (*PostTokenOutput, error) {
 	if token, err := h.AuthService.GetAccessToken(h.AppConfig, input.Body.Username, input.Body.Password); err != nil {
-		if errors.Is(err, services.AuthServiceInvalidCredentialsError) {
+		if errors.Is(err, services.InvalidCredentialsError) {
 			return nil, huma.Error401Unauthorized("invalid credentials given")
 		} else {
 			return nil, err

@@ -8,14 +8,14 @@ import (
 	"github.com/google/uuid"
 )
 
-var UsersServiceUserSignupDisabledError = errors.New("user sign-up disabled")
-var UsersServiceUserPasswordInvalid = errors.New("user password invalid")
+var UserSignupDisabledError = errors.New("user sign-up disabled")
+var UserPasswordInvalid = errors.New("user password invalid")
 
 type UsersService struct{}
 
 func (s UsersService) CreateUser(appConfig config.AppConfig, toCreate db.CreateUser) (db.User, error) {
 	if !appConfig.AllowSignup {
-		return db.User{}, UsersServiceUserSignupDisabledError
+		return db.User{}, UserSignupDisabledError
 	}
 	user := toCreate.IntoUser()
 	return user, db.DB.Create(&user).Error
@@ -63,7 +63,7 @@ func (s UsersService) UpdateUserPassword(userID uuid.UUID, input db.UpdateUserPa
 	}
 
 	if !user.IsPasswordMatch(input.ExistingPassword) {
-		return UsersServiceUserPasswordInvalid
+		return UserPasswordInvalid
 	}
 
 	user.SetPassword(input.NewPassword)
