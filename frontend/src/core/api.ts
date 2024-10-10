@@ -49,6 +49,16 @@ async function handleFetchErrors(v: Promise<Response>): Promise<Result<Response,
   }
 }
 
+async function throwResponseApiErrors(v: Response) {
+  if (!v.ok) {
+    if (v.headers.get("Content-Type") === "application/problem+json") {
+      throw new ApiError(v.status, (await v.json()).detail)
+    } else {
+      throw new ApiError(v.status)
+    }
+  }
+}
+
 async function handleBodyErrors<T>(v: Promise<T>): Promise<Result<T, ApiError>> {
   try {
     return await v
@@ -92,7 +102,11 @@ class Api {
     let reqURL = `${this.apiServer}/info`
     let resp = await handleFetchErrors(fetch(reqURL))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.json())
   }
   //
@@ -106,7 +120,11 @@ class Api {
       body: JSON.stringify(details),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.json())
   }
   async postTokenPasswordFlow(username: string, password: string): Promise<Result<OAuth2AccessToken, ApiError>> {
@@ -123,7 +141,11 @@ class Api {
       headers: HEADER_JSON,
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.json())
   }
   async getUsersMe(): Promise<Result<User, ApiError>> {
@@ -132,14 +154,22 @@ class Api {
       headers: this.headerAuthorization(),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.json())
   }
   async getUsersSearch(username: string): Promise<Result<string[], ApiError>> {
     let reqURL = `${this.apiServer}/users/search?username=${username}`
     let resp = await handleFetchErrors(fetch(reqURL))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.json())
   }
   async updateUser(user: UpdateUser): Promise<Result<undefined, ApiError>> {
@@ -153,7 +183,11 @@ class Api {
       body: JSON.stringify(user),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return undefined
   }
   async updateUserPassword(details: UpdateUserPassword): Promise<Result<undefined, ApiError>> {
@@ -167,7 +201,11 @@ class Api {
       body: JSON.stringify(details),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return undefined
   }
   //
@@ -184,7 +222,11 @@ class Api {
       body: JSON.stringify(book),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.json())
   }
   async updateBook(bookId: string, book: UpdateBook): Promise<Result<undefined, ApiError>> {
@@ -198,7 +240,11 @@ class Api {
       body: JSON.stringify(book),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return undefined
   }
   async deleteBook(bookId: string): Promise<Result<undefined, ApiError>> {
@@ -208,7 +254,11 @@ class Api {
       headers: this.headerAuthorization(),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return undefined
   }
   //
@@ -225,7 +275,11 @@ class Api {
       body: JSON.stringify(note),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.json())
   }
   async getNotesRecents(): Promise<Result<ValueWithSlug<Note>[], ApiError>> {
@@ -234,7 +288,11 @@ class Api {
       headers: this.optionalHeaderAuthorization(),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.json())
   }
   async getNotesByBookId(bookId: string, deleted: boolean = false): Promise<Result<Note[], ApiError>> {
@@ -246,7 +304,11 @@ class Api {
       headers: this.optionalHeaderAuthorization(),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.json())
   }
   async getNoteContentById(noteId: string): Promise<Result<string, ApiError>> {
@@ -255,7 +317,11 @@ class Api {
       headers: this.optionalHeaderAuthorization(),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.text())
   }
   async updateNote(noteId: string, book: UpdateNote): Promise<Result<undefined, ApiError>> {
@@ -269,7 +335,11 @@ class Api {
       body: JSON.stringify(book),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return undefined
   }
   async updateNoteContent(noteId: string, content: string): Promise<Result<undefined, ApiError>> {
@@ -280,7 +350,11 @@ class Api {
       headers: this.headerAuthorization(),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return undefined
   }
   async restoreNoteById(noteId: string): Promise<Result<undefined, ApiError>> {
@@ -290,7 +364,11 @@ class Api {
       headers: this.headerAuthorization(),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return undefined
   }
   async deleteNote(noteId: string, permanent: boolean = false): Promise<Result<undefined, ApiError>> {
@@ -300,7 +378,11 @@ class Api {
       headers: this.headerAuthorization(),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return undefined
   }
   //
@@ -317,7 +399,11 @@ class Api {
       body: file,
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.json())
   }
   getNoteAssetAccessUrl(noteId: string, assetId: string): string {
@@ -332,7 +418,11 @@ class Api {
       },
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.json())
   }
   async deleteNoteAsset(noteId: string, assetId: string): Promise<Result<undefined, ApiError>> {
@@ -342,7 +432,11 @@ class Api {
       headers: this.headerAuthorization(),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return undefined
   }
   //
@@ -355,7 +449,11 @@ class Api {
       headers: this.optionalHeaderAuthorization(),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.json())
   }
   async getBookBySlug(username: string, bookSlug: string, include?: "notes"): Promise<Result<Book, ApiError>> {
@@ -365,7 +463,11 @@ class Api {
       headers: this.optionalHeaderAuthorization(),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.json())
   }
   async getNoteBySlug(username: string, bookSlug: string, noteSlug: string): Promise<Result<Note, ApiError>> {
@@ -374,7 +476,11 @@ class Api {
       headers: this.optionalHeaderAuthorization(),
     }))
     if (resp instanceof Error) return resp
-    if (!resp.ok) return new ApiError(resp.status)
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
     return handleBodyErrors(resp.json())
   }
 }
