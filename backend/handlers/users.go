@@ -113,6 +113,10 @@ func (h UsersHandler) PatchCurrentUserPassword(ctx echo.Context) error {
 }
 
 func (h UsersHandler) GetSearchForUser(ctx echo.Context) error {
+	if !h.AppConfig.EnableAnonymousUserSearch && !getAuthDetails(ctx).IsAuthenticated() {
+		return ctx.NoContent(http.StatusUnauthorized)
+	}
+
 	var params core.FindUserParams
 	if err := core.BindAndValidate(ctx, &params); err != nil {
 		return err

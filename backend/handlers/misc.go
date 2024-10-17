@@ -21,7 +21,8 @@ type MiscHandler struct {
 
 func (h MiscHandler) GetServerInfo(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, core.ServerInfo{
-		MinSupportedVersion: "0.12.0",
-		AllowSignup:         h.AppConfig.AllowSignup,
+		MinSupportedVersion:		"0.12.0",
+		AllowSignup:				h.AppConfig.AllowSignup,
+		EnableAnonymousUserSearch:  h.AppConfig.EnableAnonymousUserSearch,
 	})
 }

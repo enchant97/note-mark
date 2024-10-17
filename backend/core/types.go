@@ -55,8 +55,9 @@ type FindUserParams struct {
 }
 
 type ServerInfo struct {
-	MinSupportedVersion string `json:"minSupportedVersion"`
-	AllowSignup         bool   `json:"allowSignup"`
+	MinSupportedVersion       string `json:"minSupportedVersion"`
+	AllowSignup               bool   `json:"allowSignup"`
+	EnableAnonymousUserSearch bool   `json:"enableAnonymousUserSearch"`
 }
 
 type DeleteParams struct {

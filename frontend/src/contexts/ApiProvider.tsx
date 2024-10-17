@@ -46,6 +46,13 @@ const makeApiContext = () => {
   const api = createMemo(() => new Api(apiConfig()))
   createEffect(() => {
     writeApiDetails(apiConfig())
+
+    api().getServerInfo()
+      .then(info => {
+        if (!(info instanceof Error)) {
+          setDetails({ ...details, info });
+        }
+      });
   })
   return {
     api,
