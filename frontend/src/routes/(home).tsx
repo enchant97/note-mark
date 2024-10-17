@@ -33,17 +33,17 @@ const Home: Component = () => {
               <img class="mb-2 mx-auto w-36" src="/icon.svg" alt="Note Mark Icon" />
               <h1 class="text-5xl font-bold">Note Mark</h1>
               <p class="py-6">Lighting Fast & Minimal Markdown Note Taking App.</p>
-              <div class="join justify-center">
+              <div class="justify-center" classList={{ 'join': apiDetails().info?.enableAnonymousUserSearch }}>
                 {!apiDetails().authToken && <A href="/login" class="btn join-item btn-outline">Login</A>}
                 {user() && <A class="btn join-item btn-outline" href={`/${user()?.username}`}>My Notes</A>}
-                <button
+                {apiDetails().info?.enableAnonymousUserSearch && <button
                   onclick={() => openUserSearchModal()}
                   class="btn join-item btn-outline"
                   type="button"
                 >
                   <Icon name="users" />
                   Find User
-                </button>
+                </button>}
               </div>
               <div class="max-w-lg mx-auto">
                 <div class="mx-4 my-4">
