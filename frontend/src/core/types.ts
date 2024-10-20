@@ -13,6 +13,7 @@ export type BreadcrumbWithNames = Breadcrumb & {
 export type ServerInfo = {
   minSupportedVersion: string
   allowSignup: boolean
+  enableAnonymousUserSearch: boolean
 }
 
 export type OAuth2AccessTokenRequest = {
