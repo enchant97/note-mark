@@ -32,7 +32,7 @@ import("../renderer/pkg").then(() => { console.debug("wasm backend loaded") })
 render(() => (
   <Router>
     <Route path="/" component={Wrapper}>
-      <Route path="/" component={Home} />
+      <Route path="/" component={() => <RequireApiSetupGuard><Home /></RequireApiSetupGuard>} />
       <Route path="/scratch-pad" component={ScratchPad} />
       <Route component={RequireNoAuthGuard}>
         <Route path="/signup" component={() => <RequireSignupAllowedGuard><Signup /></RequireSignupAllowedGuard>} />
