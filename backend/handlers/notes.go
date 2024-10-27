@@ -128,7 +128,13 @@ func (h NotesHandler) PostNoteByBookID(ctx context.Context, input *PostNoteByBoo
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	userID := authDetails.GetAuthenticatedUser().UserID
 	if note, err := h.NotesService.CreateNote(userID, input.BookID, input.Body); err != nil {
-		return nil, err
+		if errors.Is(err, services.NotFoundError) {
+			return nil, huma.Error404NotFound("book does not exist or you do not have access")
+		} else if errors.Is(err, services.ConflictError) {
+			return nil, huma.Error409Conflict("note with that slug already exists")
+		} else {
+			return nil, err
+		}
 	} else {
 		return &PostNoteByBookIDOutput{
 			Body: note,
@@ -152,7 +158,11 @@ func (h NotesHandler) GetNotesByBookID(ctx context.Context, input *GetNotesByBoo
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	optionalUserID := authDetails.GetOptionalUserID()
 	if notes, err := h.NotesService.GetNotesByBookID(optionalUserID, input.BookID, input.Deleted); err != nil {
-		return nil, err
+		if errors.Is(err, services.NotFoundError) {
+			return nil, huma.Error404NotFound("book does not exist or you do not have access")
+		} else {
+			return nil, err
+		}
 	} else {
 		return &GetNotesByBookIDOutput{
 			Body: notes,
@@ -164,7 +174,11 @@ func (h NotesHandler) GetNoteByID(ctx context.Context, input *GetNoteByIDInput) 
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	optionalUserID := authDetails.GetOptionalUserID()
 	if note, err := h.NotesService.GetNoteByID(optionalUserID, input.NoteID); err != nil {
-		return nil, err
+		if errors.Is(err, services.NotFoundError) {
+			return nil, huma.Error404NotFound("note does not exist or you do not have access")
+		} else {
+			return nil, err
+		}
 	} else {
 		return &NoteOutput{
 			Body: note,
@@ -176,7 +190,11 @@ func (h NotesHandler) GetNoteBySlug(ctx context.Context, input *GetNoteBySlugOut
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	optionalUserID := authDetails.GetOptionalUserID()
 	if note, err := h.NotesService.GetNoteBySlug(optionalUserID, input.Username, input.BookSlug, input.NoteSlug); err != nil {
-		return nil, err
+		if errors.Is(err, services.NotFoundError) {
+			return nil, huma.Error404NotFound("note does not exist or you do not have access")
+		} else {
+			return nil, err
+		}
 	} else {
 		return &NoteOutput{
 			Body: note,
@@ -247,7 +265,11 @@ func (h NotesHandler) RestoreNoteByID(ctx context.Context, input *GetNoteByIDInp
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	userID := authDetails.GetAuthenticatedUser().UserID
 	if err := h.NotesService.RestoreNoteByID(userID, input.NoteID); err != nil {
-		return nil, err
+		if errors.Is(err, services.NotFoundError) {
+			return nil, huma.Error404NotFound("note does not exist or you do not have access")
+		} else {
+			return nil, err
+		}
 	} else {
 		return nil, nil
 	}

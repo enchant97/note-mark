@@ -98,6 +98,8 @@ func (h UsersHandler) PostCreateUser(ctx context.Context, input *PostCreateUserI
 	if user, err := h.UsersService.CreateUser(h.AppConfig, input.Body); err != nil {
 		if errors.Is(err, services.UserSignupDisabledError) {
 			return nil, huma.Error403Forbidden("user signup has been disabled by the administrator")
+		} else if errors.Is(err, services.ConflictError) {
+			return nil, huma.Error409Conflict("user with that username already exists")
 		} else {
 			return nil, err
 		}
@@ -130,7 +132,11 @@ func (h UsersHandler) GetUserByUsername(ctx context.Context, input *GetUserByUse
 		input.Username,
 		includeBooks,
 		includeNotes); err != nil {
-		return nil, err
+		if errors.Is(err, services.NotFoundError) {
+			return nil, huma.Error404NotFound("user does not exist or you do not have access")
+		} else {
+			return nil, err
+		}
 	} else {
 		return &GetUserOutput{
 			Body: user,

@@ -94,6 +94,8 @@ func (h AssetsHandler) PostNoteAsset(
 		h.Storage); err != nil {
 		if errors.Is(err, services.NotFoundError) {
 			return nil, huma.Error404NotFound("note does not exist or you do not have access")
+		} else if errors.Is(err, services.ConflictError) {
+			return nil, huma.Error409Conflict("asset with that name already exists")
 		} else {
 			return nil, err
 		}
@@ -110,7 +112,11 @@ func (h AssetsHandler) GetNoteAssets(
 		authDetails.GetOptionalUserID(),
 		input.NoteID,
 		h.Storage); err != nil {
-		return nil, err
+		if errors.Is(err, services.NotFoundError) {
+			return nil, huma.Error404NotFound("note does not exist or you do not have access")
+		} else {
+			return nil, err
+		}
 	} else {
 		return &GetNoteAssetsOutput{Body: assets}, nil
 	}
@@ -124,7 +130,11 @@ func (h AssetsHandler) GetNoteAssetContentByID(
 		input.NoteID,
 		input.AssetID,
 		h.Storage); err != nil {
-		return nil, err
+		if errors.Is(err, services.NotFoundError) {
+			return nil, huma.Error404NotFound("asset does not exist or you do not have access")
+		} else {
+			return nil, err
+		}
 	} else {
 		if input.HasConditionalParams() {
 			if err := input.PreconditionFailed(info.Checksum, info.FileInfo.LastModified); err != nil {
@@ -156,7 +166,7 @@ func (h AssetsHandler) DeleteNoteAssetByID(ctx context.Context, input *DeleteNot
 		input.AssetID,
 		h.Storage); err != nil {
 		if errors.Is(err, services.NotFoundError) {
-			return nil, huma.Error404NotFound("note asset does not exist or you do not have access")
+			return nil, huma.Error404NotFound("asset does not exist or you do not have access")
 		} else {
 			return nil, err
 		}

@@ -73,7 +73,13 @@ func (h BooksHandler) PostBook(ctx context.Context, input *PostBookInput) (*Book
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	userID := authDetails.GetAuthenticatedUser().UserID
 	if book, err := h.BooksService.CreateBook(userID, input.Body); err != nil {
-		return nil, err
+		if errors.Is(err, services.NotFoundError) {
+			return nil, huma.Error404NotFound("book does not exist or you do not have access")
+		} else if errors.Is(err, services.ConflictError) {
+			return nil, huma.Error409Conflict("book with that slug already exists")
+		} else {
+			return nil, err
+		}
 	} else {
 		return &BookOutput{
 			Body: book,
