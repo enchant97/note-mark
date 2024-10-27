@@ -9,15 +9,15 @@ type BooksService struct{}
 
 func (s BooksService) CreateBook(userID uuid.UUID, toCreate db.CreateBook) (db.Book, error) {
 	book := toCreate.IntoBook(userID)
-	return book, db.DB.Create(&book).Error
+	return book, dbErrorToServiceError(db.DB.Create(&book).Error)
 }
 
 func (s BooksService) GetBookByID(currentUserID *uuid.UUID, bookID uuid.UUID) (db.Book, error) {
 	var book db.Book
-	return book, db.DB.
+	return book, dbErrorToServiceError(db.DB.
 		Where("owner_id = ? OR is_public = ?", currentUserID, true).
 		First(&book, "id = ?", bookID).
-		Error
+		Error)
 }
 
 func (s BooksService) GetBookBySlug(
@@ -30,7 +30,7 @@ func (s BooksService) GetBookBySlug(
 		Select("id").
 		First(&bookOwner, "username = ?", username).
 		Error; err != nil {
-		return db.Book{}, err
+		return db.Book{}, dbErrorToServiceError(err)
 	}
 
 	query := db.DB
@@ -38,10 +38,10 @@ func (s BooksService) GetBookBySlug(
 		query = query.Preload("Notes")
 	}
 	var book db.Book
-	return book, query.
+	return book, dbErrorToServiceError(query.
 		Where("owner_id = ? OR is_public = ?", currentUserID, true).
 		First(&book, "slug = ? AND owner_id = ?", bookSlug, bookOwner.ID).
-		Error
+		Error)
 }
 
 func (s BooksService) UpdateBookByID(
@@ -53,7 +53,7 @@ func (s BooksService) UpdateBookByID(
 		Where("id = ? AND owner_id = ?", bookID, currentUserID).
 		Updates(input)
 	if err := result.Error; err != nil {
-		return err
+		return dbErrorToServiceError(err)
 	}
 	if result.RowsAffected == 0 {
 		return NotFoundError
@@ -66,7 +66,7 @@ func (s BooksService) DeleteBookByID(currentUserID uuid.UUID, bookID uuid.UUID) 
 		Where("id = ? AND owner_id = ?", bookID, currentUserID).
 		Delete(&db.Book{})
 	if err := result.Error; err != nil {
-		return err
+		return dbErrorToServiceError(err)
 	}
 	if result.RowsAffected == 0 {
 		return NotFoundError

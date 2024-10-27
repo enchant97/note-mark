@@ -30,7 +30,7 @@ func (s AssetsService) CreateNoteAsset(
 		Where("owner_id = ? AND notes.id = ?", userID, noteID).
 		Limit(1).
 		Count(&count).Error; err != nil {
-		return StoredAsset{}, err
+		return StoredAsset{}, dbErrorToServiceError(err)
 	}
 	if count == 0 {
 		return StoredAsset{}, NotFoundError
@@ -43,7 +43,7 @@ func (s AssetsService) CreateNoteAsset(
 
 	if err := db.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&noteAsset).Error; err != nil {
-			return err
+			return dbErrorToServiceError(err)
 		}
 		return storage.WriteNoteAsset(noteID, noteAsset.ID, content)
 	}); err != nil {
@@ -77,7 +77,7 @@ func (s AssetsService) GetNoteAssets(
 		).
 		Find(&noteAssets).
 		Error; err != nil {
-		return storedAssets, err
+		return storedAssets, dbErrorToServiceError(err)
 	}
 
 	for _, noteAsset := range noteAssets {
@@ -102,7 +102,7 @@ func (s AssetsService) GetNoteAssetContentByID(
 	if err := db.DB.
 		First(&noteAsset, "id = ? AND note_id = ?", assetID, noteID).
 		Error; err != nil {
-		return noteAsset, storage.AssetFileInfo{}, nil, err
+		return noteAsset, storage.AssetFileInfo{}, nil, dbErrorToServiceError(err)
 	}
 
 	assetInfo, err := storage_backend.GetNoteAssetInfo(noteID, assetID)
@@ -130,7 +130,7 @@ func (s AssetsService) DeleteNoteAssetByID(
 		Where("owner_id = ? AND notes.id = ?", userID, noteID).
 		Limit(1).
 		Count(&count).Error; err != nil {
-		return err
+		return dbErrorToServiceError(err)
 	}
 	if count == 0 {
 		return NotFoundError
@@ -141,7 +141,7 @@ func (s AssetsService) DeleteNoteAssetByID(
 			Unscoped().
 			Delete(&db.NoteAsset{}, "id = ? AND note_id = ?", assetID, noteID).
 			Error; err != nil {
-			return err
+			return dbErrorToServiceError(err)
 		}
 		return storage_backend.DeleteNoteAsset(noteID, assetID)
 	})

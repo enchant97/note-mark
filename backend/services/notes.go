@@ -24,13 +24,13 @@ func (s NotesService) CreateNote(
 		Where("id = ? AND owner_id = ?", bookID, userID).
 		Limit(1).
 		Count(&count).Error; err != nil {
-		return db.Note{}, err
+		return db.Note{}, dbErrorToServiceError(err)
 	}
 	if count == 0 {
 		return db.Note{}, NotFoundError
 	}
 	note := toCreate.IntoNote(bookID)
-	return note, db.DB.Create(&note).Error
+	return note, dbErrorToServiceError(db.DB.Create(&note).Error)
 }
 
 func (s NotesService) GetRecentNotes(currentUserID *uuid.UUID) ([]db.ValueWithSlug, error) {
@@ -51,13 +51,13 @@ func (s NotesService) GetRecentNotes(currentUserID *uuid.UUID) ([]db.ValueWithSl
 	recentNotes := make([]db.ValueWithSlug, 0)
 
 	if rows, err := tx.Rows(); err != nil {
-		return nil, err
+		return nil, dbErrorToServiceError(err)
 	} else {
 		defer rows.Close()
 		for rows.Next() {
 			var row db.Note
 			if err := db.DB.ScanRows(rows, &row); err != nil {
-				return nil, err
+				return nil, dbErrorToServiceError(err)
 			}
 			recentNotes = append(recentNotes, db.ValueWithSlug{
 				Value: row,
@@ -84,16 +84,16 @@ func (s NotesService) GetNotesByBookID(currentUserID *uuid.UUID, bookID uuid.UUI
 		tx = tx.Where("notes.deleted_at IS NOT NULL")
 	}
 	var notes []db.Note
-	return notes, tx.Find(&notes).Error
+	return notes, dbErrorToServiceError(tx.Find(&notes).Error)
 }
 
 func (s NotesService) GetNoteByID(currentUserID *uuid.UUID, noteID uuid.UUID) (db.Note, error) {
 	var note db.Note
-	return note, db.DB.
+	return note, dbErrorToServiceError(db.DB.
 		Preload("Book").
 		Joins("JOIN books ON books.id = notes.book_id").
 		Where("owner_id = ? OR is_public = ?", currentUserID, true).
-		First(&note, "notes.id = ?", noteID).Error
+		First(&note, "notes.id = ?", noteID).Error)
 }
 
 func (s NotesService) GetNoteBySlug(
@@ -105,15 +105,15 @@ func (s NotesService) GetNoteBySlug(
 	if err := db.DB.
 		Select("id").
 		First(&bookOwner, "username = ?", username).Error; err != nil {
-		return db.Note{}, err
+		return db.Note{}, dbErrorToServiceError(err)
 	}
 	var note db.Note
-	return note, db.DB.
+	return note, dbErrorToServiceError(db.DB.
 		Preload("Book").
 		Joins("JOIN books ON books.id = notes.book_id").
 		Where("books.slug = ? AND books.owner_id = ?", bookSlug, bookOwner.ID).
 		Where("owner_id = ? OR is_public = ?", currentUserID, true).
-		First(&note, "notes.slug = ?", noteSlug).Error
+		First(&note, "notes.slug = ?", noteSlug).Error)
 }
 
 func (s NotesService) GetNoteContent(
@@ -129,7 +129,7 @@ func (s NotesService) GetNoteContent(
 		Where("notes.id = ?", noteID).
 		Limit(1).
 		Count(&count).Error; err != nil {
-		return "", nil, err
+		return "", nil, dbErrorToServiceError(err)
 	}
 	if count == 0 {
 		return "", nil, NotFoundError
@@ -159,7 +159,7 @@ func (s NotesService) UpdateNoteByID(
 		Where("owner_id = ? AND notes.id = ?", currentUserID, noteID).
 		Limit(1).
 		Count(&count).Error; err != nil {
-		return err
+		return dbErrorToServiceError(err)
 	}
 	if count == 0 {
 		return NotFoundError
@@ -170,7 +170,7 @@ func (s NotesService) UpdateNoteByID(
 		Where("notes.id = ?", noteID).
 		Updates(input)
 	if err := result.Error; err != nil {
-		return err
+		return dbErrorToServiceError(err)
 	}
 	if result.RowsAffected == 0 {
 		return NotFoundError
@@ -191,7 +191,7 @@ func (s NotesService) UpdateNoteContentByID(
 		Where("owner_id = ? AND notes.id = ?", currentUserID, noteID).
 		Limit(1).
 		Count(&count).Error; err != nil {
-		return err
+		return dbErrorToServiceError(err)
 	}
 	if count == 0 {
 		return NotFoundError
@@ -204,7 +204,7 @@ func (s NotesService) UpdateNoteContentByID(
 			Where("id = ?", noteID).
 			Update("UpdatedAt", db.DB.NowFunc()).
 			Error; err != nil {
-			return err
+			return dbErrorToServiceError(err)
 		}
 		if err := storage_backend.WriteNote(noteID, content); err != nil {
 			return err
@@ -222,7 +222,7 @@ func (s NotesService) RestoreNoteByID(currentUserID uuid.UUID, noteID uuid.UUID)
 		Where("owner_id = ?", currentUserID).
 		Select("notes.id", "book_id").
 		First(&note, "notes.id = ?", noteID).Error; err != nil {
-		return err
+		return dbErrorToServiceError(err)
 	}
 
 	return db.DB.Transaction(func(tx *gorm.DB) error {
@@ -232,7 +232,7 @@ func (s NotesService) RestoreNoteByID(currentUserID uuid.UUID, noteID uuid.UUID)
 			Where("id = ?", note.ID).
 			Update("deleted_at", nil).
 			Error; err != nil {
-			return err
+			return dbErrorToServiceError(err)
 		}
 		// restore book (ensuring user can visit restored note)
 		if err := tx.Unscoped().
@@ -240,7 +240,7 @@ func (s NotesService) RestoreNoteByID(currentUserID uuid.UUID, noteID uuid.UUID)
 			Where("id = ?", note.BookID).
 			Update("deleted_at", nil).
 			Error; err != nil {
-			return err
+			return dbErrorToServiceError(err)
 		}
 		return nil
 	})
@@ -261,7 +261,7 @@ func (s NotesService) DeleteNoteByID(
 		Where("owner_id = ? AND notes.id = ?", currentUserID, noteID).
 		Limit(1).
 		Count(&count).Error; err != nil {
-		return err
+		return dbErrorToServiceError(err)
 	}
 	if count == 0 {
 		return NotFoundError
@@ -271,10 +271,10 @@ func (s NotesService) DeleteNoteByID(
 		// performs hard deletion
 		return db.DB.Transaction(func(tx *gorm.DB) error {
 			if err := tx.Unscoped().Delete(&db.NoteAsset{}, "note_id = ?", noteID).Error; err != nil {
-				return err
+				return dbErrorToServiceError(err)
 			}
 			if err := tx.Unscoped().Delete(&db.Note{}, "id = ?", noteID).Error; err != nil {
-				return err
+				return dbErrorToServiceError(err)
 			}
 			if err := storage_backend.DeleteNote(noteID); err != nil {
 				return err
@@ -283,6 +283,6 @@ func (s NotesService) DeleteNoteByID(
 		})
 	} else {
 		// performs soft deletion
-		return db.DB.Delete(&db.Note{}, "id = ?", noteID).Error
+		return dbErrorToServiceError(db.DB.Delete(&db.Note{}, "id = ?", noteID).Error)
 	}
 }
