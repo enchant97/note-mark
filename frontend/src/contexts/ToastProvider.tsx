@@ -90,23 +90,23 @@ export function apiErrorIntoToast(err: ApiError, when: string): Toast {
   switch (err.status) {
     case HttpErrors.Unauthorized:
       return {
-        message: `authentication not recognised when ${when}`,
+        message: `authentication not recognised, when ${when}`,
         type: ToastType.ERROR,
       }
     case HttpErrors.Conflict:
       return {
-        message: `resource conflict when ${when}`,
+        message: `${err.message}, when ${when}`,
         type: ToastType.ERROR,
       }
     case HttpErrors.NotFound:
       return {
-        message: `resource was not found when ${when}, do you have permission?`,
+        message: `${err.message}, when ${when}`,
         type: ToastType.ERROR,
       }
     default:
       console.error(err, err.stack);
       return {
-        message: `an unknown error occurred when ${when}, status = ${err.status}`,
+        message: `an unknown error occurred, when ${when}, status = ${err.status}`,
         type: ToastType.ERROR,
       }
   }
