@@ -112,8 +112,20 @@ const MainApp: Component<ParentProps> = (props) => {
     return Array.from<Note>(n.values())
   }
 
-  const sortedBooks = () => performBookOrNoteSort([...books()], sortChoice())
-  const sortedNotes = () => performBookOrNoteSort([...notes()], sortChoice())
+  const sortedBooks = () => {
+    const startTime = performance.now()
+    const items = performBookOrNoteSort([...books()], sortChoice())
+    const endTime = performance.now()
+    console.debug(`sorting books (${books().length}) took ${endTime - startTime}ms`)
+    return items
+  }
+  const sortedNotes = () => {
+    const startTime = performance.now()
+    const items = performBookOrNoteSort([...notes()], sortChoice())
+    const endTime = performance.now()
+    console.debug(`sorting notes (${notes().length}) took ${endTime - startTime}ms`)
+    return items
+  }
 
   const onSearchOpen = () => {
     let searchableBooks: SearchableBook[] = books().map(v => {

@@ -41,7 +41,11 @@ export default function ContentSearchModal(props: ContentSearchProps) {
   const [searchTerm, setSearchTerm] = createSignal("")
   const [searchResult] = createResource(searchTerm, async (searchTerm) => {
     if (searchTerm === "") { return { books: [], notes: [] } }
-    return await searchSearchables(searchTerm, props.books, props.notes, 8)
+    const startTime = performance.now()
+    const items = await searchSearchables(searchTerm, props.books, props.notes, 8)
+    const endTime = performance.now()
+    console.debug(`searching for '${searchTerm}' took ${endTime - startTime}ms`)
+    return items
   })
 
   const booksResult = () => searchResult()?.books || []
