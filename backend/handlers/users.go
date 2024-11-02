@@ -26,9 +26,10 @@ func SetupUsersHandler(
 		Path:          "/api/users",
 		DefaultStatus: http.StatusCreated,
 	}, userHandler.PostCreateUser)
+	huma.Get(api, "/api/slug/{username}", userHandler.GetUserByUsername)
 	huma.Register(api, huma.Operation{
 		Method: http.MethodGet,
-		Path:   "/api/slug/{username}",
+		Path:   "/api/users/search",
 		Middlewares: func() huma.Middlewares {
 			if appConfig.EnableAnonymousUserSearch {
 				return huma.Middlewares{}
@@ -36,8 +37,7 @@ func SetupUsersHandler(
 				return huma.Middlewares{authProvider.AuthRequiredMiddleware}
 			}
 		}(),
-	}, userHandler.GetUserByUsername)
-	huma.Get(api, "/api/users/search", userHandler.GetSearchForUser)
+	}, userHandler.GetSearchForUser)
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodGet,
 		Path:        "/api/users/me",
