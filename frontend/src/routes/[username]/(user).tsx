@@ -1,4 +1,4 @@
-import { A, useParams } from "@solidjs/router";
+import { A, useNavigate, useParams } from "@solidjs/router";
 import RecentNotes from "../../components/recent_notes";
 import UserSearchModal from "../../components/modals/user_search";
 import { useModal } from "../../contexts/ModalProvider";
@@ -8,9 +8,12 @@ import Icon from "../../components/icon";
 import NewBookModal from "../../components/modals/new_book";
 import { Book } from "../../core/types";
 import { useDrawer } from "../../contexts/DrawerProvider";
+import { useApi } from "../../contexts/ApiProvider";
 
 const User = () => {
   const params = useParams()
+  const navigate = useNavigate()
+  const { apiDetails, setApiDetails } = useApi()
   const { setModal, clearModal } = useModal()
   const { user } = useCurrentUser()
   const drawer = useDrawer()
@@ -43,7 +46,18 @@ const User = () => {
         <div class="join">
           <Show
             when={user() !== undefined} fallback={
-              <A class="btn join-item btn-outline" href="/login">Login</A>
+              <Show when={apiDetails().authToken} fallback={
+                <A
+                  class="join-item btn btn-outline"
+                  href="/login"
+                >Login</A>
+              }>
+                <button
+                  class="join-item btn btn-outline" onclick={() => {
+                    setApiDetails({ authToken: undefined })
+                    navigate("/login")
+                  }}>Re-Login</button>
+              </Show>
             }>
             <Show when={user()?.username === params.username} fallback={
               <A

@@ -1,4 +1,4 @@
-import { A, Navigate } from '@solidjs/router';
+import { A, Navigate, useNavigate } from '@solidjs/router';
 import { Component, Show } from 'solid-js';
 import { useApi } from '../contexts/ApiProvider';
 import { useCurrentUser } from '../contexts/CurrentUserProvider';
@@ -10,7 +10,8 @@ import Footer from '../components/footer';
 import Icon from '../components/icon';
 
 const Home: Component = () => {
-  const { apiDetails } = useApi()
+  const navigate = useNavigate()
+  const { apiDetails, setApiDetails } = useApi()
   const { setModal, clearModal } = useModal()
   const { user } = useCurrentUser()
 
@@ -34,7 +35,18 @@ const Home: Component = () => {
               <h1 class="text-5xl font-bold">Note Mark</h1>
               <p class="py-6">Lighting Fast & Minimal Markdown Note Taking App.</p>
               <div class="justify-center" classList={{ 'join': apiDetails().info?.enableAnonymousUserSearch }}>
-                {!apiDetails().authToken && <A href="/login" class="btn join-item btn-outline">Login</A>}
+                <Show when={apiDetails().authToken} fallback={
+                  <A
+                    class="join-item btn btn-outline"
+                    href="/login"
+                  >Login</A>
+                }>
+                  <button
+                    class="join-item btn btn-outline" onclick={() => {
+                      setApiDetails({ authToken: undefined })
+                      navigate("/login")
+                    }}>Re-Login</button>
+                </Show>
                 {user() && <A class="btn join-item btn-outline" href={`/${user()?.username}`}>My Notes</A>}
                 {apiDetails().info?.enableAnonymousUserSearch && <button
                   onclick={() => openUserSearchModal()}
