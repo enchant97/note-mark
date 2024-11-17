@@ -36,6 +36,8 @@ Like this project? Consider supporting me financially so I can continue developm
 
 <a href="https://www.buymeacoffee.com/leospratt" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" height=60></a>
 
+> Please note I currently do not accept paid incentives for features.
+
 ## License
 This project is Copyright (c) 2024 Leo Spratt, licences shown below:
 

@@ -47,3 +47,5 @@ Integrated notebook sharing.
 
 ## Support My Work
 Like this project? Consider supporting me financially so I can continue development. You can do that by [buying me a coffee](https://www.buymeacoffee.com/leospratt).
+
+> Please note I currently do not accept paid incentives for features.
