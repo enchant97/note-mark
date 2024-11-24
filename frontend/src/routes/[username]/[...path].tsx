@@ -21,6 +21,7 @@ import { StringSource, copyToClipboard, download } from '../../core/helpers';
 import PrintNoteModal from '../../components/modals/print_note';
 import { createStore } from 'solid-js/store';
 import { EditorState } from '../../components/editor/editor';
+import { Context } from '../../../renderer/pkg/renderer';
 
 const Shelf: Component = () => {
   const params = useParams()
@@ -304,6 +305,7 @@ const Shelf: Component = () => {
             }}
             content={() => noteContent() || ""}
             setContent={setNoteContent}
+            context={() => new Context(note().name, book()!.name)}
             isEditAllowed={allowNoteCreate() || false}
             state={state}
             setState={setState}

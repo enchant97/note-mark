@@ -6,6 +6,7 @@ import { copyToClipboard } from "../core/helpers";
 import { ToastType, useToast } from "../contexts/ToastProvider";
 import { SetStoreFunction, Store } from "solid-js/store";
 import Editor, { EditorState } from "./editor/editor";
+import { Context } from "../../renderer/pkg/renderer";
 
 const AUTO_SAVE_TIMEOUT = 2400;
 
@@ -20,6 +21,7 @@ type NoteProps = {
   setMode: (mode: NoteMode) => any,
   content: Accessor<string>,
   setContent: (content: string) => any,
+  context: Accessor<Context>,
   isEditAllowed: boolean,
   state: Store<EditorState>
   setState: SetStoreFunction<EditorState>
@@ -105,7 +107,7 @@ const Note: Component<NoteProps> = (props) => {
           </label>
         </div>
       </div>
-      <Switch fallback={<NoteViewRendered content={props.content} />}>
+      <Switch fallback={<NoteViewRendered content={props.content} context={props.context} />}>
         <Match when={props.mode === NoteMode.PLAIN}>
           <NoteViewPlain content={props.content} />
         </Match>

@@ -1,18 +1,25 @@
 import DOMPurify from 'dompurify';
 
-import { Renderer } from '../../renderer/pkg';
+import { Renderer, Context } from '../../renderer/pkg';
 
 const renderer = new Renderer()
 
-// Render markdown into HTML,
-// will sanitize input to prevent possible XSS attacks
-function render(content: string): string {
+/**
+* Render markdown into HTML,
+* will sanitize input to prevent possible XSS attacks
+* @throws Unable to render the markdown
+*/
+function render(content: string, context: Context): string {
   const startTime = performance.now()
-  content = renderer.markdown_to_html(content)
-  content = DOMPurify.sanitize(content)
-  const endTime = performance.now()
-  console.debug(`markdown rendering and sanitization took ${endTime - startTime}ms`)
-  return content
+  let rendered = renderer.render(content, context)
+  if (rendered === undefined) {
+    throw new Error("unable to render markdown")
+  } else {
+    content = DOMPurify.sanitize(rendered)
+    const endTime = performance.now()
+    console.debug(`markdown rendering and sanitization took ${endTime - startTime}ms`)
+    return content
+  }
 }
 
 export default render
