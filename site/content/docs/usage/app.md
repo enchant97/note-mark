@@ -28,3 +28,9 @@ Depending on the operating system keybindings may be slightly different. On Wind
 - De-Indent: `<mod>[` or `<shift><tab>`
 - Bold: `<mod>b`
 - Italic: `<mod>i`
+
+## Templating
+Note Mark supports certain templating features; to assist in your note creation. You can use these features inside of the note editor and when the note is rendered the resulting item will be shown. See the below examples:
+
+- `{{ note.name }}`
+- `{{ book.name }}`
