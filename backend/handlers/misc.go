@@ -26,7 +26,7 @@ type MiscHandler struct {
 func (h MiscHandler) GetServerInfo(ctx context.Context, input *struct{}) (*GetServerInfoOutput, error) {
 	return &GetServerInfoOutput{
 		Body: core.ServerInfo{
-			MinSupportedVersion:       "0.12.0",
+			MinSupportedVersion:       "0.15.0",
 			AllowSignup:               h.AppConfig.AllowSignup,
 			EnableAnonymousUserSearch: h.AppConfig.EnableAnonymousUserSearch,
 		}}, nil
