@@ -79,7 +79,7 @@ const MainApp: Component<ParentProps> = (props) => {
     }
   }
 
-  const [currentBook] = createResource(() => [params.username, params.bookSlug], async ([username, bookSlug]) => {
+  const [currentBook, { mutate: updateCurrentBook }] = createResource(() => [params.username, params.bookSlug], async ([username, bookSlug]) => {
     if (!bookSlug) { return }
     let result = await api().getBookBySlug(username, bookSlug)
     if (result instanceof ApiError) {
@@ -87,7 +87,7 @@ const MainApp: Component<ParentProps> = (props) => {
     } else { return result }
   })
 
-  const [currentNote] = createResource(() => [params.username, params.bookSlug, params.noteSlug], async ([username, bookSlug, noteSlug]) => {
+  const [currentNote, { mutate: mutateCurrentNote }] = createResource(() => [params.username, params.bookSlug, params.noteSlug], async ([username, bookSlug, noteSlug]) => {
     if (!noteSlug) { return }
     let result = await api().getNoteBySlug(username, bookSlug, noteSlug)
     if (result instanceof ApiError) {
@@ -183,6 +183,9 @@ const MainApp: Component<ParentProps> = (props) => {
                 } else {
                   v.get("books").set(newBook.id, new Map(Object.entries({ ...newBook, notes })))
                 }
+                if (newBook.id === currentBook()?.id) {
+                  updateCurrentBook(newBook)
+                }
                 return new Map(v)
               })
             }}
@@ -190,6 +193,9 @@ const MainApp: Component<ParentProps> = (props) => {
               mutateUserData((v) => {
                 v.get("books").get(currentBookId())?.get("notes").delete(newNote.id)
                 v.get("books").get(newNote.bookId)?.get("notes").set(newNote.id, newNote)
+                if (newNote.bookId === currentBook()?.id && newNote.id === currentNote()?.id) {
+                  mutateCurrentNote(newNote)
+                }
                 return new Map(v)
               })
             }}
