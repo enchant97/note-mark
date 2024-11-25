@@ -2,7 +2,7 @@ import { Component, createSignal } from 'solid-js';
 import BaseModal from './base';
 import { useApi } from '../../contexts/ApiProvider';
 import { createStore } from 'solid-js/store';
-import { User, UpdateUser } from '../../core/types';
+import { User, userIntoUpdateUser } from '../../core/types';
 import { apiErrorIntoToast, useToast } from '../../contexts/ToastProvider';
 import { ApiError } from '../../core/api';
 
@@ -14,7 +14,7 @@ type UpdateUserModalProps = {
 const UpdateUserModal: Component<UpdateUserModalProps> = (props) => {
   const { api } = useApi()
   const { pushToast } = useToast()
-  const [form, setForm] = createStore<UpdateUser>({ name: props.user.name })
+  const [form, setForm] = createStore(userIntoUpdateUser(props.user))
   const [loading, setLoading] = createSignal(false)
 
   const onSubmit = async (ev: Event) => {

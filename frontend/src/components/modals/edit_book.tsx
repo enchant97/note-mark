@@ -1,6 +1,6 @@
 import { Component, For, Suspense, createResource, createSignal } from 'solid-js';
 import BaseModal from './base';
-import { Book, Note, UpdateBook, User } from '../../core/types';
+import { Book, bookIntoUpdateBook, Note, User } from '../../core/types';
 import { createStore } from 'solid-js/store';
 import { toSlug } from '../../core/helpers';
 import { useApi } from '../../contexts/ApiProvider';
@@ -93,7 +93,7 @@ const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
   const { api } = useApi()
   const { pushToast } = useToast()
   const navigate = useNavigate()
-  const [form, setForm] = createStore<UpdateBook>(props.book)
+  const [form, setForm] = createStore(bookIntoUpdateBook(props.book))
   const [loading, setLoading] = createSignal(false)
 
   const onSubmit = async (ev: Event) => {
@@ -105,8 +105,7 @@ const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
     else {
       navigate(`/${props.user.username}/${form.slug}`)
       props.onClose({
-        id: props.book.id,
-        ownerId: props.book.ownerId,
+        ...props.book,
         name: form.name || props.book.name,
         slug: form.slug || props.book.slug,
         isPublic: form.isPublic || props.book.isPublic

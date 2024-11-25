@@ -43,7 +43,13 @@ export type AssetFileInfo = FileInfo & {
   mimeType: string
 }
 
-export type User = {
+export type ModificationRecord = {
+  createdAt: string,
+  updatedAt: string,
+  deletedAt?: string,
+}
+
+export type User = ModificationRecord & {
   id: string
   username: string
   name?: string
@@ -51,7 +57,7 @@ export type User = {
   books?: Book[]
 }
 
-export type Book = {
+export type Book = ModificationRecord & {
   id: string
   name: string
   slug: string
@@ -61,7 +67,7 @@ export type Book = {
   notes?: Note[]
 }
 
-export type Note = {
+export type Note = ModificationRecord & {
   id: string
   name: string
   slug: string
@@ -110,4 +116,19 @@ export type UpdateBook = {
 export type UpdateNote = {
   name?: string
   slug?: string
+}
+
+export function bookIntoUpdateBook(book: Book): UpdateBook {
+  const { updatedAt: _, createdAt: _2, id: _3, deletedAt: _4, ownerId: _5, ...updateBook } = book
+  return updateBook
+}
+
+export function noteIntoUpdateNote(note: Note): UpdateNote {
+  const { updatedAt: _, createdAt: _2, id: _3, deletedAt: _4, bookId: _5, ...updateNote } = note
+  return updateNote
+}
+
+export function userIntoUpdateUser(user: User): UpdateUser {
+  const { updatedAt: _, createdAt: _2, id: _3, deletedAt: _4, username: _5, ...updateUser } = user
+  return updateUser
 }
