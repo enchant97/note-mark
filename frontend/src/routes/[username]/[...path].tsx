@@ -1,4 +1,4 @@
-import { Component, Show, createResource } from 'solid-js';
+import { Component, Show, createEffect, createResource, createSignal } from 'solid-js';
 import { useApi } from '../../contexts/ApiProvider';
 import { useParams } from '@solidjs/router';
 import { Book, Breadcrumb, BreadcrumbWithNames, Note as NoteDetails } from '../../core/types';
@@ -32,6 +32,11 @@ const Shelf: Component = () => {
   const drawer = useDrawer()
   const { currentUser, currentBook: book, currentNote: note } = drawer
   const [noteModeSetting, setNoteModeSetting] = StorageHandler.createSettingSignal("note_mode", false)
+
+  const [lastModified, setLastModified] = createSignal(note()?.updatedAt)
+  createEffect(() => {
+    setLastModified(note()?.updatedAt)
+  })
 
   const noteMode = () => {
     let stored = noteModeSetting() as NoteMode | null
@@ -183,10 +188,12 @@ const Shelf: Component = () => {
 
   const saveNote = async (noteId: string, content: string) => {
     setState({ saving: true })
-    let result = await api().updateNoteContent(noteId, content)
+    const currentlastModified = lastModified()
+    let result = await api().updateNoteContent(noteId, content, currentlastModified === undefined ? undefined : new Date(currentlastModified))
     setState({ saving: false })
     if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "saving note"))
     else {
+      setLastModified(result.toISOString());
       setState({ unsaved: false })
       setNoteContent(content)
     }

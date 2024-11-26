@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/storage"
@@ -94,6 +95,21 @@ func (s NotesService) GetNoteByID(currentUserID *uuid.UUID, noteID uuid.UUID) (d
 		Joins("JOIN books ON books.id = notes.book_id").
 		Where("owner_id = ? OR is_public = ?", currentUserID, true).
 		First(&note, "notes.id = ?", noteID).Error)
+}
+
+func (s NotesService) GetNoteByIDLastModified(
+	currentUserID uuid.UUID,
+	noteID uuid.UUID,
+) (time.Time, error) {
+	var lastModifed time.Time
+	return lastModifed, dbErrorToServiceError(db.DB.
+		Model(db.Note{}).
+		Joins("JOIN books ON books.id = notes.book_id").
+		Where("owner_id = ? OR is_public = ?", currentUserID, true).
+		Where("notes.id = ?", noteID).
+		Limit(1).
+		Pluck("notes.updated_at", &lastModifed).
+		Error)
 }
 
 func (s NotesService) GetNoteBySlug(

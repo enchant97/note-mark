@@ -93,11 +93,8 @@ export function apiErrorIntoToast(err: ApiError, when: string): Toast {
         message: `authentication not recognised, when ${when}`,
         type: ToastType.ERROR,
       }
+    case HttpErrors.PreconditionFailed:
     case HttpErrors.Conflict:
-      return {
-        message: `${err.message}, when ${when}`,
-        type: ToastType.ERROR,
-      }
     case HttpErrors.NotFound:
       return {
         message: `${err.message}, when ${when}`,

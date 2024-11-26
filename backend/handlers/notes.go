@@ -115,6 +115,7 @@ type PatchNoteByIDInput struct {
 }
 
 type UpdateNoteContentByIDInput struct {
+	conditional.Params
 	NoteID  uuid.UUID `path:"noteID" format:"uuid"`
 	RawBody []byte
 }
@@ -246,6 +247,19 @@ func (h NotesHandler) UpdateNoteContentByID(ctx context.Context, input *UpdateNo
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	userID := authDetails.GetAuthenticatedUser().UserID
 	body := bytes.NewReader(input.RawBody)
+	if input.HasConditionalParams() {
+		if lastModified, err := h.NotesService.GetNoteByIDLastModified(userID, input.NoteID); err != nil {
+			if errors.Is(err, services.NotFoundError) {
+				return nil, huma.Error404NotFound("note does not exit or you do not have access")
+			} else {
+				return nil, err
+			}
+		} else {
+			if err := input.PreconditionFailed("", lastModified.Truncate(time.Second)); err != nil {
+				return nil, err
+			}
+		}
+	}
 	if err := h.NotesService.UpdateNoteContentByID(
 		userID,
 		input.NoteID,

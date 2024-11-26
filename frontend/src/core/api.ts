@@ -22,6 +22,7 @@ export enum HttpErrors {
   Forbidden = 403,
   NotFound = 404,
   Conflict = 409,
+  PreconditionFailed = 412,
 
   InternalServerError = 500,
 }
@@ -52,6 +53,9 @@ async function handleFetchErrors(v: Promise<Response>): Promise<Result<Response,
 async function throwResponseApiErrors(v: Response) {
   if (!v.ok) {
     if (v.headers.get("Content-Type") === "application/problem+json") {
+      if (v.status === 412) {
+        throw new ApiError(v.status, "Possible resource conflict detected (server version ahead of clients)")
+      }
       throw new ApiError(v.status, (await v.json()).detail)
     } else {
       throw new ApiError(v.status)
@@ -342,12 +346,18 @@ class Api {
     }
     return undefined
   }
-  async updateNoteContent(noteId: string, content: string): Promise<Result<undefined, ApiError>> {
+  async updateNoteContent(noteId: string, content: string, lastModified?: Date): Promise<Result<Date, ApiError>> {
     let reqURL = `${this.apiServer}/notes/${noteId}/content`
+    let headers = {
+      ...this.headerAuthorization(),
+    }
+    if (lastModified) {
+      headers["If-Unmodified-Since"] = lastModified.toUTCString()
+    }
     let resp = await handleFetchErrors(fetch(reqURL, {
       method: HttpMethods.PUT,
       body: content,
-      headers: this.headerAuthorization(),
+      headers: headers,
     }))
     if (resp instanceof Error) return resp
     try {
@@ -355,7 +365,7 @@ class Api {
     } catch (e) {
       return e
     }
-    return undefined
+    return new Date()
   }
   async restoreNoteById(noteId: string): Promise<Result<undefined, ApiError>> {
     let reqURL = `${this.apiServer}/notes/${noteId}/restore`
