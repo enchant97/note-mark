@@ -10,7 +10,7 @@ FROM golang:1.22 as builder
     COPY ./backend .
     RUN CGO_ENABLED=0 go build -o /note-mark
 
-FROM gcr.io/distroless/static-debian11
+FROM gcr.io/distroless/static-debian12
 
     COPY --from=builder --link /note-mark /
     COPY --link ./frontend/dist /static
