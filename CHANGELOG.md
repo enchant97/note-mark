@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] - 2024-12-07
+### Fixed
+- #217; re-login button not available on homepage
+### Added
+- #213; syntax highlighting in code blocks
+- RFC 9457 support for API requests
+- Configurable find user capability
+- Preventions for possible note content collisions
+- Basic templating in note content, for future expansion
+### Changed
+- Rewrite backend to use huma
+- Update dependencies
+
 ## [0.14.1] - 2024-09-25
 ### Fixed
 - Fix #210; cannot add new users
