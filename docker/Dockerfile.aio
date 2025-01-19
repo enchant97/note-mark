@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-FROM golang:1.22 as builder
+FROM golang:1.23 as builder
 
     WORKDIR /usr/src/note-mark
 
