@@ -365,7 +365,7 @@ class Api {
     } catch (e) {
       return e
     }
-    return new Date()
+    return new Date(resp.headers.get("Date") || new Date().toISOString())
   }
   async restoreNoteById(noteId: string): Promise<Result<undefined, ApiError>> {
     let reqURL = `${this.apiServer}/notes/${noteId}/restore`

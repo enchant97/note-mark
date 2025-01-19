@@ -33,6 +33,7 @@ func SetupHandlers(
 		AllowedOrigins:     appConfig.CORSOrigins,
 		AllowedMethods:     []string{"HEAD", "GET", "POST", "PATCH", "PUT", "DELETE"},
 		AllowedHeaders:     []string{"*"},
+		ExposedHeaders:     []string{"Date"},
 		AllowCredentials:   true,
 	}))
 	config := huma.DefaultConfig("Note Mark - API", "0")
