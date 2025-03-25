@@ -182,6 +182,7 @@ const Shelf: Component = () => {
       props: {
         onClose: clearModal,
         content: noteContent() || "",
+        context: new Context(note()!.name, book()!.name),
       },
     })
   }

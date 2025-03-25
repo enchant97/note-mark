@@ -3,15 +3,19 @@ import BaseModal from "./base"
 import render from "../../core/renderer"
 import { LoadingRing } from "../loading"
 import Icon from "../icon"
+import { Context } from "../../../renderer/pkg/renderer"
 
 type PrintNoteModalProps = {
   onClose: () => any
   content: string
+  context: Context
 }
 
 const PrintNoteModal: Component<PrintNoteModalProps> = (props) => {
   let iframeElement: HTMLIFrameElement
-  const [contentRendered] = createResource(props.content, render)
+  const [contentRendered] = createResource(() => [props.content, props.context], async ([content, context]) => {
+    return render(content, context)
+  })
 
   return (
     <BaseModal title="Print Note">

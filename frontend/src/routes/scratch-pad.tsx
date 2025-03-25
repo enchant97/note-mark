@@ -7,6 +7,7 @@ import StorageHandler from "../core/storage";
 import { useCurrentUser } from "../contexts/CurrentUserProvider";
 import Icon from "../components/icon";
 import Footer from "../components/footer";
+import { Context } from "../../renderer/pkg/renderer";
 
 const SCRATCH_PAD_CONTENT_KEY = "scratch_pad_content"
 
@@ -47,6 +48,7 @@ const ScratchPad: Component = () => {
           setMode={setMode}
           content={content}
           setContent={setContent}
+          context={() => new Context("Note", "Scratch Pad")}
           isEditAllowed={true}
           state={state}
           setState={setState}
