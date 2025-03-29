@@ -55,10 +55,8 @@ const Signup: Component = () => {
             <p class="py-6">Create your account here.</p>
             <form onSubmit={onSubmit}>
               <WithApiSelect>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Username</span>
-                  </label>
+                <label class="form-control">
+                  <span class="label label-text">Username</span>
                   <input
                     class="input input-bordered"
                     value={formDetails.username}
@@ -71,11 +69,9 @@ const Signup: Component = () => {
                     maxlength={30}
                     required
                   />
-                </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Full Name</span>
-                  </label>
+                </label>
+                <label class="form-control">
+                  <span class="label label-text">Full Name</span>
                   <input
                     class="input input-bordered"
                     value={formDetails.name}
@@ -84,11 +80,9 @@ const Signup: Component = () => {
                     placeholder="e.g. Leo S"
                     maxlength={128}
                   />
-                </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Password</span>
-                  </label>
+                </label>
+                <label class="form-control">
+                  <span class="label label-text">Password</span>
                   <input
                     class="input input-bordered"
                     value={formDetails.password}
@@ -98,11 +92,9 @@ const Signup: Component = () => {
                     autocomplete="new-password"
                     required
                   />
-                </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Password Confirm</span>
-                  </label>
+                </label>
+                <label class="form-control">
+                  <span class="label label-text">Password Confirm</span>
                   <input
                     class="input input-bordered"
                     classList={{ "input-error": !passwordsMatch() }}
@@ -113,7 +105,7 @@ const Signup: Component = () => {
                     autocomplete="new-password"
                     required
                   />
-                </div>
+                </label>
                 <Show when={!apiDetails().info}>
                   <div class="alert my-4">
                     <Icon name="info" />

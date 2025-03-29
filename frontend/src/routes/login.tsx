@@ -41,10 +41,8 @@ const Login: Component = () => {
             <p class="py-6">Login here.</p>
             <form onSubmit={onSubmit}>
               <WithApiSelect>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Username</span>
-                  </label>
+                <label class="form-control">
+                  <span class="label label-text">Username</span>
                   <input
                     class="input input-bordered"
                     value={formDetails.username}
@@ -54,11 +52,9 @@ const Login: Component = () => {
                     autocomplete="username"
                     required
                   />
-                </div>
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text">Password</span>
-                  </label>
+                </label>
+                <label class="form-control">
+                  <span class="label label-text">Password</span>
                   <input
                     class="input input-bordered"
                     value={formDetails.password}
@@ -68,7 +64,7 @@ const Login: Component = () => {
                     autocomplete="current-password"
                     required
                   />
-                </div>
+                </label>
                 <Show when={!apiDetails().info}>
                   <div class="alert my-4">
                     <Icon name="info" />
