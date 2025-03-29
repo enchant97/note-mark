@@ -179,7 +179,7 @@ class Api {
   async updateUser(user: UpdateUser): Promise<Result<undefined, ApiError>> {
     let reqURL = `${this.apiServer}/users/me`
     let resp = await handleFetchErrors(fetch(reqURL, {
-      method: HttpMethods.PATCH,
+      method: HttpMethods.PUT,
       headers: {
         ...HEADER_JSON,
         ...this.headerAuthorization(),
@@ -236,7 +236,7 @@ class Api {
   async updateBook(bookId: string, book: UpdateBook): Promise<Result<undefined, ApiError>> {
     let reqURL = `${this.apiServer}/books/${bookId}`
     let resp = await handleFetchErrors(fetch(reqURL, {
-      method: HttpMethods.PATCH,
+      method: HttpMethods.PUT,
       headers: {
         ...HEADER_JSON,
         ...this.headerAuthorization(),
@@ -331,7 +331,7 @@ class Api {
   async updateNote(noteId: string, book: UpdateNote): Promise<Result<undefined, ApiError>> {
     let reqURL = `${this.apiServer}/notes/${noteId}`
     let resp = await handleFetchErrors(fetch(reqURL, {
-      method: HttpMethods.PATCH,
+      method: HttpMethods.PUT,
       headers: {
         ...HEADER_JSON,
         ...this.headerAuthorization(),

@@ -44,10 +44,10 @@ func SetupUsersHandler(
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
 	}, userHandler.GetCurrentUser)
 	huma.Register(api, huma.Operation{
-		Method:      http.MethodPatch,
+		Method:      http.MethodPut,
 		Path:        "/api/users/me",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
-	}, userHandler.PatchCurrentUser)
+	}, userHandler.PutCurrentUser)
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodPut,
 		Path:        "/api/users/me/password",
@@ -78,7 +78,7 @@ type GetUserByUsername struct {
 	Include  string `query:"include" enum:"books,notes"`
 }
 
-type PatchUserInput struct {
+type PutUserInput struct {
 	Body db.UpdateUser
 }
 
@@ -144,7 +144,7 @@ func (h UsersHandler) GetUserByUsername(ctx context.Context, input *GetUserByUse
 	}
 }
 
-func (h UsersHandler) PatchCurrentUser(ctx context.Context, input *PatchUserInput) (*struct{}, error) {
+func (h UsersHandler) PutCurrentUser(ctx context.Context, input *PutUserInput) (*struct{}, error) {
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	userID := authDetails.GetAuthenticatedUser().UserID
 	if err := h.UsersService.UpdateUserProfile(userID, input.Body); err != nil {
