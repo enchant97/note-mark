@@ -108,14 +108,14 @@ export type UpdateUserPassword = {
 }
 
 export type UpdateBook = {
-  name?: string
-  slug?: string
-  isPublic?: boolean
+  name: string
+  slug: string
+  isPublic: boolean
 }
 
 export type UpdateNote = {
-  name?: string
-  slug?: string
+  name: string
+  slug: string
 }
 
 export function bookIntoUpdateBook(book: Book): UpdateBook {

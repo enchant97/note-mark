@@ -26,10 +26,10 @@ func SetupBooksHandler(
 	huma.Get(api, "/api/books/{bookID}", booksHandler.GetBookByID)
 	huma.Get(api, "/api/slug/{username}/books/{bookSlug}", booksHandler.GetBookBySlug)
 	huma.Register(api, huma.Operation{
-		Method:      http.MethodPatch,
+		Method:      http.MethodPut,
 		Path:        "/api/books/{bookID}",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
-	}, booksHandler.PatchBookByID)
+	}, booksHandler.PutBookByID)
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodDelete,
 		Path:        "/api/books/{bookID}",
@@ -55,7 +55,7 @@ type GetBookBySlugInput struct {
 	Include  string `query:"include" enum:"notes"`
 }
 
-type PatchBookByIDInput struct {
+type PutBookByIDInput struct {
 	BookID uuid.UUID `path:"bookID" format:"uuid"`
 	Body   db.UpdateBook
 }
@@ -124,7 +124,7 @@ func (h BooksHandler) GetBookBySlug(ctx context.Context, input *GetBookBySlugInp
 	}
 }
 
-func (h BooksHandler) PatchBookByID(ctx context.Context, input *PatchBookByIDInput) (*struct{}, error) {
+func (h BooksHandler) PutBookByID(ctx context.Context, input *PutBookByIDInput) (*struct{}, error) {
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	userID := authDetails.GetAuthenticatedUser().UserID
 	if err := h.BooksService.UpdateBookByID(userID, input.BookID, input.Body); err != nil {

@@ -40,10 +40,10 @@ func SetupNotesHandler(
 	huma.Get(api, "/api/notes/{noteID}/content", notesHandler.GetNoteContentByID)
 	huma.Get(api, "/api/slug/{username}/books/{bookSlug}/notes/{noteSlug}", notesHandler.GetNoteBySlug)
 	huma.Register(api, huma.Operation{
-		Method:      http.MethodPatch,
+		Method:      http.MethodPut,
 		Path:        "/api/notes/{noteID}",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
-	}, notesHandler.PatchNoteByID)
+	}, notesHandler.PutNoteByID)
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodPut,
 		Path:        "/api/notes/{noteID}/restore",
@@ -109,7 +109,7 @@ type GetNoteBySlugOutput struct {
 	NoteSlug string `path:"noteSlug"`
 }
 
-type PatchNoteByIDInput struct {
+type PutNoteByIDInput struct {
 	NoteID uuid.UUID `path:"noteID" format:"uuid"`
 	Body   db.UpdateNote
 }
@@ -229,7 +229,7 @@ func (h NotesHandler) GetNoteContentByID(ctx context.Context, input *GetNoteCont
 	}
 }
 
-func (h NotesHandler) PatchNoteByID(ctx context.Context, input *PatchNoteByIDInput) (*struct{}, error) {
+func (h NotesHandler) PutNoteByID(ctx context.Context, input *PutNoteByIDInput) (*struct{}, error) {
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	userID := authDetails.GetAuthenticatedUser().UserID
 	if err := h.NotesService.UpdateNoteByID(userID, input.NoteID, input.Body); err != nil {

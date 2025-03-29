@@ -56,7 +56,7 @@ type ValueWithSlug struct {
 
 type UpdateUser struct {
 	UpdatedAt time.Time `json:"-" hidden:"true" readOnly:"true"`
-	Name      *string   `json:"name" require:"false" maxLength:"128"`
+	Name      string    `json:"name" require:"true" maxLength:"128"`
 }
 
 type UpdateUserPassword struct {
@@ -66,13 +66,13 @@ type UpdateUserPassword struct {
 
 type UpdateBook struct {
 	UpdatedAt time.Time `json:"-" hidden:"true" readOnly:"true"`
-	Name      *string   `json:"name,omitempty" minLength:"1" maxLength:"80"`
-	Slug      *string   `json:"slug,omitempty" minLength:"1" maxLength:"80" pattern:"[a-z0-9-]+"`
-	IsPublic  *bool     `json:"isPublic,omitempty"`
+	Name      string    `json:"name" require:"true" minLength:"1" maxLength:"80"`
+	Slug      string    `json:"slug" require:"true" minLength:"1" maxLength:"80" pattern:"[a-z0-9-]+"`
+	IsPublic  bool      `json:"isPublic" require:"true"`
 }
 
 type UpdateNote struct {
 	UpdatedAt time.Time `json:"-" hidden:"true" readOnly:"true"`
-	Name      *string   `json:"name,omitempty" minLength:"1" maxLength:"80"`
-	Slug      *string   `json:"slug,omitempty" minLength:"1" maxLength:"80" pattern:"[a-z0-9-]+"`
+	Name      string    `json:"name" require:"true" minLength:"1" maxLength:"80"`
+	Slug      string    `json:"slug" require:"true" minLength:"1" maxLength:"80" pattern:"[a-z0-9-]+"`
 }
