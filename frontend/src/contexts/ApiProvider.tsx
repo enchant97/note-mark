@@ -17,13 +17,13 @@ export type ApiDetails = ApiHandlerConfig & {
 const readApiDetails = (): ApiHandlerConfig => {
   let apiDetails = StorageHandler.readSetting(API_DETAILS_KEY)
   if (apiDetails) {
-    let parsed = JSON.parse(apiDetails)
+    let parsed = JSON.parse(apiDetails) as ApiDetails
     if (parsed.apiServer)
       return parsed
   }
   return {
     authToken: undefined,
-    apiServer: (new URL("/api", window.location.origin)).toString(),
+    apiServer: (new URL("/api", import.meta.env.VITE_BACKEND_URL || window.location.origin)).toString(),
   }
 }
 
