@@ -59,9 +59,11 @@ impl Renderer {
 
     #[wasm_bindgen]
     pub fn parse_templated_markdown(&self, raw: &str, context: Context) -> Option<String> {
-        let template = self.template_parser.parse(raw).unwrap();
-        let globals = liquid::to_object(&context).ok()?;
-        template.render(&globals).ok()
+        // HACK temporary fix to solve issue #231; double braces not escaping
+        //let template = self.template_parser.parse(raw).unwrap();
+        //let globals = liquid::to_object(&context).ok()?;
+        //template.render(&globals).ok()
+        return Some(raw.to_owned());
     }
 
     #[wasm_bindgen]
