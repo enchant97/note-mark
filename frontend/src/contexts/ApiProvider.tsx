@@ -14,16 +14,19 @@ export type ApiDetails = ApiHandlerConfig & {
   info?: ServerInfo
 }
 
+export function getApiURL() {
+  return (new URL("/api", import.meta.env.VITE_BACKEND_URL || window.location.origin)).toString()
+}
+
 const readApiDetails = (): ApiHandlerConfig => {
   let apiDetails = StorageHandler.readSetting(API_DETAILS_KEY)
   if (apiDetails) {
     let parsed = JSON.parse(apiDetails) as ApiDetails
-    if (parsed.apiServer)
+    if (parsed.authToken)
       return parsed
   }
   return {
     authToken: undefined,
-    apiServer: (new URL("/api", import.meta.env.VITE_BACKEND_URL || window.location.origin)).toString(),
   }
 }
 
@@ -39,11 +42,10 @@ const makeApiContext = () => {
   const [details, setDetails] = createStore<ApiDetails>(readApiDetails())
   const apiConfig: () => ApiHandlerConfig = () => {
     return {
-      apiServer: details.apiServer,
       authToken: details.authToken,
     }
   }
-  const api = createMemo(() => new Api(apiConfig()))
+  const api = createMemo(() => new Api(getApiURL(), details.authToken))
   createEffect(() => {
     writeApiDetails(apiConfig())
   })
@@ -95,7 +97,7 @@ export function RequireApiSetupGuard(props: ParentProps) {
   const navigate = useNavigate()
 
   onMount(async () => {
-    let result = await new Api({ apiServer: apiDetails().apiServer }).getServerInfo()
+    let result = await new Api(getApiURL(), apiDetails().authToken).getServerInfo()
     if (result instanceof ApiError) {
       if (result.status !== HttpErrors.Unauthorized) {
         // something odd happened, reset stored details

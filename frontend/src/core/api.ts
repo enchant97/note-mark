@@ -29,7 +29,6 @@ export enum HttpErrors {
 
 export type ApiHandlerConfig = {
   authToken?: string
-  apiServer: string
 }
 
 const HEADER_JSON = { "Content-Type": "application/json" }
@@ -74,20 +73,9 @@ async function handleBodyErrors<T>(v: Promise<T>): Promise<Result<T, ApiError>> 
 class Api {
   private authToken?: string
   private apiServer: string
-  constructor(apiDetails: ApiHandlerConfig) {
-    this.authToken = apiDetails.authToken
-    this.apiServer = apiDetails.apiServer
-  }
-  /**
-   * allows for adjusting the main settings
-   * without requiring a new object to be created.
-   * @param apiDetails the new details
-   * @returns self
-   */
-  setApi(apiDetails: ApiHandlerConfig): Api {
-    this.authToken = apiDetails.authToken
-    this.apiServer = apiDetails.apiServer
-    return this
+  constructor(apiServer: string, apiToken?: string) {
+    this.authToken = apiToken
+    this.apiServer = apiServer
   }
   isAuthenticated(): boolean {
     return this.authToken !== undefined
