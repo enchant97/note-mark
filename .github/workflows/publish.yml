@@ -23,13 +23,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: "Install corepack"
+        run: |
+          npm install --global corepack@latest
+          corepack enable
       - run: rustup target add wasm32-unknown-unknown
         working-directory: frontend
-      - run: npm i
+      - run: pnpm i
         working-directory: frontend
-      - run: npm run wasm
+      - run: pnpm run wasm
         working-directory: frontend
-      - run: npm run build
+      - run: pnpm run build
         working-directory: frontend
       - name: Upload built files
         uses: actions/upload-artifact@v4

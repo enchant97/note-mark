@@ -1,6 +1,6 @@
 targets:
   deps-frontend:
-    program: "npm"
+    program: "pnpm"
     args:
       - i
     cwd: frontend
@@ -11,13 +11,13 @@ targets:
       - download
     cwd: backend
   build-frontend-wasm:
-    program: npm
+    program: pnpm
     args:
       - run
       - wasm
     cwd: frontend
   dev-frontend:
-    program: npm
+    program: pnpm
     args:
       - run
       - dev
