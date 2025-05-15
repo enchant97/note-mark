@@ -1,5 +1,5 @@
-import { Result } from "./core"
-import { Book, CreateBook, CreateNote, CreateUser, Note, NoteAsset, OAuth2AccessToken, OAuth2AccessTokenRequest, ServerInfo, UpdateBook, UpdateNote, UpdateUser, UpdateUserPassword, User, ValueWithSlug } from "./types"
+import { Result } from "~/core/core"
+import { Book, CreateBook, CreateNote, CreateUser, Note, NoteAsset, OAuth2AccessToken, OAuth2AccessTokenRequest, ServerInfo, UpdateBook, UpdateNote, UpdateUser, UpdateUserPassword, User, ValueWithSlug } from "~/core/types"
 
 export enum HttpMethods {
   GET = "GET",
@@ -25,10 +25,6 @@ export enum HttpErrors {
   PreconditionFailed = 412,
 
   InternalServerError = 500,
-}
-
-export type ApiHandlerConfig = {
-  authToken?: string
 }
 
 const HEADER_JSON = { "Content-Type": "application/json" }
@@ -71,21 +67,21 @@ async function handleBodyErrors<T>(v: Promise<T>): Promise<Result<T, ApiError>> 
 }
 
 class Api {
-  private authToken?: string
   private apiServer: string
-  constructor(apiServer: string, apiToken?: string) {
-    this.authToken = apiToken
-    this.apiServer = apiServer
+  private accessToken?: string
+  constructor(apiToken?: string) {
+    this.apiServer = (new URL("/api", import.meta.env.VITE_BACKEND_URL || window.location.origin)).toString()
+    this.accessToken = apiToken
   }
   isAuthenticated(): boolean {
-    return this.authToken !== undefined
+    return this.accessToken !== undefined
   }
   headerAuthorization(): Record<string, string> {
-    return { "Authorization": `Bearer ${this.authToken}` }
+    return { "Authorization": `Bearer ${this.accessToken}` }
   }
   optionalHeaderAuthorization(): Record<string, string> {
     if (!this.isAuthenticated()) return {}
-    return { "Authorization": `Bearer ${this.authToken}` }
+    return { "Authorization": `Bearer ${this.accessToken}` }
   }
   //
   // Server

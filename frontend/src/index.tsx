@@ -16,7 +16,7 @@ import ScratchPad from './routes/scratch-pad';
 import Profile from './routes/profile';
 import Home from './routes/(home)';
 import Signup from './routes/signup';
-import { RequireApiSetupGuard, RequireAuthGuard, RequireNoAuthGuard, RequireSignupAllowedGuard } from './contexts/ApiProvider';
+import { RequireApiSetupGuard, RequireAuthGuard, RequireNoAuthGuard, RequireSignupAllowedGuard } from '~/components/guards';
 
 if ("serviceWorker" in navigator) {
   registerSW()

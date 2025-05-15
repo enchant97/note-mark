@@ -1,9 +1,9 @@
 import { Component, For, Show, createEffect, createSignal } from 'solid-js';
 import { A, useNavigate } from '@solidjs/router';
-import { useCurrentUser } from '../contexts/CurrentUserProvider';
-import { THEMES, getTheme, setTheme } from '../core/theme_switcher';
-import Icon from './icon';
-import { useApi } from '../contexts/ApiProvider';
+import { useCurrentUser } from '~/contexts/CurrentUserProvider';
+import { THEMES, getTheme, setTheme } from '~/core/theme_switcher';
+import Icon from '~/components/icon';
+import { useAuth } from '~/contexts/AuthProvider';
 
 const ThemeSwitcher: Component = () => {
   const [currentTheme, setCurrentTheme] = createSignal(getTheme())
@@ -36,7 +36,7 @@ const ThemeSwitcher: Component = () => {
 
 const ProfileDropdown = () => {
   const navigate = useNavigate()
-  const { apiDetails, setApiDetails } = useApi()
+  const { accessToken, setAuthStore } = useAuth()
   const { user } = useCurrentUser()
 
   return (
@@ -44,9 +44,9 @@ const ProfileDropdown = () => {
       <summary class="btn btn-ghost btn-circle shadow"><Icon name="user" /></summary>
       <menu class="mt-2 p-2 shadow-lg menu dropdown-content z-[1] bg-base-300 rounded-box w-52">
         <Show when={user()} fallback={<li>
-          <Show when={apiDetails().authToken} fallback={<A href="/login">Login</A>}>
+          <Show when={accessToken()} fallback={<A href="/login">Login</A>}>
             <button onclick={() => {
-              setApiDetails({ authToken: undefined })
+              setAuthStore(null)
               navigate("/login")
             }}>Re-Login</button>
           </Show>

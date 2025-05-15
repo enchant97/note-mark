@@ -1,17 +1,19 @@
 import { A, Navigate, useNavigate } from '@solidjs/router';
 import { Component, Show } from 'solid-js';
-import { useApi } from '../contexts/ApiProvider';
-import { useCurrentUser } from '../contexts/CurrentUserProvider';
-import { useModal } from '../contexts/ModalProvider';
-import UserSearchModal from '../components/modals/user_search';
-import RecentNotes from '../components/recent_notes';
-import Header from '../components/header';
-import Footer from '../components/footer';
-import Icon from '../components/icon';
+import { useApi } from '~/contexts/ApiProvider';
+import { useCurrentUser } from '~/contexts/CurrentUserProvider';
+import { useModal } from '~/contexts/ModalProvider';
+import UserSearchModal from '~/components/modals/user_search';
+import RecentNotes from '~/components/recent_notes';
+import Header from '~/components/header';
+import Footer from '~/components/footer';
+import Icon from '~/components/icon';
+import { useAuth } from '~/contexts/AuthProvider';
 
 const Home: Component = () => {
   const navigate = useNavigate()
-  const { apiDetails, setApiDetails } = useApi()
+  const { apiInfo } = useApi()
+  const { accessToken, setAuthStore } = useAuth()
   const { setModal, clearModal } = useModal()
   const { user } = useCurrentUser()
 
@@ -34,8 +36,8 @@ const Home: Component = () => {
               <img class="mb-2 mx-auto w-36" src="/icon.svg" alt="Note Mark Icon" />
               <h1 class="text-5xl font-bold">Note Mark</h1>
               <p class="py-6">Lighting Fast & Minimal Markdown Note Taking App.</p>
-              <div class="justify-center" classList={{ 'join': apiDetails().info?.enableAnonymousUserSearch }}>
-                <Show when={apiDetails().authToken} fallback={
+              <div class="justify-center" classList={{ 'join': apiInfo()?.enableAnonymousUserSearch }}>
+                <Show when={accessToken()} fallback={
                   <A
                     class="join-item btn btn-outline"
                     href="/login"
@@ -43,12 +45,12 @@ const Home: Component = () => {
                 }>
                   <button
                     class="join-item btn btn-outline" onclick={() => {
-                      setApiDetails({ authToken: undefined })
+                      setAuthStore(null)
                       navigate("/login")
                     }}>Re-Login</button>
                 </Show>
                 {user() && <A class="btn join-item btn-outline" href={`/${user()?.username}`}>My Notes</A>}
-                {apiDetails().info?.enableAnonymousUserSearch && <button
+                {apiInfo()?.enableAnonymousUserSearch && <button
                   onclick={() => openUserSearchModal()}
                   class="btn join-item btn-outline"
                   type="button"
