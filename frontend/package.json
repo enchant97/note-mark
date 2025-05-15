@@ -25,6 +25,7 @@
     "vite-plugin-pwa": "^0.21.1",
     "vite-plugin-solid": "^2.11.6",
     "vite-plugin-wasm": "^3.4.1",
+    "vite-tsconfig-paths": "^5.1.4",
     "wasm-pack": "^0.13.1"
   },
   "dependencies": {

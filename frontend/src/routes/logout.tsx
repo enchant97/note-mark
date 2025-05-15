@@ -1,10 +1,10 @@
 import type { Component } from 'solid-js';
-import { useApi } from '../contexts/ApiProvider';
-import StorageHandler from '../core/storage';
+import StorageHandler from '~/core/storage';
+import { useAuth } from '~/contexts/AuthProvider';
 
 const Logout: Component = () => {
-  let { clearDetails } = useApi()
-  clearDetails()
+  let { setAuthStore } = useAuth()
+  setAuthStore(null)
   StorageHandler.clearSettings()
   return <></>;
 };
