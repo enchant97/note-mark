@@ -3,7 +3,7 @@ import BaseModal from "~/components/modals/base"
 import render from "~/core/renderer"
 import { LoadingRing } from "~/components/loading"
 import Icon from "~/components/icon"
-import { Context } from "../../../renderer/pkg/renderer"
+import { type Context } from "~/core/renderer"
 
 type PrintNoteModalProps = {
   onClose: () => any

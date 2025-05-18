@@ -6,7 +6,7 @@ import Icon from "~/components/icon";
 import { copyToClipboard } from "~/core/helpers";
 import { ToastType, useToast } from "~/contexts/ToastProvider";
 import Editor, { EditorState } from "~/components/editor/editor";
-import { Context } from "../../renderer/pkg/renderer";
+import { type Context } from "~/core/renderer";
 
 const AUTO_SAVE_TIMEOUT = 2400;
 

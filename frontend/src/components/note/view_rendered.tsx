@@ -1,7 +1,7 @@
 import { Accessor, Component, createEffect, createResource } from 'solid-js';
 import render from '~/core/renderer';
 import hljs from 'highlight.js/lib/common';
-import { Context } from '../../../renderer/pkg/renderer';
+import { type Context } from '~/core/renderer';
 
 type NoteViewRenderedProps = {
   content: Accessor<string>

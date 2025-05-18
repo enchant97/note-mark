@@ -2,6 +2,8 @@ import DOMPurify from 'dompurify';
 
 import { Renderer, Context } from '../../renderer/pkg';
 
+export { Context } from '../../renderer/pkg';
+
 const renderer = new Renderer()
 
 /**
