@@ -1,10 +1,9 @@
 import { Component, createSignal } from 'solid-js';
-import BaseModal from './base';
-import { useApi } from '../../contexts/ApiProvider';
 import { createStore } from 'solid-js/store';
-import { apiErrorIntoToast, ToastType, useToast } from '../../contexts/ToastProvider';
-import { ApiError, HttpErrors } from '../../core/api';
-import { useCurrentUser } from '../../contexts/CurrentUserProvider';
+import BaseModal from '~/components/modals/base';
+import { useApi } from '~/contexts/ApiProvider';
+import { apiErrorIntoToast, ToastType, useToast } from '~/contexts/ToastProvider';
+import { ApiError, HttpErrors } from '~/core/api';
 
 type UpdateUserPasswordModalProps = {
   onClose: () => void
@@ -13,7 +12,7 @@ type UpdateUserPasswordModalProps = {
 const UpdateUserPasswordModal: Component<UpdateUserPasswordModalProps> = (props) => {
   const { api } = useApi()
   const { pushToast } = useToast()
-  const { user } = useCurrentUser()
+  const { userInfo } = useApi()
   const [form, setForm] = createStore({
     existingPassword: "",
     newPassword: "",
@@ -48,9 +47,8 @@ const UpdateUserPasswordModal: Component<UpdateUserPasswordModalProps> = (props)
 
   return (
     <BaseModal title="Update Password">
-
       <form onsubmit={onSubmit}>
-        <input type="text" autocomplete="username" value={user()!.username} readonly class="hidden" />
+        <input type="text" autocomplete="username" value={userInfo()!.username} readonly class="hidden" />
         <label class="form-control">
           <span class="label"><span class="label-text">Current Password</span></span>
           <input
