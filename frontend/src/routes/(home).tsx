@@ -1,7 +1,6 @@
 import { A, Navigate, useNavigate } from '@solidjs/router';
 import { Component, Show } from 'solid-js';
 import { useApi } from '~/contexts/ApiProvider';
-import { useCurrentUser } from '~/contexts/CurrentUserProvider';
 import { useModal } from '~/contexts/ModalProvider';
 import UserSearchModal from '~/components/modals/user_search';
 import RecentNotes from '~/components/recent_notes';
@@ -12,10 +11,9 @@ import { useAuth } from '~/contexts/AuthProvider';
 
 const Home: Component = () => {
   const navigate = useNavigate()
-  const { apiInfo } = useApi()
+  const { apiInfo, userInfo } = useApi()
   const { accessToken, setAuthStore } = useAuth()
   const { setModal, clearModal } = useModal()
-  const { user } = useCurrentUser()
 
   const openUserSearchModal = () => {
     setModal({
@@ -27,7 +25,7 @@ const Home: Component = () => {
   }
 
   return (
-    <Show when={user() === undefined} fallback={<Navigate href={`/${user()?.username}`} />}>
+    <Show when={userInfo() === undefined} fallback={<Navigate href={`/${userInfo()?.username}`} />}>
       <div class="min-h-screen">
         <Header disableDrawerToggle={true} />
         <div class="bg-base-200 p-6 mx-6">
@@ -49,7 +47,7 @@ const Home: Component = () => {
                       navigate("/login")
                     }}>Re-Login</button>
                 </Show>
-                {user() && <A class="btn join-item btn-outline" href={`/${user()?.username}`}>My Notes</A>}
+                {userInfo() && <A class="btn join-item btn-outline" href={`/${userInfo()?.username}`}>My Notes</A>}
                 {apiInfo()?.enableAnonymousUserSearch && <button
                   onclick={() => openUserSearchModal()}
                   class="btn join-item btn-outline"

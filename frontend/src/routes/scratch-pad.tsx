@@ -4,10 +4,10 @@ import Note, { NoteMode } from "../components/note";
 import { createStore } from "solid-js/store";
 import { EditorState } from "../components/editor/editor";
 import StorageHandler from "../core/storage";
-import { useCurrentUser } from "../contexts/CurrentUserProvider";
 import Icon from "../components/icon";
 import Footer from "../components/footer";
 import { Context } from "../../renderer/pkg/renderer";
+import { useApi } from "~/contexts/ApiProvider";
 
 const SCRATCH_PAD_CONTENT_KEY = "scratch_pad_content"
 
@@ -20,7 +20,7 @@ function writeContent(content: string, isAuthenticated: boolean) {
 }
 
 const ScratchPad: Component = () => {
-  const { user } = useCurrentUser()
+  const { userInfo } = useApi()
 
   const [mode, setMode] = createSignal(NoteMode.EDIT)
   const [content, setContent] = createSignal(readContent())
@@ -30,7 +30,7 @@ const ScratchPad: Component = () => {
   })
 
   const onSave = (content: string) => {
-    writeContent(content, user() !== undefined)
+    writeContent(content, userInfo() !== undefined)
     setState({ unsaved: false, saving: false })
     setContent(content)
   }

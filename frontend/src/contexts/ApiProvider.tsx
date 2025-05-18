@@ -4,7 +4,7 @@ import { optionExpect } from "~/core/core"
 import { useAuth } from "~/contexts/AuthProvider"
 
 const makeApiContext = () => {
-  const { accessToken } = useAuth()
+  const { accessToken, setAuthStore } = useAuth()
   const api = createMemo(() => new Api(accessToken() || undefined))
   const [apiInfo] = createResource(api, async (api) => {
     const r = await api.getServerInfo()
@@ -13,9 +13,22 @@ const makeApiContext = () => {
     }
     return r
   })
+  const [userInfo, { mutate: setUserInfo }] = createResource(api, async (api) => {
+    if (api.isAuthenticated()) {
+      const r = await api.getUsersMe()
+      if (r instanceof ApiError) {
+        setAuthStore(null)
+        return
+      }
+      return r
+    }
+    return
+  })
   return {
     api,
     apiInfo,
+    userInfo,
+    setUserInfo,
   } as const
 }
 
