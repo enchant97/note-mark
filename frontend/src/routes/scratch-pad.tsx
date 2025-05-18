@@ -6,7 +6,7 @@ import { EditorState } from "~/components/editor/editor";
 import StorageHandler from "~/core/storage";
 import Icon from "~/components/icon";
 import Footer from "~/components/footer";
-import { Context } from "../../renderer/pkg/renderer";
+import { Context } from "~/core/renderer";
 import { useApi } from "~/contexts/ApiProvider";
 
 const SCRATCH_PAD_CONTENT_KEY = "scratch_pad_content"

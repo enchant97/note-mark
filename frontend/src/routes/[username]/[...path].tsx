@@ -20,7 +20,7 @@ import AssetsModal from '~/components/modals/assets';
 import { StringSource, copyToClipboard, download } from '~/core/helpers';
 import PrintNoteModal from '~/components/modals/print_note';
 import { EditorState } from '~/components/editor/editor';
-import { Context } from '../../../renderer/pkg/renderer';
+import { Context } from '~/core/renderer';
 
 const Shelf: Component = () => {
   const params = useParams()
