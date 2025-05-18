@@ -1,5 +1,5 @@
 import { ParentProps, Show } from "solid-js";
-import Redirect from "./redirect";
+import Redirect from "~/components/redirect";
 
 type ShowOrRedirectProps = ParentProps & {
   when: () => boolean

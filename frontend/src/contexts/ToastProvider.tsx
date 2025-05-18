@@ -1,8 +1,8 @@
 import { Component, For, createContext, onMount, useContext } from "solid-js"
-import { optionExpect } from "../core/core"
 import { Portal } from "solid-js/web"
 import { createStore } from "solid-js/store"
-import { ApiError, HttpErrors } from "../core/api"
+import { optionExpect } from "~/core/core"
+import { ApiError, HttpErrors } from "~/core/api"
 
 export enum ToastType {
   INFO = "info",

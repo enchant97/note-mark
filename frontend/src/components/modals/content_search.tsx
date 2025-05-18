@@ -1,7 +1,7 @@
 import { For, Suspense, createResource, createSignal } from "solid-js"
-import BaseModal from "./base"
-import Icon from "../icon"
-import { LoadingSpin } from "../loading"
+import BaseModal from "~/components/modals/base"
+import Icon from "~/components/icon"
+import { LoadingSpin } from "~/components/loading"
 
 export type Searchable = {
   value: string

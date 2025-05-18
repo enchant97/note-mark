@@ -1,17 +1,17 @@
 import { useParams, A, useNavigate } from '@solidjs/router';
 import { Component, For, ParentProps, Show, createResource, createSignal, onCleanup, onMount } from 'solid-js';
-import Header from './components/header';
-import { useApi } from './contexts/ApiProvider';
-import { DrawerProvider } from './contexts/DrawerProvider';
-import { Book, Note, User } from './core/types';
-import { LoadingRing } from './components/loading';
-import { ApiError } from './core/api';
-import { SortChoice, SortSelect } from './components/inputs';
-import { compare } from './core/helpers';
-import Icon from './components/icon';
-import { apiErrorIntoToast, useToast } from './contexts/ToastProvider';
-import { useModal } from './contexts/ModalProvider';
-import ContentSearchModal, { SearchableBook, SearchableNote } from './components/modals/content_search';
+import Header from '~/components/header';
+import { useApi } from '~/contexts/ApiProvider';
+import { DrawerProvider } from '~/contexts/DrawerProvider';
+import { Book, Note, User } from '~/core/types';
+import { LoadingRing } from '~/components/loading';
+import { ApiError } from '~/core/api';
+import { SortChoice, SortSelect } from '~/components/inputs';
+import { compare } from '~/core/helpers';
+import Icon from '~/components/icon';
+import { apiErrorIntoToast, useToast } from '~/contexts/ToastProvider';
+import { useModal } from '~/contexts/ModalProvider';
+import ContentSearchModal, { SearchableBook, SearchableNote } from '~/components/modals/content_search';
 
 function performBookOrNoteSort(rows: Note[] | Book[], method: SortChoice) {
   switch (method) {

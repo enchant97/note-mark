@@ -1,8 +1,8 @@
 import { For, Suspense, createResource } from "solid-js"
-import { useApi } from "../contexts/ApiProvider"
-import { ApiError } from "../core/api"
-import { LoadingSpin } from "./loading"
 import { A } from "@solidjs/router"
+import { useApi } from "~/contexts/ApiProvider"
+import { ApiError } from "~/core/api"
+import { LoadingSpin } from "~/components/loading"
 
 const RecentNotes = () => {
   const { api } = useApi()

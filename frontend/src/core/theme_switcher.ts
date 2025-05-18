@@ -1,4 +1,4 @@
-import StorageHandler from "./storage"
+import StorageHandler from "~/core/storage"
 
 export const THEMES = [
   {

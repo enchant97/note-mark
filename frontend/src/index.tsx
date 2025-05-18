@@ -2,20 +2,20 @@
 // START POLLYFILL GLOBALS
 import 'core-js/actual';
 // END POLLYFILL GLOBALS
-import './index.css';
+import '~/index.css';
 import { render } from 'solid-js/web';
 import { Route, Router } from '@solidjs/router';
 import { registerSW } from 'virtual:pwa-register'
-import Wrapper from './wrapper';
-import Login from './routes/login';
-import Logout from './routes/logout';
-import Shelf from './routes/[username]/[...path]';
-import User from './routes/[username]/(user)';
-import MainApp from './MainApp';
-import ScratchPad from './routes/scratch-pad';
-import Profile from './routes/profile';
-import Home from './routes/(home)';
-import Signup from './routes/signup';
+import Wrapper from '~/wrapper';
+import Login from '~/routes/login';
+import Logout from '~/routes/logout';
+import Shelf from '~/routes/[username]/[...path]';
+import User from '~/routes/[username]/(user)';
+import MainApp from '~/MainApp';
+import ScratchPad from '~/routes/scratch-pad';
+import Profile from '~/routes/profile';
+import Home from '~/routes/(home)';
+import Signup from '~/routes/signup';
 import { RequireApiSetupGuard, RequireAuthGuard, RequireNoAuthGuard, RequireSignupAllowedGuard } from '~/components/guards';
 
 if ("serviceWorker" in navigator) {

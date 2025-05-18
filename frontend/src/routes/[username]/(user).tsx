@@ -1,12 +1,12 @@
 import { A, useNavigate, useParams } from "@solidjs/router";
-import RecentNotes from "../../components/recent_notes";
-import UserSearchModal from "../../components/modals/user_search";
-import { useModal } from "../../contexts/ModalProvider";
 import { Show } from "solid-js";
-import Icon from "../../components/icon";
-import NewBookModal from "../../components/modals/new_book";
-import { Book } from "../../core/types";
-import { useDrawer } from "../../contexts/DrawerProvider";
+import RecentNotes from "~/components/recent_notes";
+import UserSearchModal from "~/components/modals/user_search";
+import { useModal } from "~/contexts/ModalProvider";
+import Icon from "~/components/icon";
+import NewBookModal from "~/components/modals/new_book";
+import { Book } from "~/core/types";
+import { useDrawer } from "~/contexts/DrawerProvider";
 import { useAuth } from "~/contexts/AuthProvider";
 import { useApi } from "~/contexts/ApiProvider";
 

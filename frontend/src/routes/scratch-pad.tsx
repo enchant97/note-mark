@@ -1,11 +1,11 @@
 import { Component, createSignal } from "solid-js";
-import Header from "../components/header";
-import Note, { NoteMode } from "../components/note";
 import { createStore } from "solid-js/store";
-import { EditorState } from "../components/editor/editor";
-import StorageHandler from "../core/storage";
-import Icon from "../components/icon";
-import Footer from "../components/footer";
+import Header from "~/components/header";
+import Note, { NoteMode } from "~/components/note";
+import { EditorState } from "~/components/editor/editor";
+import StorageHandler from "~/core/storage";
+import Icon from "~/components/icon";
+import Footer from "~/components/footer";
 import { Context } from "../../renderer/pkg/renderer";
 import { useApi } from "~/contexts/ApiProvider";
 
