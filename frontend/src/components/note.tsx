@@ -1,11 +1,11 @@
 import { Accessor, Component, Match, Switch, createSignal, untrack } from "solid-js";
-import NoteViewPlain from "./note/view_plain";
-import NoteViewRendered from "./note/view_rendered";
-import Icon from "./icon";
-import { copyToClipboard } from "../core/helpers";
-import { ToastType, useToast } from "../contexts/ToastProvider";
 import { SetStoreFunction, Store } from "solid-js/store";
-import Editor, { EditorState } from "./editor/editor";
+import NoteViewPlain from "~/components/note/view_plain";
+import NoteViewRendered from "~/components/note/view_rendered";
+import Icon from "~/components/icon";
+import { copyToClipboard } from "~/core/helpers";
+import { ToastType, useToast } from "~/contexts/ToastProvider";
+import Editor, { EditorState } from "~/components/editor/editor";
 import { Context } from "../../renderer/pkg/renderer";
 
 const AUTO_SAVE_TIMEOUT = 2400;

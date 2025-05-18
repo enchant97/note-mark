@@ -1,6 +1,6 @@
 import { Accessor, ParentProps, createContext, useContext } from "solid-js"
-import { optionExpect } from "../core/core"
-import { Book, Note, User } from "../core/types"
+import { optionExpect } from "~/core/core"
+import { Book, Note, User } from "~/core/types"
 
 type DrawerContextProps = {
   currentUser: Accessor<User | undefined>

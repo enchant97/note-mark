@@ -1,11 +1,11 @@
 import { Component, For, Match, Show, Switch, createResource, createSignal } from "solid-js";
-import BaseModal from "./base";
-import { useApi } from "../../contexts/ApiProvider";
-import { ToastType, apiErrorIntoToast, useToast } from "../../contexts/ToastProvider";
-import { ApiError } from "../../core/api";
+import BaseModal from "~/components/modals/base";
+import { useApi } from "~/contexts/ApiProvider";
+import { ToastType, apiErrorIntoToast, useToast } from "~/contexts/ToastProvider";
+import { ApiError } from "~/core/api";
 import { createStore } from "solid-js/store";
-import Icon from "../icon";
-import { copyToClipboard } from "../../core/helpers";
+import Icon from "~/components/icon";
+import { copyToClipboard } from "~/core/helpers";
 
 type AssetsModalProps = {
   onClose: () => any

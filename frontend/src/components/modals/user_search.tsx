@@ -1,9 +1,9 @@
 import { Component, For, createResource, createSignal } from "solid-js";
-import BaseModal from "./base";
-import { useApi } from "../../contexts/ApiProvider";
-import { ApiError } from "../../core/api";
-import { apiErrorIntoToast, useToast } from "../../contexts/ToastProvider";
 import { A } from "@solidjs/router";
+import BaseModal from "~/components/modals/base";
+import { useApi } from "~/contexts/ApiProvider";
+import { ApiError } from "~/core/api";
+import { apiErrorIntoToast, useToast } from "~/contexts/ToastProvider";
 
 type UserSearchModalProps = {
   onClose: () => void

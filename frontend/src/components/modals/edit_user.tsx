@@ -1,10 +1,10 @@
 import { Component, createSignal } from 'solid-js';
-import BaseModal from './base';
-import { useApi } from '../../contexts/ApiProvider';
 import { createStore } from 'solid-js/store';
-import { User, userIntoUpdateUser } from '../../core/types';
-import { apiErrorIntoToast, useToast } from '../../contexts/ToastProvider';
-import { ApiError } from '../../core/api';
+import BaseModal from '~/components/modals/base';
+import { useApi } from '~/contexts/ApiProvider';
+import { User, userIntoUpdateUser } from '~/core/types';
+import { apiErrorIntoToast, useToast } from '~/contexts/ToastProvider';
+import { ApiError } from '~/core/api';
 
 type UpdateUserModalProps = {
   onClose: (user?: User) => void

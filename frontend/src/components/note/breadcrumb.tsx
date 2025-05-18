@@ -1,7 +1,7 @@
 import { Component, Show } from 'solid-js';
-import { BreadcrumbWithNames } from '../../core/types';
-import Icon from '../icon';
 import { A } from '@solidjs/router';
+import { BreadcrumbWithNames } from '~/core/types';
+import Icon from '~/components/icon';
 
 type NoteBreadcrumbProps = BreadcrumbWithNames & {
   class?: string

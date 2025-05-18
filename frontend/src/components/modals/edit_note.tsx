@@ -1,13 +1,13 @@
 import { Component, createSignal } from 'solid-js';
-import BaseModal from './base';
-import { Book, Note, noteIntoUpdateNote, User } from '../../core/types';
 import { createStore } from 'solid-js/store';
-import { toSlug } from '../../core/helpers';
-import { useApi } from '../../contexts/ApiProvider';
 import { useNavigate } from '@solidjs/router';
-import { apiErrorIntoToast, useToast } from '../../contexts/ToastProvider';
-import { ApiError } from '../../core/api';
-import Icon from '../icon';
+import BaseModal from '~/components/modals/base';
+import { Book, Note, noteIntoUpdateNote, User } from '~/core/types';
+import { toSlug } from '~/core/helpers';
+import { useApi } from '~/contexts/ApiProvider';
+import { apiErrorIntoToast, useToast } from '~/contexts/ToastProvider';
+import { ApiError } from '~/core/api';
+import Icon from '~/components/icon';
 
 type UpdateNoteModalProps = {
   onClose: (note?: Note) => void
