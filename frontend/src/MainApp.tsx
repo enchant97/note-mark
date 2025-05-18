@@ -13,7 +13,9 @@ import { apiErrorIntoToast, useToast } from '~/contexts/ToastProvider';
 import { useModal } from '~/contexts/ModalProvider';
 import ContentSearchModal, { SearchableBook, SearchableNote } from '~/components/modals/content_search';
 
-function performBookOrNoteSort(rows: Note[] | Book[], method: SortChoice) {
+type BookOrNote = Book | Note
+
+function performBookOrNoteSort<T extends BookOrNote>(rows: T[], method: SortChoice) {
   switch (method) {
     case SortChoice.NAME_ASC:
       return rows.sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base', numeric: true }))
