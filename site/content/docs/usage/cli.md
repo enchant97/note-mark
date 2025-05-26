@@ -25,6 +25,6 @@ note-mark --help
 ## Available Commands
 - `serve`: run the web API server, depending on install method may include UI
 - `clean`: remove old and unused data
-- `user`: add, remove and change user passwords
+- `user`: user management such as: creation, setting a password, mapping oidc account
 - `migrate`: import and export data out of the app
 - `help`: shows the help for CLI

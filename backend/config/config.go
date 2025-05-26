@@ -16,6 +16,14 @@ type DBConfig struct {
 	Type string `env:"TYPE,notEmpty"`
 }
 
+type OidcConfig struct {
+	DisplayName        string `env:"DISPLAY_NAME"`
+	ProviderName       string `env:"PROVIDER_NAME"`
+	IssuerUrl          string `env:"ISSUER_URL"`
+	ClientID           string `env:"CLIENT_ID"`
+	EnableUserCreation bool   `env:"ENABLE_USER_CREATION,notEmpty" envDefault:"true"`
+}
+
 type AppConfig struct {
 	Bind                      BindConfig    `envPrefix:"BIND__"`
 	DB                        DBConfig      `envPrefix:"DB__"`
@@ -24,8 +32,10 @@ type AppConfig struct {
 	DataPath                  string        `env:"DATA_PATH,notEmpty"`
 	StaticPath                string        `env:"STATIC_PATH"`
 	CORSOrigins               []string      `env:"CORS_ORIGINS,notEmpty" envSeparator:","`
-	AllowSignup               bool          `env:"ALLOW_SIGNUP,notEmpty" envDefault:"true"`
+	EnableInternalSignup      bool          `env:"ENABLE_INTERNAL_SIGNUP,notEmpty" envDefault:"true"`
+	EnableInternalLogin       bool          `env:"ENABLE_INTERNAL_LOGIN,notEmpty" envDefault:"true"`
 	EnableAnonymousUserSearch bool          `env:"ENABLE_ANONYMOUS_USER_SEARCH,notEmpty" envDefault:"true"`
 	NoteSizeLimit             Bytes         `env:"NOTE_SIZE_LIMIT,notEmpty" envDefault:"1M"`
 	AssetSizeLimit            Bytes         `env:"ASSET_SIZE_LIMIT,notEmpty" envDefault:"12M"`
+	OIDC                      *OidcConfig   `envPrefix:"OIDC__" env:",init"`
 }

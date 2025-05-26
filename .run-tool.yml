@@ -32,6 +32,13 @@ targets:
       - serve
     env_file: .env
     cwd: backend
+  dev-backend-cli:
+    program: go
+    args:
+      - run
+      - .
+    env_file: .env
+    cwd: backend
   dev-site:
     program: hugo
     args:

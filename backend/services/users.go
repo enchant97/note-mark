@@ -14,7 +14,7 @@ var UserPasswordInvalid = errors.New("user password invalid")
 type UsersService struct{}
 
 func (s UsersService) CreateUser(appConfig config.AppConfig, toCreate db.CreateUser) (db.User, error) {
-	if !appConfig.AllowSignup {
+	if !appConfig.EnableInternalSignup {
 		return db.User{}, UserSignupDisabledError
 	}
 	user := toCreate.IntoUser()

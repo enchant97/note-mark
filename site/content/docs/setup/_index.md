@@ -10,3 +10,4 @@ This section of the docs is designed for admins who wish to setup Note Mark. Her
 - The "frontend" provides a SPA that allows for online access of the backend
     - basically just some static files once built
 - The offical "note-mark-aio" image contains both frontend and backend, to make hosting easier
+- Both frontend and backend **MUST** be accessible from the same domain such as: notemark.example.com

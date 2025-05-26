@@ -75,6 +75,30 @@ func Entrypoint(appVersion string) error {
 							return commandUserSetPassword(appConfig, username, password)
 						},
 					},
+					{
+						Name:  "remove-password",
+						Usage: "remove a existing users password",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true},
+						},
+						Action: func(ctx *cli.Context) error {
+							username := ctx.String("username")
+							return commandUserRemovePassword(appConfig, username)
+						},
+					},
+					{
+						Name:  "add-oidc-mapping",
+						Usage: "set a existing users oidc mapping",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "username", Required: true},
+							&cli.StringFlag{Name: "user-sub", Required: true},
+						},
+						Action: func(ctx *cli.Context) error {
+							username := ctx.String("username")
+							userSub := ctx.String("user-sub")
+							return commandUserAddOidcMapping(appConfig, username, userSub)
+						},
+					},
 				},
 			},
 			{

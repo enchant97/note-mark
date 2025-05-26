@@ -17,6 +17,7 @@ import Profile from '~/routes/profile';
 import Home from '~/routes/(home)';
 import Signup from '~/routes/signup';
 import { RequireApiSetupGuard, RequireAuthGuard, RequireNoAuthGuard, RequireSignupAllowedGuard } from '~/components/guards';
+import OidcCallback from './routes/oidc-callback';
 
 if ("serviceWorker" in navigator) {
   registerSW()
@@ -37,6 +38,7 @@ render(() => (
       <Route component={RequireNoAuthGuard}>
         <Route path="/signup" component={() => <RequireSignupAllowedGuard><Signup /></RequireSignupAllowedGuard>} />
         <Route path="/login" component={Login} />
+        <Route path="/oidc-callback" component={OidcCallback} />
       </Route>
       <Route component={RequireAuthGuard}>
         <Route path="/logout" component={Logout} />

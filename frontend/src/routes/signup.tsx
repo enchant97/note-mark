@@ -109,7 +109,6 @@ const Signup: Component = () => {
                   Create User
                 </button>
                 <A class="btn join-item" href="/login">Have An Account?</A>
-                <A class="btn join-item" href="/">Back Home</A>
               </div>
             </form>
           </div>

@@ -10,10 +10,18 @@ export type BreadcrumbWithNames = Breadcrumb & {
   noteName?: string
 }
 
+export interface OidcProviderInfo {
+  displayName: string
+  issuerUrl: string
+  clientId: string
+}
+
 export type ServerInfo = {
   minSupportedVersion: string
-  allowSignup: boolean
+  allowInternalSignup: boolean
+  allowInternalLogin: boolean
   enableAnonymousUserSearch: boolean
+  oidcProvider?: OidcProviderInfo
 }
 
 export type OAuth2AccessTokenRequest = {

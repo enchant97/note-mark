@@ -17,6 +17,7 @@ Note Mark is a lighting fast and minimal; web-based Markdown notes app. Featurin
 - Multiple views for a note (rendered, plain)
 - Lighting fast editor with shortcuts
 - Upload and attach assets
+- OIDC support for Single-Sign-On
 
 ## Showcase
 ![Preview Image Showing App](site/static/preview.webp)

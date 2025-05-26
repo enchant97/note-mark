@@ -13,9 +13,15 @@ Like what you hear? Take a look below:
 
 <https://youtu.be/rwL99Ac5g98>
 
-## What's The Future Look Like?
-- Revision history
-- S3 storage backend
-- Offline functionality
-- Live synchronization
-- A CLI app/daemon (bring your own editor)
+## Features
+- Markdown (GitHub Flavored Markdown, see spec [here](https://github.github.com/gfm/))
+- HTML sanitisation, minimizing XSS attacks
+- Mobile Friendly
+- Friendly URLs for cleaner links
+- Dark & Light Theme
+- Notebook Sharing
+- Custom flat-file based storage system
+- Multiple views for a note (rendered, plain)
+- Lighting fast editor with shortcuts
+- Upload and attach assets
+- OIDC support for Single-Sign-On

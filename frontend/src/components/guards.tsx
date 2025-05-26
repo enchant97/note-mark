@@ -18,7 +18,7 @@ export function RequireNoAuthGuard(props: ParentProps) {
 
 export function RequireSignupAllowedGuard(props: ParentProps) {
   const { apiInfo } = useApi()
-  const check = () => apiInfo()?.allowSignup === true
+  const check = () => apiInfo()?.allowInternalSignup === true
   return <ShowOrRedirect when={check} redirectTo="/login">{props.children}</ShowOrRedirect>
 }
 

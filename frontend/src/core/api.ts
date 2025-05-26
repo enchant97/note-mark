@@ -118,6 +118,27 @@ class Api {
   async postTokenPasswordFlow(username: string, password: string): Promise<Result<OAuth2AccessToken, ApiError>> {
     return await this.postToken({ grant_type: "password", username, password })
   }
+  async postExchangeOidcToken(
+    oidcAccessToken: OAuth2AccessToken,
+    usernameHint: string,
+  ): Promise<Result<OAuth2AccessToken, ApiError>> {
+    let reqURL = `${this.apiServer}/auth/oidc-exchange`
+    let resp = await handleFetchErrors(fetch(reqURL, {
+      method: HttpMethods.POST,
+      body: JSON.stringify(oidcAccessToken),
+      headers: {
+        "Username-Hint": usernameHint,
+        ...HEADER_JSON,
+      },
+    }))
+    if (resp instanceof Error) return resp
+    try {
+      await throwResponseApiErrors(resp)
+    } catch (e) {
+      return e
+    }
+    return handleBodyErrors(resp.json())
+  }
   //
   // User
   //

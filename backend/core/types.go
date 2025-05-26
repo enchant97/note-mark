@@ -50,8 +50,16 @@ type AccessTokenRequest struct {
 	Password  string `json:"password" query:"password" form:"password" required:"true"`
 }
 
+type OidcProviderInfo struct {
+	DisplayName string `json:"displayName"`
+	IssuerURL   string `json:"issuerUrl"`
+	ClientID    string `json:"clientId"`
+}
+
 type ServerInfo struct {
-	MinSupportedVersion       string `json:"minSupportedVersion"`
-	AllowSignup               bool   `json:"allowSignup"`
-	EnableAnonymousUserSearch bool   `json:"enableAnonymousUserSearch"`
+	MinSupportedVersion       string            `json:"minSupportedVersion"`
+	AllowInternalSignup       bool              `json:"allowInternalSignup"`
+	AllowInternalLogin        bool              `json:"allowInternalLogin"`
+	EnableAnonymousUserSearch bool              `json:"enableAnonymousUserSearch"`
+	OidcProvider              *OidcProviderInfo `json:"oidcProvider,omitEmpty"`
 }

@@ -26,10 +26,11 @@ type TimeBase struct {
 type User struct {
 	UUIDBase
 	TimeBase
-	Username string  `gorm:"uniqueIndex;not null;type:varchar(30)" json:"username"`
-	Password []byte  `gorm:"not null" json:"-" hidden:"true" readOnly:"true"`
-	Name     *string `gorm:"size:128" json:"name"`
-	Books    []Book  `gorm:"foreignKey:OwnerID" json:"books,omitempty"`
+	Username          string     `gorm:"uniqueIndex;not null;type:varchar(30)" json:"username"`
+	Password          []byte     `gorm:"not null" json:"-" hidden:"true" readOnly:"true"`
+	Name              *string    `gorm:"size:128" json:"name"`
+	Books             []Book     `gorm:"foreignKey:OwnerID" json:"books,omitempty"`
+	OidcRegistrations []OidcUser `gorm:"foreignKey:UserID" json:"oidcRegistrations,omitempty"`
 }
 
 func (u *User) SetPassword(newPlainPassword string) {
@@ -41,10 +42,21 @@ func (u *User) SetPassword(newPlainPassword string) {
 }
 
 func (u *User) IsPasswordMatch(plainPassword string) bool {
+	if len(u.Password) == 0 {
+		return false
+	}
 	if err := bcrypt.CompareHashAndPassword(u.Password, []byte(plainPassword)); err == nil {
 		return true
 	}
 	return false
+}
+
+type OidcUser struct {
+	ID           int64     `gorm:"primaryKey;autoIncrement" json:"-"`
+	UserID       uuid.UUID `gorm:"not null;uniqueIndex:idx_oidc_user;type:uuid" json:"userId"`
+	UserSub      string    `gorm:"not null;uniqueIndex:idx_oidc_provider" json:"userSub"`
+	ProviderName string    `gorm:"not null;uniqueIndex:idx_oidc_user;uniqueIndex:idx_oidc_provider" json:"providerName"`
+	User         User      `json:"-"`
 }
 
 type Note struct {

@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/db"
@@ -40,4 +41,38 @@ func commandUserSetPassword(appConfig config.AppConfig, username string, passwor
 	}
 	user.SetPassword(password)
 	return db.DB.Save(&user).Error
+}
+
+func commandUserRemovePassword(appConfig config.AppConfig, username string) error {
+	if err := db.InitDB(appConfig.DB); err != nil {
+		return err
+	}
+	var user db.User
+	if err := db.DB.First(&user, "username = ?", username).Select("password").Error; err != nil {
+		return err
+	}
+	user.Password = []byte("")
+	return db.DB.Save(&user).Error
+}
+
+func commandUserAddOidcMapping(
+	appConfig config.AppConfig,
+	username string,
+	userSub string,
+) error {
+	if err := db.InitDB(appConfig.DB); err != nil {
+		return err
+	}
+	var user db.User
+	if err := db.DB.
+		First(&user, "username = ?", username).
+		Error; err != nil {
+		return err
+	}
+	OidcUser := db.OidcUser{
+		UserID:       user.ID,
+		UserSub:      userSub,
+		ProviderName: strings.ToLower(appConfig.OIDC.ProviderName),
+	}
+	return db.DB.Create(&OidcUser).Error
 }

@@ -24,10 +24,20 @@ type MiscHandler struct {
 }
 
 func (h MiscHandler) GetServerInfo(ctx context.Context, input *struct{}) (*GetServerInfoOutput, error) {
+	var oidcProvider *core.OidcProviderInfo
+	if h.AppConfig.OIDC != nil {
+		oidcProvider = &core.OidcProviderInfo{
+			DisplayName: h.AppConfig.OIDC.DisplayName,
+			IssuerURL:   h.AppConfig.OIDC.IssuerUrl,
+			ClientID:    h.AppConfig.OIDC.ClientID,
+		}
+	}
 	return &GetServerInfoOutput{
 		Body: core.ServerInfo{
 			MinSupportedVersion:       "0.15.0",
-			AllowSignup:               h.AppConfig.AllowSignup,
+			AllowInternalSignup:       h.AppConfig.EnableInternalSignup,
+			AllowInternalLogin:        h.AppConfig.EnableInternalLogin,
 			EnableAnonymousUserSearch: h.AppConfig.EnableAnonymousUserSearch,
+			OidcProvider:              oidcProvider,
 		}}, nil
 }

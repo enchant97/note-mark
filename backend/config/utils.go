@@ -13,6 +13,9 @@ func (appConfig *AppConfig) ParseConfig() error {
 	if err := env.Parse(appConfig); err != nil {
 		return err
 	}
+	if appConfig.OIDC.DisplayName == "" || appConfig.OIDC.ProviderName == "" || appConfig.OIDC.IssuerUrl == "" || appConfig.OIDC.ClientID == "" {
+		appConfig.OIDC = nil
+	}
 	return nil
 }
 
