@@ -1,6 +1,14 @@
-# syntax=docker/dockerfile:1.4
+# syntax=docker/dockerfile:1
 
-FROM node:20-bookworm as builder
+FROM node:20-slim AS node-base
+    ENV PNPM_HOME="/pnpm"
+    ENV PATH="$PNPM_HOME:$PATH"
+
+    # ensure running latest corepack: https://github.com/nodejs/corepack/issues/612
+    RUN npm install --global corepack@latest
+    RUN corepack enable
+
+FROM node-base AS builder
 
     WORKDIR /app
 
@@ -11,14 +19,14 @@ FROM node:20-bookworm as builder
     ENV PATH="$PATH:/root/.cargo/bin"
     RUN rustup target add wasm32-unknown-unknown
 
-    COPY package.json package-lock.json ./
+    COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 
-    RUN npm ci
+    RUN pnpm i
 
     COPY . .
 
-    RUN npm run wasm
-    RUN npm run build
+    RUN pnpm run wasm
+    RUN pnpm run build
 
 FROM nginxinc/nginx-unprivileged:1.27-alpine3.20
 

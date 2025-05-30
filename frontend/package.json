@@ -13,10 +13,9 @@
   },
   "engines": {
     "node": "^20.18",
-    "npm": "^10.8.2"
+    "pnpm": "^10.10.0"
   },
   "devDependencies": {
-    "@types/dompurify": "^3.0.5",
     "@types/feather-icons": "^4.29.4",
     "autoprefixer": "^10.4.17",
     "postcss": "^8.4.33",
