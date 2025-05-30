@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.0] - 2025-05-30
+### Added
+- closes #223; SSO via external OIDC providers
+### Changes
+- require go 1.24
+- closes #225; remove api picker from frontend
+- closes #226; migrate to pnpm instead of npm
+- replace all PATCH methods with PUT
+- update to es2020
+- general code tidying
+### Fixes
+- fix error when loading a user with no books
+
 ## [0.15.4] - 2025-04-19
 ### Fixed
 - #231; double braces cannot be escape (only temporary fix)
