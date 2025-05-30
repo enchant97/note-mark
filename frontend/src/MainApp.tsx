@@ -62,7 +62,7 @@ const MainApp: Component<ParentProps> = (props) => {
       pushToast(apiErrorIntoToast(result, `loading data for ${username}`))
     } else {
       let data = new Map<string, MappedUser>(Object.entries(result))
-      let books = new Map(Object.entries(result.books!).map((v) => {
+      let books = new Map(Object.entries(result.books || []).map((v) => {
         let book = new Map(Object.entries(v[1]))
         book.set("notes", new Map(v[1].notes?.map((v) => [v.id, v])) || new Map())
         return [v[1].id, book]
