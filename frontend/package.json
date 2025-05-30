@@ -43,6 +43,7 @@
     "feather-icons": "^4.29.2",
     "highlight.js": "^11.11.1",
     "openid-client": "^6.5.0",
-    "solid-js": "^1.9.7"
+    "solid-js": "^1.9.7",
+    "workbox-window": "^7.3.0"
   }
 }
