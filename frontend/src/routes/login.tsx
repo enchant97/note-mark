@@ -75,12 +75,12 @@ const Login: Component = () => {
       }
       const redirectTo = oidcClient.buildAuthorizationUrl(oidcDiscovery, parameters)
       // END setup-oidc
-      const popup = window.open(redirectTo.href, "oidcStartFlow", "popup,width=500,height=700");
-      setOidcPopup(popup)
+      let popup = window.open(redirectTo.href, "_blank");
       if (popup === null) {
         pushToast({ message: "failed to start authentication flow", type: ToastType.ERROR })
         return
       }
+      setOidcPopup(popup)
       setLoading(false)
       const closeCheck = setInterval(async () => {
         if (popup.closed) {
