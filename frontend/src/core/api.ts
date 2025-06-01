@@ -121,7 +121,7 @@ class Api {
   async postExchangeOidcToken(
     oidcAccessToken: OAuth2AccessToken,
     usernameHint: string,
-  ): Promise<Result<OAuth2AccessToken, ApiError>> {
+  ): Promise<OAuth2AccessToken> {
     let reqURL = `${this.apiServer}/auth/oidc-exchange`
     let resp = await handleFetchErrors(fetch(reqURL, {
       method: HttpMethods.POST,
@@ -131,12 +131,8 @@ class Api {
         ...HEADER_JSON,
       },
     }))
-    if (resp instanceof Error) return resp
-    try {
-      await throwResponseApiErrors(resp)
-    } catch (e) {
-      return e
-    }
+    if (resp instanceof Error) { throw resp }
+    await throwResponseApiErrors(resp)
     return handleBodyErrors(resp.json())
   }
   //
