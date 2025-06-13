@@ -5,7 +5,7 @@ import { useApi } from '~/contexts/ApiProvider';
 import { ToastType, apiErrorIntoToast, useToast } from '~/contexts/ToastProvider';
 import { ApiError, HttpErrors } from '~/core/api';
 import Header from '~/components/header';
-import Footer from '~/components/footer';
+import Icon from '~/components/icon';
 
 const Signup: Component = () => {
   const { api } = useApi()
@@ -45,64 +45,69 @@ const Signup: Component = () => {
   return (
     <div class="min-h-screen">
       <Header disableDrawerToggle={true} />
-      <div class="bg-base-200 p-6 mx-6">
-        <div class="card w-full max-w-md mx-auto bg-base-100">
+      <div class="p-6 mx-6">
+        <div class="flex w-full max-w-md mx-auto">
           <div class="card-body text-center">
             <img class="mb-2 mx-auto w-36" src="/icon.svg" alt="Note Mark Icon" />
             <h1 class="text-5xl font-bold">Note Mark</h1>
-            <p class="py-6">Create your account here.</p>
             <form onSubmit={onSubmit}>
-              <label class="form-control">
-                <span class="label label-text">Username</span>
-                <input
-                  class="input input-bordered"
-                  value={formDetails.username}
-                  oninput={(ev) => { setFormDetails({ username: ev.currentTarget.value }) }}
-                  type="text"
-                  placeholder="e.g. leo"
-                  autocomplete="username"
-                  pattern="[A-Za-z0-9]+"
-                  minlength={3}
-                  maxlength={30}
-                  required
-                />
-              </label>
-              <label class="form-control">
-                <span class="label label-text">Full Name</span>
-                <input
-                  class="input input-bordered"
-                  value={formDetails.name}
-                  oninput={(ev) => { setFormDetails({ name: ev.currentTarget.value }) }}
-                  type="text"
-                  placeholder="e.g. Leo S"
-                  maxlength={128}
-                />
-              </label>
-              <label class="form-control">
-                <span class="label label-text">Password</span>
-                <input
-                  class="input input-bordered"
-                  value={formDetails.password}
-                  oninput={(ev) => { setFormDetails({ password: ev.currentTarget.value }) }}
-                  type="password"
-                  placeholder="e.g. P@ssword123"
-                  autocomplete="new-password"
-                  required
-                />
-              </label>
-              <label class="form-control">
-                <span class="label label-text">Password Confirm</span>
-                <input
-                  class="input input-bordered"
-                  classList={{ "input-error": !passwordsMatch() }}
-                  value={formDetails.passwordConfirm}
-                  oninput={(ev) => { setFormDetails({ passwordConfirm: ev.currentTarget.value }) }}
-                  type="password"
-                  placeholder="e.g. P@ssword123"
-                  autocomplete="new-password"
-                  required
-                />
-              </label>
+              <fieldset class="fieldset">
+                <legend class="fieldset-legend">Create Account</legend>
+                <label class="input validator">
+                  <Icon name="user" />
+                  <input
+                    value={formDetails.username}
+                    oninput={(ev) => { setFormDetails({ username: ev.currentTarget.value }) }}
+                    type="text"
+                    placeholder="Username"
+                    autocomplete="username"
+                    pattern="[A-Za-z0-9]+"
+                    minlength={3}
+                    maxlength={30}
+                    required
+                  />
+                </label>
+                <p class="validator-hint hidden">
+                  Must be 3 to 30 characters
+                  <br />containing only letters and numbers
+                </p>
+                <label class="input validator">
+                  <Icon name="edit-3" />
+                  <input
+                    value={formDetails.name}
+                    oninput={(ev) => { setFormDetails({ name: ev.currentTarget.value }) }}
+                    type="text"
+                    placeholder="Full Name"
+                    maxlength={128}
+                  />
+                </label>
+                <p class="validator-hint hidden">
+                  Must be 0 to 128 characters
+                </p>
+                <label class="input validator">
+                  <Icon name="lock" />
+                  <input
+                    value={formDetails.password}
+                    oninput={(ev) => { setFormDetails({ password: ev.currentTarget.value }) }}
+                    type="password"
+                    placeholder="Password"
+                    autocomplete="new-password"
+                    required
+                  />
+                </label>
+                <label class="input validator">
+                  <Icon name="lock" />
+                  <input
+                    classList={{ "input-error": !passwordsMatch() }}
+                    value={formDetails.passwordConfirm}
+                    oninput={(ev) => { setFormDetails({ passwordConfirm: ev.currentTarget.value }) }}
+                    type="password"
+                    placeholder="Password Confirm"
+                    autocomplete="new-password"
+                    required
+                  />
+                </label>
+              </fieldset>
               <div class="join join-vertical w-full mt-5">
                 <button class="btn join-item btn-primary" disabled={!passwordsMatch() || loading()} type="submit">
                   {loading() && <span class="loading loading-spinner"></span>}
@@ -114,7 +119,6 @@ const Signup: Component = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

@@ -37,34 +37,35 @@ const NewNoteModal: Component<NewNoteModalProps> = (props) => {
   return (
     <BaseModal title="Create Note">
       <form onsubmit={onSubmit}>
-        <label class="form-control">
-          <span class="label"><span class="label-text">Title</span></span>
-          <input
-            oninput={(ev) => setForm({
-              name: ev.currentTarget.value,
-              slug: toSlugWithSuffix(ev.currentTarget.value)
-            })}
-            value={form.name}
-            class="input input-bordered w-full"
-            type="text"
-            placeholder="e.g. My Amazing Note"
-            required
-          />
-        </label>
-        <label class="form-control">
-          <span class="label"><span class="label-text">Slug</span></span>
-          <input
-            oninput={(ev) => setForm({
-              slug: toSlug(ev.currentTarget.value)
-            })}
-            value={form.slug}
-            class="input input-bordered input-sm w-full"
-            type="text"
-            placeholder="e.g. my-amazing-note"
-            pattern="(?:[a-z0-9]|-)+"
-            required
-          />
-        </label>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Note details</legend>
+          <label class="input validator">
+            Title
+            <input
+              oninput={(ev) => setForm({
+                name: ev.currentTarget.value,
+                slug: toSlugWithSuffix(ev.currentTarget.value)
+              })}
+              value={form.name}
+              type="text"
+              placeholder="e.g. My Amazing Note"
+              required
+            />
+          </label>
+          <label class="input validator">
+            Slug
+            <input
+              oninput={(ev) => setForm({
+                slug: toSlug(ev.currentTarget.value)
+              })}
+              value={form.slug}
+              type="text"
+              placeholder="e.g. my-amazing-note"
+              pattern="(?:[a-z0-9]|-)+"
+              required
+            />
+          </label>
+        </fieldset>
         <div class="modal-action">
           <button class="btn btn-primary" classList={{ loading: loading() }} type="submit">
             <Icon name="file-plus" />

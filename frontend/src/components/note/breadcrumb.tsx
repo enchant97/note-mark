@@ -13,7 +13,7 @@ const NoteBreadcrumb: Component<NoteBreadcrumbProps> = (props) => {
     return ""
   }
   return (
-    <div class={"p-2 text-sm breadcrumbs rounded-md shadow-md bg-base-200 flex" + extraClass()}>
+    <div class={"p-2 text-sm breadcrumbs shadow-glass rounded-box flex" + extraClass()}>
       <ul>
         <Show when={props.username}>
           <li>

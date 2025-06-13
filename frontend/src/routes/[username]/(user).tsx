@@ -40,20 +40,20 @@ const User = () => {
   }
 
   return (
-    <div class="bg-base-200 py-6 flex flex-col gap-4">
+    <div class="py-6 mt-6 flex flex-col gap-4 max-w-md mx-auto text-center">
       <h1 class="text-4xl font-bold text-center">{drawer.currentUser()?.name || params.username}'s Area</h1>
-      <div class="max-w-md mx-auto text-center">
+      <div class="text-center">
         <div class="join">
           <Show
             when={userInfo() !== undefined} fallback={
               <Show when={accessToken()} fallback={
                 <A
-                  class="join-item btn btn-outline"
+                  class="join-item btn"
                   href="/login"
                 >Login</A>
               }>
                 <button
-                  class="join-item btn btn-outline" onclick={() => {
+                  class="join-item btn" onclick={() => {
                     setAuthStore(null)
                     navigate("/login")
                   }}>Re-Login</button>
@@ -61,13 +61,13 @@ const User = () => {
             }>
             <Show when={userInfo()?.username === params.username} fallback={
               <A
-                class="btn join-item btn-outline"
+                class="btn join-item"
                 href={`/${userInfo()?.username}`}
               >My Notes</A>
             }>
               <button
                 onClick={onNewBookClick}
-                class="btn join-item btn-outline"
+                class="btn join-item"
                 type="button"
               >
                 <Icon name="folder-plus" />
@@ -77,7 +77,7 @@ const User = () => {
           </Show>
           <button
             onclick={() => openUserSearchModal()}
-            class="btn join-item btn-outline"
+            class="btn join-item"
             type="button"
           >
             <Icon name="users" />
@@ -85,7 +85,7 @@ const User = () => {
           </button>
         </div>
       </div>
-      <div class="mx-4 p-2 bg-base-100 rounded">
+      <div class="mx-4 p-2">
         <h2 class="text-lg font-bold text-center">Recent Notes</h2>
         <RecentNotes />
       </div>

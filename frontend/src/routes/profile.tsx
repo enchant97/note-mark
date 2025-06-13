@@ -6,7 +6,6 @@ import { useModal } from '~/contexts/ModalProvider';
 import { User } from '~/core/types';
 import Icon from '~/components/icon';
 import Header from '~/components/header';
-import Footer from '~/components/footer';
 import { useApi } from '~/contexts/ApiProvider';
 
 const Profile: Component = () => {
@@ -41,26 +40,26 @@ const Profile: Component = () => {
   return (
     <div class="min-h-screen">
       <Header disableDrawerToggle={true} />
-      <div class="bg-base-200 p-6 mx-6">
-        <h1 class="text-4xl text-center font-bold mb-4">My Profile</h1>
-        <div class="card w-full max-w-md mx-auto bg-base-100">
+      <div class="p-6 mx-6">
+        <div class="flex max-w-md mx-auto">
           <div class="card-body">
+            <h1 class="text-4xl text-center font-bold mb-4">My Profile</h1>
             <div>username: {userInfo()?.username}</div>
             <div class="mb-2">full-name: {userInfo()?.name || ""}</div>
             <div class="join">
               <button
                 onclick={() => onUpdateProfileClick()}
-                class="btn btn-neutral join-item">
+                class="btn join-item">
                 Update Profile
               </button>
               <button
                 onclick={() => onUpdatePasswordClick()}
-                class="btn btn-neutral join-item">
+                class="btn join-item">
                 Change Password
               </button>
             </div>
             <A
-              class="btn btn-wide btn-neutral mx-auto mt-4"
+              class="btn btn-wide mx-auto mt-4"
               href={`/${userInfo()?.username}`}
             >
               <Icon name="home" />
@@ -69,7 +68,6 @@ const Profile: Component = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

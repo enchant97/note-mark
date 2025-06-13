@@ -218,76 +218,80 @@ const MainApp: Component<ParentProps> = (props) => {
           </DrawerProvider>
         </div>
       </div>
-      <div class="drawer-side z-40">
+      <div class="drawer-side z-40 p-2">
         <label for="main-drawer" class="drawer-overlay"></label>
-        <menu class="menu menu-sm gap-2 p-4 w-80 bg-base-300-blur text-base-content h-full">
-          <li><label aria-label="Sort Mode">
-            <Icon name="align-left" />
-            <SortSelect onChange={setSortChoice} selected={sortChoice()} />
-          </label></li>
-          <li><button
-            onClick={() => onSearchOpen()}
-            class="btn btn-sm shadow bg-base-100"
-            type="button">
-            <Icon name="search" />
-            Search
-          </button></li>
-          <li class="menu-title">NOTEBOOKS</li>
-          <ul class="bg-base-100 flex-1 overflow-auto rounded-lg">
-            <Show when={!userData.loading} fallback={<LoadingRing />}>
-              <For each={sortedBooks()}>
-                {(book) => <li>
-                  <A
-                    href={`/${params.username}/${book.slug}`}
-                    end={true}
-                  >
-                    <Icon name="folder" size={14} />
-                    {book.name}
-                  </A>
-                  <Show when={!currentBook.loading && book.slug === params.bookSlug}>
-                    <ul>
-                      <For each={sortedNotes()}>
-                        {(note) => <li>
-                          <A
-                            href={`/${params.username}/${params.bookSlug}/${note.slug}`}
-                            end={true}
-                          >
-                            <Icon name="file" size={14} />
-                            {note.name}
-                          </A></li>}
-                      </For>
-                    </ul>
-                  </Show>
-                </li>}
-              </For>
-            </Show>
-          </ul>
-          <li>
-            <a
-              href="https://buymeacoffee.com/leospratt"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="btn btn-sm shadow bg-base-100"
-            >
-              Support My Work (Donate)
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://github.com/enchant97/note-mark"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-sm block leading-relaxed"
-            >
-              Powered By
-              <span class="font-bold"> Note Mark</span>
-              <br />
-              Licensed Under AGPL-3.0
-            </a>
-          </li>
-        </menu>
+        <div class="h-full rounded-box backdrop-glass">
+          <menu class="menu gap-2 p-4 w-80 h-full">
+            <li><label aria-label="Sort Mode">
+              <Icon name="align-left" />
+              <SortSelect name="drawerSortMode" onChange={setSortChoice} selected={sortChoice()} />
+            </label></li>
+            <li><button
+              onClick={() => onSearchOpen()}
+              class="btn btn-sm"
+              type="button">
+              <Icon name="search" />
+              Search
+            </button></li>
+            <li class="menu-title">NOTEBOOKS</li>
+            <ul class="p-2 flex-1 overflow-auto bg-base-100 shadow-glass rounded-box">
+              <Show when={!userData.loading} fallback={<LoadingRing />}>
+                <For each={sortedBooks()}>
+                  {(book) => <li>
+                    <A
+                      href={`/${params.username}/${book.slug}`}
+                      end={true}
+                      activeClass="menu-active"
+                    >
+                      <Icon name="folder" size={14} />
+                      {book.name}
+                    </A>
+                    <Show when={!currentBook.loading && book.slug === params.bookSlug}>
+                      <ul>
+                        <For each={sortedNotes()}>
+                          {(note) => <li>
+                            <A
+                              href={`/${params.username}/${params.bookSlug}/${note.slug}`}
+                              end={true}
+                              activeClass="menu-active"
+                            >
+                              <Icon name="file" size={14} />
+                              {note.name}
+                            </A></li>}
+                        </For>
+                      </ul>
+                    </Show>
+                  </li>}
+                </For>
+              </Show>
+            </ul>
+            <li>
+              <a
+                href="https://buymeacoffee.com/leospratt"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-sm shadow bg-base-100"
+              >
+                Support My Work (Donate)
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://github.com/enchant97/note-mark"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-sm block leading-relaxed"
+              >
+                Powered By
+                <span class="font-bold"> Note Mark</span>
+                <br />
+                Licensed Under AGPL-3.0
+              </a>
+            </li>
+          </menu>
+        </div>
       </div>
-    </div >
+    </div>
   );
 }
 

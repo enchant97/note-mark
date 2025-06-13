@@ -36,45 +36,44 @@ const NewBookModal: Component<NewBookModalProps> = (props) => {
   return (
     <BaseModal title="Create Book">
       <form onsubmit={onSubmit}>
-        <label class="form-control">
-          <span class="label"><span class="label-text">Title</span></span>
-          <input
-            oninput={(ev) => setForm({
-              name: ev.currentTarget.value,
-              slug: toSlugWithSuffix(ev.currentTarget.value)
-            })}
-            value={form.name}
-            class="input input-bordered w-full"
-            type="text"
-            placeholder="e.g. My Amazing Book"
-            required
-          />
-        </label>
-        <label class="form-control">
-          <span class="label"><span class="label-text">Slug</span></span>
-          <input
-            oninput={(ev) => setForm({
-              slug: toSlug(ev.currentTarget.value)
-            })}
-            value={form.slug}
-            class="input input-bordered input-sm w-full"
-            type="text"
-            placeholder="e.g. my-amazing-book"
-            pattern="(?:[a-z0-9]|-)+"
-            required
-          />
-        </label>
-        <div class="form-control">
-          <label class="label cursor-pointer">
-            <span class="label-text">Public</span>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Book details</legend>
+          <label class="input validator">
+            Title
+            <input
+              oninput={(ev) => setForm({
+                name: ev.currentTarget.value,
+                slug: toSlugWithSuffix(ev.currentTarget.value)
+              })}
+              value={form.name}
+              type="text"
+              placeholder="e.g. My Amazing Book"
+              required
+            />
+          </label>
+          <label class="input validator">
+            Slug
+            <input
+              oninput={(ev) => setForm({
+                slug: toSlug(ev.currentTarget.value)
+              })}
+              value={form.slug}
+              type="text"
+              placeholder="e.g. my-amazing-book"
+              pattern="(?:[a-z0-9]|-)+"
+              required
+            />
+          </label>
+          <label class="label justify-between">
+            Public
             <input
               onchange={() => setForm({ isPublic: !form.isPublic })}
               checked={form.isPublic}
-              class="checkbox"
+              class="toggle"
               type="checkbox"
             />
           </label>
-        </div>
+        </fieldset>
         <div class="modal-action">
           <button class="btn btn-primary" classList={{ loading: loading() }} type="submit">
             <Icon name="folder-plus" />
