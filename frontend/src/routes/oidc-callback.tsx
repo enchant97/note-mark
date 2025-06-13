@@ -15,10 +15,6 @@ const OidcCallback: Component = () => {
     return <Redirect href="/" />
   }
   const currentUrl = new URL(window.location.href)
-  if (currentUrl.searchParams.get("state") === "") {
-    // remove empty state as it interferes when using PKCE
-    currentUrl.searchParams.delete("state")
-  }
 
   const navigate = useNavigate()
   const { apiInfo } = useApi()

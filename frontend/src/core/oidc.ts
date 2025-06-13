@@ -4,14 +4,14 @@ const verificationSessionKey = "oidc_verification"
 
 export interface OidcVerificationType {
   pkceCodeVerifier: string
-  state?: string
+  state: string
 }
 
 export class OidcVerification implements OidcVerificationType {
   pkceCodeVerifier: string
-  state?: string
+  state: string
 
-  constructor(pkceCodeVerifier: string, state?: string) {
+  constructor(pkceCodeVerifier: string, state: string) {
     this.pkceCodeVerifier = pkceCodeVerifier
     this.state = state
   }

@@ -40,9 +40,10 @@ const Login: Component = () => {
 
   const startOidcFlow = useAction(action(async (oidcDiscovery) => {
     setOidcLoading(true)
+    const state = oidcClient.randomState()
     const verification = new OidcVerification(
       oidcClient.randomPKCECodeVerifier(),
-      oidcDiscovery.serverMetadata().supportsPKCE() ? undefined : oidcClient.randomState(),
+      state,
     )
     verification.save()
     const code_challenge = await oidcClient.calculatePKCECodeChallenge(verification.pkceCodeVerifier)
@@ -53,9 +54,7 @@ const Login: Component = () => {
       scope,
       code_challenge,
       code_challenge_method: 'S256',
-    }
-    if (verification.state !== undefined) {
-      parameters.state = verification.state
+      state,
     }
     throw redirect(oidcClient.buildAuthorizationUrl(oidcDiscovery, parameters).href)
   }))
