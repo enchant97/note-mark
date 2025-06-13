@@ -57,8 +57,8 @@ const Note: Component<NoteProps> = (props) => {
         "min-h-screen": isFullscreen(),
       }}
     >
-      <div class="bg-base-200 shadow-md rounded-md flex justify-between">
-        <div class="tabs tabs-boxed">
+      <div class="flex justify-between shadow-glass rounded-box p-1.5">
+        <div class="tabs">
           <button
             onclick={() => {
               if (query_navigation_allowed()) {

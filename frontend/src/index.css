@@ -3,20 +3,33 @@
 @plugin "@tailwindcss/typography";
 
 @plugin "daisyui" {
-    themes: light, dark --default;
+    themes: light, dark --default --prefersdark;
 }
 
 @plugin "daisyui/theme" {
     name: "light";
     --color-primary: #2a76b7;
+    --radius-box: var(--radius-xl);
+    --radius-field: var(--radius-xl);
 }
 
 @plugin "daisyui/theme" {
     name: "dark";
+    --color-base-content: oklch(0.86 0.02 228.93);
     --color-primary: #235886;
+    --radius-box: var(--radius-3xl);
+    --radius-field: var(--radius-xl);
 }
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@utility shadow-glass {
+    box-shadow: inset -1px 1px 3px 0 rgba(0, 0, 0, 0.2), 0px 0px 5px 0px rgba(0, 0, 0, 0.1);
+
+    @variant dark {
+        box-shadow: inset -1px 1px 3px 0 rgba(255, 255, 255, 0.3), 0px 0px 5px 0px rgba(0, 0, 0, 0.4);
+    }
+}
 
 @layer components {
     .bg-base-300-blur {
@@ -25,6 +38,11 @@
 }
 
 @layer utilities {
+
+    .backdrop-glass {
+        @apply backdrop-blur-md bg-base-100/70;
+    }
+
     .full-screen {
         z-index: 100;
         position: absolute;
@@ -41,5 +59,21 @@
         table {
             width: auto;
         }
+    }
+
+    .input {
+        @apply w-full shadow-glass;
+    }
+
+    .btn,
+    .card,
+    .menu,
+    .select {
+        @apply shadow-glass;
+    }
+
+    .menu,
+    .navbar {
+        @apply rounded-box;
     }
 }

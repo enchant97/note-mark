@@ -17,8 +17,8 @@ type SortSelectProps = {
 export const SortSelect: Component<SortSelectProps> = (props) => {
   return (
     <select
+      class="select select-sm"
       onchange={(ev) => props.onChange(SortChoice[ev.currentTarget.value])}
-      class="select select-sm shadow"
     >
       <option selected={props.selected === SortChoice.NAME_ASC} value={SortChoice.NAME_ASC}>Name (A to Z)</option>
       <option selected={props.selected === SortChoice.NAME_DEC} value={SortChoice.NAME_DEC}>Name (Z to A)</option>
