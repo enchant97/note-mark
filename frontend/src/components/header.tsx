@@ -12,16 +12,19 @@ const ThemeSwitcher: Component = () => {
   )
 
   return (
-    <details class="dropdown dropdown-end">
-      <summary class="btn btn-ghost shadow flex gap-2">
+    <details class="dropdown">
+      <summary class="btn flex gap-2">
         <Icon name="sun" />
         <Icon name="moon" />
       </summary>
-      <menu class="mt-2 p-2 shadow-lg menu menu-sm dropdown-content z-[1] bg-base-300 rounded-box">
+      <ul class="mt-2 p-2 menu dropdown-content z-[1] w-52 bg-base-100">
         <For each={THEMES}>
           {(theme) => (
             <li><button
-              onclick={() => setCurrentTheme(theme.name)}
+              onclick={(ev) => {
+                setCurrentTheme(theme.name)
+                ev.currentTarget.closest("details")?.removeAttribute("open")
+              }}
               classList={{ "active": currentTheme() === theme.name }}
               type="button"
             >
@@ -29,7 +32,7 @@ const ThemeSwitcher: Component = () => {
             </button></li>
           )}
         </For>
-      </menu>
+      </ul>
     </details>
   )
 }
@@ -41,8 +44,8 @@ const ProfileDropdown = () => {
 
   return (
     <details class="dropdown dropdown-end">
-      <summary class="btn btn-ghost btn-circle shadow"><Icon name="user" /></summary>
-      <menu class="mt-2 p-2 shadow-lg menu dropdown-content z-[1] bg-base-300 rounded-box w-52">
+      <summary class="btn btn-circle"><Icon name="user" /></summary>
+      <menu class="mt-2 p-2 menu dropdown-content z-[1] bg-base-100 w-52">
         <Show when={userInfo()} fallback={<li>
           <Show when={accessToken()} fallback={<A href="/login">Login</A>}>
             <button onclick={() => {
@@ -70,31 +73,34 @@ const Header: Component<HeaderProps> = (props) => {
   const { userInfo } = useApi()
 
   return (
-    <div class="w-full navbar bg-base-300-blur shadow-lg sticky top-0 z-10">
-      <Show when={!props.disableDrawerToggle}>
-        <label for="main-drawer" class="lg:hidden btn btn-square btn-ghost shadow">
-          <Icon name="menu" />
-        </label>
-      </Show>
-      <span class="px-2 mx-2 text-xl hidden sm:block">Note Mark</span>
-      <div class="flex-1"></div>
-      <div class="flex gap-4">
-        <ThemeSwitcher />
-        <A
-          class="btn btn-ghost btn-circle shadow"
-          activeClass="btn-disabled"
-          href="/scratch-pad"
-          title="Scratch Pad"
-        ><Icon name="file-text" /></A>
-        <A
-          activeClass="btn-disabled"
-          class="btn btn-ghost btn-circle shadow"
-          end={true}
-          href={userInfo() === undefined ? "/" : `/${userInfo()?.username}`}
-        ><Icon name="home" /></A>
-        <ProfileDropdown />
+    <div class="sticky top-2 z-10 px-2">
+      <div class="navbar backdrop-glass shadow-glass">
+        <Show when={!props.disableDrawerToggle}>
+          <label for="main-drawer" class="lg:hidden btn btn-square btn-ghost shadow">
+            <Icon name="menu" />
+          </label>
+        </Show>
+        <span class="px-2 mx-2 text-xl hidden sm:block">Note Mark</span>
+        <div class="flex-1"></div>
+        <div class="flex gap-4">
+          <ThemeSwitcher />
+          <A
+            class="btn btn-circle"
+            activeClass="btn-disabled"
+            href="/scratch-pad"
+            title="Scratch Pad"
+          ><Icon name="file-text" /></A>
+          <A
+            title="Home"
+            activeClass="btn-disabled"
+            class="btn btn-circle"
+            end={true}
+            href={userInfo() === undefined ? "/" : `/${userInfo()?.username}`}
+          ><Icon name="home" /></A>
+          <ProfileDropdown />
+        </div>
       </div>
-    </div >
+    </div>
   );
 };
 

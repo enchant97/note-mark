@@ -6,7 +6,7 @@ type NoteViewPlainProps = {
 
 const NoteViewPlain: Component<NoteViewPlainProps> = (props) => {
   return (
-    <div class="prose max-w-none"><pre class="whitespace-pre-wrap">{props.content()}</pre></div>
+    <div class="prose max-w-none"><pre class="whitespace-pre-wrap shadow-glass rounded-box">{props.content()}</pre></div>
   )
 }
 

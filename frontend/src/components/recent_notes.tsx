@@ -20,7 +20,7 @@ const RecentNotes = () => {
     <Suspense fallback={<LoadingSpin />}>
       <ul class="flex gap-2 flex-col items-center mt-2">
         <For each={recentNotes()}>
-          {row => <li><A class="btn btn-wide" href={`/${row.slug}`}>{row.value.name}</A></li>}
+          {row => <li class="btn btn-wide"><A href={`/${row.slug}`}>{row.value.name}</A></li>}
         </For>
       </ul>
     </Suspense>

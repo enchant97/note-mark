@@ -53,24 +53,26 @@ export default function ContentSearchModal(props: ContentSearchProps) {
 
   return (
     <BaseModal title="Search">
-      <label class="form-control">
-        <span class="label"><span class="label-text">Search Term</span></span>
-        <input
-          value={searchTerm()}
-          oninput={(ev) => setSearchTerm(ev.currentTarget.value.toLowerCase())}
-          class="input input-sm input-bordered w-full"
-          type="text"
-          placeholder="e.g. Note Mark"
-          required
-        />
-      </label>
-      <ul class="my-4 menu flex-nowrap gap-2 p-2 overflow-y-auto h-40 max-h-40 lg:h-80 lg:max-h-80 bg-base-200 rounded-lg">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Search for book or note</legend>
+        <label class="input validator">
+          Term
+          <input
+            value={searchTerm()}
+            oninput={(ev) => setSearchTerm(ev.currentTarget.value.toLowerCase())}
+            type="text"
+            placeholder="e.g. Note Mark"
+            required
+          />
+        </label>
+      </fieldset>
+      <ul class="my-4 menu w-full flex-nowrap gap-2 p-2 overflow-y-auto h-40 max-h-40 lg:h-80 lg:max-h-80">
         <Suspense fallback={<LoadingSpin />}>
           <For each={booksResult()}>
-            {book => <li><button onClick={() => props.onFound(book.book_id)}><Icon name="folder" />{book.book_title}</button></li>}
+            {book => <li class="shadow-glass rounded-box bg-base-100"><button onClick={() => props.onFound(book.book_id)}><Icon name="folder" />{book.book_title}</button></li>}
           </For>
           <For each={notesResult()}>
-            {note => <li><button onClick={() => props.onFound(note.book_id, note.note_id)}><Icon name="file" />{note.note_title}</button></li>}
+            {note => <li class="shadow-glass rounded-box bg-base-100"><button onClick={() => props.onFound(note.book_id, note.note_id)}><Icon name="file" />{note.note_title}</button></li>}
           </For>
         </Suspense>
       </ul>

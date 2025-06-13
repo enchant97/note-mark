@@ -48,50 +48,49 @@ const UpdateUserPasswordModal: Component<UpdateUserPasswordModalProps> = (props)
   return (
     <BaseModal title="Update Password">
       <form onsubmit={onSubmit}>
-        <input type="text" autocomplete="username" value={userInfo()!.username} readonly class="hidden" />
-        <label class="form-control">
-          <span class="label"><span class="label-text">Current Password</span></span>
-          <input
-            oninput={(ev) => setForm({
-              existingPassword: ev.currentTarget.value,
-            })}
-            value={form.existingPassword}
-            class="input input-bordered w-full"
-            type="password"
-            placeholder="e.g. P@ssword123"
-            autocomplete="current-password"
-            required
-          />
-        </label>
-        <label class="form-control">
-          <span class="label"><span class="label-text">New Password</span></span>
-          <input
-            oninput={(ev) => setForm({
-              newPassword: ev.currentTarget.value,
-            })}
-            value={form.newPassword}
-            class="input input-bordered w-full"
-            type="password"
-            placeholder="e.g. Qwerty@123"
-            autocomplete="new-password"
-            required
-          />
-        </label>
-        <label class="form-control">
-          <span class="label"><span class="label-text">New Password Confirm</span></span>
-          <input
-            oninput={(ev) => setForm({
-              newPasswordConfirm: ev.currentTarget.value,
-            })}
-            value={form.newPasswordConfirm}
-            class="input input-bordered w-full"
-            classList={{ "input-error": !passwordsMatch() }}
-            type="password"
-            placeholder="e.g. Qwerty@123"
-            autocomplete="new-password"
-            required
-          />
-        </label>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Password details</legend>
+          <label class="input validator">
+            Current Password
+            <input
+              oninput={(ev) => setForm({
+                existingPassword: ev.currentTarget.value,
+              })}
+              value={form.existingPassword}
+              type="password"
+              placeholder="e.g. P@ssword123"
+              autocomplete="current-password"
+              required
+            />
+          </label>
+          <label class="input validator">
+            New Password
+            <input
+              oninput={(ev) => setForm({
+                newPassword: ev.currentTarget.value,
+              })}
+              value={form.newPassword}
+              type="password"
+              placeholder="e.g. Qwerty@123"
+              autocomplete="new-password"
+              required
+            />
+          </label>
+          <label class="input validator">
+            Confirm New Password
+            <input
+              oninput={(ev) => setForm({
+                newPasswordConfirm: ev.currentTarget.value,
+              })}
+              value={form.newPasswordConfirm}
+              classList={{ "input-error": !passwordsMatch() }}
+              type="password"
+              placeholder="e.g. Qwerty@123"
+              autocomplete="new-password"
+              required
+            />
+          </label>
+        </fieldset>
         <div class="modal-action">
           <button
             class="btn btn-primary"

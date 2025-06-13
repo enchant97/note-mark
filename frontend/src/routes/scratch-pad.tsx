@@ -5,7 +5,6 @@ import Note, { NoteMode } from "~/components/note";
 import { EditorState } from "~/components/editor/editor";
 import StorageHandler from "~/core/storage";
 import Icon from "~/components/icon";
-import Footer from "~/components/footer";
 import { Context } from "~/core/renderer";
 import { useApi } from "~/contexts/ApiProvider";
 
@@ -55,7 +54,6 @@ const ScratchPad: Component = () => {
           onSave={onSave}
         />
       </div>
-      <Footer />
     </div>
   )
 }

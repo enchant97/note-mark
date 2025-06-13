@@ -199,9 +199,9 @@ const Shelf: Component = () => {
   }
 
   return (
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4 mt-6">
       <div class="flex gap-4 flex-col sm:flex-row">
-        <menu class="menu menu-horizontal shadow-md rounded-lg bg-base-200">
+        <menu class="menu menu-horizontal">
           <li classList={{ "disabled": globalLoading() || !allowBookCreate() }}>
             <button
               onclick={onNewBookClick}
@@ -226,9 +226,12 @@ const Shelf: Component = () => {
             <Show when={!globalLoading()} fallback={<div><Icon name="more-horizontal" /></div>}>
               <details class="dropdown">
                 <summary><Icon name="more-horizontal" /></summary>
-                <ul class="p-2 shadow-lg menu dropdown-content z-[1] bg-base-300 rounded-box w-52">
+                <ul class="p-2 menu dropdown-content z-[1] w-52 backdrop-glass">
                   <li><button
-                    onclick={onShareClick}
+                    onclick={(ev) => {
+                      onShareClick()
+                      ev.currentTarget.closest("details")?.removeAttribute("open")
+                    }}
                     type="button"
                     classList={{ "hidden": !window.isSecureContext }}
                   >
@@ -237,7 +240,10 @@ const Shelf: Component = () => {
                   </button></li>
                   <Show when={slugParts().bookSlug && allowBookCreate()}>
                     <li><button
-                      onclick={onUpdateBookClick}
+                      onclick={(ev) => {
+                        onUpdateBookClick()
+                        ev.currentTarget.closest("details")?.removeAttribute("open")
+                      }}
                       type="button"
                     >
                       <Icon name="folder" />
@@ -246,14 +252,20 @@ const Shelf: Component = () => {
                   </Show>
                   <Show when={slugParts().bookSlug && slugParts().noteSlug && allowNoteCreate()}>
                     <li><button
-                      onclick={onUpdateNoteClick}
+                      onclick={(ev) => {
+                        onUpdateNoteClick()
+                        ev.currentTarget.closest("details")?.removeAttribute("open")
+                      }}
                       type="button"
                     >
                       <Icon name="file" />
                       Note Settings
                     </button></li>
                     <li><button
-                      onClick={onNoteAssetsClick}
+                      onClick={(ev) => {
+                        onNoteAssetsClick()
+                        ev.currentTarget.closest("details")?.removeAttribute("open")
+                      }}
                       type="button"
                     >
                       <Icon name="image" />
@@ -262,7 +274,7 @@ const Shelf: Component = () => {
                   </Show>
                   <Show when={slugParts().bookSlug && slugParts().noteSlug}>
                     <li><button
-                      onClick={() => {
+                      onClick={(ev) => {
                         let content = noteContent()
                         if (content) {
                           download(
@@ -270,6 +282,7 @@ const Shelf: Component = () => {
                             `${book()?.slug}_${note()?.slug}.md`,
                           )
                         }
+                        ev.currentTarget.closest("details")?.removeAttribute("open")
                       }}
                       type="button"
                       classList={{ "loading": noteContent.loading }}
@@ -278,7 +291,10 @@ const Shelf: Component = () => {
                       Download Note
                     </button></li>
                     <li><button
-                      onClick={onNotePrintClick}
+                      onClick={(ev) => {
+                        onNotePrintClick()
+                        ev.currentTarget.closest("details")?.removeAttribute("open")
+                      }}
                       type="button"
                     >
                       <Icon name="printer" />
@@ -294,12 +310,10 @@ const Shelf: Component = () => {
       </div>
       <Show when={!noteContent.loading} fallback={<LoadingRing />}>
         <Show when={note()} fallback={
-          <div class="hero pt-6 bg-base-200 rounded-md">
-            <div class="hero-content text-center">
-              <div class="max-w-md">
-                <h1 class="text-5xl font-bold">No Note Selected</h1>
-                <p class="py-6">Either create a new note or select an existing one.</p>
-              </div>
+          <div class="flex py-6">
+            <div class="max-w-md mx-auto">
+              <h1 class="text-5xl font-bold">No Note Selected</h1>
+              <p class="py-6">Either create a new note or select an existing one.</p>
             </div>
           </div>
         }>

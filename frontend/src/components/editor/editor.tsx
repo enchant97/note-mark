@@ -19,31 +19,31 @@ const editorTheme = EditorView.baseTheme({
     "font-size": ".95rem",
   },
   ".cm-scroller": {
-    "font-family": "monospace",
+    "font-family": "var(--font-mono)",
   },
   ".cm-gutters": {
-    "background-color": "oklch(var(--b2))",
-    "border-right": "oklch(var(--b2))",
+    "background-color": "var(--color-base-100)",
+    "border-right": "var(--color-base-100)",
   },
   ".cm-activeLineGutter": {
-    "background-color": "oklch(var(--b3))",
+    "background-color": "var(--color-base-200)",
   },
   ".ͼ5,.ͼc": {
-    "color": "oklch(var(--in))",
+    "color": "var(--color-info)",
   },
   ".ͼ7": {
     "text-decoration": "none",
   },
-  '.cm-panels, .cm-panels-bottom': {
-    borderTop: 'none',
-    backgroundColor: 'oklch(var(--b2))',
-    color: 'oklch(var(--bc))',
+  ".cm-panels, .cm-panels-bottom": {
+    borderTop: "none",
+    backgroundColor: "var(--color-base-100)",
+    color: "var(--color-base-content)",
   },
-  '.cm-cursor': {
-    "border-color": "oklch(var(--bc))",
+  ".cm-cursor": {
+    "border-color": "var(--color-base-content)",
     "border-left-width": "2px",
   },
-  '.cm-fat-cursor': {
+  ".cm-fat-cursor": {
     "color": "white !important",
   },
 })
@@ -246,17 +246,17 @@ const Editor: Component<EditorProps> = (props) => {
     <>
       <menu
         ref={(el) => toolbarElement = el}
-        class="menu menu-horizontal flex-nowrap gap-6 bg-base-300-blur rounded-md shadow-md p-2 w-full items-center overflow-x-auto overflow-y-clip"
+        class="menu menu-horizontal flex-nowrap gap-6 p-2 w-full items-center overflow-x-auto overflow-y-clip shadow-glass backdrop-glass"
         classList={{
           "fixed": stickyToolbar(),
-          "top-0": stickyToolbar(),
+          "top-2": stickyToolbar(),
           "left-0": stickyToolbar(),
           "z-[1]": stickyToolbar(),
         }}
       >
         <ul class="menu-horizontal gap-2 flex-nowrap items-center">
-          <li><label class="form-control">
-            <span class="label-text cursor-pointer">Auto Save</span>
+          <li><label>
+            <span class="cursor-pointer">Auto Save</span>
             <input
               class="toggle toggle-sm"
               type="checkbox"
@@ -269,7 +269,7 @@ const Editor: Component<EditorProps> = (props) => {
             />
           </label></li>
           <li><button
-            class="btn btn-sm btn-square btn-outline"
+            class="btn btn-sm btn-square"
             disabled={props.state.saving}
             classList={{ "btn-error": props.state.unsaved }}
             type="button"
@@ -282,21 +282,21 @@ const Editor: Component<EditorProps> = (props) => {
         </ul>
         <ul class="menu-horizontal gap-2 flex-nowrap">
           <li><button
-            class="btn btn-sm btn-square btn-outline"
+            class="btn btn-sm btn-square"
             title="Bold"
             onClick={() => wrapSelectionWith("**")}
           >
             <Icon name="bold" />
           </button></li>
           <li><button
-            class="btn btn-sm btn-square btn-outline"
+            class="btn btn-sm btn-square"
             title="Italic"
             onClick={() => wrapSelectionWith("*")}
           >
             <Icon name="italic" />
           </button></li>
           <li><div class="dropdown dropdown-hover dropdown-bottom p-0">
-            <div tabindex="0" role="button" class="btn btn-sm btn-square btn-outline">
+            <div tabindex="0" role="button" class="btn btn-sm btn-square">
               <Icon name="hash" />
             </div>
             <ul tabindex="0" class="dropdown-content z-[1] menu menu-sm shadow-lg bg-base-300 rounded-box w-52">
@@ -314,14 +314,14 @@ const Editor: Component<EditorProps> = (props) => {
         </ul>
         <ul class="menu-horizontal gap-2 flex-nowrap flex">
           <li><button
-            class="btn btn-sm btn-square btn-outline"
+            class="btn btn-sm btn-square"
             title="Block Comment"
             onClick={() => addPrefixToLine("> ")}
           >
             <Icon name="chevron-right" />
           </button></li>
           <li><button
-            class="btn btn-sm btn-square btn-outline"
+            class="btn btn-sm btn-square"
             title="De-Indent"
             onClick={() => {
               indentLess(editor)
@@ -331,7 +331,7 @@ const Editor: Component<EditorProps> = (props) => {
             <Icon name="chevrons-left" />
           </button></li>
           <li><button
-            class="btn btn-sm btn-square btn-outline"
+            class="btn btn-sm btn-square"
             title="Indent"
             onClick={() => {
               indentMore(editor)
@@ -343,7 +343,7 @@ const Editor: Component<EditorProps> = (props) => {
         </ul>
         <ul class="menu-horizontal gap-2 flex-nowrap flex">
           <li><button
-            class="btn btn-sm btn-square btn-outline"
+            class="btn btn-sm btn-square"
             title="Insert Link"
             onClick={() => setModal({
               component: CreateLinkModal,
@@ -361,7 +361,7 @@ const Editor: Component<EditorProps> = (props) => {
             <Icon name="link" />
           </button></li>
           <li><button
-            class="btn btn-sm btn-square btn-outline"
+            class="btn btn-sm btn-square"
             title="Insert Image"
             onClick={() => setModal({
               component: CreateImageModal,
@@ -379,7 +379,7 @@ const Editor: Component<EditorProps> = (props) => {
             <Icon name="image" />
           </button></li>
           <li><button
-            class="btn btn-sm btn-square btn-outline"
+            class="btn btn-sm btn-square"
             title="Insert Table"
             onClick={() => setModal({
               component: CreateTableModal,
@@ -398,8 +398,8 @@ const Editor: Component<EditorProps> = (props) => {
           </button></li>
         </ul>
         <ul class="menu-horizontal gap-2 flex-nowrap ml-auto items-center">
-          <li><label class="form-control">
-            <span class="label-text cursor-pointer">Vim</span>
+          <li><label>
+            <span class="cursor-pointer">Vim</span>
             <input
               class="toggle toggle-sm"
               type="checkbox"
@@ -411,7 +411,7 @@ const Editor: Component<EditorProps> = (props) => {
             />
           </label></li>
           <li><a
-            class="btn btn-sm btn-square btn-outline"
+            class="btn btn-sm btn-square"
             title="Open Help"
             href="https://github.github.com/gfm/"
             target="_blank"
@@ -420,7 +420,7 @@ const Editor: Component<EditorProps> = (props) => {
           </a></li>
         </ul>
       </menu>
-      <div ref={(el) => editorDiv = el}></div>
+      <div class="shadow-glass rounded-box p-2" ref={(el) => editorDiv = el}></div>
     </>
   )
 }

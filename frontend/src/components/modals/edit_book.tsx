@@ -54,29 +54,31 @@ const DeletedNotes: Component<DeletedNotesProps> = (props) => {
   return (
     <div>
       <h4 class="text-bold mb-2">Removed Notes</h4>
-      <ul class="max-h-40 h-40 overflow-y-auto bg-base-200">
-        <Suspense fallback={<LoadingSpin />}>
-          <For each={notes()}>
-            {(note, i) =>
-              <li class="flex items-center p-2 gap-2 rounded">
-                <span class="mr-auto">{note.name}</span>
-                <div class="join">
-                  <button
-                    onclick={() => restoreNote(note.id, i())}
-                    type="button"
-                    class="join-item btn btn-outline btn-sm"
-                  >Restore</button>
-                  <button
-                    onclick={() => deleteNote(note.id, i())}
-                    type="button"
-                    class="join-item btn btn-outline btn-sm btn-error"
-                  ><Icon name="trash" /></button>
-                </div>
-              </li>
-            }
-          </For>
-        </Suspense>
-      </ul>
+      <div class="overflow-y-auto max-h-40">
+        <ul class="list gap-2">
+          <Suspense fallback={<LoadingSpin />}>
+            <For each={notes()}>
+              {(note, i) =>
+                <li class="list-row bg-base-100 rounded-box shadow-glass items-center">
+                  <div class="list-col-grow">{note.name}</div>
+                  <div class="join">
+                    <button
+                      onclick={() => restoreNote(note.id, i())}
+                      type="button"
+                      class="join-item btn btn-sm"
+                    >Restore</button>
+                    <button
+                      onclick={() => deleteNote(note.id, i())}
+                      type="button"
+                      class="join-item btn btn-sm btn-error btn-outline"
+                    ><Icon name="trash" /></button>
+                  </div>
+                </li>
+              }
+            </For>
+          </Suspense>
+        </ul>
+      </div>
     </div>
   )
 }
@@ -127,44 +129,43 @@ const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
   return (
     <BaseModal title="Update Book">
       <form onsubmit={onSubmit}>
-        <label class="form-control">
-          <span class="label"><span class="label-text">Title</span></span>
-          <input
-            oninput={(ev) => setForm({
-              name: ev.currentTarget.value,
-            })}
-            value={form.name}
-            class="input input-bordered w-full"
-            type="text"
-            placeholder="e.g. My Amazing Book"
-            required
-          />
-        </label>
-        <label class="form-control">
-          <span class="label"><span class="label-text">Slug</span></span>
-          <input
-            oninput={(ev) => setForm({
-              slug: toSlug(ev.currentTarget.value)
-            })}
-            value={form.slug}
-            class="input input-bordered input-sm w-full"
-            type="text"
-            placeholder="e.g. my-amazing-book"
-            pattern="(?:[a-z0-9]|-)+"
-            required
-          />
-        </label>
-        <div class="form-control">
-          <label class="label cursor-pointer">
-            <span class="label-text">Public</span>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Book Details</legend>
+          <label class="input validator">
+            Title
+            <input
+              oninput={(ev) => setForm({
+                name: ev.currentTarget.value,
+              })}
+              value={form.name}
+              type="text"
+              placeholder="e.g. My Amazing Book"
+              required
+            />
+          </label>
+          <label class="input validator">
+            Slug
+            <input
+              oninput={(ev) => setForm({
+                slug: toSlug(ev.currentTarget.value)
+              })}
+              value={form.slug}
+              type="text"
+              placeholder="e.g. my-amazing-book"
+              pattern="(?:[a-z0-9]|-)+"
+              required
+            />
+          </label>
+          <label class="label justify-between">
+            Public
             <input
               onchange={() => setForm({ isPublic: !form.isPublic })}
               checked={form.isPublic}
-              class="checkbox"
+              class="toggle"
               type="checkbox"
             />
           </label>
-        </div>
+        </fieldset>
         <DeletedNotes bookId={props.book.id} restoreNote={props.restoreNote} />
         <div class="modal-action">
           <button onclick={onDelete} class="btn btn-outline btn-error" disabled={loading()} type="button">

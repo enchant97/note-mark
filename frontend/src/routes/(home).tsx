@@ -5,7 +5,6 @@ import { useModal } from '~/contexts/ModalProvider';
 import UserSearchModal from '~/components/modals/user_search';
 import RecentNotes from '~/components/recent_notes';
 import Header from '~/components/header';
-import Footer from '~/components/footer';
 import Icon from '~/components/icon';
 import { useAuth } from '~/contexts/AuthProvider';
 
@@ -28,8 +27,8 @@ const Home: Component = () => {
     <Show when={userInfo() === undefined} fallback={<Navigate href={`/${userInfo()?.username}`} />}>
       <div class="min-h-screen">
         <Header disableDrawerToggle={true} />
-        <div class="bg-base-200 p-6 mx-6">
-          <div class="card w-full max-w-md mx-auto bg-base-100">
+        <div class="p-6 mx-6">
+          <div class="flex w-full max-w-md mx-auto">
             <div class="card-body text-center">
               <img class="mb-2 mx-auto w-36" src="/icon.svg" alt="Note Mark Icon" />
               <h1 class="text-5xl font-bold">Note Mark</h1>
@@ -37,12 +36,12 @@ const Home: Component = () => {
               <div class="justify-center" classList={{ 'join': apiInfo()?.enableAnonymousUserSearch }}>
                 <Show when={accessToken()} fallback={
                   <A
-                    class="join-item btn btn-outline"
+                    class="join-item btn"
                     href="/login"
                   >Login</A>
                 }>
                   <button
-                    class="join-item btn btn-outline" onclick={() => {
+                    class="join-item btn" onclick={() => {
                       setAuthStore(null)
                       navigate("/login")
                     }}>Re-Login</button>
@@ -50,7 +49,7 @@ const Home: Component = () => {
                 {userInfo() && <A class="btn join-item btn-outline" href={`/${userInfo()?.username}`}>My Notes</A>}
                 {apiInfo()?.enableAnonymousUserSearch && <button
                   onclick={() => openUserSearchModal()}
-                  class="btn join-item btn-outline"
+                  class="btn join-item"
                   type="button"
                 >
                   <Icon name="users" />
@@ -66,7 +65,6 @@ const Home: Component = () => {
             </div>
           </div>
         </div>
-        <Footer />
       </div>
     </Show>
   );
