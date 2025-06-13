@@ -3,10 +3,12 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 import solidPlugin from 'vite-plugin-solid';
 import { VitePWA } from 'vite-plugin-pwa'
 import wasm from "vite-plugin-wasm";
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [
     tsconfigPaths(),
+    tailwindcss(),
     wasm(),
     solidPlugin(),
     VitePWA({
