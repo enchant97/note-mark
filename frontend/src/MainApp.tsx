@@ -218,7 +218,7 @@ const MainApp: Component<ParentProps> = (props) => {
           </DrawerProvider>
         </div>
       </div>
-      <div class="drawer-side z-40 h-full p-2">
+      <div class="drawer-side z-40 p-2">
         <label for="main-drawer" class="drawer-overlay"></label>
         <div class="h-full rounded-box backdrop-glass">
           <menu class="menu gap-2 p-4 w-80 h-full">
