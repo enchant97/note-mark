@@ -70,106 +70,103 @@ const AssetsModal: Component<AssetsModalProps> = (props) => {
 
   return (
     <BaseModal title="Note Assets">
-      <div class="flex flex-col gap-2 bg-base-200 rounded p-2">
-        <Show when={props.allowEdit}>
-          <form onSubmit={onCreateSubmit} class="bg-base-100 p-2 rounded">
-            <span class="text-md font-bold">New Asset</span>
-            <label class="form-control">
-              <span class="label">Asset</span>
-              <input
-                ref={assetUploadInput}
-                onChange={(ev) => {
-                  const file = ev.currentTarget.files?.item(0) || null
-                  setForm({ file, name: "" })
-                }}
-                class="file-input file-input-bordered w-full"
-                type="file"
-                required
-              />
-            </label>
-            <label class="form-control">
-              <span class="label">Name</span>
+      <Show when={props.allowEdit}>
+        <form class="shadow-glass rounded-box p-4 my-2" onSubmit={onCreateSubmit}>
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">Asset details</legend>
+            <input
+              ref={assetUploadInput}
+              onChange={(ev) => {
+                const file = ev.currentTarget.files?.item(0) || null
+                setForm({ file, name: "" })
+              }}
+              class="file-input w-full"
+              type="file"
+              aria-label="Asset"
+              required
+            />
+            <label class="input validator">
+              Name
               <input
                 value={form.name}
                 onInput={(ev) => setForm({ name: ev.currentTarget.value })}
-                class="input input-bordered w-full"
                 type="text"
-                placeholder="e.g. my cat"
+                placeholder="e.g. my-cat.png"
               />
             </label>
-            <button
-              disabled={modifyLoading()}
-              class="btn btn-primary mt-2"
-              type="submit"
-            >
-              Upload
-            </button>
-          </form>
-        </Show>
-        <div class="bg-base-100 rounded p-2">
-          <span class="text-md font-bold">Existing Assets</span>
-          <div class="overflow-auto max-h-48 mt-2">
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Preview</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <For each={assets()}>
-                  {asset => (
-                    <tr>
-                      <td>{asset.name}</td>
-                      <td class="avatar"><Switch>
-                        <Match when={asset.info.mimeType.startsWith("image")}>
-                          <div class="mask mask-squircle w-12 h-12">
-                            <img src={api().getNoteAssetAccessUrl(props.noteId, asset.id)} />
-                          </div>
-                        </Match>
-                      </Switch></td>
-                      <td>
-                        <div class="join flex justify-end">
-                          <button
-                            class="btn join-item"
-                            title={`Copy Link "${asset.name}"`}
-                            onClick={async () => {
-                              let assetUrl = api().getNoteAssetAccessUrl(props.noteId, asset.id)
-                              try {
-                                await copyToClipboard(assetUrl)
-                                pushToast({ message: "copied to clipboard", type: ToastType.SUCCESS })
-                              } catch (err) {
-                                pushToast({ message: err.message, type: ToastType.ERROR })
-                              }
-                            }}
-                          >
-                            <Icon name="link" />
-                          </button>
-                          <a
-                            class="btn join-item"
-                            href={api().getNoteAssetAccessUrl(props.noteId, asset.id)}
-                            target="_blank"
-                            title={`Open "${asset.name}"`}
-                          >
-                            <Icon name="external-link" />
-                          </a>
-                          <button
-                            onClick={() => onAssetDelete(asset.id)}
-                            disabled={modifyLoading()}
-                            class="btn btn-outline btn-error join-item"
-                            title={`Delete "${asset.name}"`}
-                          >
-                            <Icon name="trash" />
-                          </button>
+          </fieldset>
+          <button
+            disabled={modifyLoading()}
+            class="btn btn-primary"
+            type="submit"
+          >
+            Upload
+          </button>
+        </form>
+      </Show>
+      <div class="shadow-glass rounded-box p-4 my-2">
+        <span class="text-md font-bold">Existing Assets</span>
+        <div class="overflow-auto max-h-48 mt-2">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Preview</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <For each={assets()}>
+                {asset => (
+                  <tr class="shadow-glass rounded-box">
+                    <td>{asset.name}</td>
+                    <td class="avatar"><Switch>
+                      <Match when={asset.info.mimeType.startsWith("image")}>
+                        <div class="mask mask-squircle w-12 h-12">
+                          <img src={api().getNoteAssetAccessUrl(props.noteId, asset.id)} />
                         </div>
-                      </td>
-                    </tr>
-                  )}
-                </For>
-              </tbody>
-            </table>
-          </div>
+                      </Match>
+                    </Switch></td>
+                    <td>
+                      <div class="join flex justify-end">
+                        <button
+                          class="btn btn-sm join-item"
+                          title={`Copy Link "${asset.name}"`}
+                          onClick={async () => {
+                            let assetUrl = api().getNoteAssetAccessUrl(props.noteId, asset.id)
+                            try {
+                              await copyToClipboard(assetUrl)
+                              pushToast({ message: "copied to clipboard", type: ToastType.SUCCESS })
+                            } catch (err) {
+                              pushToast({ message: err.message, type: ToastType.ERROR })
+                            }
+                          }}
+                        >
+                          <Icon name="link" />
+                        </button>
+                        <a
+                          class="btn btn-sm join-item"
+                          href={api().getNoteAssetAccessUrl(props.noteId, asset.id)}
+                          target="_blank"
+                          title={`Open "${asset.name}"`}
+                        >
+                          <Icon name="external-link" />
+                        </a>
+                        <button
+                          onClick={() => onAssetDelete(asset.id)}
+                          disabled={modifyLoading()}
+                          class="btn btn-sm btn-outline btn-error join-item"
+                          title={`Delete "${asset.name}"`}
+                        >
+                          <Icon name="trash" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </For>
+            </tbody>
+          </table>
         </div>
       </div>
       <div class="modal-action">

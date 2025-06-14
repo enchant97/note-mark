@@ -420,7 +420,7 @@ const Editor: Component<EditorProps> = (props) => {
           </a></li>
         </ul>
       </menu>
-      <div ref={(el) => editorDiv = el}></div>
+      <div class="shadow-glass rounded-box p-2" ref={(el) => editorDiv = el}></div>
     </>
   )
 }

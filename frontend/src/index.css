@@ -15,7 +15,7 @@
 
 @plugin "daisyui/theme" {
     name: "dark";
-    --color-base-content: oklch(0.86 0.02 228.93);
+    --color-base-content: oklch(82% .02 264.4);
     --color-primary: #235886;
     --radius-box: var(--radius-3xl);
     --radius-field: var(--radius-xl);
@@ -58,6 +58,10 @@
 
         table {
             width: auto;
+        }
+
+        img {
+            @apply shadow-glass rounded-box;
         }
     }
 

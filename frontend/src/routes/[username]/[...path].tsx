@@ -294,7 +294,7 @@ const Shelf: Component = () => {
       </div>
       <Show when={!noteContent.loading} fallback={<LoadingRing />}>
         <Show when={note()} fallback={
-          <div class="card py-6">
+          <div class="flex py-6">
             <div class="max-w-md mx-auto">
               <h1 class="text-5xl font-bold">No Note Selected</h1>
               <p class="py-6">Either create a new note or select an existing one.</p>

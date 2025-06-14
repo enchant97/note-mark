@@ -31,20 +31,22 @@ const UpdateUserModal: Component<UpdateUserModalProps> = (props) => {
   return (
     <BaseModal title="Update Profile">
       <form onsubmit={onSubmit}>
-        <label class="form-control">
-          <span class="label"><span class="label-text">Name</span></span>
-          <input
-            oninput={(ev) => setForm({
-              name: ev.currentTarget.value,
-            })}
-            value={form.name}
-            class="input input-bordered w-full"
-            type="text"
-            placeholder="e.g. Leo S"
-            maxlength={128}
-            required
-          />
-        </label>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">User details</legend>
+          <label class="input validator">
+            Full Name
+            <input
+              oninput={(ev) => setForm({
+                name: ev.currentTarget.value,
+              })}
+              value={form.name}
+              type="text"
+              placeholder="e.g. Leo S"
+              maxlength={128}
+              required
+            />
+          </label>
+        </fieldset>
         <div class="modal-action">
           <button class="btn btn-primary" classList={{ loading: loading() }} type="submit">Save</button>
           <button onclick={() => props.onClose()} class="btn" type="button">Cancel</button>

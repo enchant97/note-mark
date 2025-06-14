@@ -89,7 +89,7 @@ const Login: Component = () => {
       }>
         <Header disableDrawerToggle={true} />
         <div class="p-6 mx-6">
-          <div class="card w-full max-w-md mx-auto">
+          <div class="flex w-full max-w-md mx-auto">
             <div class="card-body text-center">
               <img class="mb-2 mx-auto w-36" src="/icon.svg" alt="Note Mark Icon" />
               <h1 class="text-5xl font-bold">Note Mark</h1>

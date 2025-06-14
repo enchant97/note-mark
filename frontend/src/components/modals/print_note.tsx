@@ -21,15 +21,15 @@ const PrintNoteModal: Component<PrintNoteModalProps> = (props) => {
     <BaseModal title="Print Note">
       <div class="flex flex-col gap-2">
         <Suspense fallback={<LoadingRing />}>
-          <div class="overflow-y-auto max-h-32 rounded border">
+          <div class="overflow-y-auto max-h-32">
             <iframe
-              class="w-full h-screen"
+              class="w-full h-screen hidden"
               ref={(el) => iframeElement = el}
               srcdoc={contentRendered()}>
             </iframe>
           </div>
           <button
-            class="btn btn-outline"
+            class="btn btn-primary"
             onClick={() => iframeElement.contentWindow?.print()}
           >
             <Icon name="printer" />
