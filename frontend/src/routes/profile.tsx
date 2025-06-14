@@ -6,7 +6,6 @@ import { useModal } from '~/contexts/ModalProvider';
 import { User } from '~/core/types';
 import Icon from '~/components/icon';
 import Header from '~/components/header';
-import Footer from '~/components/footer';
 import { useApi } from '~/contexts/ApiProvider';
 
 const Profile: Component = () => {

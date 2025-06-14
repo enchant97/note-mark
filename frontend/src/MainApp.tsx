@@ -241,6 +241,7 @@ const MainApp: Component<ParentProps> = (props) => {
                     <A
                       href={`/${params.username}/${book.slug}`}
                       end={true}
+                      activeClass="menu-active"
                     >
                       <Icon name="folder" size={14} />
                       {book.name}
@@ -252,6 +253,7 @@ const MainApp: Component<ParentProps> = (props) => {
                             <A
                               href={`/${params.username}/${params.bookSlug}/${note.slug}`}
                               end={true}
+                              activeClass="menu-active"
                             >
                               <Icon name="file" size={14} />
                               {note.name}

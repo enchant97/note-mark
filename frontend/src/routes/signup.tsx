@@ -5,7 +5,6 @@ import { useApi } from '~/contexts/ApiProvider';
 import { ToastType, apiErrorIntoToast, useToast } from '~/contexts/ToastProvider';
 import { ApiError, HttpErrors } from '~/core/api';
 import Header from '~/components/header';
-import Footer from '~/components/footer';
 import Icon from '~/components/icon';
 
 const Signup: Component = () => {

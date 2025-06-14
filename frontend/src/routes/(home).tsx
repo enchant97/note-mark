@@ -5,7 +5,6 @@ import { useModal } from '~/contexts/ModalProvider';
 import UserSearchModal from '~/components/modals/user_search';
 import RecentNotes from '~/components/recent_notes';
 import Header from '~/components/header';
-import Footer from '~/components/footer';
 import Icon from '~/components/icon';
 import { useAuth } from '~/contexts/AuthProvider';
 

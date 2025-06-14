@@ -6,7 +6,6 @@ import { ApiError } from '~/core/api';
 import { apiErrorIntoToast, ToastType, useToast } from '~/contexts/ToastProvider';
 import Icon from '~/components/icon';
 import Header from '~/components/header';
-import Footer from '~/components/footer';
 import { useAuth } from '~/contexts/AuthProvider';
 import * as oidcClient from 'openid-client'
 import { OidcVerification } from '~/core/oidc';
