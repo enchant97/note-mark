@@ -19,31 +19,31 @@ const editorTheme = EditorView.baseTheme({
     "font-size": ".95rem",
   },
   ".cm-scroller": {
-    "font-family": "monospace",
+    "font-family": "var(--font-mono)",
   },
   ".cm-gutters": {
-    "background-color": "oklch(var(--b2))",
-    "border-right": "oklch(var(--b2))",
+    "background-color": "var(--color-base-100)",
+    "border-right": "var(--color-base-100)",
   },
   ".cm-activeLineGutter": {
-    "background-color": "oklch(var(--b3))",
+    "background-color": "var(--color-base-200)",
   },
   ".ͼ5,.ͼc": {
-    "color": "oklch(var(--in))",
+    "color": "var(--color-info)",
   },
   ".ͼ7": {
     "text-decoration": "none",
   },
-  '.cm-panels, .cm-panels-bottom': {
-    borderTop: 'none',
-    backgroundColor: 'oklch(var(--b2))',
-    color: 'oklch(var(--bc))',
+  ".cm-panels, .cm-panels-bottom": {
+    borderTop: "none",
+    backgroundColor: "var(--color-base-100)",
+    color: "var(--color-base-content)",
   },
-  '.cm-cursor': {
-    "border-color": "oklch(var(--bc))",
+  ".cm-cursor": {
+    "border-color": "var(--color-base-content)",
     "border-left-width": "2px",
   },
-  '.cm-fat-cursor': {
+  ".cm-fat-cursor": {
     "color": "white !important",
   },
 })
