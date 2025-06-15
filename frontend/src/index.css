@@ -4,6 +4,7 @@
 
 @plugin "daisyui" {
     themes: light, dark --default --prefersdark;
+    exclude: rootscrollgutter, rootcolor;
 }
 
 @plugin "daisyui/theme" {
@@ -31,6 +32,12 @@
     }
 }
 
+@layer base {
+    body {
+        @apply bg-base-100 text-base-content;
+    }
+}
+
 @layer components {
     .bg-base-300-blur {
         @apply bg-base-300/[.5] backdrop-blur-md;
@@ -38,6 +45,14 @@
 }
 
 @layer utilities {
+
+    .drawer-toggle:checked+.drawer-content+.drawer-side {
+        @apply max-lg:bg-black/40;
+    }
+
+    .drawer-side>.drawer-overlay {
+        background-color: initial;
+    }
 
     .backdrop-glass {
         @apply backdrop-blur-md bg-base-100/70;
