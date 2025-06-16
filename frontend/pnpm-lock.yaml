@@ -24,8 +24,8 @@ importers:
         specifier: ^6.3.0
         version: 6.3.0(@codemirror/commands@6.8.1)(@codemirror/language@6.11.1)(@codemirror/search@6.5.11)(@codemirror/state@6.5.2)(@codemirror/view@6.37.2)
       '@solidjs/router':
-        specifier: ^0.13.6
-        version: 0.13.6(solid-js@1.9.7)
+        specifier: ^0.15.3
+        version: 0.15.3(solid-js@1.9.7)
       '@tailwindcss/typography':
         specifier: ^0.5.16
         version: 0.5.16(tailwindcss@4.1.10)
@@ -985,8 +985,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@solidjs/router@0.13.6':
-    resolution: {integrity: sha512-CdpFsBYoiJ/FQ4wZIamj3KEFRkmrYu5sVXM6PouNkmSENta1YJamsm9wa/VjaPmkw2RsnDnO0UvZ705v6EgOXQ==}
+  '@solidjs/router@0.15.3':
+    resolution: {integrity: sha512-iEbW8UKok2Oio7o6Y4VTzLj+KFCmQPGEpm1fS3xixwFBdclFVBvaQVeibl1jys4cujfAK5Kn6+uG2uBm3lxOMw==}
     peerDependencies:
       solid-js: ^1.8.6
 
@@ -3382,7 +3382,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.43.0':
     optional: true
 
-  '@solidjs/router@0.13.6(solid-js@1.9.7)':
+  '@solidjs/router@0.15.3(solid-js@1.9.7)':
     dependencies:
       solid-js: 1.9.7
 

@@ -32,7 +32,7 @@
     "@codemirror/state": "^6.5.2",
     "@codemirror/view": "^6.37.2",
     "@replit/codemirror-vim": "^6.3.0",
-    "@solidjs/router": "^0.13.6",
+    "@solidjs/router": "^0.15.3",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.1.10",
     "codemirror": "^6.0.1",
