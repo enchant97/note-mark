@@ -29,6 +29,8 @@ The following labels are available:
 <major>.<minor>.<patch>
 ```
 
+> *TIP* The `latest` label is deprecated and does not get updated
+
 Here is an example to deploy though Docker Compose, using the all-in-one image.
 
 ```yaml
