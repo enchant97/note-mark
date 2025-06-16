@@ -60,6 +60,7 @@ export type EditorProps = {
   state: Store<EditorState>
   setState: SetStoreFunction<EditorState>
   isFullscreen: Accessor<boolean>
+  onContentChange?: (content: string) => any
 }
 
 const Editor: Component<EditorProps> = (props) => {
@@ -88,6 +89,9 @@ const Editor: Component<EditorProps> = (props) => {
 
   const onInput = (state: InternalEditorState) => {
     props.setState({ unsaved: true })
+    if (props.onContentChange !== undefined) {
+      props.onContentChange(state.doc.toString())
+    }
     if (autoSave()) {
       window.clearTimeout(autosaveTimeout)
       autosaveTimeout = window.setTimeout(

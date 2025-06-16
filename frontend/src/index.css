@@ -46,6 +46,14 @@
 
 @layer utilities {
 
+    .split {
+        @apply flex gap-4;
+
+        .gutter {
+            @apply hover:bg-base-300 duration-300 shadow-glass rounded-box cursor-ew-resize;
+        }
+    }
+
     .drawer-toggle:checked+.drawer-content+.drawer-side {
         @apply max-lg:bg-black/40;
     }

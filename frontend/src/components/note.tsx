@@ -1,4 +1,4 @@
-import { Accessor, Component, Match, Switch, createSignal, untrack } from "solid-js";
+import { Accessor, Component, Match, Switch, createSignal, onCleanup, onMount, untrack } from "solid-js";
 import { SetStoreFunction, Store } from "solid-js/store";
 import NoteViewPlain from "~/components/note/view_plain";
 import NoteViewRendered from "~/components/note/view_rendered";
@@ -7,6 +7,7 @@ import { copyToClipboard } from "~/core/helpers";
 import { ToastType, useToast } from "~/contexts/ToastProvider";
 import Editor, { EditorState } from "~/components/editor/editor";
 import { type Context } from "~/core/renderer";
+import Split from "split.js";
 
 const AUTO_SAVE_TIMEOUT = 2400;
 
@@ -14,6 +15,44 @@ export enum NoteMode {
   RENDERED = "rendered",
   PLAIN = "plain",
   EDIT = "edit",
+  EDIT_SPLIT = "edit_split",
+}
+
+const EditorSplitScreen: Component<{ noteProps: NoteProps, isFullscreen: Accessor<boolean> }> = ({ noteProps, isFullscreen }) => {
+  let editorElement: HTMLDivElement
+  let renderedElement: HTMLDivElement
+  let splitInstsance: Split.Instance
+
+  let [currentContent, setCurrentContent] = createSignal(untrack(noteProps.content))
+
+  onMount(() => {
+    splitInstsance = Split([editorElement, renderedElement], {
+      sizes: [66, 33],
+      minSize: [300, 300],
+    })
+  })
+  onCleanup(() => {
+    splitInstsance?.destroy()
+  })
+
+  return (
+    <div class="split">
+      <div ref={(el) => editorElement = el} class="w-full max-h-[90vh] overflow-y-scroll">
+        <Editor
+          content={untrack(noteProps.content)}
+          autoSaveTimeout={AUTO_SAVE_TIMEOUT}
+          onSave={noteProps.onSave}
+          state={noteProps.state}
+          setState={noteProps.setState}
+          isFullscreen={isFullscreen}
+          onContentChange={setCurrentContent}
+        />
+      </div>
+      <div ref={(el) => renderedElement = el} class="shadow-glass rounded-box p-2 w-full max-h-[90vh] overflow-y-scroll">
+        <NoteViewRendered content={currentContent} context={noteProps.context} />
+      </div>
+    </div>
+  )
 }
 
 type NoteProps = {
@@ -68,7 +107,7 @@ const Note: Component<NoteProps> = (props) => {
             class="tab"
             classList={{ "tab-active": props.mode === NoteMode.RENDERED }}
             title="switch to rendered view"
-          >Rendered</button>
+          ><Icon name="file-text" /></button>
           <button
             onclick={() => {
               if (query_navigation_allowed()) {
@@ -78,14 +117,24 @@ const Note: Component<NoteProps> = (props) => {
             class="tab"
             classList={{ "tab-active": props.mode === NoteMode.PLAIN }}
             title="switch to plain view"
-          >Plain</button>
+          ><Icon name="code" /></button>
           <button
             onclick={() => props.setMode(NoteMode.EDIT)}
             class="tab"
             disabled={!props.isEditAllowed}
             classList={{ "tab-active": props.mode === NoteMode.EDIT }}
             title="switch to editor"
-          >Editor</button>
+          ><Icon name="edit-2" /></button>
+          <button
+            onclick={() => props.setMode(NoteMode.EDIT_SPLIT)}
+            class="tab"
+            disabled={!props.isEditAllowed}
+            classList={{
+              "tab-active": props.mode === NoteMode.EDIT_SPLIT,
+              "max-md:hidden": props.mode !== NoteMode.EDIT_SPLIT,
+            }}
+            title="switch to editor with preview"
+          ><Icon name="edit-2" />+<Icon name="file-text" /></button>
         </div>
         <div class="join p-1">
           <button
@@ -122,6 +171,9 @@ const Note: Component<NoteProps> = (props) => {
             setState={props.setState}
             isFullscreen={isFullscreen}
           />
+        </Match>
+        <Match when={props.mode === NoteMode.EDIT_SPLIT}>
+          <EditorSplitScreen noteProps={props} isFullscreen={isFullscreen} />
         </Match>
       </Switch>
     </div>
