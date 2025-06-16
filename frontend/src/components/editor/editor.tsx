@@ -262,6 +262,7 @@ const Editor: Component<EditorProps> = (props) => {
           <li><label>
             <span class="cursor-pointer">Auto Save</span>
             <input
+              name="editor-autosave-toggle"
               class="toggle toggle-sm"
               type="checkbox"
               checked={autoSave()}
@@ -299,11 +300,20 @@ const Editor: Component<EditorProps> = (props) => {
           >
             <Icon name="italic" />
           </button></li>
-          <li><div class="dropdown dropdown-hover dropdown-bottom p-0">
-            <div tabindex="0" role="button" class="btn btn-sm btn-square">
+          <li>
+            <button
+              class="btn btn-sm btn-square"
+              popovertarget="popover-editor-insert-heading"
+              style="anchor-name:--anchor-editor-insert-heading"
+            >
               <Icon name="hash" />
-            </div>
-            <ul tabindex="0" class="dropdown-content z-[1] menu menu-sm shadow-lg bg-base-300 rounded-box w-52">
+            </button>
+            <ul
+              class="dropdown dropdown-left menu w-52 rounded-box bg-base-100 backdrop-glass"
+              popover
+              id="popover-editor-insert-heading"
+              style="position-anchor:--anchor-editor-insert-heading"
+            >
               <For each={[1, 2, 3, 4, 5, 6]}>
                 {(level) => (
                   <li><button
@@ -314,7 +324,7 @@ const Editor: Component<EditorProps> = (props) => {
                 )}
               </For>
             </ul>
-          </div></li>
+          </li>
         </ul>
         <ul class="menu-horizontal gap-2 flex-nowrap flex">
           <li><button
@@ -405,6 +415,7 @@ const Editor: Component<EditorProps> = (props) => {
           <li><label>
             <span class="cursor-pointer">Vim</span>
             <input
+              name="editor-vim-toggle"
               class="toggle toggle-sm"
               type="checkbox"
               checked={vimInput()}
