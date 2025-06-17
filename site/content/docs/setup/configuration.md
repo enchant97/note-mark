@@ -7,6 +7,7 @@ Configuration of the backend is done through environment variables. See the belo
 |:---------------- |:----------------------------------------- |:----------|:--------------- |
 | BIND__HOST       | What ip to listen on                      | 127.0.0.1 | 0.0.0.0         |
 | BIND__PORT       | Port to bind to                           | 8000      | 8000            |
+| BIND__UNIX_SOCKET | Listen on unix socket, overrides HOST/PORT when set | - | - |
 | DB__TYPE         | Type of DB (sqlite or postgres)           |           | sqlite          |
 | DB__URI          | URI (or file path if using SQLite)        |           | /data/db.sqlite |
 | JWT_SECRET       | base64 encoded secret                     |           |                 |

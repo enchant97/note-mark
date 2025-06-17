@@ -3,8 +3,9 @@ package config
 import "fmt"
 
 type BindConfig struct {
-	Host string `env:"HOST" envDefault:"127.0.0.1"`
-	Port uint   `env:"PORT" envDefault:"8000"`
+	Host       string `env:"HOST" envDefault:"127.0.0.1"`
+	Port       uint   `env:"PORT" envDefault:"8000"`
+	UnixSocket string `env:"UNIX_SOCKET" validate:"unix_addr"`
 }
 
 func (c *BindConfig) AsAddress() string {
@@ -17,10 +18,10 @@ type DBConfig struct {
 }
 
 type OidcConfig struct {
-	DisplayName        string `env:"DISPLAY_NAME"`
-	ProviderName       string `env:"PROVIDER_NAME"`
-	IssuerUrl          string `env:"ISSUER_URL"`
-	ClientID           string `env:"CLIENT_ID"`
+	DisplayName        string `env:"DISPLAY_NAME" validate:"required"`
+	ProviderName       string `env:"PROVIDER_NAME" validate:"required"`
+	IssuerUrl          string `env:"ISSUER_URL" validate:"required"`
+	ClientID           string `env:"CLIENT_ID" validate:"required"`
 	EnableUserCreation bool   `env:"ENABLE_USER_CREATION,notEmpty" envDefault:"true"`
 }
 
@@ -37,5 +38,5 @@ type AppConfig struct {
 	EnableAnonymousUserSearch bool          `env:"ENABLE_ANONYMOUS_USER_SEARCH,notEmpty" envDefault:"true"`
 	NoteSizeLimit             Bytes         `env:"NOTE_SIZE_LIMIT,notEmpty" envDefault:"1M"`
 	AssetSizeLimit            Bytes         `env:"ASSET_SIZE_LIMIT,notEmpty" envDefault:"12M"`
-	OIDC                      *OidcConfig   `envPrefix:"OIDC__" env:",init"`
+	OIDC                      *OidcConfig   `envPrefix:"OIDC__" env:",init" validate:"omitempty,required"`
 }

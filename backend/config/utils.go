@@ -3,20 +3,24 @@ package config
 import (
 	"encoding/base64"
 	"errors"
+	"reflect"
 
 	"github.com/caarlos0/env/v11"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/gommon/bytes"
 )
+
+var validate = validator.New(validator.WithRequiredStructEnabled())
 
 // Load the config from OS
 func (appConfig *AppConfig) ParseConfig() error {
 	if err := env.Parse(appConfig); err != nil {
 		return err
 	}
-	if appConfig.OIDC.DisplayName == "" || appConfig.OIDC.ProviderName == "" || appConfig.OIDC.IssuerUrl == "" || appConfig.OIDC.ClientID == "" {
+	if reflect.DeepEqual(appConfig.OIDC, &OidcConfig{EnableUserCreation: true}) {
 		appConfig.OIDC = nil
 	}
-	return nil
+	return validate.Struct(appConfig)
 }
 
 type Base64Decoded []byte
