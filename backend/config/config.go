@@ -3,8 +3,8 @@ package config
 import "fmt"
 
 type BindConfig struct {
-	Host       string `env:"HOST" envDefault:"127.0.0.1"`
-	Port       uint   `env:"PORT" envDefault:"8000"`
+	Host       string `env:"HOST" envDefault:"127.0.0.1" validate:"hostname_rfc1123"`
+	Port       uint   `env:"PORT" envDefault:"8000" validate:"gt=0,lte=65535"`
 	UnixSocket string `env:"UNIX_SOCKET" validate:"unix_addr"`
 }
 
@@ -14,13 +14,13 @@ func (c *BindConfig) AsAddress() string {
 
 type DBConfig struct {
 	URI  string `env:"URI,notEmpty"`
-	Type string `env:"TYPE,notEmpty"`
+	Type string `env:"TYPE,notEmpty" validate:"oneof=sqlite postgres"`
 }
 
 type OidcConfig struct {
 	DisplayName        string `env:"DISPLAY_NAME" validate:"required"`
 	ProviderName       string `env:"PROVIDER_NAME" validate:"required"`
-	IssuerUrl          string `env:"ISSUER_URL" validate:"required"`
+	IssuerUrl          string `env:"ISSUER_URL" validate:"required,http_url"`
 	ClientID           string `env:"CLIENT_ID" validate:"required"`
 	EnableUserCreation bool   `env:"ENABLE_USER_CREATION,notEmpty" envDefault:"true"`
 }
