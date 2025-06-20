@@ -108,9 +108,9 @@ const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
       navigate(`/${props.user.username}/${form.slug}`)
       props.onClose({
         ...props.book,
-        name: form.name || props.book.name,
-        slug: form.slug || props.book.slug,
-        isPublic: form.isPublic || props.book.isPublic
+        name: form.name,
+        slug: form.slug,
+        isPublic: form.isPublic
       })
     }
   }

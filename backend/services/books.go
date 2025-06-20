@@ -51,6 +51,7 @@ func (s BooksService) UpdateBookByID(
 	result := db.DB.
 		Model(&db.Book{}).
 		Where("id = ? AND owner_id = ?", bookID, currentUserID).
+		Select("*").
 		Updates(input)
 	if err := result.Error; err != nil {
 		return dbErrorToServiceError(err)

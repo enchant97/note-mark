@@ -35,8 +35,8 @@ const UpdateNoteModal: Component<UpdateNoteModalProps> = (props) => {
       navigate(`/${props.user.username}/${props.book.slug}/${form.slug}`)
       props.onClose({
         ...props.note,
-        name: form.name || props.note.name,
-        slug: form.slug || props.note.slug,
+        name: form.name,
+        slug: form.slug,
       })
     }
   }
