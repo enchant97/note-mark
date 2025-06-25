@@ -10,6 +10,7 @@ import (
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/services"
+	"golang.org/x/oauth2"
 )
 
 func SetupAuthHandler(api huma.API, appConfig config.AppConfig) {
@@ -21,6 +22,7 @@ func SetupAuthHandler(api huma.API, appConfig config.AppConfig) {
 		if err != nil {
 			log.Fatal(err)
 		}
+		authHandler.OidcProvider = p
 		authHandler.OidcVerifier = p.Verifier(&oidc.Config{ClientID: appConfig.OIDC.ClientID})
 
 	}
@@ -37,13 +39,16 @@ type PostTokenOutput struct {
 }
 
 type PostExchangeOidcTokenInput struct {
-	Body         core.AccessToken
-	UsernameHint string `header:"Username-Hint" required:"true"`
+	Body struct {
+		AccessToken string `json:"accessToken"`
+		IDToken     string `json:"idToken"`
+	}
 }
 
 type AuthHandler struct {
 	services.AuthService
 	AppConfig    config.AppConfig
+	OidcProvider *oidc.Provider
 	OidcVerifier *oidc.IDTokenVerifier
 }
 
@@ -70,13 +75,31 @@ func (h AuthHandler) PostExchangeOidcToken(
 	if h.OidcVerifier == nil {
 		return nil, huma.Error404NotFound("oidc authentication has not been setup")
 	}
-	oidcToken, err := h.OidcVerifier.Verify(context.Background(), input.Body.AccessToken)
+	oidcToken, err := h.OidcVerifier.Verify(context.Background(), input.Body.IDToken)
 	if err != nil {
 		return nil, err
 	}
 	userSub := oidcToken.Subject
 	if h.AppConfig.OIDC.EnableUserCreation {
-		if err := h.AuthService.TryCreateNewOidcUser(h.AppConfig, input.UsernameHint, userSub); err != nil {
+		type Claims struct {
+			PreferredUsername string `json:"preferred_username"`
+		}
+		var claims Claims
+		if err := oidcToken.Claims(&claims); err != nil {
+			// only request user info if claims were not provided
+			// (some providers give them in the claims when 'profile' scope is included)
+			userInfo, err := h.OidcProvider.UserInfo(context.Background(), oauth2.StaticTokenSource(&oauth2.Token{
+				AccessToken: input.Body.AccessToken,
+			}))
+			if err != nil {
+				return nil, err
+			}
+			if err := userInfo.Claims(&claims); err != nil {
+				return nil, err
+			}
+			return nil, err
+		}
+		if err := h.AuthService.TryCreateNewOidcUser(h.AppConfig, claims.PreferredUsername, userSub); err != nil {
 			return nil, err
 		}
 	}

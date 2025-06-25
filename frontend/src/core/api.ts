@@ -119,17 +119,14 @@ class Api {
     return await this.postToken({ grant_type: "password", username, password })
   }
   async postExchangeOidcToken(
-    oidcAccessToken: OAuth2AccessToken,
-    usernameHint: string,
+    accessToken: string,
+    idToken: string,
   ): Promise<OAuth2AccessToken> {
     let reqURL = `${this.apiServer}/auth/oidc-exchange`
     let resp = await handleFetchErrors(fetch(reqURL, {
       method: HttpMethods.POST,
-      body: JSON.stringify(oidcAccessToken),
-      headers: {
-        "Username-Hint": usernameHint,
-        ...HEADER_JSON,
-      },
+      body: JSON.stringify({ accessToken, idToken }),
+      headers: HEADER_JSON,
     }))
     if (resp instanceof Error) { throw resp }
     await throwResponseApiErrors(resp)

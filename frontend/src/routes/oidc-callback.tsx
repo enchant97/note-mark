@@ -1,11 +1,10 @@
-import { Component, createResource, ErrorBoundary, Match, Suspense, Switch } from "solid-js";
+import { Component, createResource, ErrorBoundary, Match, Show, Switch } from "solid-js";
 import Redirect from "~/components/redirect";
 import { useApi } from "~/contexts/ApiProvider";
-import { useAuth } from "~/contexts/AuthProvider";
+import { AuthStoreType, useAuth } from "~/contexts/AuthProvider";
 import { OidcVerification } from "~/core/oidc";
 import * as oidcClient from 'openid-client'
 import { A, useNavigate } from "@solidjs/router";
-import { OAuth2AccessToken } from "~/core/types";
 import Api from "~/core/api";
 import { LoadingSpin } from "~/components/loading";
 
@@ -29,34 +28,20 @@ const OidcCallback: Component = () => {
       new URL(apiInfo.oidcProvider!.issuerUrl),
       apiInfo.oidcProvider!.clientId,
     )
-    let access_token: OAuth2AccessToken
-    let usernameHint: string
+    let newAuthStore: AuthStoreType
     {
-      let tokens = await oidcClient.authorizationCodeGrant(oidcConfig, currentUrl, {
+      const tokens = await oidcClient.authorizationCodeGrant(oidcConfig, currentUrl, {
         pkceCodeVerifier: verification.pkceCodeVerifier,
         expectedState: verification.state,
         idTokenExpected: true,
       })
-      const claims = tokens.claims()
-      access_token = {
-        access_token: tokens.access_token,
-        token_type: tokens.token_type,
-        expires_in: tokens.expires_in || 0,
-      }
-      // only request user info if claims were not provided
-      // (some providers give them in the claims when 'profile' scope is included)
-      if (claims?.preferred_username) {
-        usernameHint = claims.preferred_username.toString()
-      } else {
-        const userInfo = await oidcClient.fetchUserInfo(oidcConfig, tokens.access_token, claims!.sub)
-        usernameHint = userInfo.preferred_username!
-      }
+      const resp = await (new Api()).postExchangeOidcToken(tokens.access_token, tokens.id_token!)
+      const expiresAt = Date.now() + (resp.expires_in * 1000)
+      newAuthStore = { accessToken: resp.access_token, expiresAt }
     }
-    const resp = await (new Api()).postExchangeOidcToken(access_token, usernameHint)
-    const expiresAt = Date.now() + (resp.expires_in * 1000)
-    console.debug(`login flow success, token expires at: ${new Date(expiresAt).toISOString()}`)
-    setAuthStore({ accessToken: resp.access_token, expiresAt })
-    return { username: usernameHint }
+    console.debug(`login flow success, token expires at: ${new Date(newAuthStore.expiresAt).toISOString()}`)
+    setAuthStore(newAuthStore)
+    return
   })
 
   return (
@@ -74,17 +59,17 @@ const OidcCallback: Component = () => {
                 </Match>
               </Switch>
             )}>
-              <Suspense fallback={<>
+              <Show when={!oidcResult.loading} fallback={<>
                 <p class="py-6">
                   Exchanging details with provider, please wait.
                 </p>
                 <LoadingSpin />
               </>}>
                 <p class="py-6">
-                  Successfully authenticated, welcome {oidcResult()?.username}.
+                  Successfully authenticated.
                 </p>
                 <A class="btn btn-primary" href="/">Click here if automatic redirect did not happen</A>
-              </Suspense>
+              </Show>
             </ErrorBoundary>
           </div>
         </div>
