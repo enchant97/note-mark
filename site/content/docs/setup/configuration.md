@@ -31,7 +31,7 @@ Configuration of the backend is done through environment variables. See the belo
 Single-Sign-On is handled via OpenID Connect and OAuth2. To use SSO you must have a compatible provider that supports the following features:
 
 - OpenID Connect (OIDC) Discovery - RFC5785
-- Authorization Code Flow with PKCE
+- Authorization Code Flow with PKCE + state
     - May show in provider UI's as a "public client type"
 - Claims
     - sub: the users id
@@ -40,20 +40,36 @@ Single-Sign-On is handled via OpenID Connect and OAuth2. To use SSO you must hav
 - Scopes
     - openid
     - profile
+- ID Token: MUST be signed JWT, JWE NOT supported
 
 Depending on your SSO provider the issuer URL may be different, see below for examples:
 
-Authentik:
+If your provider is not listed, please see requirements listed above. No further support will be given, as every provider & setup cannot be tested.
+
+> Please do reach out if you have a working setup for another provider and would like it listed.
+
+### Authentik (version tested: 2025.6.1):
+Client Type:
 
 ```
-issuer url:
+public
+```
 
+Issuer URL (shown in UI as "OpenID Configuration Issuer"):
+
+```
 https://{provider-domain:port}/application/o/{note-mark}/
+```
 
-redirect/callback:
+Redirect/Callback URL:
 
+```
 https://{note-mark-domain:port}/oidc-callback
 ```
+
+Optional:
+
+- Turn on "Include claims in id_token", this removes the extra request
 
 ## Database URI
 These have been copied from the ORM docs, more info found on [gorm.io](https://gorm.io/docs/connecting_to_the_database.html).
