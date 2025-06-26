@@ -34,6 +34,7 @@ func SPAMiddleware(root http.FileSystem) func(http.ResponseWriter, *http.Request
 		if strings.HasPrefix(r.URL.Path, "/api") {
 			http.NotFoundHandler().ServeHTTP(w, r)
 		} else {
+			w.Header().Set("X-Frame-Options", "DENY")
 			wt := &intercept404{ResponseWriter: w}
 			fs.ServeHTTP(wt, r)
 			if wt.statusCode == http.StatusNotFound {
