@@ -1,7 +1,7 @@
 ---
 title: 02 - Configuration
 ---
-Configuration of the backend is done through environment variables. See the below options:
+Configuration of the Note Mark is done through environment variables. See the below options:
 
 | Key              | Description                               | Default   | Docker Default
 |:---------------- |:----------------------------------------- |:----------|:--------------- |
@@ -42,6 +42,8 @@ Single-Sign-On is handled via OpenID Connect and OAuth2. To use SSO you must hav
     - profile
 - ID Token: MUST be signed JWT, JWE NOT supported
 
+> *TIP*: OIDC will only work if Note Mark is running with https
+
 Depending on your SSO provider the issuer URL may be different, see below for examples:
 
 If your provider is not listed, please see requirements listed above. No further support will be given, as every provider & setup cannot be tested.
@@ -69,7 +71,7 @@ https://{note-mark-domain:port}/oidc-callback
 
 Optional:
 
-- Turn on "Include claims in id_token", this removes the extra request
+- Turn on "Include claims in id_token", this removes extra requests to provider
 
 ## Database URI
 These have been copied from the ORM docs, more info found on [gorm.io](https://gorm.io/docs/connecting_to_the_database.html).

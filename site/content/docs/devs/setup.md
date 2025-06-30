@@ -5,10 +5,10 @@ title: Environment Setup
 ## Requirements
 - [Run Tool](https://github.com/enchant97/run-tool)
 - Backend Development
-    - Go
+    - Go (1.24)
 - Frontend Development
     - Rust
-    - Node/NPM
+    - Node.js (20) & pnpm
 - Site
     - Install [Hugo](https://gohugo.io/)
 

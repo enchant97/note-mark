@@ -3,17 +3,13 @@ title: 01 - Install
 ---
 
 ## Docker (Official)
-Both the backend and frontend are distributed by as Docker images, making deployment consistent. Using the all-in-one image may be preferred as everything is bundled together.
+Note Mark is installed by using the all-in-one image, making deployment easier and more consistent.
 
 > Stuck? Watch the [demo video](https://youtu.be/rwL99Ac5g98).
 
-Below are the image names:
+Below is the image name:
 
 ```text
-ghcr.io/enchant97/note-mark-backend
-
-ghcr.io/enchant97/note-mark-frontend
-
 ghcr.io/enchant97/note-mark-aio
 ```
 
@@ -29,7 +25,7 @@ The following labels are available:
 <major>.<minor>.<patch>
 ```
 
-> *TIP* The `latest` label is deprecated and does not get updated
+> *IMPORTANT:* The `latest` label is deprecated and does not get updated
 
 Here is an example to deploy though Docker Compose, using the all-in-one image.
 
@@ -47,12 +43,13 @@ services:
     volumes:
       - data:/data
     environment:
-      # !!! REPLACE These !!!
-      JWT_SECRET: "bXktc2VjcmV0"
-      CORS_ORIGINS: "http://example.com:8000"
+      JWT_SECRET: "!!! REPLACE ME !!!"
+      CORS_ORIGINS: "http://example.com"
     ports:
-      - 8000:8000
+      - 80:8000
 ```
+
+For [further configuration, click here]({{< ref "docs/setup/configuration" >}}).
 
 > *TIP* A reverse proxy is recommended so a FQDN can be used and tls can be setup to secure the traffic
 

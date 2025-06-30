@@ -3,7 +3,7 @@ title: Reverse Proxy
 ---
 To run the backend and frontend over one FQDN and port can be done via a reverse proxy.
 
-> This tutorial is not required for the "note-mark-aio" Docker image
+> *IMPORTANT:* This tutorial is deprecated, use "note-mark-aio" Docker image and setup
 
 ## Routes
 Depending on the request they need to be routed to either app. These are documented below:
