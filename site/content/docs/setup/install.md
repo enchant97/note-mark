@@ -7,6 +7,8 @@ Note Mark is installed by using the all-in-one image, making deployment easier a
 
 > Stuck? Watch the [demo video](https://youtu.be/rwL99Ac5g98).
 
+### Pre-Built Image
+
 Below is the image name:
 
 ```text
@@ -27,12 +29,20 @@ The following labels are available:
 
 > *IMPORTANT:* The `latest` label is deprecated and does not get updated
 
+### Build Your Own
+This may take some time depending on your internet and processor speed (about 15 mins on RPI 4).
+
+```sh
+git clone --depth 1 --branch v{{< app-version >}} https://github.com/enchant97/note-mark.git note-mark-{{< app-version >}} && \
+cd note-mark-{{< app-version >}} && \
+docker build -t note-mark:{{< app-version >}} -f docker/Dockerfile .
+```
+
+### Basic Config
 Here is an example to deploy though Docker Compose, using the all-in-one image.
 
 ```yaml
 # file: docker-compose.yml
-version: "3"
-
 volumes:
   data:
 
@@ -56,4 +66,4 @@ For [further configuration, click here]({{< ref "docs/setup/configuration" >}}).
 > *TIP* Take a look at the [example]({{< ref "examples" >}}) deployments
 
 ## Bare
-Not officially supported, but you should be able to follow the steps that the Dockerfile's perform.
+Not officially supported, but you should be able to follow the steps that Docker build performs, find the Dockerfile in: `docker/Dockerfile`.

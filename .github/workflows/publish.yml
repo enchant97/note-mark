@@ -61,7 +61,7 @@ jobs:
             docker_file: backend/Dockerfile
           - service_name: aio
             docker_context: ./
-            docker_file: docker/Dockerfile.aio
+            docker_file: docker/Dockerfile.pre-built
           - service_name: frontend
             docker_context: ./frontend
             docker_file: frontend/Dockerfile.pre-built
