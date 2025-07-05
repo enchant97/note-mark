@@ -130,7 +130,7 @@ class Api {
     }))
     if (resp instanceof Error) { throw resp }
     await throwResponseApiErrors(resp)
-    return handleBodyErrors(resp.json())
+    return await resp.json()
   }
   //
   // User

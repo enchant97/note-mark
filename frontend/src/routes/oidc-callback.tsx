@@ -1,4 +1,4 @@
-import { Component, createResource, ErrorBoundary, Match, Show, Switch } from "solid-js";
+import { Component, createResource, Show } from "solid-js";
 import Redirect from "~/components/redirect";
 import { useApi } from "~/contexts/ApiProvider";
 import { AuthStoreType, useAuth } from "~/contexts/AuthProvider";
@@ -49,28 +49,27 @@ const OidcCallback: Component = () => {
       <div class="hero bg-base-200 min-h-screen">
         <div class="hero-content text-center">
           <div class="max-w-md">
-            <ErrorBoundary fallback={(error, _) => (
-              <Switch fallback={<></>}>
-                <Match when={error !== undefined}>
-                  <p class="py-6">
+            <Show when={!oidcResult.loading} fallback={<>
+              <p class="py-6">
+                Exchanging details with provider, please wait.
+              </p>
+              <LoadingSpin />
+            </>}>
+              <Show when={oidcResult.error === undefined} fallback={
+                <>
+                  <p class="pt-6">
                     Error exchanging details with provider.
                   </p>
+                  <p class="pt-2 pb-6">{`(${oidcResult.error.message})`}</p>
                   <A class="btn btn-primary" href="/login">Back To Login</A>
-                </Match>
-              </Switch>
-            )}>
-              <Show when={!oidcResult.loading} fallback={<>
-                <p class="py-6">
-                  Exchanging details with provider, please wait.
-                </p>
-                <LoadingSpin />
-              </>}>
+                </>
+              }>
                 <p class="py-6">
                   Successfully authenticated.
                 </p>
                 <A class="btn btn-primary" href="/">Click here if automatic redirect did not happen</A>
               </Show>
-            </ErrorBoundary>
+            </Show>
           </div>
         </div>
       </div>

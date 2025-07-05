@@ -85,7 +85,7 @@ func (h AuthHandler) PostExchangeOidcToken(
 			PreferredUsername string `json:"preferred_username"`
 		}
 		var claims Claims
-		if err := oidcToken.Claims(&claims); err != nil {
+		if err := oidcToken.Claims(&claims); err != nil || claims.PreferredUsername == "" {
 			// only request user info if claims were not provided
 			// (some providers give them in the claims when 'profile' scope is included)
 			userInfo, err := h.OidcProvider.UserInfo(context.Background(), oauth2.StaticTokenSource(&oauth2.Token{
@@ -97,7 +97,9 @@ func (h AuthHandler) PostExchangeOidcToken(
 			if err := userInfo.Claims(&claims); err != nil {
 				return nil, err
 			}
-			return nil, err
+		}
+		if claims.PreferredUsername == "" {
+			return nil, huma.Error500InternalServerError("oidc 'preferred_username' is blank or missing")
 		}
 		if err := h.AuthService.TryCreateNewOidcUser(h.AppConfig, claims.PreferredUsername, userSub); err != nil {
 			return nil, err
