@@ -46,6 +46,14 @@
 
 @layer utilities {
 
+    .tn-tree-node-expand-btn {
+        @apply btn btn-square btn-xs shadow-glass;
+    }
+
+    .tn-active {
+        @apply bg-primary;
+    }
+
     .split {
         @apply flex gap-4;
 

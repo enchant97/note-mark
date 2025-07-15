@@ -1,5 +1,5 @@
-import { useParams, A, useNavigate } from '@solidjs/router';
-import { Component, For, ParentProps, Show, createResource, createSignal, onCleanup, onMount } from 'solid-js';
+import { useParams, useNavigate } from '@solidjs/router';
+import { Component, ParentProps, Show, createResource, createSignal, onCleanup, onMount } from 'solid-js';
 import Header from '~/components/header';
 import { useApi } from '~/contexts/ApiProvider';
 import { DrawerProvider } from '~/contexts/DrawerProvider';
@@ -12,6 +12,8 @@ import Icon from '~/components/icon';
 import { apiErrorIntoToast, useToast } from '~/contexts/ToastProvider';
 import { useModal } from '~/contexts/ModalProvider';
 import ContentSearchModal, { SearchableBook, SearchableNote } from '~/components/modals/content_search';
+import TreeNavigator from 'solid-tree-navigator';
+import { FileIcon, FolderIcon } from './components/TreeIcons';
 
 type BookOrNote = Book | Note
 
@@ -108,12 +110,6 @@ const MainApp: Component<ParentProps> = (props) => {
     }))
   }
 
-  const notes = () => {
-    let n: Map<string, MappedBook> | undefined = userData()?.get("books")?.get(currentBookId())?.get("notes")
-    if (!n) { return [] }
-    return Array.from<Note>(n.values())
-  }
-
   const sortedBooks = () => {
     const startTime = performance.now()
     const items = performBookOrNoteSort([...books()], sortChoice())
@@ -121,13 +117,25 @@ const MainApp: Component<ParentProps> = (props) => {
     console.debug(`sorting books (${books().length}) took ${endTime - startTime}ms`)
     return items
   }
-  const sortedNotes = () => {
-    const startTime = performance.now()
-    const items = performBookOrNoteSort([...notes()], sortChoice())
-    const endTime = performance.now()
-    console.debug(`sorting notes (${notes().length}) took ${endTime - startTime}ms`)
-    return items
+
+  const getSortedNotesById = (bookId: string) => {
+    let n: Map<string, MappedBook> | undefined = userData()?.get("books")?.get(bookId)?.get("notes")
+    if (!n) { return [] }
+    return performBookOrNoteSort([...Array.from<Note>(n.values())], sortChoice())
   }
+
+  const tree = () => sortedBooks().map((book) => {
+    return {
+      title: book.name,
+      href: `/${params.username}/${book.slug}`,
+      nodes: getSortedNotesById(book.id).map((note) => {
+        return {
+          title: note.name,
+          href: `/${params.username}/${book.slug}/${note.slug}`,
+        }
+      })
+    }
+  })
 
   const onSearchOpen = () => {
     let searchableBooks: SearchableBook[] = books().map(v => {
@@ -236,33 +244,7 @@ const MainApp: Component<ParentProps> = (props) => {
             <li class="menu-title">NOTEBOOKS</li>
             <ul class="p-2 flex-1 overflow-auto bg-base-100 shadow-glass rounded-box">
               <Show when={!userData.loading} fallback={<LoadingRing />}>
-                <For each={sortedBooks()}>
-                  {(book) => <li>
-                    <A
-                      href={`/${params.username}/${book.slug}`}
-                      end={true}
-                      activeClass="menu-active"
-                    >
-                      <Icon name="folder" size={14} />
-                      {book.name}
-                    </A>
-                    <Show when={!currentBook.loading && book.slug === params.bookSlug}>
-                      <ul>
-                        <For each={sortedNotes()}>
-                          {(note) => <li>
-                            <A
-                              href={`/${params.username}/${params.bookSlug}/${note.slug}`}
-                              end={true}
-                              activeClass="menu-active"
-                            >
-                              <Icon name="file" size={14} />
-                              {note.name}
-                            </A></li>}
-                        </For>
-                      </ul>
-                    </Show>
-                  </li>}
-                </For>
+                <TreeNavigator nodes={tree} fileIcon={FileIcon} folderIcon={FolderIcon} />
               </Show>
             </ul>
             <li>

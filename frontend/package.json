@@ -43,6 +43,7 @@
     "highlight.js": "^11.11.1",
     "openid-client": "^6.5.1",
     "solid-js": "^1.9.7",
+    "solid-tree-navigator": "github:enchant97/solid-tree-navigator#ee39efa747cb83dee589ec326e3ac5f6d6121a41",
     "split.js": "^1.6.5",
     "workbox-window": "^7.3.0"
   }
