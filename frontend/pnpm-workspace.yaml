@@ -2,3 +2,4 @@ onlyBuiltDependencies:
   - core-js
   - esbuild
   - wasm-pack
+  - '@tailwindcss/oxide'
