@@ -7,17 +7,17 @@ toolchain go1.24.2
 require (
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/coreos/go-oidc/v3 v3.14.1
-	github.com/danielgtaylor/huma/v2 v2.32.0
+	github.com/danielgtaylor/huma/v2 v2.34.1
 	github.com/glebarez/sqlite v1.11.0
-	github.com/go-chi/chi/v5 v5.2.1
-	github.com/go-chi/cors v1.2.1
-	github.com/go-playground/validator/v10 v10.26.0
-	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/go-chi/chi/v5 v5.2.2
+	github.com/go-chi/cors v1.2.2
+	github.com/go-playground/validator/v10 v10.27.0
+	github.com/golang-jwt/jwt/v5 v5.2.3
 	github.com/google/uuid v1.6.0
 	github.com/h2non/filetype v1.1.3
 	github.com/labstack/gommon v0.4.2
 	github.com/urfave/cli/v2 v2.27.7
-	golang.org/x/crypto v0.39.0
+	golang.org/x/crypto v0.40.0
 	golang.org/x/oauth2 v0.30.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.30.0
@@ -28,7 +28,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
 	github.com/glebarez/go-sqlite v1.22.0 // indirect
-	github.com/go-jose/go-jose/v4 v4.1.0 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -42,13 +42,13 @@ require (
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
-	golang.org/x/exp v0.0.0-20250606033433-dcc06ee1d476 // indirect
-	golang.org/x/net v0.41.0 // indirect
-	golang.org/x/sync v0.15.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
-	modernc.org/libc v1.65.10 // indirect
+	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342 // indirect
+	golang.org/x/exp v0.0.0-20250711185948-6ae5c78190dc // indirect
+	golang.org/x/net v0.42.0 // indirect
+	golang.org/x/sync v0.16.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
+	golang.org/x/text v0.27.0 // indirect
+	modernc.org/libc v1.66.3 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 	modernc.org/sqlite v1.38.0 // indirect
