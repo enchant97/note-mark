@@ -42,6 +42,18 @@ class StorageHandler {
       }
     ] as const
   }
+  static createSettingSignalJSON<T>(name: string, persistant = true) {
+    const [setting, setSetting] = StorageHandler.createSettingSignal(name, persistant)
+    return [
+      () => {
+        const v = setting()
+        return v !== null ? JSON.parse(v) : null
+      },
+      (value: T | null) => {
+        setSetting(JSON.stringify(value))
+      }
+    ] as const
+  }
 }
 
 export default StorageHandler;

@@ -14,6 +14,7 @@ import { useModal } from '~/contexts/ModalProvider';
 import ContentSearchModal, { SearchableBook, SearchableNote } from '~/components/modals/content_search';
 import TreeNavigator from 'solid-tree-navigator';
 import { FileIcon, FolderIcon } from './components/TreeIcons';
+import StorageHandler from './core/storage';
 
 type BookOrNote = Book | Note
 
@@ -51,6 +52,7 @@ const MainApp: Component<ParentProps> = (props) => {
   const { setModal, clearModal, modal: currentModal } = useModal()
   const navigator = useNavigate()
   const [sortChoice, setSortChoice] = createSignal(SortChoice.NAME_ASC)
+  const [defaultExpandTree, setDefaultExpandTree] = StorageHandler.createSettingSignalJSON<boolean>("default_expand_tree", true)
 
   function handleShortcuts(ev: KeyboardEvent) {
     if (ev.key == "k" && ev.ctrlKey && !currentModal()) {
@@ -241,10 +243,26 @@ const MainApp: Component<ParentProps> = (props) => {
               <Icon name="search" />
               Search
             </button></li>
-            <li class="menu-title">NOTEBOOKS</li>
+            <li class="menu-title flex flex-row">
+              <span class="flex-1">NOTEBOOKS</span>
+              <label class="swap btn btn-square btn-xs">
+                <input
+                  type="checkbox"
+                  checked={defaultExpandTree() || false}
+                  onInput={(ev) => setDefaultExpandTree(ev.currentTarget.checked)}
+                />
+                <Icon class="swap-on" name="chevrons-down" size={16} />
+                <Icon class="swap-off" name="chevrons-right" size={16} />
+              </label>
+            </li>
             <ul class="p-2 flex-1 overflow-auto bg-base-100 shadow-glass rounded-box">
               <Show when={!userData.loading} fallback={<LoadingRing />}>
-                <TreeNavigator nodes={tree} fileIcon={FileIcon} folderIcon={FolderIcon} />
+                <TreeNavigator
+                  nodes={tree}
+                  defaultExpandAll={defaultExpandTree}
+                  fileIcon={FileIcon}
+                  folderIcon={FolderIcon}
+                />
               </Show>
             </ul>
             <li>
