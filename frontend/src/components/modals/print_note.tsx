@@ -1,8 +1,5 @@
-import { Component, Suspense, createResource } from "solid-js"
-import BaseModal from "~/components/modals/base"
+import { Component, onMount } from "solid-js"
 import render from "~/core/renderer"
-import { LoadingRing } from "~/components/loading"
-import Icon from "~/components/icon"
 import { type Context } from "~/core/renderer"
 
 type PrintNoteModalProps = {
@@ -13,33 +10,18 @@ type PrintNoteModalProps = {
 
 const PrintNoteModal: Component<PrintNoteModalProps> = (props) => {
   let iframeElement: HTMLIFrameElement
-  const [contentRendered] = createResource(() => [props.content, props.context], async ([content, context]) => {
-    return render(content, context)
+
+  onMount(() => {
+    iframeElement.contentWindow!.addEventListener("afterprint", () => props.onClose())
+    iframeElement.contentWindow!.print()
   })
 
   return (
-    <BaseModal title="Print Note">
-      <div class="flex flex-col gap-2">
-        <Suspense fallback={<LoadingRing />}>
-          <div class="overflow-y-auto max-h-32">
-            <iframe
-              class="w-full h-screen hidden"
-              ref={(el) => iframeElement = el}
-              srcdoc={contentRendered()}>
-            </iframe>
-          </div>
-          <button
-            class="btn btn-primary"
-            onClick={() => iframeElement.contentWindow?.print()}
-          >
-            <Icon name="printer" />
-            Print</button>
-        </Suspense>
-        <div class="modal-action">
-          <button onclick={() => props.onClose()} class="btn" type="button">Close</button>
-        </div>
-      </div>
-    </BaseModal>
+    <iframe
+      class="w-full h-screen hidden"
+      ref={(el) => iframeElement = el}
+      srcdoc={render(props.content, props.context)}>
+    </iframe>
   )
 }
 
