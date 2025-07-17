@@ -35,11 +35,11 @@ This example assumes you already have the Docker Compose shown in the install se
 ```properties
 # file: nginx.conf
 upstream backend {
-    server backend:8000;
+    server backend:8080;
 }
 
 upstream frontend {
-    server frontend:8000;
+    server frontend:8080;
 }
 
 server {

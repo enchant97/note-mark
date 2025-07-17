@@ -44,10 +44,10 @@ FROM gcr.io/distroless/static-debian12
     COPY --from=backend --link /note-mark /
     COPY --from=frontend /dist /static
 
-    EXPOSE 8000
+    EXPOSE 8080
 
     ENV BIND__HOST=0.0.0.0
-    ENV BIND__PORT=8000
+    ENV BIND__PORT=8080
     ENV DB__URI=/data/db.sqlite
     ENV DB__TYPE=sqlite
     ENV DATA_PATH=/data

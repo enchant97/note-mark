@@ -6,7 +6,7 @@ Configuration of the Note Mark is done through environment variables. See the be
 | Key              | Description                               | Default   | Docker Default
 |:---------------- |:----------------------------------------- |:----------|:--------------- |
 | BIND__HOST       | What ip to listen on                      | 127.0.0.1 | 0.0.0.0         |
-| BIND__PORT       | Port to bind to                           | 8000      | 8000            |
+| BIND__PORT       | Port to bind to                           | 8080      | 8080            |
 | BIND__UNIX_SOCKET | Listen on unix socket, overrides HOST/PORT when set | - | - |
 | DB__TYPE         | Type of DB (sqlite or postgres)           |           | sqlite          |
 | DB__URI          | URI (or file path if using SQLite)        |           | /data/db.sqlite |

@@ -4,7 +4,7 @@ import "fmt"
 
 type BindConfig struct {
 	Host       string `env:"HOST" envDefault:"127.0.0.1" validate:"hostname_rfc1123"`
-	Port       uint   `env:"PORT" envDefault:"8000" validate:"gt=0,lte=65535"`
+	Port       uint   `env:"PORT" envDefault:"8080" validate:"gt=0,lte=65535"`
 	UnixSocket string `env:"UNIX_SOCKET" validate:"unix_addr"`
 }
 

@@ -56,7 +56,7 @@ services:
       JWT_SECRET: "!!! REPLACE ME !!!"
       CORS_ORIGINS: "http://example.com"
     ports:
-      - 80:8000
+      - 80:8080
 ```
 
 For [further configuration, click here]({{< ref "docs/setup/configuration" >}}).

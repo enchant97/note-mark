@@ -16,7 +16,7 @@ services:
       DB__TYPE: postgres
       DB__URI: "host=postgres user=postgres password=postgres dbname=notemark port=5432 sslmode=disable TimeZone=Europe/London"
     ports:
-      - 80:8000
+      - 80:8080
 
   postgres:
     image: postgres:15-alpine
