@@ -34,7 +34,7 @@ func (h MiscHandler) GetServerInfo(ctx context.Context, input *struct{}) (*GetSe
 	}
 	return &GetServerInfoOutput{
 		Body: core.ServerInfo{
-			MinSupportedVersion:       "0.16.0",
+			MinSupportedVersion:       "0.17.0",
 			AllowInternalSignup:       h.AppConfig.EnableInternalSignup,
 			AllowInternalLogin:        h.AppConfig.EnableInternalLogin,
 			EnableAnonymousUserSearch: h.AppConfig.EnableAnonymousUserSearch,
