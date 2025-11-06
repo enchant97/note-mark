@@ -260,11 +260,9 @@ const Editor: Component<EditorProps> = (props) => {
       >
         <menu class="menu menu-horizontal gap-4 shadow-glass backdrop-glass min-w-fit">
           <ul class="menu-horizontal gap-2 flex-nowrap items-center">
-            <li><label>
-              <span class="cursor-pointer">Auto Save</span>
+            <li><label>Auto Save<span class="toggle toggle-sm">
               <input
                 name="editor-autosave-toggle"
-                class="toggle toggle-sm"
                 type="checkbox"
                 checked={autoSave()}
                 oninput={(ev) => {
@@ -273,7 +271,9 @@ const Editor: Component<EditorProps> = (props) => {
                   setAutoSave(v)
                 }}
               />
-            </label></li>
+              <Icon name="x" size={16} aria-label="autosave disabled" />
+              <Icon name="refresh-cw" size={16} aria-label="autosave enabled" />
+            </span></label></li>
             <li><button
               class="btn btn-sm btn-square"
               disabled={props.state.saving}
@@ -417,11 +417,9 @@ const Editor: Component<EditorProps> = (props) => {
         </menu>
         <menu class="menu menu-horizontal gap-4 shadow-glass backdrop-glass ml-auto">
           <ul class="menu-horizontal gap-2 flex-nowrap ml-auto items-center">
-            <li><label>
-              <span class="cursor-pointer">Vim</span>
+            <li><label>Vim<span class="toggle toggle-sm">
               <input
                 name="editor-vim-toggle"
-                class="toggle toggle-sm"
                 type="checkbox"
                 checked={vimInput()}
                 oninput={(ev) => {
@@ -429,7 +427,9 @@ const Editor: Component<EditorProps> = (props) => {
                   setVimInput(v)
                 }}
               />
-            </label></li>
+              <Icon name="x" size={16} aria-label="vim disabled" />
+              <Icon name="check" size={16} aria-label="vim enabled" />
+            </span></label></li>
           </ul>
         </menu>
       </div>
