@@ -248,9 +248,9 @@ const Editor: Component<EditorProps> = (props) => {
 
   return (
     <>
-      <menu
+      <div
         ref={(el) => toolbarElement = el}
-        class="menu menu-horizontal flex-nowrap gap-6 p-2 w-full items-center overflow-x-auto overflow-y-clip shadow-glass backdrop-glass"
+        class="flex gap-4 w-full p-2"
         classList={{
           "fixed": stickyToolbar(),
           "top-2": stickyToolbar(),
@@ -258,183 +258,181 @@ const Editor: Component<EditorProps> = (props) => {
           "z-[1]": stickyToolbar(),
         }}
       >
-        <ul class="menu-horizontal gap-2 flex-nowrap items-center">
-          <li><label>
-            <span class="cursor-pointer">Auto Save</span>
-            <input
-              name="editor-autosave-toggle"
-              class="toggle toggle-sm"
-              type="checkbox"
-              checked={autoSave()}
-              oninput={(ev) => {
-                let v = ev.currentTarget.checked
-                if (v && props.state.unsaved) { triggerSave() }
-                setAutoSave(v)
-              }}
-            />
-          </label></li>
-          <li><button
-            class="btn btn-sm btn-square"
-            disabled={props.state.saving}
-            classList={{ "btn-error": props.state.unsaved }}
-            type="button"
-            title="Save"
-            onclick={() => triggerSave()}
-          >
-            {props.state.saving && <span class="loading loading-spinner text-warning"></span>}
-            {!props.state.saving && <Icon name="save" />}
-          </button></li>
-        </ul>
-        <ul class="menu-horizontal gap-2 flex-nowrap">
-          <li><button
-            class="btn btn-sm btn-square"
-            title="Bold"
-            onClick={() => wrapSelectionWith("**")}
-          >
-            <Icon name="bold" />
-          </button></li>
-          <li><button
-            class="btn btn-sm btn-square"
-            title="Italic"
-            onClick={() => wrapSelectionWith("*")}
-          >
-            <Icon name="italic" />
-          </button></li>
-          <li>
-            <button
+        <menu class="menu menu-horizontal gap-4 shadow-glass backdrop-glass min-w-fit">
+          <ul class="menu-horizontal gap-2 flex-nowrap items-center">
+            <li><label>
+              <span class="cursor-pointer">Auto Save</span>
+              <input
+                name="editor-autosave-toggle"
+                class="toggle toggle-sm"
+                type="checkbox"
+                checked={autoSave()}
+                oninput={(ev) => {
+                  let v = ev.currentTarget.checked
+                  if (v && props.state.unsaved) { triggerSave() }
+                  setAutoSave(v)
+                }}
+              />
+            </label></li>
+            <li><button
               class="btn btn-sm btn-square"
-              popovertarget="popover-editor-insert-heading"
-              style="anchor-name:--anchor-editor-insert-heading"
+              disabled={props.state.saving}
+              classList={{ "btn-error": props.state.unsaved }}
+              type="button"
+              title="Save"
+              onclick={() => triggerSave()}
             >
-              <Icon name="hash" />
-            </button>
-            <ul
-              class="dropdown dropdown-left menu w-52 rounded-box bg-base-100 backdrop-glass"
-              popover
-              id="popover-editor-insert-heading"
-              style="position-anchor:--anchor-editor-insert-heading"
+              {props.state.saving && <span class="loading loading-spinner text-warning"></span>}
+              {!props.state.saving && <Icon name="save" />}
+            </button></li>
+          </ul>
+        </menu>
+        <menu class="menu menu-horizontal flex-nowrap gap-4 shadow-glass backdrop-glass overflow-x-auto max-sm:hidden">
+          <ul class="menu-horizontal gap-2 flex-nowrap">
+            <li><button
+              class="btn btn-sm btn-square"
+              title="Bold"
+              onClick={() => wrapSelectionWith("**")}
             >
-              <For each={[1, 2, 3, 4, 5, 6]}>
-                {(level) => (
-                  <li><button
-                    onClick={() => addPrefixToLine("#".repeat(level) + " ")}
-                  >
-                    H.{level}
-                  </button></li>
-                )}
-              </For>
-            </ul>
-          </li>
-        </ul>
-        <ul class="menu-horizontal gap-2 flex-nowrap flex">
-          <li><button
-            class="btn btn-sm btn-square"
-            title="Block Comment"
-            onClick={() => addPrefixToLine("> ")}
-          >
-            <Icon name="chevron-right" />
-          </button></li>
-          <li><button
-            class="btn btn-sm btn-square"
-            title="De-Indent"
-            onClick={() => {
-              indentLess(editor)
-              editor.focus()
-            }}
-          >
-            <Icon name="chevrons-left" />
-          </button></li>
-          <li><button
-            class="btn btn-sm btn-square"
-            title="Indent"
-            onClick={() => {
-              indentMore(editor)
-              editor.focus()
-            }}
-          >
-            <Icon name="chevrons-right" />
-          </button></li>
-        </ul>
-        <ul class="menu-horizontal gap-2 flex-nowrap flex">
-          <li><button
-            class="btn btn-sm btn-square"
-            title="Insert Link"
-            onClick={() => setModal({
-              component: CreateLinkModal,
-              props: {
-                onClose: (content?: string) => {
-                  if (content) {
-                    replaceSelection(content)
-                  }
-                  clearModal()
-                  editor.focus()
-                }
-              }
-            })}
-          >
-            <Icon name="link" />
-          </button></li>
-          <li><button
-            class="btn btn-sm btn-square"
-            title="Insert Image"
-            onClick={() => setModal({
-              component: CreateImageModal,
-              props: {
-                onClose: (content?: string) => {
-                  if (content) {
-                    replaceSelection(content)
-                  }
-                  clearModal()
-                  editor.focus()
-                }
-              }
-            })}
-          >
-            <Icon name="image" />
-          </button></li>
-          <li><button
-            class="btn btn-sm btn-square"
-            title="Insert Table"
-            onClick={() => setModal({
-              component: CreateTableModal,
-              props: {
-                onClose: (content?: string) => {
-                  if (content) {
-                    replaceSelection(content)
-                  }
-                  clearModal()
-                  editor.focus()
-                }
-              }
-            })}
-          >
-            <Icon name="table" />
-          </button></li>
-        </ul>
-        <ul class="menu-horizontal gap-2 flex-nowrap ml-auto items-center">
-          <li><label>
-            <span class="cursor-pointer">Vim</span>
-            <input
-              name="editor-vim-toggle"
-              class="toggle toggle-sm"
-              type="checkbox"
-              checked={vimInput()}
-              oninput={(ev) => {
-                let v = ev.currentTarget.checked
-                setVimInput(v)
+              <Icon name="bold" />
+            </button></li>
+            <li><button
+              class="btn btn-sm btn-square"
+              title="Italic"
+              onClick={() => wrapSelectionWith("*")}
+            >
+              <Icon name="italic" />
+            </button></li>
+            <li>
+              <button
+                class="btn btn-sm btn-square"
+                popovertarget="popover-editor-insert-heading"
+                style="anchor-name:--anchor-editor-insert-heading"
+              >
+                <Icon name="hash" />
+              </button>
+              <ul
+                class="dropdown dropdown-left menu w-52 rounded-box bg-base-100 backdrop-glass"
+                popover
+                id="popover-editor-insert-heading"
+                style="position-anchor:--anchor-editor-insert-heading"
+              >
+                <For each={[1, 2, 3, 4, 5, 6]}>
+                  {(level) => (
+                    <li><button
+                      onClick={() => addPrefixToLine("#".repeat(level) + " ")}
+                    >
+                      H.{level}
+                    </button></li>
+                  )}
+                </For>
+              </ul>
+            </li>
+          </ul>
+          <ul class="menu-horizontal gap-2 flex-nowrap flex">
+            <li><button
+              class="btn btn-sm btn-square"
+              title="Block Comment"
+              onClick={() => addPrefixToLine("> ")}
+            >
+              <Icon name="chevron-right" />
+            </button></li>
+            <li><button
+              class="btn btn-sm btn-square"
+              title="De-Indent"
+              onClick={() => {
+                indentLess(editor)
+                editor.focus()
               }}
-            />
-          </label></li>
-          <li><a
-            class="btn btn-sm btn-square"
-            title="Open Help"
-            href="https://github.github.com/gfm/"
-            target="_blank"
-          >
-            <Icon name="help-circle" />
-          </a></li>
-        </ul>
-      </menu>
+            >
+              <Icon name="chevrons-left" />
+            </button></li>
+            <li><button
+              class="btn btn-sm btn-square"
+              title="Indent"
+              onClick={() => {
+                indentMore(editor)
+                editor.focus()
+              }}
+            >
+              <Icon name="chevrons-right" />
+            </button></li>
+          </ul>
+          <ul class="menu-horizontal gap-2 flex-nowrap flex">
+            <li><button
+              class="btn btn-sm btn-square"
+              title="Insert Link"
+              onClick={() => setModal({
+                component: CreateLinkModal,
+                props: {
+                  onClose: (content?: string) => {
+                    if (content) {
+                      replaceSelection(content)
+                    }
+                    clearModal()
+                    editor.focus()
+                  }
+                }
+              })}
+            >
+              <Icon name="link" />
+            </button></li>
+            <li><button
+              class="btn btn-sm btn-square"
+              title="Insert Image"
+              onClick={() => setModal({
+                component: CreateImageModal,
+                props: {
+                  onClose: (content?: string) => {
+                    if (content) {
+                      replaceSelection(content)
+                    }
+                    clearModal()
+                    editor.focus()
+                  }
+                }
+              })}
+            >
+              <Icon name="image" />
+            </button></li>
+            <li><button
+              class="btn btn-sm btn-square"
+              title="Insert Table"
+              onClick={() => setModal({
+                component: CreateTableModal,
+                props: {
+                  onClose: (content?: string) => {
+                    if (content) {
+                      replaceSelection(content)
+                    }
+                    clearModal()
+                    editor.focus()
+                  }
+                }
+              })}
+            >
+              <Icon name="table" />
+            </button></li>
+          </ul>
+        </menu>
+        <menu class="menu menu-horizontal gap-4 shadow-glass backdrop-glass ml-auto">
+          <ul class="menu-horizontal gap-2 flex-nowrap ml-auto items-center">
+            <li><label>
+              <span class="cursor-pointer">Vim</span>
+              <input
+                name="editor-vim-toggle"
+                class="toggle toggle-sm"
+                type="checkbox"
+                checked={vimInput()}
+                oninput={(ev) => {
+                  let v = ev.currentTarget.checked
+                  setVimInput(v)
+                }}
+              />
+            </label></li>
+          </ul>
+        </menu>
+      </div>
       <div class="shadow-glass rounded-box p-2" ref={(el) => editorDiv = el}></div>
     </>
   )
