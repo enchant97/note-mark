@@ -10,7 +10,7 @@ import { useApi } from '~/contexts/ApiProvider';
 
 const Profile: Component = () => {
   const { setModal, clearModal } = useModal()
-  const { userInfo, setUserInfo } = useApi()
+  const { apiInfo, userInfo, setUserInfo } = useApi()
 
   const onUpdateProfileClick = () => {
     setModal({
@@ -52,11 +52,12 @@ const Profile: Component = () => {
                 class="btn join-item">
                 Update Profile
               </button>
-              <button
-                onclick={() => onUpdatePasswordClick()}
-                class="btn join-item">
-                Change Password
-              </button>
+              {apiInfo()?.allowInternalLogin &&
+                <button
+                  onclick={() => onUpdatePasswordClick()}
+                  class="btn join-item">
+                  Change Password
+                </button>}
             </div>
             <A
               class="btn btn-wide mx-auto mt-4"

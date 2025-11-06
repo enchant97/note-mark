@@ -155,6 +155,9 @@ func (h UsersHandler) PutCurrentUser(ctx context.Context, input *PutUserInput) (
 }
 
 func (h UsersHandler) PutCurrentUserPassword(ctx context.Context, input *PutUserPasswordInput) (*struct{}, error) {
+	if !h.AppConfig.EnableInternalLogin {
+		return nil, huma.Error403Forbidden("password changes have been disabled by the administrator")
+	}
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
 	userID := authDetails.GetAuthenticatedUser().UserID
 	if err := h.UsersService.UpdateUserPassword(userID, input.Body); err != nil {
