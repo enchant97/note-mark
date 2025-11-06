@@ -1,7 +1,8 @@
-import { Accessor, Component, Match, Switch, createSignal, onCleanup, onMount, untrack } from "solid-js";
+import { Accessor, Component, Match, Show, Switch, createSignal, onCleanup, onMount, untrack } from "solid-js";
 import { SetStoreFunction, Store } from "solid-js/store";
 import NoteViewPlain from "~/components/note/view_plain";
 import NoteViewRendered from "~/components/note/view_rendered";
+import NoteViewEmpty from "~/components/note/view_empty";
 import Icon from "~/components/icon";
 import { copyToClipboard } from "~/core/helpers";
 import { ToastType, useToast } from "~/contexts/ToastProvider";
@@ -158,9 +159,15 @@ const Note: Component<NoteProps> = (props) => {
           </label>
         </div>
       </div>
-      <Switch fallback={<NoteViewRendered content={props.content} context={props.context} />}>
+      <Switch fallback={
+        <Show when={props.content().replace("\n", "").length !== 0} fallback={<NoteViewEmpty />}>
+          <NoteViewRendered content={props.content} context={props.context} />
+        </Show>
+      }>
         <Match when={props.mode === NoteMode.PLAIN}>
-          <NoteViewPlain content={props.content} />
+          <Show when={props.content().replace("\n", "").length !== 0} fallback={<NoteViewEmpty />}>
+            <NoteViewPlain content={props.content} />
+          </Show>
         </Match>
         <Match when={props.mode === NoteMode.EDIT}>
           <Editor
