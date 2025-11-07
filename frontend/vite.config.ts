@@ -29,7 +29,6 @@ export default defineConfig({
         'start_url': '.',
         'display': 'standalone',
         'scope': '/',
-        'theme_color': '#2a76b7',
         'description': 'Lighting Fast & Minimal Markdown Note Taking App'
       },
     }),
