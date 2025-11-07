@@ -28,50 +28,7 @@ Configuration of the Note Mark is done through environment variables. See the be
 > *TIP* A secret can be generated using: `openssl rand -base64 32`
 
 ## OIDC
-Single-Sign-On is handled via OpenID Connect and OAuth2. To use SSO you must have a compatible provider that supports the following features:
-
-- OpenID Connect (OIDC) Discovery - RFC5785
-- Authorization Code Flow with PKCE + state
-    - May show in provider UI's as a "public client type"
-- Claims
-    - sub: the users id
-    - name: the users full name
-    - preferred_username: the users username, not the email
-- Scopes
-    - openid
-    - profile
-- ID Token: MUST be signed JWT, JWE NOT supported
-
-> *TIP*: OIDC will only work if Note Mark is running with https
-
-Depending on your SSO provider the issuer URL may be different, see below for examples:
-
-If your provider is not listed, please see requirements listed above. No further support will be given, as every provider & setup cannot be tested.
-
-> Please do reach out if you have a working setup for another provider and would like it listed.
-
-### Authentik (version tested: 2025.6.1):
-Client Type:
-
-```
-public
-```
-
-Issuer URL (shown in UI as "OpenID Configuration Issuer"):
-
-```
-https://{provider-domain:port}/application/o/{note-mark}/
-```
-
-Redirect/Callback URL:
-
-```
-https://{note-mark-domain:port}/oidc-callback
-```
-
-Optional:
-
-- Turn on "Include claims in id_token", this removes extra requests to provider
+Single-Sign-On is handled via OpenID Connect and OAuth2. [OIDC Provider Examples]({{< ref oidc >}}).
 
 ## Database URI
 These have been copied from the ORM docs, more info found on [gorm.io](https://gorm.io/docs/connecting_to_the_database.html).
