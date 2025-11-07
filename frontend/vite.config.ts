@@ -29,7 +29,13 @@ export default defineConfig({
         'start_url': '.',
         'display': 'standalone',
         'scope': '/',
-        'description': 'Lighting Fast & Minimal Markdown Note Taking App'
+        'description': 'Lighting Fast & Minimal Markdown Note Taking App',
+        'shortcuts': [
+          {
+            'name': 'Scratch Pad',
+            'url': '/scratch-pad'
+          },
+        ],
       },
     }),
   ],
