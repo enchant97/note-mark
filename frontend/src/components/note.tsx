@@ -90,7 +90,7 @@ const Note: Component<NoteProps> = (props) => {
 
   return (
     <div
-      class="flex flex-col gap-4 bg-base-100"
+      class="flex flex-col gap-2 bg-base-100"
       classList={{
         "full-screen": isFullscreen(),
         "p-4": isFullscreen(),
@@ -98,7 +98,7 @@ const Note: Component<NoteProps> = (props) => {
       }}
     >
       <div class="flex justify-between shadow-glass rounded-box p-1.5">
-        <div class="tabs">
+        <div role="tablist" class="tabs tabs-box bg-base-100">
           <button
             onclick={() => {
               if (query_navigation_allowed()) {
@@ -139,14 +139,14 @@ const Note: Component<NoteProps> = (props) => {
         </div>
         <div class="join p-1">
           <button
-            class="join-item btn btn-sm"
+            class="join-item btn"
             type="button"
             title="Copy Note To Clipboard"
             classList={{ "hidden": !window.isSecureContext }}
             onClick={copyContentsToClipboard}
           ><Icon name="copy" />
           </button>
-          <label class="join-item btn btn-sm swap">
+          <label class="join-item btn swap">
             <input
               title="Toggle Note Full-Screen"
               name="noteFullscreenToggle"

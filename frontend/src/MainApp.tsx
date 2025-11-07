@@ -182,7 +182,7 @@ const MainApp: Component<ParentProps> = (props) => {
       <input id="main-drawer" type="checkbox" class="drawer-toggle" />
       <div class="drawer-content min-h-screen pb-8">
         <Header />
-        <div class="px-6 mt-2">
+        <div class="px-2 mt-2">
           <DrawerProvider
             currentUser={currentUser}
             currentBook={currentBook}

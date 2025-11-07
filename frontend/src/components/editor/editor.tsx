@@ -250,12 +250,13 @@ const Editor: Component<EditorProps> = (props) => {
     <>
       <div
         ref={(el) => toolbarElement = el}
-        class="flex gap-4 w-full p-2"
+        class="flex gap-4 w-full py-2"
         classList={{
           "fixed": stickyToolbar(),
           "top-2": stickyToolbar(),
           "left-0": stickyToolbar(),
           "z-[1]": stickyToolbar(),
+          "px-2": stickyToolbar(),
         }}
       >
         <menu class="menu menu-horizontal gap-4 shadow-glass backdrop-glass min-w-fit">
