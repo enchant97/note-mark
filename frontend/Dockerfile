@@ -28,7 +28,7 @@ FROM node-base AS builder
     RUN pnpm run wasm
     RUN pnpm run build
 
-FROM nginxinc/nginx-unprivileged:1.28-alpine3.21
+FROM nginxinc/nginx-unprivileged:1.29-alpine3.22
 
     COPY --from=builder --link /app/dist /usr/share/nginx/html
     COPY --link nginx.conf /etc/nginx/conf.d/default.conf
