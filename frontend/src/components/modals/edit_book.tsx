@@ -158,12 +158,15 @@ const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
           </label>
           <label class="label justify-between">
             Public
-            <input
-              onchange={() => setForm({ isPublic: !form.isPublic })}
-              checked={form.isPublic}
-              class="toggle"
-              type="checkbox"
-            />
+            <span class="toggle">
+              <input
+                onchange={() => setForm({ isPublic: !form.isPublic })}
+                checked={form.isPublic}
+                type="checkbox"
+              />
+              <Icon name="x" size={16} aria-label="public access disabled" />
+              <Icon name="check" size={16} aria-label="public access enabled" />
+            </span>
           </label>
         </fieldset>
         <DeletedNotes bookId={props.book.id} restoreNote={props.restoreNote} />
