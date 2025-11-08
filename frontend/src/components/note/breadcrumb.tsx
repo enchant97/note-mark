@@ -18,7 +18,7 @@ const NoteBreadcrumb: Component<NoteBreadcrumbProps> = (props) => {
         <Show when={props.username}>
           <li>
             <A
-              activeClass="btn-disabled"
+              activeClass="breadcrumb-disabled"
               end={true}
               href={`/${props.username}`}
             >
@@ -29,7 +29,7 @@ const NoteBreadcrumb: Component<NoteBreadcrumbProps> = (props) => {
           <Show when={props.bookSlug}>
             <li>
               <A
-                activeClass="btn-disabled"
+                activeClass="breadcrumb-disabled"
                 end={true}
                 href={`/${props.username}/${props.bookSlug}`}
               >
@@ -40,7 +40,7 @@ const NoteBreadcrumb: Component<NoteBreadcrumbProps> = (props) => {
             <Show when={props.noteSlug}>
               <li>
                 <A
-                  activeClass="btn-disabled"
+                  activeClass="breadcrumb-disabled"
                   end={true}
                   href={`/${props.username}/${props.bookSlug}/${props.noteSlug}`}
                 >

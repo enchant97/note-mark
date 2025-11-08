@@ -111,4 +111,12 @@
     .navbar {
         @apply rounded-box;
     }
+
+    .breadcrumb-disabled {
+        @apply text-base-content/75;
+    }
+
+    .breadcrumb-disabled:hover {
+        @apply no-underline cursor-not-allowed;
+    }
 }
