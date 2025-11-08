@@ -8,7 +8,7 @@ title: Environment Setup
     - Go (1.24)
 - Frontend Development
     - Rust
-    - Node.js (20) & pnpm
+    - Node.js (24) & pnpm
 - Site
     - Install [Hugo](https://gohugo.io/)
 
