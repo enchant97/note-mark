@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.0] - 2025-11-13
+### Added
+- #259; Show notice when note is empty
+- #248; Authelia SSO config example
+- add pwa shortcut for scratch-pad
+### Changed
+- #260; disable user password management when internal login is disabled
+- improve spacing and appearance of toolbars/menus
+- #261 improve toggle style (add status icons)
+- migrate to node v24 for building frontend
+### Fixed
+- fix active breadcrumb entry style
+### Removed
+- remove theme-color, browsers implement this differently and it's sometimes annoying have a blue scrollbar
 
 ## [0.17.1] - 2025-07-18
 ### Fixed
