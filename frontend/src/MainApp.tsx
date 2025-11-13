@@ -249,7 +249,11 @@ const MainApp: Component<ParentProps> = (props) => {
                 <input
                   type="checkbox"
                   checked={defaultExpandTree() || false}
-                  onInput={(ev) => setDefaultExpandTree(ev.currentTarget.checked)}
+                  onInput={(ev) => {
+                    setDefaultExpandTree(ev.currentTarget.checked)
+                    // HACK fix for tree expand not expanding
+                    window.location.reload()
+                  }}
                 />
                 <Icon class="swap-on" name="chevrons-down" size={16} />
                 <Icon class="swap-off" name="chevrons-right" size={16} />
