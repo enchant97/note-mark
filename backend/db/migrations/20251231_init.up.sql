@@ -1,0 +1,3 @@
+CREATE TABLE nodes (
+  uid BLOB PRIMARY KEY
+);
