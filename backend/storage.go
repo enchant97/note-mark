@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -38,6 +39,15 @@ func (sc *StorageController) writeUidAnchor(
 		return err
 	}
 	return nil
+}
+
+func (sc *StorageController) readUidAnchor(fp string) (uuid.UUID, error) {
+	absPath := filepath.Join(sc.rootPath, fp+".uid")
+	rawContent, err := os.ReadFile(absPath)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	return uuid.FromBytes(rawContent)
 }
 
 func (sc *StorageController) deleteUidAnchor(
@@ -118,4 +128,41 @@ func (sc *StorageController) DeleteDirNode(
 ) error {
 	// TODO
 	return nil
+}
+
+type DiscoverNodesFunc func(node NodeEntry) error
+
+func (sc *StorageController) DiscoverNodes(fn DiscoverNodesFunc) error {
+	return filepath.WalkDir(sc.rootPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		// skip if is root path or root/username
+		if len(filepath.SplitList(sc.rootPath)) <= 2 {
+			return nil
+		}
+		// skip anchor as not a node
+		if filepath.Ext(path) == ".uid" {
+			return nil
+		}
+		relPath, err := filepath.Rel(sc.rootPath, path)
+		if err != nil {
+			return err
+		}
+		// read a anchor, if one exists (if missing, it must be new file to import)
+		nodeUid, err := sc.readUidAnchor(relPath)
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
+			return err
+		}
+		// get the node type
+		var nodeType NodeType
+		if d.IsDir() {
+			nodeType = DirNode
+		} else if filepath.Ext(path) == ".md" {
+			nodeType = NoteNode
+		} else {
+			nodeType = AssetNode
+		}
+		return fn(NodeEntry{}.New(nodeUid, relPath, nodeType))
+	})
 }
