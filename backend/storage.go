@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -34,7 +35,7 @@ func (sc *StorageController) writeUidAnchor(
 		return err
 	}
 	defer f.Close()
-	_, err = f.Write(nodeUid[:])
+	_, err = f.WriteString(nodeUid.String() + "\n")
 	if err != nil {
 		return err
 	}
@@ -47,7 +48,7 @@ func (sc *StorageController) readUidAnchor(fp string) (uuid.UUID, error) {
 	if err != nil {
 		return uuid.Nil, err
 	}
-	return uuid.FromBytes(rawContent)
+	return uuid.Parse(strings.TrimSuffix(strings.TrimSuffix(string(rawContent), "\n"), "\r"))
 }
 
 func (sc *StorageController) deleteUidAnchor(
@@ -137,17 +138,17 @@ func (sc *StorageController) DiscoverNodes(fn DiscoverNodesFunc) error {
 		if err != nil {
 			return err
 		}
+		relPath, err := filepath.Rel(sc.rootPath, path)
+		if err != nil {
+			return err
+		}
 		// skip if is root path or root/username
-		if len(filepath.SplitList(sc.rootPath)) <= 2 {
+		if len(strings.SplitN(relPath, string(filepath.Separator), 2)) <= 1 {
 			return nil
 		}
 		// skip anchor as not a node
 		if filepath.Ext(path) == ".uid" {
 			return nil
-		}
-		relPath, err := filepath.Rel(sc.rootPath, path)
-		if err != nil {
-			return err
 		}
 		// read a anchor, if one exists (if missing, it must be new file to import)
 		nodeUid, err := sc.readUidAnchor(relPath)
