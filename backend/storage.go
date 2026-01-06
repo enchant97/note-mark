@@ -7,8 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/google/uuid"
 )
 
 type StorageController struct {
@@ -19,151 +17,161 @@ func (sc StorageController) New(rootPath string) (StorageController, error) {
 	if !filepath.IsAbs(rootPath) {
 		return StorageController{}, errors.New("rootPath must be a absolute path")
 	}
-	err := os.MkdirAll(rootPath, 0755)
+	err := os.MkdirAll(rootPath, os.ModePerm)
 	return StorageController{
 		rootPath: rootPath,
 	}, err
 }
 
-func (sc *StorageController) writeUidAnchor(
-	fp string,
-	nodeUid uuid.UUID,
+func (sc *StorageController) writeFile(
+	username string,
+	slug string,
+	r io.Reader,
 ) error {
-	absPath := filepath.Join(sc.rootPath, fp+".uid")
+	absPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(slug))
+	if err := os.MkdirAll(filepath.Dir(absPath), os.ModePerm); err != nil {
+		return err
+	}
 	f, err := os.Create(absPath)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	_, err = f.WriteString(nodeUid.String() + "\n")
+	_, err = io.Copy(f, r)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (sc *StorageController) readUidAnchor(fp string) (uuid.UUID, error) {
-	absPath := filepath.Join(sc.rootPath, fp+".uid")
-	rawContent, err := os.ReadFile(absPath)
+func (sc *StorageController) readFile(
+	username string,
+	slug string,
+) (io.ReadCloser, error) {
+	absPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(slug))
+	f, err := os.Open(absPath)
 	if err != nil {
-		return uuid.Nil, err
+		if errors.Is(err, fs.ErrNotExist) {
+			// TODO custom error
+			return nil, err
+		}
+		return nil, err
 	}
-	return uuid.Parse(strings.TrimSuffix(strings.TrimSuffix(string(rawContent), "\n"), "\r"))
+	return f, nil
 }
 
-func (sc *StorageController) deleteUidAnchor(
-	fp string,
+func (sc *StorageController) renameFileOrFolder(
+	username string,
+	slug string,
+	newSlug string,
 ) error {
-	absPath := filepath.Join(sc.rootPath, fp+".uid")
-	return os.Remove(absPath)
-}
-
-func (sc *StorageController) WriteFileNode(
-	fp string,
-	nodeUid uuid.UUID,
-	r io.Reader,
-) error {
-	// TODO
-	return nil
-}
-
-func (sc *StorageController) renameNode(
-	fp string,
-	newfp string,
-	nodeUid uuid.UUID,
-) error {
-	currentAbsPath := filepath.Join(sc.rootPath, fp)
-	newAbsPath := filepath.Join(sc.rootPath, newfp)
-	if err := sc.writeUidAnchor(newAbsPath, nodeUid); err != nil {
+	currentAbsPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(slug))
+	newAbsPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(newSlug))
+	if err := os.MkdirAll(filepath.Dir(newAbsPath), os.ModePerm); err != nil {
 		return err
 	}
 	if err := os.Rename(currentAbsPath, newAbsPath); err != nil {
 		return err
 	}
-	return sc.deleteUidAnchor(currentAbsPath)
+	return nil
 }
 
-func (sc *StorageController) ReadFileNode(
-	fp string,
-	nodeUid uuid.UUID,
-) (io.ReadCloser, error) {
-	// TODO
-	return nil, nil
-}
-
-func (sc *StorageController) RenameFileNode(
-	fp string,
-	newfp string,
-	nodeUid uuid.UUID,
+func (sc *StorageController) WriteNoteNode(
+	username string,
+	slug string,
+	r io.Reader,
 ) error {
-	return sc.renameNode(fp, newfp, nodeUid)
+	return sc.writeFile(username, slug+".md", r)
+}
+
+func (sc *StorageController) ReadNoteNode(
+	username string,
+	slug string,
+) (io.ReadCloser, error) {
+	return sc.readFile(username, slug+".md")
+}
+
+func (sc *StorageController) RenameNoteNode(
+	username string,
+	slug string,
+	newSlug string,
+) error {
+	if err := sc.renameFileOrFolder(username, slug, newSlug); err != nil {
+		return err
+	}
+	return sc.renameFileOrFolder(username, slug+".md", newSlug+".md")
 }
 
 func (sc *StorageController) DeleteFileNode(
-	fp string,
-	nodeUid uuid.UUID,
+	username string,
+	slug string,
 ) error {
-	// TODO
-	return nil
+	absPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(slug))
+	os.RemoveAll(absPath)
+	return os.Remove(absPath + ".md")
 }
 
-func (sc *StorageController) CreateDirNode(
-	fp string,
-	nodeUid uuid.UUID,
+func (sc *StorageController) WriteAssetNode(
+	username string,
+	slug string,
+	r io.Reader,
 ) error {
-	// TODO
-	return nil
+	return sc.writeFile(username, slug, r)
 }
 
-func (sc *StorageController) RenameDirNode(
-	fp string,
-	newfp string,
-	nodeUid uuid.UUID,
-) error {
-	return sc.renameNode(fp, newfp, nodeUid)
+func (sc *StorageController) ReadAssetNode(
+	username string,
+	slug string,
+) (io.ReadCloser, error) {
+	return sc.readFile(username, slug)
 }
 
-func (sc *StorageController) DeleteDirNode(
-	fp string,
-	nodeUid uuid.UUID,
+func (sc *StorageController) RenameAssetNode(
+	username string,
+	slug string,
+	newSlug string,
 ) error {
-	// TODO
-	return nil
+	return sc.renameFileOrFolder(username, slug, newSlug)
 }
 
-type DiscoverNodesFunc func(node NodeEntry) error
+func (sc *StorageController) DeleteAssetNode(
+	username string,
+	slug string,
+) error {
+	absPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(slug))
+	return os.Remove(absPath)
+}
 
+type DiscoverNodesFunc func(username string, node NodeEntry) error
+
+// Discover all nodes.
 func (sc *StorageController) DiscoverNodes(fn DiscoverNodesFunc) error {
-	return filepath.WalkDir(sc.rootPath, func(path string, d fs.DirEntry, err error) error {
+	return filepath.WalkDir(sc.rootPath, func(absPath string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		relPath, err := filepath.Rel(sc.rootPath, path)
+		relPath, err := filepath.Rel(sc.rootPath, absPath)
 		if err != nil {
 			return err
 		}
-		// skip if is root path or root/username
-		if len(strings.SplitN(relPath, string(filepath.Separator), 2)) <= 1 {
-			return nil
-		}
-		// skip anchor as not a node
-		if filepath.Ext(path) == ".uid" {
-			return nil
-		}
-		// read a anchor, if one exists (if missing, it must be new file to import)
-		nodeUid, err := sc.readUidAnchor(relPath)
-		if err != nil && !errors.Is(err, os.ErrNotExist) {
-			return err
-		}
-		// get the node type
-		var nodeType NodeType
 		if d.IsDir() {
-			nodeType = DirNode
-		} else if filepath.Ext(path) == ".md" {
+			return nil
+		}
+		relPathSplit := strings.SplitN(relPath, string(filepath.Separator), 2)
+		// skip if is root path or root/username
+		if len(relPathSplit) <= 1 {
+			return nil
+		}
+		nodeUsername := relPathSplit[0]
+		var nodeSlug string
+		var nodeType NodeType
+		if filepath.Ext(absPath) == ".md" {
+			nodeSlug = strings.TrimSuffix(filepath.ToSlash(relPathSplit[1]), ".md")
 			nodeType = NoteNode
 		} else {
+			nodeSlug = filepath.ToSlash(relPathSplit[1])
 			nodeType = AssetNode
 		}
-		return fn(NodeEntry{}.New(nodeUid, relPath, nodeType))
+		return fn(nodeUsername, NodeEntry{}.New(nodeSlug, nodeType))
 	})
 }
