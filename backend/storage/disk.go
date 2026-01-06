@@ -1,4 +1,4 @@
-package main
+package storage
 
 import (
 	"errors"
@@ -7,23 +7,25 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/enchant97/note-mark/backend/core"
 )
 
-type StorageController struct {
+type DiskStorageController struct {
 	rootPath string
 }
 
-func (sc StorageController) New(rootPath string) (StorageController, error) {
+func (sc DiskStorageController) New(rootPath string) (DiskStorageController, error) {
 	if !filepath.IsAbs(rootPath) {
-		return StorageController{}, errors.New("rootPath must be a absolute path")
+		return DiskStorageController{}, errors.New("rootPath must be a absolute path")
 	}
 	err := os.MkdirAll(rootPath, os.ModePerm)
-	return StorageController{
+	return DiskStorageController{
 		rootPath: rootPath,
 	}, err
 }
 
-func (sc *StorageController) writeFile(
+func (sc *DiskStorageController) writeFile(
 	username string,
 	slug string,
 	r io.Reader,
@@ -44,7 +46,7 @@ func (sc *StorageController) writeFile(
 	return nil
 }
 
-func (sc *StorageController) readFile(
+func (sc *DiskStorageController) readFile(
 	username string,
 	slug string,
 ) (io.ReadCloser, error) {
@@ -60,7 +62,7 @@ func (sc *StorageController) readFile(
 	return f, nil
 }
 
-func (sc *StorageController) renameFileOrFolder(
+func (sc *DiskStorageController) renameFileOrFolder(
 	username string,
 	slug string,
 	newSlug string,
@@ -76,7 +78,7 @@ func (sc *StorageController) renameFileOrFolder(
 	return nil
 }
 
-func (sc *StorageController) WriteNoteNode(
+func (sc *DiskStorageController) WriteNoteNode(
 	username string,
 	slug string,
 	r io.Reader,
@@ -84,14 +86,14 @@ func (sc *StorageController) WriteNoteNode(
 	return sc.writeFile(username, slug+".md", r)
 }
 
-func (sc *StorageController) ReadNoteNode(
+func (sc *DiskStorageController) ReadNoteNode(
 	username string,
 	slug string,
 ) (io.ReadCloser, error) {
 	return sc.readFile(username, slug+".md")
 }
 
-func (sc *StorageController) RenameNoteNode(
+func (sc *DiskStorageController) RenameNoteNode(
 	username string,
 	slug string,
 	newSlug string,
@@ -102,7 +104,7 @@ func (sc *StorageController) RenameNoteNode(
 	return sc.renameFileOrFolder(username, slug+".md", newSlug+".md")
 }
 
-func (sc *StorageController) DeleteFileNode(
+func (sc *DiskStorageController) DeleteNoteNode(
 	username string,
 	slug string,
 ) error {
@@ -111,7 +113,7 @@ func (sc *StorageController) DeleteFileNode(
 	return os.Remove(absPath + ".md")
 }
 
-func (sc *StorageController) WriteAssetNode(
+func (sc *DiskStorageController) WriteAssetNode(
 	username string,
 	slug string,
 	r io.Reader,
@@ -119,14 +121,14 @@ func (sc *StorageController) WriteAssetNode(
 	return sc.writeFile(username, slug, r)
 }
 
-func (sc *StorageController) ReadAssetNode(
+func (sc *DiskStorageController) ReadAssetNode(
 	username string,
 	slug string,
 ) (io.ReadCloser, error) {
 	return sc.readFile(username, slug)
 }
 
-func (sc *StorageController) RenameAssetNode(
+func (sc *DiskStorageController) RenameAssetNode(
 	username string,
 	slug string,
 	newSlug string,
@@ -134,7 +136,7 @@ func (sc *StorageController) RenameAssetNode(
 	return sc.renameFileOrFolder(username, slug, newSlug)
 }
 
-func (sc *StorageController) DeleteAssetNode(
+func (sc *DiskStorageController) DeleteAssetNode(
 	username string,
 	slug string,
 ) error {
@@ -142,10 +144,7 @@ func (sc *StorageController) DeleteAssetNode(
 	return os.Remove(absPath)
 }
 
-type DiscoverNodesFunc func(username string, node NodeEntry) error
-
-// Discover all nodes.
-func (sc *StorageController) DiscoverNodes(fn DiscoverNodesFunc) error {
+func (sc *DiskStorageController) DiscoverNodes(fn DiscoverNodesFunc) error {
 	return filepath.WalkDir(sc.rootPath, func(absPath string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -164,14 +163,14 @@ func (sc *StorageController) DiscoverNodes(fn DiscoverNodesFunc) error {
 		}
 		nodeUsername := relPathSplit[0]
 		var nodeSlug string
-		var nodeType NodeType
+		var nodeType core.NodeType
 		if filepath.Ext(absPath) == ".md" {
 			nodeSlug = strings.TrimSuffix(filepath.ToSlash(relPathSplit[1]), ".md")
-			nodeType = NoteNode
+			nodeType = core.NoteNode
 		} else {
 			nodeSlug = filepath.ToSlash(relPathSplit[1])
-			nodeType = AssetNode
+			nodeType = core.AssetNode
 		}
-		return fn(nodeUsername, NodeEntry{}.New(nodeSlug, nodeType))
+		return fn(nodeUsername, core.NodeEntry{}.New(nodeSlug, nodeType))
 	})
 }
