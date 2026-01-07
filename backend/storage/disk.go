@@ -1,10 +1,12 @@
 package storage
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -91,7 +93,21 @@ func (sc *DiskStorageController) ReadNoteNode(
 	username string,
 	slug string,
 ) (io.ReadCloser, error) {
-	return sc.readFile(username, slug+".md")
+	if r, err := sc.readFile(username, slug+".md"); err == nil {
+		// note exists
+		return r, nil
+	} else if errors.Is(err, fs.ErrNotExist) {
+		absPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(slug))
+		if _, err := os.Stat(absPath); errors.Is(err, fs.ErrNotExist) {
+			return nil, err
+		} else if err != nil {
+			return nil, err
+		}
+		// note does not exist, but a directory does (blank note)
+		return io.NopCloser(bytes.NewReader([]byte(""))), nil
+	} else {
+		return nil, err
+	}
 }
 
 func (sc *DiskStorageController) RenameNoteNode(
@@ -102,7 +118,12 @@ func (sc *DiskStorageController) RenameNoteNode(
 	if err := sc.renameFileOrFolder(username, slug, newSlug); err != nil {
 		return err
 	}
-	return sc.renameFileOrFolder(username, slug+".md", newSlug+".md")
+	err := sc.renameFileOrFolder(username, slug+".md", newSlug+".md")
+	// handle if note directory existed, but not a note file (blank note)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
+	return err
 }
 
 func (sc *DiskStorageController) DeleteNoteNode(
@@ -111,7 +132,12 @@ func (sc *DiskStorageController) DeleteNoteNode(
 ) error {
 	absPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(slug))
 	os.RemoveAll(absPath)
-	return os.Remove(absPath + ".md")
+	err := os.Remove(absPath + ".md")
+	// handle if note directory existed, but not a note file (blank note)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
+	return err
 }
 
 func (sc *DiskStorageController) WriteAssetNode(
@@ -154,10 +180,6 @@ func (sc *DiskStorageController) DiscoverNodes(fn DiscoverNodesFunc) error {
 		if err != nil {
 			return err
 		}
-		// skip directories, as they are not a node
-		if d.IsDir() {
-			return nil
-		}
 		relPathSplit := strings.SplitN(relPath, string(filepath.Separator), 2)
 		// skip if is root path or root/username
 		if len(relPathSplit) <= 1 {
@@ -173,13 +195,23 @@ func (sc *DiskStorageController) DiscoverNodes(fn DiscoverNodesFunc) error {
 		} else {
 			nodeModTime = info.ModTime()
 		}
+		// skip registering directory as note node if note file exists for it
+		if d.IsDir() {
+			if _, err := os.Stat(absPath + ".md"); !errors.Is(err, fs.ErrNotExist) {
+				return err
+			}
+		}
 		// make node slug & discover type
-		if filepath.Ext(absPath) == ".md" {
+		if filepath.Ext(absPath) == ".md" || d.IsDir() {
 			nodeSlug = strings.TrimSuffix(filepath.ToSlash(relPathSplit[1]), ".md")
 			nodeType = core.NoteNode
 		} else {
 			nodeSlug = filepath.ToSlash(relPathSplit[1])
 			nodeType = core.AssetNode
+		}
+		// final, more strict node check
+		if !IsValidNodeSlug(path.Join(nodeUsername, nodeSlug), nodeType) {
+			return nil
 		}
 		return fn(nodeUsername, core.NodeEntry{}.New(
 			nodeSlug,
