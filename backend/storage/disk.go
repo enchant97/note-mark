@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/enchant97/note-mark/backend/core"
 )
@@ -153,6 +154,7 @@ func (sc *DiskStorageController) DiscoverNodes(fn DiscoverNodesFunc) error {
 		if err != nil {
 			return err
 		}
+		// skip directories, as they are not a node
 		if d.IsDir() {
 			return nil
 		}
@@ -164,6 +166,14 @@ func (sc *DiskStorageController) DiscoverNodes(fn DiscoverNodesFunc) error {
 		nodeUsername := relPathSplit[0]
 		var nodeSlug string
 		var nodeType core.NodeType
+		var nodeModTime time.Time
+		// get node modification time
+		if info, err := d.Info(); err != nil {
+			return err
+		} else {
+			nodeModTime = info.ModTime()
+		}
+		// make node slug & discover type
 		if filepath.Ext(absPath) == ".md" {
 			nodeSlug = strings.TrimSuffix(filepath.ToSlash(relPathSplit[1]), ".md")
 			nodeType = core.NoteNode
@@ -171,6 +181,10 @@ func (sc *DiskStorageController) DiscoverNodes(fn DiscoverNodesFunc) error {
 			nodeSlug = filepath.ToSlash(relPathSplit[1])
 			nodeType = core.AssetNode
 		}
-		return fn(nodeUsername, core.NodeEntry{}.New(nodeSlug, nodeType))
+		return fn(nodeUsername, core.NodeEntry{}.New(
+			nodeSlug,
+			nodeType,
+			nodeModTime,
+		))
 	})
 }
