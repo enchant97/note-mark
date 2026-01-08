@@ -8,7 +8,11 @@ sql:
         package: "db"
         out: "db"
         overrides:
-          - column: "nodes.uid"
+          - column: "users.uid"
+            go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"
+          - column: "tree_cache.owner_uid"
             go_type:
               import: "github.com/google/uuid"
               type: "UUID"

@@ -1,24 +1,29 @@
 package tree
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"strings"
 	"sync"
 
 	"github.com/enchant97/note-mark/backend/core"
+	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/storage"
+	"github.com/google/uuid"
 )
 
 type TreeController struct {
 	sc    storage.StorageController
+	dao   *db.DAO
 	mutex *sync.RWMutex
 	tree  map[core.Username]core.NodeTree
 }
 
-func (tc TreeController) New(sc storage.StorageController) TreeController {
+func (tc TreeController) New(sc storage.StorageController, dao *db.DAO) TreeController {
 	return TreeController{
 		sc:    sc,
+		dao:   dao,
 		mutex: &sync.RWMutex{},
 		tree:  map[core.Username]core.NodeTree{},
 	}
@@ -31,11 +36,53 @@ func (tc *TreeController) DebugGetAsJSON() string {
 	return string(b)
 }
 
-func (tc *TreeController) Ingest() error {
+func (tc *TreeController) Load() error {
 	tc.mutex.Lock()
 	defer tc.mutex.Unlock()
-	return tc.sc.DiscoverNodes(func(username core.Username, nodeEntry core.NodeEntry) error {
-		log.Printf("ingesting: %s/%s\n", username, nodeEntry.FullSlug)
+	return tc.sc.DiscoverUsers(func(username core.Username) error {
+		// ensure users exist in database
+		// TODO handle db errors
+		tc.dao.Queries.InsertUser(context.Background(), db.InsertUserParams{
+			Uid:      uuid.Must(uuid.NewV7()),
+			Username: string(username),
+		})
+		// use cached tree if one exists
+		if cachEntry, err := tc.dao.Queries.GetTreeCacheEntry(context.Background(), string(username)); err == nil {
+			log.Printf("found cached tree for user '%s'\n", username)
+			if _, exists := tc.tree[username]; !exists {
+				tc.tree[username] = core.NodeTree{}
+			}
+			var cachedTree core.NodeTree
+			if err := json.Unmarshal(cachEntry.NodeTree, &cachedTree); err != nil {
+				return err
+			}
+			tc.tree[username] = cachedTree
+			return nil
+		}
+		// discover from storage
+		err := tc.ingestFromStorage(username)
+		if err != nil {
+			return err
+		}
+		// insert entries into cache, if any exist
+		if tree, exists := tc.tree[username]; exists {
+			log.Printf("saving ingested tree to cache for user '%s'\n", username)
+			nodeTreeRaw, err := json.Marshal(tree)
+			if err != nil {
+				return err
+			}
+			return tc.dao.Queries.InsertTreeCache(context.Background(), db.InsertTreeCacheParams{
+				Username: string(username),
+				NodeTree: nodeTreeRaw,
+			})
+		}
+		return nil
+	})
+}
+
+func (tc *TreeController) ingestFromStorage(username core.Username) error {
+	return tc.sc.DiscoverNodesForUser(username, func(nodeEntry core.NodeEntry) error {
+		log.Printf("ingest: %s/%s\n", username, nodeEntry.FullSlug)
 		var currentTree core.NodeTree
 		// handle username path
 		if tree, exists := tc.tree[username]; exists {

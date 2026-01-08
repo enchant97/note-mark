@@ -187,8 +187,15 @@ func (sc *DiskStorageController) DeleteAssetNode(
 	return os.Remove(absPath)
 }
 
-func (sc *DiskStorageController) DiscoverNodes(fn DiscoverNodesFunc) error {
-	return filepath.WalkDir(sc.rootPath, func(absPath string, d fs.DirEntry, err error) error {
+func (sc *DiskStorageController) DiscoverNodesForUser(
+	username core.Username,
+	fn DiscoverNodesFunc,
+) error {
+	return filepath.WalkDir(filepath.Join(sc.rootPath, string(username)), func(
+		absPath string,
+		d fs.DirEntry,
+		err error,
+	) error {
 		if err != nil {
 			return err
 		}
@@ -229,10 +236,28 @@ func (sc *DiskStorageController) DiscoverNodes(fn DiscoverNodesFunc) error {
 		if !IsValidNodeSlug(path.Join(nodeUsername, nodeSlug), nodeType) {
 			return nil
 		}
-		return fn(core.Username(nodeUsername), core.NodeEntry{}.New(
+		return fn(core.NodeEntry{}.New(
 			core.NodeSlug(nodeSlug),
 			nodeType,
 			nodeModTime,
 		))
 	})
+}
+
+func (sc *DiskStorageController) DiscoverUsers(fn DiscoverUsersFunc) error {
+	f, err := os.Open(sc.rootPath)
+	if err != nil {
+		return err
+	}
+	dirEntry, err := f.ReadDir(-1)
+	f.Close()
+	if err != nil {
+		return err
+	}
+	for _, entry := range dirEntry {
+		if entry.IsDir() {
+			fn(core.Username(entry.Name()))
+		}
+	}
+	return nil
 }

@@ -8,7 +8,8 @@ import (
 	"github.com/enchant97/note-mark/backend/core"
 )
 
-type DiscoverNodesFunc func(username core.Username, node core.NodeEntry) error
+type DiscoverNodesFunc func(node core.NodeEntry) error
+type DiscoverUsersFunc func(username core.Username) error
 
 type StorageController interface {
 	WriteNoteNode(username core.Username, slug string, r io.Reader) error
@@ -20,8 +21,9 @@ type StorageController interface {
 	ReadAssetNode(username core.Username, slug string) (io.ReadCloser, error)
 	RenameAssetNode(username core.Username, slug string, newSlug string) error
 	DeleteAssetNode(username core.Username, slug string) error
-	// Discover all nodes.
-	DiscoverNodes(fn DiscoverNodesFunc) error
+	// Discover all nodes for a given username.
+	DiscoverNodesForUser(username core.Username, fn DiscoverNodesFunc) error
+	DiscoverUsers(fn DiscoverUsersFunc) error
 }
 
 // Validate if node's full slug (including username) is valid.

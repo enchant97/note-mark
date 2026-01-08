@@ -1,3 +1,11 @@
-CREATE TABLE nodes (
-  uid BLOB PRIMARY KEY
+CREATE TABLE users (
+  uid BLOB PRIMARY KEY,
+  username TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE tree_cache (
+  owner_uid BLOB PRIMARY KEY,
+  node_tree BLOB NOT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (owner_uid) REFERENCES users(uid) ON DELETE CASCADE
 );
