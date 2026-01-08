@@ -33,7 +33,12 @@ func (ne NodeEntry) New(
 type NodeSlug string
 type NodeTree map[NodeSlug]*Node
 
+type FrontMatter struct {
+	Title string `json:"title"`
+}
+
 type Node struct {
+	FrontMatter
 	Slug     NodeSlug  `json:"slug"`
 	Type     NodeType  `json:"type"`
 	ModTime  time.Time `json:"modTime"`

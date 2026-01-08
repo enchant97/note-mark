@@ -74,6 +74,11 @@ func (tc *TreeController) Ingest() error {
 		// setup final node (the actual node we indented to add)
 		currentNode.ModTime = nodeEntry.ModTime
 		currentNode.Type = nodeEntry.Type
+		if nodeEntry.Type == core.NoteNode {
+			fm, err := tc.sc.ReadNoteNodeFrontMatter(username, string(nodeEntry.FullSlug))
+			currentNode.FrontMatter = fm
+			return err
+		}
 		return nil
 	})
 }

@@ -13,6 +13,7 @@ type DiscoverNodesFunc func(username core.Username, node core.NodeEntry) error
 type StorageController interface {
 	WriteNoteNode(username core.Username, slug string, r io.Reader) error
 	ReadNoteNode(username core.Username, slug string) (io.ReadCloser, error)
+	ReadNoteNodeFrontMatter(username core.Username, slug string) (core.FrontMatter, error)
 	RenameNoteNode(username core.Username, slug string, newSlug string) error
 	DeleteNoteNode(username core.Username, slug string) error
 	WriteAssetNode(username core.Username, slug string, r io.Reader) error

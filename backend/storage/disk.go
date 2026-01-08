@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/adrg/frontmatter"
+
 	"github.com/enchant97/note-mark/backend/core"
 )
 
@@ -108,6 +110,20 @@ func (sc *DiskStorageController) ReadNoteNode(
 	} else {
 		return nil, err
 	}
+}
+
+func (sc *DiskStorageController) ReadNoteNodeFrontMatter(
+	username core.Username,
+	slug string,
+) (core.FrontMatter, error) {
+	r, err := sc.ReadNoteNode(username, slug)
+	if err != nil {
+		return core.FrontMatter{}, err
+	}
+	defer r.Close()
+	var fm core.FrontMatter
+	_, err = frontmatter.Parse(r, &fm)
+	return fm, err
 }
 
 func (sc *DiskStorageController) RenameNoteNode(
