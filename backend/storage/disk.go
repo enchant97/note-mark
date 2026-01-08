@@ -29,11 +29,11 @@ func (sc DiskStorageController) New(rootPath string) (DiskStorageController, err
 }
 
 func (sc *DiskStorageController) writeFile(
-	username string,
+	username core.Username,
 	slug string,
 	r io.Reader,
 ) error {
-	absPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(slug))
+	absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
 	if err := os.MkdirAll(filepath.Dir(absPath), os.ModePerm); err != nil {
 		return err
 	}
@@ -50,10 +50,10 @@ func (sc *DiskStorageController) writeFile(
 }
 
 func (sc *DiskStorageController) readFile(
-	username string,
+	username core.Username,
 	slug string,
 ) (io.ReadCloser, error) {
-	absPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(slug))
+	absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
 	f, err := os.Open(absPath)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
@@ -66,12 +66,12 @@ func (sc *DiskStorageController) readFile(
 }
 
 func (sc *DiskStorageController) renameFileOrFolder(
-	username string,
+	username core.Username,
 	slug string,
 	newSlug string,
 ) error {
-	currentAbsPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(slug))
-	newAbsPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(newSlug))
+	currentAbsPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+	newAbsPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(newSlug))
 	if err := os.MkdirAll(filepath.Dir(newAbsPath), os.ModePerm); err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func (sc *DiskStorageController) renameFileOrFolder(
 }
 
 func (sc *DiskStorageController) WriteNoteNode(
-	username string,
+	username core.Username,
 	slug string,
 	r io.Reader,
 ) error {
@@ -90,14 +90,14 @@ func (sc *DiskStorageController) WriteNoteNode(
 }
 
 func (sc *DiskStorageController) ReadNoteNode(
-	username string,
+	username core.Username,
 	slug string,
 ) (io.ReadCloser, error) {
 	if r, err := sc.readFile(username, slug+".md"); err == nil {
 		// note exists
 		return r, nil
 	} else if errors.Is(err, fs.ErrNotExist) {
-		absPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(slug))
+		absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
 		if _, err := os.Stat(absPath); errors.Is(err, fs.ErrNotExist) {
 			return nil, err
 		} else if err != nil {
@@ -111,7 +111,7 @@ func (sc *DiskStorageController) ReadNoteNode(
 }
 
 func (sc *DiskStorageController) RenameNoteNode(
-	username string,
+	username core.Username,
 	slug string,
 	newSlug string,
 ) error {
@@ -127,10 +127,10 @@ func (sc *DiskStorageController) RenameNoteNode(
 }
 
 func (sc *DiskStorageController) DeleteNoteNode(
-	username string,
+	username core.Username,
 	slug string,
 ) error {
-	absPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(slug))
+	absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
 	os.RemoveAll(absPath)
 	err := os.Remove(absPath + ".md")
 	// handle if note directory existed, but not a note file (blank note)
@@ -141,7 +141,7 @@ func (sc *DiskStorageController) DeleteNoteNode(
 }
 
 func (sc *DiskStorageController) WriteAssetNode(
-	username string,
+	username core.Username,
 	slug string,
 	r io.Reader,
 ) error {
@@ -149,14 +149,14 @@ func (sc *DiskStorageController) WriteAssetNode(
 }
 
 func (sc *DiskStorageController) ReadAssetNode(
-	username string,
+	username core.Username,
 	slug string,
 ) (io.ReadCloser, error) {
 	return sc.readFile(username, slug)
 }
 
 func (sc *DiskStorageController) RenameAssetNode(
-	username string,
+	username core.Username,
 	slug string,
 	newSlug string,
 ) error {
@@ -164,10 +164,10 @@ func (sc *DiskStorageController) RenameAssetNode(
 }
 
 func (sc *DiskStorageController) DeleteAssetNode(
-	username string,
+	username core.Username,
 	slug string,
 ) error {
-	absPath := filepath.Join(sc.rootPath, username, filepath.FromSlash(slug))
+	absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
 	return os.Remove(absPath)
 }
 
@@ -213,8 +213,8 @@ func (sc *DiskStorageController) DiscoverNodes(fn DiscoverNodesFunc) error {
 		if !IsValidNodeSlug(path.Join(nodeUsername, nodeSlug), nodeType) {
 			return nil
 		}
-		return fn(nodeUsername, core.NodeEntry{}.New(
-			nodeSlug,
+		return fn(core.Username(nodeUsername), core.NodeEntry{}.New(
+			core.NodeSlug(nodeSlug),
 			nodeType,
 			nodeModTime,
 		))

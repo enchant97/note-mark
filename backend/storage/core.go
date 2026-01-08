@@ -8,17 +8,17 @@ import (
 	"github.com/enchant97/note-mark/backend/core"
 )
 
-type DiscoverNodesFunc func(username string, node core.NodeEntry) error
+type DiscoverNodesFunc func(username core.Username, node core.NodeEntry) error
 
 type StorageController interface {
-	WriteNoteNode(username string, slug string, r io.Reader) error
-	ReadNoteNode(username string, slug string) (io.ReadCloser, error)
-	RenameNoteNode(username string, slug string, newSlug string) error
-	DeleteNoteNode(username string, slug string) error
-	WriteAssetNode(username string, slug string, r io.Reader) error
-	ReadAssetNode(username string, slug string) (io.ReadCloser, error)
-	RenameAssetNode(username string, slug string, newSlug string) error
-	DeleteAssetNode(username string, slug string) error
+	WriteNoteNode(username core.Username, slug string, r io.Reader) error
+	ReadNoteNode(username core.Username, slug string) (io.ReadCloser, error)
+	RenameNoteNode(username core.Username, slug string, newSlug string) error
+	DeleteNoteNode(username core.Username, slug string) error
+	WriteAssetNode(username core.Username, slug string, r io.Reader) error
+	ReadAssetNode(username core.Username, slug string) (io.ReadCloser, error)
+	RenameAssetNode(username core.Username, slug string, newSlug string) error
+	DeleteAssetNode(username core.Username, slug string) error
 	// Discover all nodes.
 	DiscoverNodes(fn DiscoverNodesFunc) error
 }

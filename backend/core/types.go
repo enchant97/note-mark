@@ -1,8 +1,11 @@
 package core
 
-import "time"
+import (
+	"time"
+)
 
 type NodeType string
+type Username string
 
 const (
 	NoteNode  = "note"
@@ -10,19 +13,29 @@ const (
 )
 
 type NodeEntry struct {
-	Slug    string
-	Type    NodeType
-	ModTime time.Time
+	FullSlug NodeSlug
+	Type     NodeType
+	ModTime  time.Time
 }
 
 func (ne NodeEntry) New(
-	slug string,
+	fullSlug NodeSlug,
 	nodeType NodeType,
 	modTime time.Time,
 ) NodeEntry {
 	return NodeEntry{
-		Slug: slug,
-		Type: nodeType,
-		ModTime: modTime,
+		FullSlug: fullSlug,
+		Type:     nodeType,
+		ModTime:  modTime,
 	}
+}
+
+type NodeSlug string
+type NodeTree map[NodeSlug]*Node
+
+type Node struct {
+	Slug     NodeSlug  `json:"slug"`
+	Type     NodeType  `json:"type"`
+	ModTime  time.Time `json:"modTime"`
+	Children NodeTree  `json:"children"`
 }
