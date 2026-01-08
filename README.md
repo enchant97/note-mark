@@ -6,6 +6,10 @@
 
 Note Mark is a lighting fast and minimal; web-based Markdown notes app. Featuring a sleek and responsive web UI.
 
+> [!IMPORTANT]
+> Working on V1, V0.19 will implement a migrate/export utility and project will be maintenance only until release of V1.
+> Stay tuned!
+
 ## Features
 - Markdown (GitHub Flavored Markdown, see spec [here](https://github.github.com/gfm/))
 - HTML sanitisation, minimizing XSS attacks
