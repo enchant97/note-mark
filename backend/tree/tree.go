@@ -37,6 +37,17 @@ func (tc *TreeController) DebugGetAsJSON() string {
 	return string(b)
 }
 
+// Reset the in-memory tree and DB cache to fresh state.
+func (tc *TreeController) Reset() error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	if err := tc.dao.Queries.DeleteTreeCacheEntries(context.Background()); err != nil {
+		return err
+	}
+	tc.tree = map[core.Username]core.NodeTree{}
+	return nil
+}
+
 // Load node tree for every discovered user.
 // Will error if in-memory tree is not in a fresh state.
 //
