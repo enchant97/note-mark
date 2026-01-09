@@ -1,0 +1,8 @@
+[Tt]humbs.db
+*.DS_Store
+~$*
+
+.vscode/
+
+_data/
+.env
