@@ -3,6 +3,7 @@ package tree
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"strings"
 	"sync"
@@ -36,16 +37,29 @@ func (tc *TreeController) DebugGetAsJSON() string {
 	return string(b)
 }
 
+// Load node tree for every discovered user.
+// Will error if in-memory tree is not in a fresh state.
+//
+// 1. Ensure in-memory tree is not in a fresh state
+// 2. Insert user into DB if does not exist
+// 3. Get tree for user from cache (if exists)
+// 4. Get tree from ingesting from storage (if not in cache)
+// 5. Insert tree into DB cache (if not in cache)
+// 6. Add to in-memory tree
 func (tc *TreeController) Load() error {
 	tc.mutex.Lock()
 	defer tc.mutex.Unlock()
+	if len(tc.tree) != 0 {
+		return errors.New("tree not in fresh state")
+	}
 	return tc.sc.DiscoverUsers(func(username core.Username) error {
 		// ensure users exist in database
-		// TODO handle db errors
-		tc.dao.Queries.InsertUser(context.Background(), db.InsertUserParams{
+		if _, err := tc.dao.Queries.InsertUser(context.Background(), db.InsertUserParams{
 			Uid:      uuid.Must(uuid.NewV7()),
 			Username: string(username),
-		})
+		}); err != nil && !errors.Is(core.WrapDbError(err), core.ErrConflict) {
+			return err
+		}
 		// use cached tree if one exists
 		if cachEntry, err := tc.dao.Queries.GetTreeCacheEntry(context.Background(), string(username)); err == nil {
 			log.Printf("found cached tree for user '%s'\n", username)
@@ -58,6 +72,8 @@ func (tc *TreeController) Load() error {
 			}
 			tc.tree[username] = cachedTree
 			return nil
+		} else if !errors.Is(core.WrapDbError(err), core.ErrNotFound) {
+			return err
 		}
 		// discover from storage
 		err := tc.ingestFromStorage(username)
@@ -80,6 +96,9 @@ func (tc *TreeController) Load() error {
 	})
 }
 
+// Ingest nodes from storage for given username.
+//
+// Assumes tree mutex has been locked for writing.
 func (tc *TreeController) ingestFromStorage(username core.Username) error {
 	return tc.sc.DiscoverNodesForUser(username, func(nodeEntry core.NodeEntry) error {
 		log.Printf("ingest: %s/%s\n", username, nodeEntry.FullSlug)
