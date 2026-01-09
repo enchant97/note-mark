@@ -64,19 +64,20 @@ func (tc *TreeController) Load() error {
 		return errors.New("tree not in fresh state")
 	}
 	return tc.sc.DiscoverUsers(func(username core.Username) error {
-		// ensure users exist in database
+		// ensure user exists in database
 		if _, err := tc.dao.Queries.InsertUser(context.Background(), db.InsertUserParams{
 			Uid:      uuid.Must(uuid.NewV7()),
 			Username: string(username),
 		}); err != nil && !errors.Is(core.WrapDbError(err), core.ErrConflict) {
 			return err
 		}
+		// ensure user exists in node tree
+		if _, exists := tc.tree[username]; !exists {
+			tc.tree[username] = core.NodeTree{}
+		}
 		// use cached tree if one exists
 		if cachEntry, err := tc.dao.Queries.GetTreeCacheEntry(context.Background(), string(username)); err == nil {
 			log.Printf("found cached tree for user '%s'\n", username)
-			if _, exists := tc.tree[username]; !exists {
-				tc.tree[username] = core.NodeTree{}
-			}
 			var cachedTree core.NodeTree
 			if err := json.Unmarshal(cachEntry.NodeTree, &cachedTree); err != nil {
 				return err
