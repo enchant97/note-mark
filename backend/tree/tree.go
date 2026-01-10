@@ -92,20 +92,38 @@ func (tc *TreeController) Load() error {
 		if err != nil {
 			return err
 		}
-		// insert entries into cache, if any exist
-		if tree, exists := tc.tree[username]; exists {
-			log.Printf("saving ingested tree to cache for user '%s'\n", username)
-			nodeTreeRaw, err := json.Marshal(tree)
-			if err != nil {
-				return err
-			}
-			return tc.dao.Queries.InsertTreeCache(context.Background(), db.InsertTreeCacheParams{
-				Username: string(username),
-				NodeTree: nodeTreeRaw,
-			})
-		}
-		return nil
+		// insert entries into cache
+		return tc.updateCacheFromMemory(username)
 	})
+}
+
+// Insert or update the tree cache from current tree state in-memory.
+//
+// Assumes tree mutex has been locked for writing.
+func (tc *TreeController) updateCacheFromMemory(username core.Username) error {
+	if tree, exists := tc.tree[username]; exists {
+		log.Printf("saving tree to cache for user '%s'\n", username)
+		nodeTreeRaw, err := json.Marshal(tree)
+		if err != nil {
+			return err
+		}
+		// try and insert new cache
+		if err := tc.dao.Queries.InsertTreeCache(context.Background(), db.InsertTreeCacheParams{
+			Username: string(username),
+			NodeTree: nodeTreeRaw,
+		}); err == nil {
+			return nil
+		} else if !errors.Is(core.WrapDbError(err), core.ErrConflict) {
+			return err
+		}
+		// update existing cache
+		return tc.dao.Queries.UpdateTreeCacheEntry(context.Background(), db.UpdateTreeCacheEntryParams{
+			Username: string(username),
+			NodeTree: nodeTreeRaw,
+		})
+	}
+	// no tree exists
+	return nil
 }
 
 // Ingest nodes from storage for given username.
