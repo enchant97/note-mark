@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"log"
 	"strings"
 	"sync"
@@ -28,6 +29,34 @@ func (tc TreeController) New(sc storage.StorageController, dao *db.DAO) TreeCont
 		mutex: &sync.RWMutex{},
 		tree:  map[core.Username]core.NodeTree{},
 	}
+}
+
+// Get a node tree for a specific user, will return false if no tree exists.
+func (tc *TreeController) TryGetNodeTreeForUser(username core.Username) (core.NodeTree, bool) {
+	tc.mutex.RLock()
+	defer tc.mutex.RUnlock()
+	v, exists := tc.tree[username]
+	return v, exists
+}
+
+// Return a note node's content.
+func (tc *TreeController) GetNoteNodeContent(
+	username core.Username,
+	slug core.NodeSlug,
+) (io.ReadCloser, error) {
+	tc.mutex.RLock()
+	defer tc.mutex.RUnlock()
+	return tc.sc.ReadNoteNode(username, string(slug))
+}
+
+// Return a asset node's content.
+func (tc *TreeController) GetAssetNodeContent(
+	username core.Username,
+	slug core.NodeSlug,
+) (io.ReadCloser, error) {
+	tc.mutex.RLock()
+	defer tc.mutex.RUnlock()
+	return tc.sc.ReadAssetNode(username, string(slug))
 }
 
 func (tc *TreeController) DebugGetAsJSON() string {
