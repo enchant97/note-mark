@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"log"
+	"path"
 	"strings"
 	"sync"
 	"time"
@@ -104,6 +105,72 @@ func (tc *TreeController) GetAssetNodeContent(
 	tc.mutex.RLock()
 	defer tc.mutex.RUnlock()
 	return tc.sc.ReadAssetNode(username, string(slug))
+}
+
+// Rename a node.
+func (tc *TreeController) RenameNode(
+	username core.Username,
+	currentFullSlug core.NodeSlug,
+	newFullSlug core.NodeSlug,
+) error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	node, err := tc.tryGetNodeFromMemory(username, currentFullSlug)
+	if err != nil {
+		return err
+	}
+	// update storage
+	if node.Type == core.NoteNode {
+		if err := tc.sc.RenameNoteNode(username, string(currentFullSlug), string(newFullSlug)); err != nil {
+			return err
+		}
+	} else {
+		if err := tc.sc.RenameAssetNode(username, string(currentFullSlug), string(newFullSlug)); err != nil {
+			return err
+		}
+	}
+	// update in-memory tree
+	if err := tc.insertNodeIntoMemory(username, core.NodeEntry{
+		FullSlug: newFullSlug,
+		Type:     node.Type,
+		ModTime:  time.Now(),
+	}, node.FrontMatter); err != nil {
+		return err
+	}
+	if err := tc.tryDeleteFromMemory(username, currentFullSlug); err != nil {
+		return err
+	}
+	// update cache
+	return tc.updateCacheFromMemory(username)
+}
+
+// Delete a node and any children.
+func (tc *TreeController) DeleteNode(
+	username core.Username,
+	fullSlug core.NodeSlug,
+) error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	node, err := tc.tryGetNodeFromMemory(username, fullSlug)
+	if err != nil {
+		return err
+	}
+	// update storage
+	if node.Type == core.NoteNode {
+		if err := tc.sc.DeleteNoteNode(username, string(fullSlug)); err != nil {
+			return err
+		}
+	} else {
+		if err := tc.sc.DeleteAssetNode(username, string(fullSlug)); err != nil {
+			return err
+		}
+	}
+	// update in-memory tree
+	if err := tc.tryDeleteFromMemory(username, fullSlug); err != nil {
+		return err
+	}
+	// update cache
+	return tc.updateCacheFromMemory(username)
 }
 
 func (tc *TreeController) DebugGetAsJSON() string {
@@ -271,4 +338,76 @@ func (tc *TreeController) insertNodeIntoMemory(
 		currentNode.FrontMatter = frontmatter
 	}
 	return nil
+}
+
+// get a node into in-memory tree, if one exists.
+//
+// Assumes tree mutex has been locked for reading.
+func (tc *TreeController) tryGetNodeFromMemory(
+	username core.Username,
+	fullSlug core.NodeSlug,
+) (core.Node, error) {
+	var currentTree core.NodeTree
+	// handle username path
+	if tree, exists := tc.tree[username]; exists {
+		currentTree = tree
+	} else {
+		return core.Node{}, core.ErrNotFound
+	}
+	slugParts := strings.Split(string(fullSlug), "/")
+	var currentNode *core.Node
+	// handle top level node
+	if node, exists := currentTree[core.NodeSlug(slugParts[0])]; exists {
+		currentNode = node
+	} else {
+		return core.Node{}, core.ErrNotFound
+	}
+	// handle further nodes
+	for _, slugPart := range slugParts[1:] {
+		slugPart := core.NodeSlug(slugPart)
+		if _, exists := currentNode.Children[slugPart]; exists {
+			currentNode = currentNode.Children[slugPart]
+		} else {
+			return core.Node{}, core.ErrNotFound
+		}
+	}
+	return *currentNode, nil
+}
+
+// delete node from in-memory tree, if one exists.
+//
+// Assumes tree mutex has been locked for writing.
+func (tc *TreeController) tryDeleteFromMemory(
+	username core.Username,
+	fullSlug core.NodeSlug,
+) error {
+	var currentTree core.NodeTree
+	// handle username path
+	if tree, exists := tc.tree[username]; exists {
+		currentTree = tree
+	} else {
+		return core.ErrNotFound
+	}
+	dirParts, nodeSlug := path.Split(string(fullSlug))
+	var currentNode *core.Node
+	// handle top level node
+	if node, exists := currentTree[core.NodeSlug(dirParts[0])]; exists {
+		currentNode = node
+	} else {
+		return core.ErrNotFound
+	}
+	// handle further nodes
+	for _, slugPart := range dirParts[1:] {
+		slugPart := core.NodeSlug(slugPart)
+		if _, exists := currentNode.Children[slugPart]; exists {
+			currentNode = currentNode.Children[slugPart]
+		} else {
+			return core.ErrNotFound
+		}
+	}
+	if _, exists := currentNode.Children[core.NodeSlug(nodeSlug)]; exists {
+		delete(currentNode.Children, core.NodeSlug(nodeSlug))
+		return nil
+	}
+	return core.ErrNotFound
 }
