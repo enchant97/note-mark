@@ -219,10 +219,16 @@ func (tc *TreeController) Load() error {
 			tc.tree[username] = core.NodeTree{}
 		}
 		// use cached tree if one exists
-		if cachEntry, err := tc.dao.Queries.GetTreeCacheEntry(context.Background(), string(username)); err == nil {
+		if cacheEntry, err := tc.dao.Queries.GetTreeCacheEntry(
+			context.Background(),
+			string(username),
+		); err == nil && core.IsTreeCacheCompatible(cacheEntry.CacheVersion) {
 			log.Printf("found cached tree for user '%s'\n", username)
 			var cachedTree core.NodeTree
-			if err := json.Unmarshal(cachEntry.NodeTree, &cachedTree); err != nil {
+			if err := core.UnmarshalTreeCache(core.TreeCacheEntry{
+				Cache:   cacheEntry.Cache,
+				Version: cacheEntry.CacheVersion,
+			}, &cachedTree); err != nil {
 				return err
 			}
 			tc.tree[username] = cachedTree
@@ -246,14 +252,15 @@ func (tc *TreeController) Load() error {
 func (tc *TreeController) updateCacheFromMemory(username core.Username) error {
 	if tree, exists := tc.tree[username]; exists {
 		log.Printf("saving tree to cache for user '%s'\n", username)
-		nodeTreeRaw, err := json.Marshal(tree)
+		cacheEntry, err := core.MarshalTreeCache(tree)
 		if err != nil {
 			return err
 		}
 		// try and insert new cache
 		if err := tc.dao.Queries.InsertTreeCache(context.Background(), db.InsertTreeCacheParams{
-			Username: string(username),
-			NodeTree: nodeTreeRaw,
+			Username:     string(username),
+			Cache:        cacheEntry.Cache,
+			CacheVersion: cacheEntry.Version,
 		}); err == nil {
 			return nil
 		} else if !errors.Is(core.WrapDbError(err), core.ErrConflict) {
@@ -261,8 +268,9 @@ func (tc *TreeController) updateCacheFromMemory(username core.Username) error {
 		}
 		// update existing cache
 		return tc.dao.Queries.UpdateTreeCacheEntry(context.Background(), db.UpdateTreeCacheEntryParams{
-			Username: string(username),
-			NodeTree: nodeTreeRaw,
+			Username:     string(username),
+			Cache:        cacheEntry.Cache,
+			CacheVersion: cacheEntry.Version,
 		})
 	}
 	// no tree exists

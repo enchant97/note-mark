@@ -5,7 +5,8 @@ CREATE TABLE users (
 
 CREATE TABLE tree_cache (
   owner_uid BLOB PRIMARY KEY,
-  node_tree BLOB NOT NULL,
+  cache BLOB NOT NULL,
+  cache_version INTEGER NOT NULL,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (owner_uid) REFERENCES users(uid) ON DELETE CASCADE
 );
