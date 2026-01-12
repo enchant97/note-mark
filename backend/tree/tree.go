@@ -8,6 +8,7 @@ import (
 	"log"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
@@ -37,6 +38,52 @@ func (tc *TreeController) TryGetNodeTreeForUser(username core.Username) (core.No
 	defer tc.mutex.RUnlock()
 	v, exists := tc.tree[username]
 	return v, exists
+}
+
+// Write a new or update existing note node to tree.
+func (tc *TreeController) WriteNoteNode(
+	username core.Username,
+	fullSlug core.NodeSlug,
+	r io.Reader,
+) error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	if err := tc.sc.WriteNoteNode(username, string(fullSlug), r); err != nil {
+		return err
+	}
+	frontmatter, err := tc.sc.ReadNoteNodeFrontMatter(username, string(fullSlug))
+	if err != nil {
+		return err
+	}
+	if err := tc.insertNodeIntoMemory(username, core.NodeEntry{
+		FullSlug: fullSlug,
+		Type:     core.NoteNode,
+		ModTime:  time.Now(),
+	}, frontmatter); err != nil {
+		return err
+	}
+	return tc.updateCacheFromMemory(username)
+}
+
+// Write a new or update existing asset node to tree.
+func (tc *TreeController) WriteAssetNode(
+	username core.Username,
+	fullSlug core.NodeSlug,
+	r io.Reader,
+) error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	if err := tc.sc.WriteAssetNode(username, string(fullSlug), r); err != nil {
+		return err
+	}
+	if err := tc.insertNodeIntoMemory(username, core.NodeEntry{
+		FullSlug: fullSlug,
+		Type:     core.AssetNode,
+		ModTime:  time.Now(),
+	}, core.FrontMatter{}); err != nil {
+		return err
+	}
+	return tc.updateCacheFromMemory(username)
 }
 
 // Return a note node's content.
@@ -161,49 +208,67 @@ func (tc *TreeController) updateCacheFromMemory(username core.Username) error {
 func (tc *TreeController) ingestFromStorage(username core.Username) error {
 	return tc.sc.DiscoverNodesForUser(username, func(nodeEntry core.NodeEntry) error {
 		log.Printf("ingest: %s/%s\n", username, nodeEntry.FullSlug)
-		var currentTree core.NodeTree
-		// handle username path
-		if tree, exists := tc.tree[username]; exists {
-			currentTree = tree
-		} else {
-			tc.tree[username] = core.NodeTree{}
-			currentTree = tc.tree[username]
+		var frontmatter core.FrontMatter
+		if nodeEntry.Type == core.NoteNode {
+			fm, err := tc.sc.ReadNoteNodeFrontMatter(username, string(nodeEntry.FullSlug))
+			if err != nil {
+				return err
+			}
+			frontmatter = fm
 		}
-		slugParts := strings.Split(string(nodeEntry.FullSlug), "/")
-		var currentNode *core.Node
-		// handle top level node
-		if node, exists := currentTree[core.NodeSlug(slugParts[0])]; exists {
-			currentNode = node
-		} else {
-			// make a default note node (will get updated later from discovery)
-			node := core.Node{
-				Slug:     core.NodeSlug(slugParts[0]),
+		return tc.insertNodeIntoMemory(username, nodeEntry, frontmatter)
+	})
+}
+
+// Insert a node into in-memory tree.
+//
+// Assumes tree mutex has been locked for writing.
+func (tc *TreeController) insertNodeIntoMemory(
+	username core.Username,
+	nodeEntry core.NodeEntry,
+	frontmatter core.FrontMatter,
+) error {
+	var currentTree core.NodeTree
+	// handle username path
+	if tree, exists := tc.tree[username]; exists {
+		currentTree = tree
+	} else {
+		tc.tree[username] = core.NodeTree{}
+		currentTree = tc.tree[username]
+	}
+	slugParts := strings.Split(string(nodeEntry.FullSlug), "/")
+	var currentNode *core.Node
+	// handle top level node
+	if node, exists := currentTree[core.NodeSlug(slugParts[0])]; exists {
+		currentNode = node
+	} else {
+		// make a default note node (will get updated later from discovery)
+		node := core.Node{
+			Slug:     core.NodeSlug(slugParts[0]),
+			Type:     core.NoteNode,
+			Children: core.NodeTree{},
+		}
+		currentTree[core.NodeSlug(slugParts[0])] = &node
+		currentNode = &node
+	}
+	// handle further nodes
+	for _, slugPart := range slugParts[1:] {
+		slugPart := core.NodeSlug(slugPart)
+		if _, exists := currentNode.Children[slugPart]; !exists {
+			currentNode.Children[slugPart] = &core.Node{
+				Slug:     slugPart,
 				Type:     core.NoteNode,
 				Children: core.NodeTree{},
 			}
-			currentTree[core.NodeSlug(slugParts[0])] = &node
-			currentNode = &node
 		}
-		// handle further nodes
-		for _, slugPart := range slugParts[1:] {
-			slugPart := core.NodeSlug(slugPart)
-			if _, exists := currentNode.Children[slugPart]; !exists {
-				currentNode.Children[slugPart] = &core.Node{
-					Slug:     slugPart,
-					Type:     core.NoteNode,
-					Children: core.NodeTree{},
-				}
-			}
-			currentNode = currentNode.Children[slugPart]
-		}
-		// setup final node (the actual node we indented to add)
-		currentNode.ModTime = nodeEntry.ModTime
-		currentNode.Type = nodeEntry.Type
-		if nodeEntry.Type == core.NoteNode {
-			fm, err := tc.sc.ReadNoteNodeFrontMatter(username, string(nodeEntry.FullSlug))
-			currentNode.FrontMatter = fm
-			return err
-		}
-		return nil
-	})
+		currentNode = currentNode.Children[slugPart]
+	}
+	// setup final node (the actual node we indented to add)
+	currentNode.ModTime = nodeEntry.ModTime
+	currentNode.Type = nodeEntry.Type
+	// handle noteNode
+	if nodeEntry.Type == core.NoteNode {
+		currentNode.FrontMatter = frontmatter
+	}
+	return nil
 }
