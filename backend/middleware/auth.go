@@ -18,14 +18,15 @@ const (
 type AuthDetailsProvider struct {
 	api       huma.API
 	jwtSecret []byte
+	usesHTTPS bool
 }
 
-func (p AuthDetailsProvider) New(api huma.API, jwtSecret []byte) AuthDetailsProvider {
-	p = AuthDetailsProvider{
+func (p AuthDetailsProvider) New(api huma.API, jwtSecret []byte, usesHTTPS bool) AuthDetailsProvider {
+	return AuthDetailsProvider{
 		api:       api,
 		jwtSecret: jwtSecret,
+		usesHTTPS: usesHTTPS,
 	}
-	return p
 }
 
 // Use as a global middleware to process and validate given authentication.
@@ -88,9 +89,9 @@ func (p AuthDetailsProvider) TryGetAuthDetails(ctx context.Context) (core.Authen
 }
 
 func (p *AuthDetailsProvider) clearSessionCookie(ctx huma.Context) {
-	// XXX make sure to enable secure if running on https
 	cookie := http.Cookie{
 		HttpOnly: true,
+		Secure:   p.usesHTTPS,
 		Name:     AuthSessionTokenCookieName,
 		Value:    "",
 		Path:     "/",
@@ -101,9 +102,9 @@ func (p *AuthDetailsProvider) clearSessionCookie(ctx huma.Context) {
 }
 
 func (p *AuthDetailsProvider) CreateSessionCookie(token core.AccessToken) http.Cookie {
-	// XXX make sure to enable secure if running on https
 	return http.Cookie{
 		HttpOnly: true,
+		Secure:   p.usesHTTPS,
 		Name:     AuthSessionTokenCookieName,
 		Value:    token.AccessToken,
 		Path:     "/",
@@ -113,9 +114,9 @@ func (p *AuthDetailsProvider) CreateSessionCookie(token core.AccessToken) http.C
 }
 
 func (p *AuthDetailsProvider) CreateClearSessionCookie() http.Cookie {
-	// XXX make sure to enable secure if running on https
 	return http.Cookie{
 		HttpOnly: true,
+		Secure:   p.usesHTTPS,
 		Name:     AuthSessionTokenCookieName,
 		Value:    "",
 		Path:     "/",

@@ -14,7 +14,7 @@ Configuration of the Note Mark is done through environment variables. See the be
 | TOKEN_EXPIRY     | seconds until a token expires             | 259200    | 259200          |
 | DATA_PATH        | Where to store app data                   |           | /data           |
 | STATIC_PATH      | Host static files                         |           |                 |
-| CORS_ORIGINS     | Comma separated values of allowed origins |           |                 |
+| PUBLIC_URL       | The URL where app is accessed from | | |
 | ENABLE_INTERNAL_SIGNUP | Whether to enable new internal accounts | true | true |
 | ENABLE_INTERNAL_LOGIN | Whether to enable new logins for internal accounts | true | true |
 | NOTE_SIZE_LIMIT  | Max file size for note                    |  1M       | 1M              |
@@ -45,5 +45,5 @@ postgres:
 host=localhost user=user password=pass dbname=notemark port=5432 sslmode=disable TimeZone=Europe/London
 ```
 
-## CORS
-For most people this should be set to your front-end URL. For example if you access your front-end via `https://notemark.example.com` then you should enter that. Multiple origins can also be specified by providing comma separated values. Learn more about CORS on [Wikipedia](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing).
+## PUBLIC_URL
+This **MUST** be set to your front-end URL and **NOT** end in a trailing slash e.g. `https://notemark.example.com`.

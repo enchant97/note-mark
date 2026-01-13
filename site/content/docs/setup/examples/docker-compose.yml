@@ -1,5 +1,5 @@
 # file: docker-compose.yml
-# built-for: 0.17
+# built-for: 0.19
 volumes:
   data:
 
@@ -12,6 +12,6 @@ services:
     environment:
       # !!! REPLACE These !!!
       JWT_SECRET: "!!! REPLACE ME !!!"
-      CORS_ORIGINS: "http://example.com"
+      PUBLIC_URL: "http://notemark.example.com"
     ports:
       - 80:8080

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
@@ -30,7 +31,7 @@ func SetupHandlers(
 	mux.Use(middleware.Recoverer)
 	mux.Use(cors.Handler(cors.Options{
 		OptionsPassthrough: false,
-		AllowedOrigins:     appConfig.CORSOrigins,
+		AllowedOrigins:     []string{appConfig.PublicUrl},
 		AllowedMethods:     []string{"HEAD", "GET", "POST", "PATCH", "PUT", "DELETE"},
 		AllowedHeaders:     []string{"*"},
 		ExposedHeaders:     []string{"Date"},
@@ -40,7 +41,11 @@ func SetupHandlers(
 	config.DocsPath = "/api/docs"
 	config.OpenAPIPath = "/api/openapi"
 	api := humachi.New(mux, config)
-	authProvider := core_middleware.AuthDetailsProvider{}.New(api, appConfig.JWTSecret)
+	authProvider := core_middleware.AuthDetailsProvider{}.New(
+		api,
+		appConfig.JWTSecret,
+		strings.HasPrefix(appConfig.PublicUrl, "https://"),
+	)
 	api.UseMiddleware(authProvider.ProviderMiddleware)
 	SetupMiscHandler(api, appConfig)
 	SetupAuthHandler(api, appConfig, authProvider)

@@ -54,7 +54,7 @@ services:
       - data:/data
     environment:
       JWT_SECRET: "!!! REPLACE ME !!!"
-      CORS_ORIGINS: "http://example.com"
+      PUBLIC_URL: "http://notemark.example.com"
     ports:
       - 80:8080
 ```

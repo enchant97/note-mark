@@ -32,7 +32,7 @@ type AppConfig struct {
 	TokenExpiry               int64         `env:"TOKEN_EXPIRY" envDefault:"259200"`
 	DataPath                  string        `env:"DATA_PATH,notEmpty"`
 	StaticPath                string        `env:"STATIC_PATH"`
-	CORSOrigins               []string      `env:"CORS_ORIGINS,notEmpty" envSeparator:","`
+	PublicUrl                 string        `env:"PUBLIC_URL,notEmpty" validate:"http_url,endsnotwith=/,required"`
 	EnableInternalSignup      bool          `env:"ENABLE_INTERNAL_SIGNUP,notEmpty" envDefault:"true"`
 	EnableInternalLogin       bool          `env:"ENABLE_INTERNAL_LOGIN,notEmpty" envDefault:"true"`
 	EnableAnonymousUserSearch bool          `env:"ENABLE_ANONYMOUS_USER_SEARCH,notEmpty" envDefault:"true"`
