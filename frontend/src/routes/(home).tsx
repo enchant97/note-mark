@@ -1,17 +1,16 @@
 import { A, Navigate, useNavigate } from '@solidjs/router';
 import { Component, Show } from 'solid-js';
-import { useApi } from '~/contexts/ApiProvider';
 import { useModal } from '~/contexts/ModalProvider';
 import UserSearchModal from '~/components/modals/user_search';
 import RecentNotes from '~/components/recent_notes';
 import Header from '~/components/header';
 import Icon from '~/components/icon';
-import { useAuth } from '~/contexts/AuthProvider';
+import { useSession } from '~/contexts/SessionProvider';
+import Api from '~/core/api';
 
 const Home: Component = () => {
   const navigate = useNavigate()
-  const { apiInfo, userInfo } = useApi()
-  const { accessToken, setAuthStore } = useAuth()
+  const { isAuthenticated, apiInfo, userInfo, setIsAuthenticated } = useSession()
   const { setModal, clearModal } = useModal()
 
   const openUserSearchModal = () => {
@@ -34,15 +33,16 @@ const Home: Component = () => {
               <h1 class="text-5xl font-bold">Note Mark</h1>
               <p class="py-6">Lighting Fast & Minimal Markdown Note Taking App.</p>
               <div class="justify-center" classList={{ 'join': apiInfo()?.enableAnonymousUserSearch }}>
-                <Show when={accessToken()} fallback={
+                <Show when={isAuthenticated()} fallback={
                   <A
                     class="join-item btn"
                     href="/login"
                   >Login</A>
                 }>
                   <button
-                    class="join-item btn" onclick={() => {
-                      setAuthStore(null)
+                    class="join-item btn" onclick={async () => {
+                      await Api.getLogout()
+                      setIsAuthenticated(false)
                       navigate("/login")
                     }}>Re-Login</button>
                 </Show>

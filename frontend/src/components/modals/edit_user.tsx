@@ -1,10 +1,9 @@
 import { Component, createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import BaseModal from '~/components/modals/base';
-import { useApi } from '~/contexts/ApiProvider';
 import { User, userIntoUpdateUser } from '~/core/types';
 import { apiErrorIntoToast, useToast } from '~/contexts/ToastProvider';
-import { ApiError } from '~/core/api';
+import Api from '~/core/api';
 
 type UpdateUserModalProps = {
   onClose: (user?: User) => void
@@ -12,7 +11,6 @@ type UpdateUserModalProps = {
 }
 
 const UpdateUserModal: Component<UpdateUserModalProps> = (props) => {
-  const { api } = useApi()
   const { pushToast } = useToast()
   const [form, setForm] = createStore(userIntoUpdateUser(props.user))
   const [loading, setLoading] = createSignal(false)
@@ -20,11 +18,13 @@ const UpdateUserModal: Component<UpdateUserModalProps> = (props) => {
   const onSubmit = async (ev: Event) => {
     ev.preventDefault()
     setLoading(true)
-    let result = await api().updateUser(form)
-    setLoading(false)
-    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "saving profile"))
-    else {
+    try {
+      await Api.updateUser(form)
       props.onClose({ ...props.user, name: form.name })
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "saving profile"))
+    } finally {
+      setLoading(false)
     }
   }
 

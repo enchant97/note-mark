@@ -1,11 +1,17 @@
-import type { Component } from 'solid-js';
+import { createEffect, createResource, type Component } from 'solid-js';
+import { useSession } from '~/contexts/SessionProvider';
+import Api from '~/core/api';
 import StorageHandler from '~/core/storage';
-import { useAuth } from '~/contexts/AuthProvider';
 
 const Logout: Component = () => {
-  let { setAuthStore } = useAuth()
-  setAuthStore(null)
-  StorageHandler.clearSettings()
+  let { setIsAuthenticated } = useSession()
+  const [doLogout] = createResource(Api.getLogout)
+  createEffect(() => {
+    if (!doLogout.loading) {
+      setIsAuthenticated(false)
+      StorageHandler.clearSettings()
+    }
+  })
   return <></>;
 };
 

@@ -4,9 +4,8 @@ import { useNavigate } from '@solidjs/router';
 import BaseModal from '~/components/modals/base';
 import { Book, Note, noteIntoUpdateNote, User } from '~/core/types';
 import { toSlug } from '~/core/helpers';
-import { useApi } from '~/contexts/ApiProvider';
 import { apiErrorIntoToast, useToast } from '~/contexts/ToastProvider';
-import { ApiError } from '~/core/api';
+import Api, { ApiError } from '~/core/api';
 import Icon from '~/components/icon';
 
 type UpdateNoteModalProps = {
@@ -18,7 +17,6 @@ type UpdateNoteModalProps = {
 }
 
 const UpdateNoteModal: Component<UpdateNoteModalProps> = (props) => {
-  const { api } = useApi()
   const { pushToast } = useToast()
   const navigate = useNavigate()
   const [form, setForm] = createStore(noteIntoUpdateNote(props.note))
@@ -27,23 +25,24 @@ const UpdateNoteModal: Component<UpdateNoteModalProps> = (props) => {
   const onSubmit = async (ev: Event) => {
     ev.preventDefault()
     setLoading(true)
-    let result = await api().updateNote(props.note.id, form)
-    setLoading(false)
-
-    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "saving note"))
-    else {
+    try {
+      await Api.updateNote(props.note.id, form)
       navigate(`/${props.user.username}/${props.book.slug}/${form.slug}`)
       props.onClose({
         ...props.note,
         name: form.name,
         slug: form.slug,
       })
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "saving note"))
+    } finally {
+      setLoading(false)
     }
   }
 
   const onDelete = async () => {
     setLoading(true)
-    let result = await api().deleteNote(props.note.id)
+    let result = await Api.deleteNote(props.note.id)
     setLoading(false)
     if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "deleting note"))
     else {

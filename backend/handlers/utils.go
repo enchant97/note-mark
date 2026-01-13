@@ -43,7 +43,7 @@ func SetupHandlers(
 	authProvider := core_middleware.AuthDetailsProvider{}.New(api, appConfig.JWTSecret)
 	api.UseMiddleware(authProvider.ProviderMiddleware)
 	SetupMiscHandler(api, appConfig)
-	SetupAuthHandler(api, appConfig)
+	SetupAuthHandler(api, appConfig, authProvider)
 	SetupUsersHandler(api, appConfig, authProvider)
 	SetupBooksHandler(api, authProvider)
 	SetupNotesHandler(api, appConfig, storage_backend, authProvider)

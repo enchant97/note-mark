@@ -1,8 +1,7 @@
 import { Component, For, createResource, createSignal } from "solid-js";
 import { A } from "@solidjs/router";
 import BaseModal from "~/components/modals/base";
-import { useApi } from "~/contexts/ApiProvider";
-import { ApiError } from "~/core/api";
+import Api from "~/core/api";
 import { apiErrorIntoToast, useToast } from "~/contexts/ToastProvider";
 import Icon from "../icon";
 
@@ -11,7 +10,6 @@ type UserSearchModalProps = {
 }
 
 const UserSearchModal: Component<UserSearchModalProps> = (props) => {
-  const { api } = useApi()
   const { pushToast } = useToast()
   const [username, setUsername] = createSignal("")
 
@@ -19,11 +17,12 @@ const UserSearchModal: Component<UserSearchModalProps> = (props) => {
 
   const [users] = createResource(sanitisedUsername, async (username) => {
     if (!username) return
-    let result = await api().getUsersSearch(username)
-    if (result instanceof ApiError) {
-      pushToast(apiErrorIntoToast(result, "searching for users"))
-      return
-    } else return result
+    try {
+      let resp = await Api.getUsersSearch(username)
+      return resp
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "searching for users"))
+    }
   })
 
   return (

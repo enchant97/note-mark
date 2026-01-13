@@ -1,18 +1,16 @@
 import { For, Suspense, createResource } from "solid-js"
 import { A } from "@solidjs/router"
-import { useApi } from "~/contexts/ApiProvider"
-import { ApiError } from "~/core/api"
+import Api from "~/core/api"
 import { LoadingSpin } from "~/components/loading"
+import { useSession } from "~/contexts/SessionProvider"
 
 const RecentNotes = () => {
-  const { api } = useApi()
-
-  const [recentNotes] = createResource(api, async (api) => {
-    let recentNotes = await api.getNotesRecents()
-    if (recentNotes instanceof ApiError) {
+  const { userInfo } = useSession()
+  const [recentNotes] = createResource(userInfo, async (_) => {
+    try {
+      return await Api.getNotesRecents()
+    } catch (err) {
       return []
-    } else {
-      return recentNotes
     }
   })
 

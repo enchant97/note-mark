@@ -6,7 +6,7 @@ import { EditorState } from "~/components/editor/editor";
 import StorageHandler from "~/core/storage";
 import Icon from "~/components/icon";
 import { Context } from "~/core/renderer";
-import { useApi } from "~/contexts/ApiProvider";
+import { useSession } from "~/contexts/SessionProvider";
 
 const SCRATCH_PAD_CONTENT_KEY = "scratch_pad_content"
 
@@ -19,7 +19,7 @@ function writeContent(content: string, isAuthenticated: boolean) {
 }
 
 const ScratchPad: Component = () => {
-  const { userInfo } = useApi()
+  const { userInfo } = useSession()
 
   const [mode, setMode] = createSignal(NoteMode.EDIT)
   const [content, setContent] = createSignal(readContent())

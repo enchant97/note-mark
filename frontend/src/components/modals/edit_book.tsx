@@ -4,9 +4,8 @@ import { useNavigate } from '@solidjs/router';
 import BaseModal from '~/components/modals/base';
 import { Book, bookIntoUpdateBook, Note, User } from '~/core/types';
 import { toSlug } from "~/core/helpers";
-import { useApi } from '~/contexts/ApiProvider';
 import { apiErrorIntoToast, useToast } from '~/contexts/ToastProvider';
-import { ApiError } from '~/core/api';
+import Api from '~/core/api';
 import Icon from '~/components/icon';
 import { LoadingSpin } from '~/components/loading';
 
@@ -16,38 +15,39 @@ type DeletedNotesProps = {
 }
 
 const DeletedNotes: Component<DeletedNotesProps> = (props) => {
-  const { api } = useApi()
   const { pushToast } = useToast()
   const [notes, { mutate }] = createResource(props.bookId, async (bookId) => {
-    let result = await api().getNotesByBookId(bookId, true)
-    if (result instanceof ApiError) {
-      pushToast(apiErrorIntoToast(result, "getting removed notes"))
+    try {
+      return await Api.getNotesByBookId(bookId, true)
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "getting removed notes"))
       return []
     }
-    return result
   })
 
   const deleteNote = async (noteId: string, i: number) => {
-    let result = await api().deleteNote(noteId, true)
-    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "deleting note"))
-    else {
+    try {
+      await Api.deleteNote(noteId, true)
       let new_notes = notes()
       if (new_notes) {
         new_notes?.splice(i, 1)
         mutate([...new_notes])
       }
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "deleting note"))
     }
   }
   const restoreNote = async (noteId: string, i: number) => {
-    let result = await api().restoreNoteById(noteId)
-    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "restoring note"))
-    else {
+    try {
+      await Api.restoreNoteById(noteId)
       let new_notes = notes()
       if (new_notes) {
         props.restoreNote(new_notes[i])
         new_notes?.splice(i, 1)
         mutate([...new_notes])
       }
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "restoring note"))
     }
   }
 
@@ -92,7 +92,6 @@ type UpdateBookModalProps = {
 }
 
 const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
-  const { api } = useApi()
   const { pushToast } = useToast()
   const navigate = useNavigate()
   const [form, setForm] = createStore(bookIntoUpdateBook(props.book))
@@ -101,10 +100,8 @@ const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
   const onSubmit = async (ev: Event) => {
     ev.preventDefault()
     setLoading(true)
-    let result = await api().updateBook(props.book.id, form)
-    setLoading(false)
-    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "saving book"))
-    else {
+    try {
+      await Api.updateBook(props.book.id, form)
       navigate(`/${props.user.username}/${form.slug}`)
       props.onClose({
         ...props.book,
@@ -112,17 +109,23 @@ const UpdateBookModal: Component<UpdateBookModalProps> = (props) => {
         slug: form.slug,
         isPublic: form.isPublic
       })
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "saving book"))
+    } finally {
+      setLoading(false)
     }
   }
 
   const onDelete = async () => {
     setLoading(true)
-    let result = await api().deleteBook(props.book.id)
-    setLoading(false)
-    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "deleting book"))
-    else {
+    try {
+      await Api.deleteBook(props.book.id)
       navigate(`/${props.user.username}`)
       props.onDeleteClose(props.book.id)
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "deleting book"))
+    } finally {
+      setLoading(false)
     }
   }
 

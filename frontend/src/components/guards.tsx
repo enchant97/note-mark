@@ -1,29 +1,28 @@
 import { ParentProps, Show } from "solid-js"
 import ShowOrRedirect from "~/components/show_or_redirect"
-import { useApi } from "~/contexts/ApiProvider"
-import { useAuth } from "~/contexts/AuthProvider"
 import { LoadingScreen } from "~/components/loading"
+import { useSession } from "~/contexts/SessionProvider"
 
 export function RequireAuthGuard(props: ParentProps) {
-  const { accessToken } = useAuth()
-  const check = () => accessToken() !== null
+  const { isAuthenticated } = useSession()
+  const check = () => { return isAuthenticated() === true }
   return <ShowOrRedirect when={check} redirectTo="/login">{props.children}</ShowOrRedirect>
 }
 
 export function RequireNoAuthGuard(props: ParentProps) {
-  const { accessToken } = useAuth()
-  const check = () => accessToken() === null
+  const { isAuthenticated } = useSession()
+  const check = () => { return !isAuthenticated() }
   return <ShowOrRedirect when={check} redirectTo="/">{props.children}</ShowOrRedirect>
 }
 
 export function RequireSignupAllowedGuard(props: ParentProps) {
-  const { apiInfo } = useApi()
+  const { apiInfo } = useSession()
   const check = () => apiInfo()?.allowInternalSignup === true
   return <ShowOrRedirect when={check} redirectTo="/login">{props.children}</ShowOrRedirect>
 }
 
 export function RequireApiSetupGuard(props: ParentProps) {
-  const { apiInfo } = useApi()
+  const { apiInfo } = useSession()
   return (
     <Show when={!apiInfo.loading} fallback={
       <LoadingScreen message="Contacting Server" />

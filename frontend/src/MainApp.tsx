@@ -1,11 +1,10 @@
 import { useParams, useNavigate } from '@solidjs/router';
 import { Component, ParentProps, Show, createResource, createSignal, onCleanup, onMount } from 'solid-js';
 import Header from '~/components/header';
-import { useApi } from '~/contexts/ApiProvider';
 import { DrawerProvider } from '~/contexts/DrawerProvider';
 import { Book, Note, User } from '~/core/types';
 import { LoadingRing } from '~/components/loading';
-import { ApiError } from '~/core/api';
+import Api from '~/core/api';
 import { SortChoice, SortSelect } from '~/components/inputs';
 import { compare } from '~/core/helpers';
 import Icon from '~/components/icon';
@@ -47,7 +46,6 @@ type MappedUser = User & {
 
 const MainApp: Component<ParentProps> = (props) => {
   const params = useParams()
-  const { api } = useApi()
   const { pushToast } = useToast()
   const { setModal, clearModal, modal: currentModal } = useModal()
   const navigator = useNavigate()
@@ -61,10 +59,8 @@ const MainApp: Component<ParentProps> = (props) => {
   }
 
   const [userData, { mutate: mutateUserData }] = createResource(() => params.username, async (username) => {
-    let result = await api().getUserByUsername(username, "notes")
-    if (result instanceof ApiError) {
-      pushToast(apiErrorIntoToast(result, `loading data for ${username}`))
-    } else {
+    try {
+      let result = await Api.getUserByUsername(username, "notes")
       let data = new Map<string, MappedUser>(Object.entries(result))
       let books = new Map(Object.entries(result.books || []).map((v) => {
         let book = new Map(Object.entries(v[1]))
@@ -73,6 +69,8 @@ const MainApp: Component<ParentProps> = (props) => {
       }))
       data.set("books", books)
       return data
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, `loading data for ${username}`))
     }
   })
 
@@ -87,18 +85,20 @@ const MainApp: Component<ParentProps> = (props) => {
 
   const [currentBook, { mutate: updateCurrentBook }] = createResource(() => [params.username, params.bookSlug], async ([username, bookSlug]) => {
     if (!bookSlug) { return }
-    let result = await api().getBookBySlug(username, bookSlug)
-    if (result instanceof ApiError) {
-      pushToast(apiErrorIntoToast(result, "fetching lookup for book"))
-    } else { return result }
+    try {
+      return await Api.getBookBySlug(username, bookSlug)
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "fetching lookup for book"))
+    }
   })
 
   const [currentNote, { mutate: mutateCurrentNote }] = createResource(() => [params.username, params.bookSlug, params.noteSlug], async ([username, bookSlug, noteSlug]) => {
     if (!noteSlug) { return }
-    let result = await api().getNoteBySlug(username, bookSlug, noteSlug)
-    if (result instanceof ApiError) {
-      pushToast(apiErrorIntoToast(result, "fetching lookup for note"))
-    } else { return result }
+    try {
+      return await Api.getNoteBySlug(username, bookSlug, noteSlug)
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "fetching lookup for note"))
+    }
   })
 
   const currentBookId = () => currentBook()?.id

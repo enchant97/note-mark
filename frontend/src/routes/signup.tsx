@@ -1,14 +1,12 @@
 import { Component, createSignal } from 'solid-js';
 import { createStore } from "solid-js/store";
 import { A, useNavigate } from '@solidjs/router';
-import { useApi } from '~/contexts/ApiProvider';
 import { ToastType, apiErrorIntoToast, useToast } from '~/contexts/ToastProvider';
-import { ApiError, HttpErrors } from '~/core/api';
+import Api, { HttpErrors } from '~/core/api';
 import Header from '~/components/header';
 import Icon from '~/components/icon';
 
 const Signup: Component = () => {
-  const { api } = useApi()
   const { pushToast } = useToast()
   const navigate = useNavigate()
   const [formDetails, setFormDetails] = createStore({
@@ -22,21 +20,22 @@ const Signup: Component = () => {
   const onSubmit = async (ev: Event) => {
     ev.preventDefault()
     setLoading(true)
-    let result = await api().createUser({
-      username: formDetails.username,
-      password: formDetails.password,
-      name: formDetails.name || undefined,
-    })
-    setLoading(false)
-    if (result instanceof ApiError) {
-      if (result.status === HttpErrors.Forbidden) {
-        pushToast({ message: "server is not accepting new accounts", type: ToastType.ERROR })
-      } else {
-        pushToast(apiErrorIntoToast(result, "creating account"))
-      }
-    } else {
+    try {
+      await Api.createUser({
+        username: formDetails.username,
+        password: formDetails.password,
+        name: formDetails.name || undefined,
+      })
       pushToast({ message: "created new account", type: ToastType.SUCCESS })
       navigate("/login")
+    } catch (err) {
+      if (err.status === HttpErrors.Forbidden) {
+        pushToast({ message: "server is not accepting new accounts", type: ToastType.ERROR })
+      } else {
+        pushToast(apiErrorIntoToast(err, "creating account"))
+      }
+    } finally {
+      setLoading(false)
     }
   }
 

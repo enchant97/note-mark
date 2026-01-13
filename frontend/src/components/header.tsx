@@ -2,8 +2,8 @@ import { Component, For, Show, createEffect, createSignal } from 'solid-js';
 import { A, useNavigate } from '@solidjs/router';
 import { THEMES, getTheme, setTheme } from '~/core/theme_switcher';
 import Icon from '~/components/icon';
-import { useAuth } from '~/contexts/AuthProvider';
-import { useApi } from '~/contexts/ApiProvider';
+import { useSession } from '~/contexts/SessionProvider';
+import Api from '~/core/api';
 
 const ThemeSwitcher: Component = () => {
   const [currentTheme, setCurrentTheme] = createSignal(getTheme())
@@ -39,17 +39,17 @@ const ThemeSwitcher: Component = () => {
 
 const ProfileDropdown = () => {
   const navigate = useNavigate()
-  const { accessToken, setAuthStore } = useAuth()
-  const { userInfo } = useApi()
+  const { isAuthenticated, userInfo, setIsAuthenticated } = useSession()
 
   return (
     <details class="dropdown dropdown-end">
       <summary class="btn btn-circle"><Icon name="user" /></summary>
       <menu class="mt-2 p-2 menu dropdown-content z-[1] bg-base-100 w-52">
         <Show when={userInfo()} fallback={<li>
-          <Show when={accessToken()} fallback={<A href="/login">Login</A>}>
-            <button onclick={() => {
-              setAuthStore(null)
+          <Show when={isAuthenticated()} fallback={<A href="/login">Login</A>}>
+            <button onclick={async () => {
+              await Api.getLogout()
+              setIsAuthenticated(false)
               navigate("/login")
             }}>Re-Login</button>
           </Show>
@@ -70,7 +70,7 @@ export type HeaderProps = {
 }
 
 const Header: Component<HeaderProps> = (props) => {
-  const { userInfo } = useApi()
+  const { userInfo } = useSession()
 
   return (
     <div class="sticky top-2 z-10 px-2">

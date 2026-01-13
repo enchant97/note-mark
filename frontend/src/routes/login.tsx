@@ -1,19 +1,17 @@
 import { Component, Show, createResource, createSignal } from 'solid-js';
 import { createStore } from "solid-js/store";
 import { A, action, redirect, useAction } from '@solidjs/router';
-import { useApi } from '~/contexts/ApiProvider';
-import { ApiError } from '~/core/api';
+import Api from '~/core/api';
 import { apiErrorIntoToast, ToastType, useToast } from '~/contexts/ToastProvider';
 import Icon from '~/components/icon';
 import Header from '~/components/header';
-import { useAuth } from '~/contexts/AuthProvider';
 import * as oidcClient from 'openid-client'
 import { OidcVerification } from '~/core/oidc';
 import { LoadingSpin } from '~/components/loading';
+import { useSession } from '~/contexts/SessionProvider';
 
 const Login: Component = () => {
-  const { api, apiInfo } = useApi()
-  const { setAuthStore } = useAuth()
+  const { apiInfo, setIsAuthenticated } = useSession()
   const { pushToast } = useToast()
   const [formDetails, setFormDetails] = createStore({ username: "", password: "" })
   const [loading, setLoading] = createSignal(false)
@@ -33,7 +31,6 @@ const Login: Component = () => {
         })
         throw e
       }
-
     }
   })
 
@@ -60,16 +57,15 @@ const Login: Component = () => {
   const onSubmit = async (ev: Event) => {
     ev.preventDefault()
     setLoading(true)
-    let result = await api().postTokenPasswordFlow(formDetails.username, formDetails.password)
-    setLoading(false)
-
-    if (result instanceof ApiError) {
-      pushToast(apiErrorIntoToast(result, "logging-in"))
+    try {
+      await Api.postTokenPasswordFlow(formDetails.username, formDetails.password)
       setFormDetails({ password: "" })
-    } else {
-      const expiresAt = Date.now() + (result.expires_in * 1000)
-      console.debug(`login flow success, token expires at: ${new Date(expiresAt).toISOString()}`)
-      setAuthStore({ accessToken: result.access_token, expiresAt })
+      setIsAuthenticated(true)
+      console.debug("login flow success")
+    } catch (e) {
+      pushToast(apiErrorIntoToast(e, "logging-in"))
+    } finally {
+      setLoading(false)
     }
   }
 

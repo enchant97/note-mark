@@ -4,8 +4,7 @@ import { useNavigate } from '@solidjs/router';
 import BaseModal from '~/components/modals/base';
 import { Book, CreateNote, Note, User } from '~/core/types';
 import { toSlug, toSlugWithSuffix } from '~/core/helpers';
-import { useApi } from '~/contexts/ApiProvider';
-import { ApiError } from '~/core/api';
+import Api from '~/core/api';
 import { apiErrorIntoToast, useToast } from '~/contexts/ToastProvider';
 import Icon from '~/components/icon';
 
@@ -16,7 +15,6 @@ type NewNoteModalProps = {
 }
 
 const NewNoteModal: Component<NewNoteModalProps> = (props) => {
-  const { api } = useApi()
   const { pushToast } = useToast()
   const navigate = useNavigate()
   const [form, setForm] = createStore<CreateNote>({ name: "", slug: "" })
@@ -25,12 +23,14 @@ const NewNoteModal: Component<NewNoteModalProps> = (props) => {
   const onSubmit = async (ev: Event) => {
     ev.preventDefault()
     setLoading(true)
-    let result = await api().createNote(props.book.id, form)
-    setLoading(false)
-    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "creating note"))
-    else {
+    try {
+      let result = await Api.createNote(props.book.id, form)
       navigate(`/${props.user.username}/${props.book.slug}/${form.slug}`)
       props.onClose(result)
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "creating note"))
+    } finally {
+      setLoading(false)
     }
   }
 

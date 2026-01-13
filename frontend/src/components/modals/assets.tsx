@@ -1,8 +1,7 @@
 import { Component, For, Show, createResource, createSignal } from "solid-js";
 import BaseModal from "~/components/modals/base";
-import { useApi } from "~/contexts/ApiProvider";
 import { ToastType, apiErrorIntoToast, useToast } from "~/contexts/ToastProvider";
-import { ApiError } from "~/core/api";
+import Api from "~/core/api";
 import { createStore } from "solid-js/store";
 import Icon from "~/components/icon";
 import { copyToClipboard } from "~/core/helpers";
@@ -16,15 +15,13 @@ type AssetsModalProps = {
 const AssetsModal: Component<AssetsModalProps> = (props) => {
   let assetUploadInput: HTMLInputElement
 
-  const { api } = useApi()
   const { pushToast } = useToast()
   const [assets, { mutate }] = createResource(props.noteId, async (noteId) => {
-    const result = await api().getNoteAssets(noteId)
-    if (result instanceof ApiError) {
-      pushToast(apiErrorIntoToast(result, "loading assets"))
+    try {
+      return await Api.getNoteAssets(noteId)
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "loading assets"))
       return []
-    } else {
-      return result
     }
   })
 
@@ -42,16 +39,16 @@ const AssetsModal: Component<AssetsModalProps> = (props) => {
       if (form.name === "") {
         setForm({ name: form.file.name })
       }
-      const result = await api().createNoteAsset(props.noteId, form.file, form.name)
-      if (result instanceof ApiError) {
-        pushToast(apiErrorIntoToast(result, "uploading asset"))
-      } else {
+      try {
+        const result = await Api.createNoteAsset(props.noteId, form.file, form.name)
         mutate([...assets() || [], result])
         assetUploadInput.value = null
         setForm({
           name: "",
           file: null,
         })
+      } catch (err) {
+        pushToast(apiErrorIntoToast(err, "uploading asset"))
       }
     }
     setModifyLoading(false)
@@ -59,13 +56,14 @@ const AssetsModal: Component<AssetsModalProps> = (props) => {
 
   const onAssetDelete = async (assetId: string) => {
     setModifyLoading(true)
-    const result = await api().deleteNoteAsset(props.noteId, assetId)
-    if (result instanceof ApiError) {
-      pushToast(apiErrorIntoToast(result, "deleting asset"))
-    } else {
+    try {
+      await Api.deleteNoteAsset(props.noteId, assetId)
       mutate(assets()?.filter(asset => asset.id !== assetId))
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "deleting asset"))
+    } finally {
+      setModifyLoading(false)
     }
-    setModifyLoading(false)
   }
 
   return (
@@ -114,7 +112,7 @@ const AssetsModal: Component<AssetsModalProps> = (props) => {
                 <li class="list-row bg-base-100 rounded-box shadow-glass items-center">
                   <div>
                     <Show when={asset.info.mimeType.startsWith("image")} fallback={<Icon name="file" />}>
-                      <img class="size-10 rounded-box" src={api().getNoteAssetAccessUrl(props.noteId, asset.id)} />
+                      <img class="size-10 rounded-box" src={Api.getNoteAssetAccessUrl(props.noteId, asset.id)} />
                     </Show>
                   </div>
                   <div>{asset.name}</div>
@@ -123,7 +121,7 @@ const AssetsModal: Component<AssetsModalProps> = (props) => {
                       class="btn btn-sm join-item"
                       title={`Copy Link "${asset.name}"`}
                       onClick={async () => {
-                        let assetUrl = api().getNoteAssetAccessUrl(props.noteId, asset.id)
+                        let assetUrl = Api.getNoteAssetAccessUrl(props.noteId, asset.id)
                         try {
                           await copyToClipboard(assetUrl)
                           pushToast({ message: "copied to clipboard", type: ToastType.SUCCESS })
@@ -136,7 +134,7 @@ const AssetsModal: Component<AssetsModalProps> = (props) => {
                     </button>
                     <a
                       class="btn btn-sm join-item"
-                      href={api().getNoteAssetAccessUrl(props.noteId, asset.id)}
+                      href={Api.getNoteAssetAccessUrl(props.noteId, asset.id)}
                       target="_blank"
                       title={`Open "${asset.name}"`}
                     >

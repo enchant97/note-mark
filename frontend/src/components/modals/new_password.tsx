@@ -1,18 +1,15 @@
 import { Component, createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import BaseModal from '~/components/modals/base';
-import { useApi } from '~/contexts/ApiProvider';
 import { apiErrorIntoToast, ToastType, useToast } from '~/contexts/ToastProvider';
-import { ApiError, HttpErrors } from '~/core/api';
+import Api, { HttpErrors } from '~/core/api';
 
 type UpdateUserPasswordModalProps = {
   onClose: () => void
 }
 
 const UpdateUserPasswordModal: Component<UpdateUserPasswordModalProps> = (props) => {
-  const { api } = useApi()
   const { pushToast } = useToast()
-  const { userInfo } = useApi()
   const [form, setForm] = createStore({
     existingPassword: "",
     newPassword: "",
@@ -25,23 +22,23 @@ const UpdateUserPasswordModal: Component<UpdateUserPasswordModalProps> = (props)
   const onSubmit = async (ev: Event) => {
     ev.preventDefault()
     setLoading(true)
-    let result = await api().updateUserPassword({
-      existingPassword: form.existingPassword,
-      newPassword: form.newPassword,
-    })
-    setLoading(false)
-    if (result instanceof ApiError) {
-      if (result.status === HttpErrors.Forbidden) {
+    try {
+      await Api.updateUserPassword({
+        existingPassword: form.existingPassword,
+        newPassword: form.newPassword,
+      })
+      props.onClose()
+    } catch (err) {
+      if (err.status === HttpErrors.Forbidden) {
         pushToast({
           message: "existing password not accepted, did you type it correctly?",
           type: ToastType.ERROR,
         })
       } else {
-        pushToast(apiErrorIntoToast(result, "updating new password"))
+        pushToast(apiErrorIntoToast(err, "updating new password"))
       }
-    }
-    else {
-      props.onClose()
+    } finally {
+      setLoading(false)
     }
   }
 

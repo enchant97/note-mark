@@ -1,21 +1,18 @@
 import { ParentProps } from "solid-js";
 import { ToastProvider, Toasts } from "~/contexts/ToastProvider";
 import { Modal, ModalProvider } from "~/contexts/ModalProvider";
-import { ApiProvider } from "~/contexts/ApiProvider";
-import { AuthProvider } from "~/contexts/AuthProvider";
+import { SessionProvider } from "./contexts/SessionProvider";
 
 export default function Wrapper(props: ParentProps) {
   return (
     <ToastProvider>
       <Toasts />
-      <AuthProvider>
+      <SessionProvider>
         <ModalProvider>
-          <ApiProvider>
-            <Modal />
-            {props.children}
-          </ApiProvider>
+          <Modal />
+          {props.children}
         </ModalProvider>
-      </AuthProvider>
+      </SessionProvider>
     </ToastProvider>
   )
 }

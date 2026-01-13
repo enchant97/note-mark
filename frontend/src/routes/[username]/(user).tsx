@@ -7,15 +7,14 @@ import Icon from "~/components/icon";
 import NewBookModal from "~/components/modals/new_book";
 import { Book } from "~/core/types";
 import { useDrawer } from "~/contexts/DrawerProvider";
-import { useAuth } from "~/contexts/AuthProvider";
-import { useApi } from "~/contexts/ApiProvider";
+import { useSession } from "~/contexts/SessionProvider";
+import Api from "~/core/api";
 
 const User = () => {
   const params = useParams()
   const navigate = useNavigate()
-  const { accessToken, setAuthStore } = useAuth()
   const { setModal, clearModal } = useModal()
-  const { userInfo } = useApi()
+  const { isAuthenticated, userInfo, setIsAuthenticated } = useSession()
   const drawer = useDrawer()
 
   const openUserSearchModal = () => {
@@ -46,15 +45,16 @@ const User = () => {
         <div class="join">
           <Show
             when={userInfo() !== undefined} fallback={
-              <Show when={accessToken()} fallback={
+              <Show when={isAuthenticated()} fallback={
                 <A
                   class="join-item btn"
                   href="/login"
                 >Login</A>
               }>
                 <button
-                  class="join-item btn" onclick={() => {
-                    setAuthStore(null)
+                  class="join-item btn" onclick={async () => {
+                    await Api.getLogout()
+                    setIsAuthenticated(false)
                     navigate("/login")
                   }}>Re-Login</button>
               </Show>

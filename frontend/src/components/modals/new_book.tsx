@@ -4,8 +4,7 @@ import { useNavigate } from '@solidjs/router';
 import BaseModal from '~/components/modals/base';
 import { Book, CreateBook, User } from '~/core/types';
 import { toSlug, toSlugWithSuffix } from '~/core/helpers';
-import { useApi } from '~/contexts/ApiProvider';
-import { ApiError } from '~/core/api';
+import Api from '~/core/api';
 import { apiErrorIntoToast, useToast } from '~/contexts/ToastProvider';
 import Icon from '~/components/icon';
 
@@ -15,7 +14,6 @@ type NewBookModalProps = {
 }
 
 const NewBookModal: Component<NewBookModalProps> = (props) => {
-  const { api } = useApi()
   const { pushToast } = useToast()
   const navigate = useNavigate()
   const [form, setForm] = createStore<CreateBook>({ name: "", slug: "", isPublic: false })
@@ -24,12 +22,14 @@ const NewBookModal: Component<NewBookModalProps> = (props) => {
   const onSubmit = async (ev: Event) => {
     ev.preventDefault()
     setLoading(true)
-    let result = await api().createBook(form)
-    setLoading(false)
-    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "creating book"))
-    else {
+    try {
+      let resp = await Api.createBook(form)
       navigate(`/${props.user.username}/${form.slug}`)
-      props.onClose(result)
+      props.onClose(resp)
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "creating book"))
+    } finally {
+      setLoading(false)
     }
   }
 

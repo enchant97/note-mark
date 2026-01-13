@@ -1,7 +1,6 @@
 import { Component, Show, createEffect, createResource, createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { useParams } from '@solidjs/router';
-import { useApi } from '~/contexts/ApiProvider';
 import { Book, Breadcrumb, BreadcrumbWithNames, Note as NoteDetails } from '~/core/types';
 import NoteBreadcrumb from '~/components/note/breadcrumb';
 import { useModal } from '~/contexts/ModalProvider';
@@ -12,7 +11,7 @@ import UpdateNoteModal from '~/components/modals/edit_note';
 import { useDrawer } from '~/contexts/DrawerProvider';
 import { LoadingRing } from '~/components/loading';
 import { ToastType, apiErrorIntoToast, useToast } from '~/contexts/ToastProvider';
-import { ApiError } from '~/core/api';
+import Api from '~/core/api';
 import Icon from '~/components/icon';
 import Note, { NoteMode } from '~/components/note';
 import StorageHandler from '~/core/storage';
@@ -21,10 +20,11 @@ import { StringSource, copyToClipboard, download } from '~/core/helpers';
 import PrintNoteModal from '~/components/modals/print_note';
 import { EditorState } from '~/components/editor/editor';
 import { Context } from '~/core/renderer';
+import { useSession } from '~/contexts/SessionProvider';
 
 const Shelf: Component = () => {
   const params = useParams()
-  const { api, userInfo } = useApi()
+  const { userInfo } = useSession()
   const { pushToast } = useToast()
   const { setModal, clearModal } = useModal()
   const drawer = useDrawer()
@@ -66,15 +66,14 @@ const Shelf: Component = () => {
   }
 
   const [noteContent, { mutate: setNoteContent }] = createResource(note, async (note) => {
-    let result = await api().getNoteContentById(note.id)
-    if (result instanceof ApiError) {
-      pushToast(apiErrorIntoToast(result, "getting note content"))
-      return
-    } else {
+    try {
+      let result = await Api.getNoteContentById(note.id)
       if (!result.endsWith("\n")) {
         result += "\n"
       }
       return result
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "getting note content"))
     }
   })
 
@@ -188,13 +187,19 @@ const Shelf: Component = () => {
   const saveNote = async (noteId: string, content: string) => {
     setState({ saving: true })
     const currentlastModified = lastModified()
-    let result = await api().updateNoteContent(noteId, content, currentlastModified === undefined ? undefined : new Date(currentlastModified))
-    setState({ saving: false })
-    if (result instanceof ApiError) pushToast(apiErrorIntoToast(result, "saving note"))
-    else {
+    try {
+      let result = await Api.updateNoteContent(
+        noteId,
+        content,
+        currentlastModified === undefined ? undefined : new Date(currentlastModified),
+      )
       setLastModified(result.toISOString());
       setState({ unsaved: false })
       setNoteContent(content)
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "saving note"))
+    } finally {
+      setState({ saving: false })
     }
   }
 

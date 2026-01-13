@@ -6,11 +6,11 @@ import { useModal } from '~/contexts/ModalProvider';
 import { User } from '~/core/types';
 import Icon from '~/components/icon';
 import Header from '~/components/header';
-import { useApi } from '~/contexts/ApiProvider';
+import { useSession } from '~/contexts/SessionProvider';
 
 const Profile: Component = () => {
   const { setModal, clearModal } = useModal()
-  const { apiInfo, userInfo, setUserInfo } = useApi()
+  const { apiInfo, userInfo, setUserInfo } = useSession()
 
   const onUpdateProfileClick = () => {
     setModal({
