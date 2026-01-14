@@ -46,6 +46,11 @@
 
 @layer utilities {
 
+    .dropdown {
+        /* fixes: <https://github.com/saadeghi/daisyui/issues/4343> */
+        overflow: unset;
+    }
+
     .tn-tree-node-expand-btn {
         @apply btn btn-square btn-xs shadow-glass;
     }
