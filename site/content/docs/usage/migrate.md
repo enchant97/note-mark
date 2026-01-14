@@ -26,3 +26,15 @@ Importing and exporting data is handled via the `migrate` CLI command. This sect
             assets/
                 {asset-id}.{asset-name}
 ```
+
+
+## Export For V1
+This produces a V1 compatible structure, so you can continue to use Note Mark. Please note, you will need to create your users before import.
+
+```text
+{username}/
+    {book-slug}/
+        {note-slug}.md
+        {note-slug}/
+            {asset-name}
+```

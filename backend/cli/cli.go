@@ -132,6 +132,17 @@ func Entrypoint(appVersion string) error {
 							return commandMigrateExportData(appConfig, exportDir)
 						},
 					},
+					{
+						Name:  "export-v1",
+						Usage: "export data for v1 of app",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "export-dir", Aliases: []string{"d"}, Required: true},
+						},
+						Action: func(ctx *cli.Context) error {
+							exportDir := ctx.String("export-dir")
+							return commandMigrateExportDataV1(appConfig, exportDir)
+						},
+					},
 				},
 			},
 		},

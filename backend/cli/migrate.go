@@ -1,11 +1,13 @@
 package cli
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/enchant97/note-mark/backend/config"
@@ -14,8 +16,13 @@ import (
 	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/google/uuid"
 	"github.com/urfave/cli/v2"
+	"gopkg.in/yaml.v3"
 	"gorm.io/gorm"
 )
+
+type frontMatterV1 struct {
+	Title string `yaml:"title"`
+}
 
 func findDirs(p string) ([]string, error) {
 	dirs := make([]string, 0)
@@ -214,6 +221,111 @@ func commandMigrateExportData(appConfig config.AppConfig, exportDir string) erro
 								} else {
 									defer r.Close()
 									f, err := os.Create(path.Join(assetsDir, asset.ID.String()+"."+asset.Name))
+									if err != nil {
+										return err
+									}
+									defer f.Close()
+									if _, err = io.Copy(f, r); err != nil {
+										return err
+									}
+								}
+							}
+						}
+					}
+				}
+
+				log.Printf("finished export on user '%s'\n", user.Username)
+			}
+			return nil
+		}).Error; err != nil {
+		return err
+	}
+
+	log.Println("finished export")
+
+	return nil
+}
+
+func commandMigrateExportDataV1(appConfig config.AppConfig, exportDir string) error {
+	// Connect to storage backend
+	storage_backend := storage.DiskController{}.New(appConfig.DataPath)
+	if err := storage_backend.Setup(); err != nil {
+		return err
+	}
+	defer storage_backend.TearDown()
+	// Connect to database
+	if err := db.InitDB(appConfig.DB); err != nil {
+		return err
+	}
+
+	log.Println("ensuring export directory exists and is empty")
+	if err := os.MkdirAll(exportDir, os.ModePerm); err != nil {
+		return err
+	}
+	if isEmpty := core.IsDirEmpty(exportDir); !isEmpty {
+		return cli.Exit("export directory not empty", 1)
+	}
+
+	log.Println("starting export, this may take some time...")
+
+	var userRows []db.User
+	if err := db.DB.
+		Preload("Books").
+		Preload("Books.Notes").
+		Preload("Books.Notes.Assets").
+		FindInBatches(&userRows, 1, func(tx *gorm.DB, batch int) error {
+			for _, user := range userRows {
+				log.Printf("starting export on user '%s'\n", user.Username)
+
+				for _, book := range user.Books {
+					bookDir := filepath.Join(exportDir, user.Username, book.Slug)
+					if err := os.MkdirAll(bookDir, os.ModePerm); err != nil {
+						return err
+					}
+					for _, note := range book.Notes {
+						log.Printf("exporting '%s/%s/%s'\n", user.Username, book.Slug, note.Slug)
+						// export note content
+						r, err := storage_backend.ReadNote(note.ID)
+						if err != nil && errors.Is(err, storage.ErrNotFound) {
+							r = io.NopCloser(strings.NewReader(""))
+						} else if err != nil {
+							return err
+						}
+						defer r.Close()
+						f, err := os.Create(filepath.Join(bookDir, note.Slug+".md"))
+						if err != nil {
+							return err
+						}
+						defer f.Close()
+						// write frontmatter
+						frontmatter := frontMatterV1{
+							Title: note.Name,
+						}
+						frontmatterRaw, err := yaml.Marshal(frontmatter)
+						frontmatterRaw = bytes.TrimSuffix(frontmatterRaw, []byte("\n"))
+						if err != nil {
+							return err
+						}
+						if _, err = f.Write(bytes.Join([][]byte{[]byte("---\n"), frontmatterRaw, []byte("\n---\n\n")}, []byte(""))); err != nil {
+							return err
+						}
+						// write actual note content
+						if _, err = io.Copy(f, r); err != nil {
+							return err
+						}
+						// export note assets
+						if len(note.Assets) != 0 {
+							log.Printf("exporting '%s/%s/%s' assets\n", user.Username, book.Slug, note.Slug)
+							noteDir := filepath.Join(bookDir, note.Slug)
+							if err := os.MkdirAll(noteDir, os.ModePerm); err != nil {
+								return err
+							}
+							for _, asset := range note.Assets {
+								if r, err := storage_backend.ReadNoteAsset(note.ID, asset.ID); err != nil {
+									return err
+								} else {
+									defer r.Close()
+									f, err := os.Create(filepath.Join(noteDir, asset.Name))
 									if err != nil {
 										return err
 									}
