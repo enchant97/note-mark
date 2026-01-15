@@ -33,6 +33,16 @@ func (tc TreeController) New(sc storage.StorageController, dao *db.DAO) TreeCont
 	}
 }
 
+// Get the last modification time for a users tree.
+func (tc *TreeController) GetTreeModTimeForUser(username core.Username) (time.Time, error) {
+	tc.mutex.RLock()
+	defer tc.mutex.RUnlock()
+	return core.WrapDbErrorWithValue(tc.dao.Queries.GetTreeCacheUpdatedAt(
+		context.Background(),
+		string(username),
+	))
+}
+
 // Get a node tree for a specific user, will return false if no tree exists.
 func (tc *TreeController) TryGetNodeTreeForUser(username core.Username) (core.NodeTree, bool) {
 	tc.mutex.RLock()

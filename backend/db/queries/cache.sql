@@ -5,6 +5,9 @@ VALUES ((SELECT uid FROM users WHERE username=?),?,?);
 -- name: GetTreeCacheEntry :one
 SELECT * FROM tree_cache WHERE owner_uid = (SELECT uid FROM users WHERE username=?) LIMIT 1;
 
+-- name: GetTreeCacheUpdatedAt :one
+SELECT updated_at FROM tree_cache WHERE owner_uid = (SELECT uid FROM users WHERE username=?) LIMIT 1;
+
 -- name: UpdateTreeCacheEntry :exec
 UPDATE tree_cache
 SET cache=?, cache_version=?, updated_at=CURRENT_TIMESTAMP
