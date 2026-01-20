@@ -4,6 +4,8 @@ go 1.25.4
 
 require (
 	github.com/adrg/frontmatter v0.2.0
+	github.com/danielgtaylor/huma/v2 v2.35.0
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/google/uuid v1.6.0
 	modernc.org/sqlite v1.43.0
