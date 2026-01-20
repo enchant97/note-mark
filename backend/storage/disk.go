@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -15,6 +16,12 @@ import (
 
 	"github.com/enchant97/note-mark/backend/core"
 )
+
+var skipSystemFilesRegex = []*regexp.Regexp{
+	regexp.MustCompile(`^[Tt]humbs.db$`),
+	regexp.MustCompile(`^.*.DS_Store$`),
+	regexp.MustCompile(`^~\$`),
+}
 
 type DiskStorageController struct {
 	rootPath string
@@ -218,10 +225,18 @@ func (sc *DiskStorageController) DiscoverNodesForUser(
 		} else {
 			nodeModTime = info.ModTime()
 		}
-		// skip registering directory as note node if note file exists for it
 		if d.IsDir() {
+			// skip registering directory as note node if note file exists for it
 			if _, err := os.Stat(absPath + ".md"); !errors.Is(err, fs.ErrNotExist) {
 				return err
+			}
+		} else {
+			// skip operating system files
+			filename := filepath.Base(absPath)
+			for _, regex := range skipSystemFilesRegex {
+				if regex.MatchString(filename) {
+					return nil
+				}
 			}
 		}
 		// make node slug & discover type
