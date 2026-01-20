@@ -12,6 +12,9 @@ INSERT INTO oidc_users (user_uid, user_sub, provider_name) VALUES((SELECT uid FR
 -- name: GetUserByUsername :one
 SELECT (uid,created_at,updated_at,username,name) FROM users WHERE username = ? AND deleted_at IS NOT NULL LIMIT 1;
 
+-- name: GetUserByUid :one
+SELECT (uid,created_at,updated_at,username,name) FROM users WHERE uid = ? AND deleted_at IS NOT NULL LIMIT 1;
+
 -- name: GetUsernamesLike :many
 SELECT username FROM users WHERE username LIKE ? AND deleted_at IS NOT NULL LIMIT 6;
 
