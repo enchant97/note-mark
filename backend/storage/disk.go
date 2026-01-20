@@ -66,8 +66,7 @@ func (sc *DiskStorageController) readFile(
 	f, err := os.Open(absPath)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			// TODO custom error
-			return nil, err
+			return nil, errors.Join(core.ErrNotFound)
 		}
 		return nil, err
 	}
@@ -85,6 +84,9 @@ func (sc *DiskStorageController) renameFileOrFolder(
 		return err
 	}
 	if err := os.Rename(currentAbsPath, newAbsPath); err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return errors.Join(core.ErrNotFound)
+		}
 		return err
 	}
 	return nil
@@ -105,10 +107,10 @@ func (sc *DiskStorageController) ReadNoteNode(
 	if r, err := sc.readFile(username, slug+".md"); err == nil {
 		// note exists
 		return r, nil
-	} else if errors.Is(err, fs.ErrNotExist) {
+	} else if errors.Is(err, core.ErrNotFound) {
 		absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
 		if _, err := os.Stat(absPath); errors.Is(err, fs.ErrNotExist) {
-			return nil, err
+			return nil, errors.Join(err, core.ErrNotFound)
 		} else if err != nil {
 			return nil, err
 		}
@@ -143,7 +145,7 @@ func (sc *DiskStorageController) RenameNoteNode(
 	}
 	err := sc.renameFileOrFolder(username, slug+".md", newSlug+".md")
 	// handle if note directory existed, but not a note file (blank note)
-	if errors.Is(err, fs.ErrNotExist) {
+	if errors.Is(err, core.ErrNotFound) {
 		return nil
 	}
 	return err
