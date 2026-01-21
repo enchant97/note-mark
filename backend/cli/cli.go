@@ -10,6 +10,7 @@ import (
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/db/migrations"
+	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/urfave/cli/v3"
 )
 
@@ -29,6 +30,10 @@ func Entrypoint(appVersion string) error {
 		return err
 	}
 	dao := db.DAO{}.New(dbConn, db.New(dbConn))
+	sc, err := storage.DiskStorageController{}.New(filepath.Join(appConfig.DataPath, "notes"))
+	if err != nil {
+		return err
+	}
 
 	// Do CLI
 	app := &cli.Command{
@@ -47,7 +52,7 @@ func Entrypoint(appVersion string) error {
 				Name:  "clean",
 				Usage: "permanently removes users marked for deletion",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return commandClean()
+					return commandClean(&dao, &sc)
 				},
 			},
 			{

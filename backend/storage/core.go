@@ -21,6 +21,7 @@ type StorageController interface {
 	ReadAssetNode(username core.Username, slug string) (io.ReadCloser, error)
 	RenameAssetNode(username core.Username, slug string, newSlug string) error
 	DeleteAssetNode(username core.Username, slug string) error
+	DeleteUser(username core.Username) error
 	// Discover all nodes for a given username.
 	DiscoverNodesForUser(username core.Username, fn DiscoverNodesFunc) error
 	DiscoverUsers(fn DiscoverUsersFunc) error

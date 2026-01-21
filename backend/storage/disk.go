@@ -196,6 +196,11 @@ func (sc *DiskStorageController) DeleteAssetNode(
 	return os.Remove(absPath)
 }
 
+func (sc *DiskStorageController) DeleteUser(username core.Username) error {
+	absPath := filepath.Join(sc.rootPath, string(username))
+	return os.RemoveAll(absPath)
+}
+
 func (sc *DiskStorageController) DiscoverNodesForUser(
 	username core.Username,
 	fn DiscoverNodesFunc,

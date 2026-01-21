@@ -43,8 +43,11 @@ UPDATE users SET deleted_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHER
 -- name: MarkUserAsDeletedByUsername :exec
 UPDATE users SET deleted_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE username = ?;
 
--- name: AdminDeleteUserByUsername :exec
-DELETE FROM users WHERE username = ?;
+-- name: AdminGetDeletedUsers :many
+SELECT uid, username FROM users WHERE deleted_at IS NOT NULL ORDER BY deleted_at LIMIT ?;
+
+-- name: AdminDeleteUser :exec
+DELETE FROM users WHERE uid = ?;
 
 -- name: AdminRemoveUserPassword :exec
 UPDATE users SET password_hash = NULL WHERE username = ?;
