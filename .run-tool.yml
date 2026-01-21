@@ -1,0 +1,23 @@
+targets:
+  codegen-backend:
+    program: go
+    args:
+      - tool
+      - sqlc
+      - generate
+    cwd: backend
+  dev-backend:
+    program: go
+    args:
+      - run
+      - .
+      - serve
+    env_file: .env
+    cwd: backend
+  dev-backend-cli:
+    program: go
+    args:
+      - run
+      - .
+    env_file: .env
+    cwd: backend

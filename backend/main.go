@@ -1,23 +1,16 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
+	"log"
 
-	//"github.com/enchant97/note-mark/backend/db"
-	"github.com/enchant97/note-mark/backend/db/migrations"
+	"github.com/enchant97/note-mark/backend/cli"
 )
 
+// set this during build
+var Version = "unknown"
+
 func main() {
-	if err := migrations.MigrateDB("sqlite://db.sqlite"); err != nil {
-		panic(err)
+	if err := cli.Entrypoint(Version); err != nil {
+		log.Fatal(err)
 	}
-	dbConn, err := sql.Open("sqlite", "/db.sqlite")
-	if err != nil {
-		panic(err)
-	}
-
-	//dbQueries := db.New(dbConn)
-
-	fmt.Println(dbConn.Stats())
 }
