@@ -11,7 +11,6 @@ import (
 )
 
 func commandUserAdd(
-	appConfig config.AppConfig,
 	dao *db.DAO,
 	username string,
 	password string,
@@ -31,7 +30,6 @@ func commandUserAdd(
 }
 
 func commandUserRemove(
-	appConfig config.AppConfig,
 	dao *db.DAO,
 	username string,
 ) error {
@@ -39,7 +37,6 @@ func commandUserRemove(
 }
 
 func commandUserSetPassword(
-	appConfig config.AppConfig,
 	dao *db.DAO,
 	username string,
 	password string,
@@ -53,7 +50,6 @@ func commandUserSetPassword(
 }
 
 func commandUserRemovePassword(
-	appConfig config.AppConfig,
 	dao *db.DAO,
 	username string,
 ) error {

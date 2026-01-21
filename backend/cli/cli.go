@@ -69,7 +69,7 @@ func Entrypoint(appVersion string) error {
 						Action: func(ctx context.Context, cmd *cli.Command) error {
 							username := cmd.String("username")
 							password := cmd.String("password")
-							return commandUserAdd(appConfig, &dao, username, password)
+							return commandUserAdd(&dao, username, password)
 						},
 					},
 					{
@@ -80,7 +80,7 @@ func Entrypoint(appVersion string) error {
 						},
 						Action: func(ctx context.Context, cmd *cli.Command) error {
 							username := cmd.String("username")
-							return commandUserRemove(appConfig, &dao, username)
+							return commandUserRemove(&dao, username)
 						},
 					},
 					{
@@ -93,7 +93,7 @@ func Entrypoint(appVersion string) error {
 						Action: func(ctx context.Context, cmd *cli.Command) error {
 							username := cmd.String("username")
 							password := cmd.String("password")
-							return commandUserSetPassword(appConfig, &dao, username, password)
+							return commandUserSetPassword(&dao, username, password)
 						},
 					},
 					{
@@ -104,7 +104,7 @@ func Entrypoint(appVersion string) error {
 						},
 						Action: func(ctx context.Context, cmd *cli.Command) error {
 							username := cmd.String("username")
-							return commandUserRemovePassword(appConfig, &dao, username)
+							return commandUserRemovePassword(&dao, username)
 						},
 					},
 					{
