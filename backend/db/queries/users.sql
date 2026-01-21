@@ -31,11 +31,20 @@ LIMIT 1;
 -- name: UpdateUserPassword :exec
 UPDATE users SET password_hash = ?, updated_at=CURRENT_TIMESTAMP WHERE uid = ?;
 
+-- name: UpdateUserPasswordByUsername :exec
+UPDATE users SET password_hash = ?, updated_at=CURRENT_TIMESTAMP WHERE username = ?;
+
 -- name: UpdateUser :exec
 UPDATE users SET name = ?, updated_at=CURRENT_TIMESTAMP WHERE uid = ?;
 
 -- name: MarkUserAsDeleted :exec
-UPDATE users SET deleted_at=CURRENT_TIMESTAMP , updated_at=CURRENT_TIMESTAMP WHERE uid = ?;
+UPDATE users SET deleted_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE uid = ?;
+
+-- name: MarkUserAsDeletedByUsername :exec
+UPDATE users SET deleted_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE username = ?;
 
 -- name: AdminDeleteUserByUsername :exec
 DELETE FROM users WHERE username = ?;
+
+-- name: AdminRemoveUserPassword :exec
+UPDATE users SET password_hash = NULL WHERE username = ?;
