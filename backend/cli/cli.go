@@ -49,6 +49,29 @@ func Entrypoint(appVersion string) error {
 				},
 			},
 			{
+				Name:  "clear-cache",
+				Usage: "clear the tree cache",
+				Description: "clear cache can be used when note data is changed from outside" +
+					" of Note Mark (like when importing notes). " +
+					"Any instances of Note Mark will need to be restarted" +
+					" before this is taken into effect.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "username",
+						Aliases:  []string{"u"},
+						Required: false,
+						Usage:    "clear a specific users tree cache",
+					},
+				},
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					username := cmd.String("username")
+					if username == "" {
+						return dao.Queries.DeleteTreeCacheEntries(context.Background())
+					}
+					return dao.Queries.DeleteTreeCacheEntry(context.Background(), username)
+				},
+			},
+			{
 				Name:  "clean",
 				Usage: "permanently removes users marked for deletion",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
