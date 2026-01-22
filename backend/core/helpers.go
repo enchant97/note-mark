@@ -13,8 +13,8 @@ func MustNewUID() uuid.UUID {
 }
 
 func HashPassword(plainPassword string) []byte {
-	hashedPw, err := bcrypt.GenerateFromPassword([]byte(
-		plainPassword),
+	hashedPw, err := bcrypt.GenerateFromPassword(
+		[]byte(plainPassword),
 		bcrypt.DefaultCost,
 	)
 	if err != nil {

@@ -44,3 +44,17 @@ type Node struct {
 	ModTime  time.Time `json:"modTime"`
 	Children NodeTree  `json:"children"`
 }
+
+type OidcProviderInfo struct {
+	DisplayName string `json:"displayName"`
+	IssuerURL   string `json:"issuerUrl"`
+	ClientID    string `json:"clientId"`
+}
+
+type ServerInfo struct {
+	MinSupportedVersion       string            `json:"minSupportedVersion"`
+	AllowInternalSignup       bool              `json:"allowInternalSignup"`
+	AllowInternalLogin        bool              `json:"allowInternalLogin"`
+	EnableAnonymousUserSearch bool              `json:"enableAnonymousUserSearch"`
+	OidcProvider              *OidcProviderInfo `json:"oidcProvider,omitempty"`
+}
