@@ -52,7 +52,7 @@ func (p AuthDetailsProvider) ProviderMiddleware(ctx huma.Context, next func(huma
 			authValue = strings.TrimPrefix(authHeader, "Bearer ")
 		}
 		// process chosen token
-		if user, err := core.ParseAuthenticationToken(authValue, p.jwtSecret); err != nil {
+		if userUID, err := core.ParseAuthenticationToken(authValue, p.jwtSecret); err != nil {
 			// token could not be parsed
 			if cookieErr == nil {
 				p.clearSessionCookie(ctx)
@@ -62,7 +62,7 @@ func (p AuthDetailsProvider) ProviderMiddleware(ctx huma.Context, next func(huma
 		} else {
 			// token parsed, now validate user is still valid
 			// TODO add in-memory caching to this query with ttl
-			if _, err := p.dao.Queries.GetUserByUid(context.Background(), user.UserUID); err != nil {
+			if user, err := p.dao.Queries.GetUserByUid(context.Background(), userUID); err != nil {
 				if errors.Is(core.WrapDbError(err), core.ErrNotFound) {
 					if cookieErr == nil {
 						p.clearSessionCookie(ctx)
@@ -72,10 +72,17 @@ func (p AuthDetailsProvider) ProviderMiddleware(ctx huma.Context, next func(huma
 					log.Panicln(err)
 				}
 				return
+			} else {
+				ctx = huma.WithValue(
+					ctx,
+					AuthDetailsProviderContextKey,
+					core.AuthenticationDetails{}.New(&core.AuthenticatedUser{
+						UserUID:  user.Uid,
+						Username: user.Username,
+					}))
+				next(ctx)
+				return
 			}
-			ctx = huma.WithValue(ctx, AuthDetailsProviderContextKey, core.AuthenticationDetails{}.New(&user))
-			next(ctx)
-			return
 		}
 	}
 	ctx = huma.WithValue(ctx, AuthDetailsProviderContextKey, core.AuthenticationDetails{}.New(nil))

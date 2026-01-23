@@ -15,7 +15,8 @@ var (
 )
 
 type AuthenticatedUser struct {
-	UserUID uuid.UUID `json:"userUid"`
+	UserUID  uuid.UUID
+	Username string
 }
 
 func (u *AuthenticatedUser) IntoClaims(expiresAt time.Time) JWTClaims {
@@ -31,13 +32,11 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (c *JWTClaims) ToAuthenticatedUser() (AuthenticatedUser, error) {
+func (c *JWTClaims) GetUserUID() (uuid.UUID, error) {
 	if userID, err := uuid.Parse(c.Subject); err != nil {
-		return AuthenticatedUser{}, err
+		return uuid.Nil, err
 	} else {
-		return AuthenticatedUser{
-			UserUID: userID,
-		}, nil
+		return userID, nil
 	}
 }
 
@@ -78,18 +77,18 @@ func CreateAuthenticationToken(
 }
 
 // Parse a token and convert into a authenticated user
-func ParseAuthenticationToken(tokenString string, secretKey []byte) (AuthenticatedUser, error) {
+func ParseAuthenticationToken(tokenString string, secretKey []byte) (uuid.UUID, error) {
 	if token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(t *jwt.Token) (any, error) {
 		return secretKey, nil
 	},
 		jwt.WithValidMethods([]string{DefaultJwtSigningMethod.Alg()}),
 		jwt.WithExpirationRequired()); err != nil {
-		return AuthenticatedUser{}, err
+		return uuid.Nil, err
 	} else {
 		if claims, ok := token.Claims.(*JWTClaims); !ok {
-			return AuthenticatedUser{}, JWTClaimsNotValidError
+			return uuid.Nil, JWTClaimsNotValidError
 		} else {
-			return claims.ToAuthenticatedUser()
+			return claims.GetUserUID()
 		}
 	}
 }
