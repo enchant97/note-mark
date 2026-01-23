@@ -10,6 +10,8 @@ import (
 
 var ErrNotFound = errors.New("not found")
 var ErrConflict = errors.New("conflict")
+var ErrInvalidCredentials = errors.New("invalid credentials")
+var ErrFeatureDisabled = errors.New("feature is disabled")
 
 // / wrap a database error with a specific service error
 func WrapDbError(err error) error {

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"database/sql"
 	"log"
 
 	"github.com/google/uuid"
@@ -25,4 +26,21 @@ func HashPassword(plainPassword string) []byte {
 
 func DoesPasswordMatchHashed(plain string, hashed []byte) bool {
 	return bcrypt.CompareHashAndPassword(hashed, []byte(plain)) == nil
+}
+
+func StringPtrToNullString(v *string) sql.NullString {
+	if v == nil {
+		return sql.NullString{Valid: false}
+	}
+	return sql.NullString{
+		String: *v,
+		Valid:  true,
+	}
+}
+
+func NullStringToStringPtr(v sql.NullString) *string {
+	if v.Valid {
+		return &v.String
+	}
+	return nil
 }
