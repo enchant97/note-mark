@@ -28,7 +28,9 @@ func (s UsersService) New(
 	}
 }
 
-func (s *UsersService) CreateUserWithPassword(toCreate core.CreateUser) (core.User, error) {
+func (s *UsersService) CreateUserWithPassword(
+	toCreate core.CreateUserWithPassword,
+) (core.User, error) {
 	if !s.enableInternalSignup {
 		return core.User{}, core.ErrFeatureDisabled
 	}

@@ -61,7 +61,7 @@ type ServerInfo struct {
 	OidcProvider              *OidcProviderInfo `json:"oidcProvider,omitempty"`
 }
 
-type CreateUser struct {
+type CreateUserWithPassword struct {
 	Username string  `json:"username" minLength:"3" maxLength:"30" pattern:"[a-zA-Z0-9]+"`
 	Name     *string `json:"name" require:"false" minLength:"3" maxLength:"128"`
 	Password string  `json:"password" maxLength:"128"`
