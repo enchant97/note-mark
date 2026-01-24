@@ -92,7 +92,10 @@ type GetSearchForUserOutput struct {
 	Body []string
 }
 
-func (h UsersHandler) PostCreateUser(ctx context.Context, input *PostCreateUserInput) (*PostCreateUserOutput, error) {
+func (h UsersHandler) PostCreateUser(
+	ctx context.Context,
+	input *PostCreateUserInput,
+) (*PostCreateUserOutput, error) {
 	if user, err := h.service.CreateUserWithPassword(input.Body); err != nil {
 		if errors.Is(err, core.ErrFeatureDisabled) {
 			return nil, huma.Error403Forbidden("user signup has been disabled by the administrator")
@@ -108,7 +111,10 @@ func (h UsersHandler) PostCreateUser(ctx context.Context, input *PostCreateUserI
 	}
 }
 
-func (h UsersHandler) GetUserByUsername(ctx context.Context, input *GetUserByUsername) (*GetUserOutput, error) {
+func (h UsersHandler) GetUserByUsername(
+	ctx context.Context,
+	input *GetUserByUsername,
+) (*GetUserOutput, error) {
 	if user, err := h.service.GetUserByUsername(input.Username); err != nil {
 		if errors.Is(err, core.ErrNotFound) {
 			return nil, huma.Error404NotFound("user does not exist")
@@ -122,7 +128,10 @@ func (h UsersHandler) GetUserByUsername(ctx context.Context, input *GetUserByUse
 	}
 }
 
-func (h UsersHandler) PutCurrentUser(ctx context.Context, input *PutUserInput) (*struct{}, error) {
+func (h UsersHandler) PutCurrentUser(
+	ctx context.Context,
+	input *PutUserInput,
+) (*struct{}, error) {
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
 	currentUsername := authDetails.MustGetAuthenticatedUser().Username
 	if currentUsername != input.Username {
@@ -135,7 +144,10 @@ func (h UsersHandler) PutCurrentUser(ctx context.Context, input *PutUserInput) (
 	}
 }
 
-func (h UsersHandler) PutCurrentUserPassword(ctx context.Context, input *PutUserPasswordInput) (*struct{}, error) {
+func (h UsersHandler) PutCurrentUserPassword(
+	ctx context.Context,
+	input *PutUserPasswordInput,
+) (*struct{}, error) {
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
 	currentUsername := authDetails.MustGetAuthenticatedUser().Username
 	if currentUsername != input.Username {
@@ -154,7 +166,10 @@ func (h UsersHandler) PutCurrentUserPassword(ctx context.Context, input *PutUser
 	}
 }
 
-func (h UsersHandler) GetSearchForUser(ctx context.Context, input *GetSearchForUserInput) (*GetSearchForUserOutput, error) {
+func (h UsersHandler) GetSearchForUser(
+	ctx context.Context,
+	input *GetSearchForUserInput,
+) (*GetSearchForUserOutput, error) {
 	if users, err := h.service.GetUsernameSearch(input.Username); err != nil {
 		return nil, err
 	} else {
