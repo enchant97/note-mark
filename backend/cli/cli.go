@@ -45,7 +45,7 @@ func Entrypoint(appVersion string) error {
 				Name:  "serve",
 				Usage: "run the api server",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return commandServe()
+					return commandServe(appConfig, &dao)
 				},
 			},
 			{
