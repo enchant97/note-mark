@@ -24,7 +24,7 @@
     "vite-plugin-solid": "^2.11.10",
     "vite-plugin-wasm": "^3.5.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "wasm-pack": "^0.13.1"
+    "wasm-pack": "^0.14.0"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.1",
@@ -36,15 +36,16 @@
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.18",
     "codemirror": "^6.0.2",
-    "core-js": "^3.47.0",
+    "core-js": "^3.48.0",
     "daisyui": "^5.5.14",
     "dompurify": "^3.3.1",
     "feather-icons": "^4.29.2",
     "highlight.js": "^11.11.1",
     "openid-client": "^6.8.1",
-    "solid-js": "^1.9.10",
+    "solid-js": "^1.9.11",
     "solid-tree-navigator": "github:enchant97/solid-tree-navigator#f45670b5998b3779a5a7e9de2411c744af2986bf",
     "split.js": "^1.6.5",
-    "workbox-window": "^7.4.0"
+    "workbox-window": "^7.4.0",
+    "workbox-build": "^7.4.0"
   }
 }
