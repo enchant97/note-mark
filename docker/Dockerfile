@@ -29,7 +29,7 @@ FROM node-base AS frontend
     RUN pnpm run wasm
     RUN pnpm run build --outDir /dist
 
-FROM golang:1.24 as backend
+FROM golang:1.25 as backend
 
     WORKDIR /usr/src/note-mark
 
