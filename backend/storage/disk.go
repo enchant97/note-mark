@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/adrg/frontmatter"
+	"go.yaml.in/yaml/v4"
 
 	"github.com/enchant97/note-mark/backend/core"
 )
@@ -133,6 +134,31 @@ func (sc *DiskStorageController) ReadNoteNodeFrontMatter(
 	var fm core.FrontMatter
 	_, err = frontmatter.Parse(r, &fm)
 	return fm, err
+}
+
+func (sc *DiskStorageController) UpdateNoteNodeFrontmatter(
+	username core.Username,
+	slug string,
+	newFrontmatter core.FrontMatter,
+) error {
+	r, err := sc.ReadNoteNode(username, slug)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+	var fm core.FrontMatter
+	content, err := frontmatter.Parse(r, &fm)
+	rawFm, err := yaml.Marshal(&newFrontmatter)
+	if err != nil {
+		return err
+	}
+	newContent := bytes.Join([][]byte{
+		[]byte("---\n"),
+		rawFm,
+		[]byte("---\n\n"),
+		content,
+	}, []byte(""))
+	return sc.WriteNoteNode(username, slug, bytes.NewBuffer(newContent))
 }
 
 func (sc *DiskStorageController) RenameNoteNode(

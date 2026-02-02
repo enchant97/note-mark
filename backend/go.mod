@@ -14,6 +14,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/labstack/gommon v0.4.2
 	github.com/urfave/cli/v3 v3.6.2
+	go.yaml.in/yaml/v4 v4.0.0-rc.4
 	golang.org/x/crypto v0.45.0
 	golang.org/x/sync v0.19.0
 	modernc.org/sqlite v1.43.0

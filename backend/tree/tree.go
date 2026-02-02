@@ -97,6 +97,27 @@ func (tc *TreeController) WriteAssetNode(
 	return tc.updateCacheFromMemory(username)
 }
 
+func (tc *TreeController) UpdateNoteNodeFrontmatter(
+	username core.Username,
+	fullSlug core.NodeSlug,
+	newFrontmatter core.FrontMatter,
+) error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	// TODO return an error if note does not exist
+	if err := tc.sc.UpdateNoteNodeFrontmatter(username, string(fullSlug), newFrontmatter); err != nil {
+		return err
+	}
+	if err := tc.insertNodeIntoMemory(username, core.NodeEntry{
+		FullSlug: fullSlug,
+		Type:     core.NoteNode,
+		ModTime:  time.Now(),
+	}, newFrontmatter); err != nil {
+		return err
+	}
+	return tc.updateCacheFromMemory(username)
+}
+
 // Return a note node's content.
 func (tc *TreeController) GetNoteNodeContent(
 	username core.Username,
