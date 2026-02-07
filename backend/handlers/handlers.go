@@ -12,6 +12,7 @@ import (
 	"github.com/enchant97/note-mark/backend/db"
 	core_middleware "github.com/enchant97/note-mark/backend/middleware"
 	"github.com/enchant97/note-mark/backend/services"
+	"github.com/enchant97/note-mark/backend/tree"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -20,6 +21,7 @@ import (
 func SetupHandlers(
 	appConfig config.AppConfig,
 	dao *db.DAO,
+	tc *tree.TreeController,
 ) (http.Handler, error) {
 	mux := chi.NewRouter()
 	mux.Use(func(h http.Handler) http.Handler {
@@ -57,6 +59,10 @@ func SetupHandlers(
 		appConfig.EnableInternalLogin,
 		appConfig.EnableAnonymousUserSearch,
 	), appConfig, &authProvider)
+	SetupTreeHandler(api, services.TreeService{}.New(
+		dao,
+		tc,
+	), &authProvider)
 	if len(appConfig.StaticPath) != 0 {
 		if _, err := os.Stat(appConfig.StaticPath); errors.Is(err, os.ErrNotExist) {
 			return nil, err

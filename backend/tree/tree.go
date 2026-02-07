@@ -43,6 +43,20 @@ func (tc *TreeController) GetTreeModTimeForUser(username core.Username) (time.Ti
 	))
 }
 
+// Get the modification time for a users node.
+func (tc *TreeController) GetTreeModTimeForNode(
+	username core.Username,
+	fullSlug core.NodeSlug,
+) (time.Time, error) {
+	tc.mutex.RLock()
+	defer tc.mutex.RUnlock()
+	node, err := tc.tryGetNodeFromMemory(username, fullSlug)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return node.ModTime, nil
+}
+
 // Get a node tree for a specific user, will return false if no tree exists.
 func (tc *TreeController) TryGetNodeTreeForUser(username core.Username) (core.NodeTree, bool) {
 	tc.mutex.RLock()

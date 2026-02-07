@@ -3,6 +3,7 @@ package services
 import (
 	"io"
 	"path"
+	"time"
 
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
@@ -21,11 +22,22 @@ func (s TreeService) New(dao *db.DAO, tc *tree.TreeController) TreeService {
 	}
 }
 
-func (s *TreeService) GetTreeForUser(username core.Username) (core.NodeTree, error) {
-	if tree, ok := s.tc.TryGetNodeTreeForUser(username); ok {
-		return tree, nil
+func (s *TreeService) GetTreeForUser(username core.Username) (core.NodeTree, time.Time, error) {
+	treeModTime, err := s.tc.GetTreeModTimeForUser(username)
+	if err != nil {
+		return nil, time.Time{}, core.ErrNotFound
 	}
-	return nil, core.ErrNotFound
+	if tree, ok := s.tc.TryGetNodeTreeForUser(username); ok {
+		return tree, treeModTime, nil
+	}
+	return nil, time.Time{}, core.ErrNotFound
+}
+
+func (s *TreeService) GetNodeModTime(
+	username core.Username,
+	slug core.NodeSlug,
+) (time.Time, error) {
+	return s.tc.GetTreeModTimeForNode(username, slug)
 }
 
 func (s *TreeService) GetNodeContent(

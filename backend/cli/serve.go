@@ -11,10 +11,11 @@ import (
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/handlers"
+	"github.com/enchant97/note-mark/backend/tree"
 )
 
-func commandServe(appConfig config.AppConfig, dao *db.DAO) error {
-	if mux, err := handlers.SetupHandlers(appConfig, dao); err != nil {
+func commandServe(appConfig config.AppConfig, dao *db.DAO, tc *tree.TreeController) error {
+	if mux, err := handlers.SetupHandlers(appConfig, dao, tc); err != nil {
 		return err
 	} else {
 		// Start server

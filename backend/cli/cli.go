@@ -11,6 +11,7 @@ import (
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/db/migrations"
 	"github.com/enchant97/note-mark/backend/storage"
+	"github.com/enchant97/note-mark/backend/tree"
 	"github.com/urfave/cli/v3"
 )
 
@@ -34,7 +35,10 @@ func Entrypoint(appVersion string) error {
 	if err != nil {
 		return err
 	}
-
+	tc := tree.TreeController{}.New(&sc, &dao)
+	if err := tc.Load(); err != nil {
+		return err
+	}
 	// Do CLI
 	app := &cli.Command{
 		Version:               appVersion,
@@ -45,7 +49,7 @@ func Entrypoint(appVersion string) error {
 				Name:  "serve",
 				Usage: "run the api server",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return commandServe(appConfig, &dao)
+					return commandServe(appConfig, &dao, &tc)
 				},
 			},
 			{

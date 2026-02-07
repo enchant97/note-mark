@@ -3,6 +3,7 @@ package core
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -43,4 +44,12 @@ func NullStringToStringPtr(v sql.NullString) *string {
 		return &v.String
 	}
 	return nil
+}
+
+func TimeIntoHTTPFormat(t time.Time) string {
+	if loc, err := time.LoadLocation("GMT"); err != nil {
+		panic("failed to load GMT timezone")
+	} else {
+		return t.In(loc).Format(time.RFC1123)
+	}
 }
