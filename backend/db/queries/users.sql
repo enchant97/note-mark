@@ -19,7 +19,7 @@ SELECT uid,created_at,updated_at,username,name FROM users WHERE uid = ? AND dele
 SELECT username FROM users WHERE username LIKE ? AND deleted_at IS NULL LIMIT 6;
 
 -- name: GetUserPassword :one
-SELECT password_hash FROM users where username = ? AND deleted_at IS NULL LIMIT 1;
+SELECT uid,password_hash FROM users where username = ? AND deleted_at IS NULL LIMIT 1;
 
 -- name: GetOidcUserUid :one
 SELECT user_uid

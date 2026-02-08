@@ -12,10 +12,16 @@ import (
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/handlers"
 	"github.com/enchant97/note-mark/backend/tree"
+	"github.com/go-playground/validator/v10"
 )
 
-func commandServe(appConfig config.AppConfig, dao *db.DAO, tc *tree.TreeController) error {
-	if mux, err := handlers.SetupHandlers(appConfig, dao, tc); err != nil {
+func commandServe(
+	validate *validator.Validate,
+	appConfig config.AppConfig,
+	dao *db.DAO,
+	tc *tree.TreeController,
+) error {
+	if mux, err := handlers.SetupHandlers(validate, appConfig, dao, tc); err != nil {
 		return err
 	} else {
 		// Start server

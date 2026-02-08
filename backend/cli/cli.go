@@ -12,13 +12,15 @@ import (
 	"github.com/enchant97/note-mark/backend/db/migrations"
 	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/enchant97/note-mark/backend/tree"
+	"github.com/go-playground/validator/v10"
 	"github.com/urfave/cli/v3"
 )
 
 func Entrypoint(appVersion string) error {
+	validate := validator.New(validator.WithRequiredStructEnabled())
 	// Parse config
 	var appConfig config.AppConfig
-	if err := appConfig.ParseConfig(); err != nil {
+	if err := appConfig.ParseConfig(validate); err != nil {
 		return err
 	}
 	// Setup DB
@@ -49,7 +51,7 @@ func Entrypoint(appVersion string) error {
 				Name:  "serve",
 				Usage: "run the api server",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return commandServe(appConfig, &dao, &tc)
+					return commandServe(validate, appConfig, &dao, &tc)
 				},
 			},
 			{

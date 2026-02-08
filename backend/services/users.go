@@ -92,7 +92,7 @@ func (s *UsersService) UpdateUserPasswordByUsername(
 	if !s.enableInternalLogin {
 		return core.ErrFeatureDisabled
 	}
-	actualPasswordHash, err := core.WrapDbErrorWithValue(
+	user, err := core.WrapDbErrorWithValue(
 		s.dao.Queries.GetUserPassword(
 			context.Background(),
 			username,
@@ -100,7 +100,7 @@ func (s *UsersService) UpdateUserPasswordByUsername(
 	if err != nil {
 		return err
 	}
-	if ok := core.DoesPasswordMatchHashed(v.ExistingPassword, actualPasswordHash); !ok {
+	if ok := core.DoesPasswordMatchHashed(v.ExistingPassword, user.PasswordHash); !ok {
 		return core.ErrInvalidCredentials
 	}
 	return core.WrapDbError(

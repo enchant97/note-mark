@@ -12,6 +12,10 @@ sql:
             go_type:
               import: "github.com/google/uuid"
               type: "UUID"
+          - column: "oidc_users.user_uid"
+            go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"
           - column: "tree_cache.owner_uid"
             go_type:
               import: "github.com/google/uuid"

@@ -16,9 +16,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-playground/validator/v10"
 )
 
 func SetupHandlers(
+	validate *validator.Validate,
 	appConfig config.AppConfig,
 	dao *db.DAO,
 	tc *tree.TreeController,
@@ -45,12 +47,14 @@ func SetupHandlers(
 	config.DocsPath = "/api/docs"
 	config.OpenAPIPath = "/api/openapi"
 	api := humachi.New(mux, config)
+	validatorProvider := core_middleware.ValidatorMiddleware{}.New(validate)
 	authProvider := core_middleware.AuthDetailsProvider{}.New(
 		api,
 		dao,
 		appConfig.AuthToken.Secret,
 		strings.HasPrefix(appConfig.PublicUrl, "https://"),
 	)
+	api.UseMiddleware(validatorProvider.Provider)
 	api.UseMiddleware(authProvider.ProviderMiddleware)
 	SetupMiscHandler(api, appConfig)
 	SetupUsersHandler(api, services.UsersService{}.New(

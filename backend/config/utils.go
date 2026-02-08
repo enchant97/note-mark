@@ -10,10 +10,8 @@ import (
 	"github.com/labstack/gommon/bytes"
 )
 
-var validate = validator.New(validator.WithRequiredStructEnabled())
-
 // Load the config from OS
-func (appConfig *AppConfig) ParseConfig() error {
+func (appConfig *AppConfig) ParseConfig(validate *validator.Validate) error {
 	if err := env.Parse(appConfig); err != nil {
 		return err
 	}

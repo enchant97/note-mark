@@ -47,13 +47,34 @@ type AccessToken struct {
 	ExpiresIn   uint   `json:"expires_in"`
 }
 
-// OAuth2.0 Access Token Request, following: RFC6749
-//
-// only supporting 'Resource Owner Password Flow'
+type PasswordGrant struct {
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
+
+type TokenExchangeGrant struct {
+	Resource           string `json:"resource,omitempty"`
+	Audience           string `json:"audience,omitempty"`
+	Scope              string `json:"scope,omitempty"`
+	RequestedTokenType string `json:"requested_token_type,omitempty"`
+	SubjectToken       string `json:"subject_token" validate:"required"`
+	SubjectTokenType   string `json:"subject_token_type" validate:"eq=urn:ietf:params:oauth:token-type:access_token"`
+	ActorToken         string `json:"actor_token,omitempty"  validate:"require_with=ActorTokenType"`
+	ActorTokenType     string `json:"actor_token_type,omitempty" validate:"require_with=ActorToken,eq=urn:ietf:params:oauth:token-type:id_token"`
+}
+
+// OAuth2.0 Access Token Request, following: RFC6749 + RFC8693
 type AccessTokenRequest struct {
-	GrantType string `json:"grant_type" query:"grant_type" form:"grant_type" required:"true" enum:"password"`
-	Username  string `json:"username" query:"username" form:"username" required:"true"`
-	Password  string `json:"password" query:"password" form:"password" required:"true"`
+	GrantType          string `json:"grant_type" validate:"oneof=password urn:ietf:params:oauth:grant-type:token-exchange"`
+	PasswordGrant      `validate:"required_if=GrantType password,dive"`
+	TokenExchangeGrant `validate:"required_if=GrantType urn:ietf:params:oauth:grant-type:token-exchange,dive"`
+}
+
+// OpenID UserInfo Response
+type UserInfoResponse struct {
+	Sub               string  `json:"sub"`
+	Name              *string `json:"name,omitempty"`
+	PreferredUsername string  `json:"preferred_username"`
 }
 
 // Create token for authentication
