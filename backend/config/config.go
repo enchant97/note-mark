@@ -34,7 +34,6 @@ type AppConfig struct {
 	EnableInternalSignup      bool            `env:"ENABLE_INTERNAL_SIGNUP,notEmpty" envDefault:"true"`
 	EnableInternalLogin       bool            `env:"ENABLE_INTERNAL_LOGIN,notEmpty" envDefault:"true"`
 	EnableAnonymousUserSearch bool            `env:"ENABLE_ANONYMOUS_USER_SEARCH,notEmpty" envDefault:"true"`
-	NoteSizeLimit             Bytes           `env:"NOTE_SIZE_LIMIT,notEmpty" envDefault:"1M"`
-	AssetSizeLimit            Bytes           `env:"ASSET_SIZE_LIMIT,notEmpty" envDefault:"12M"`
+	FileSizeLimit             Bytes           `env:"FILE_SIZE_LIMIT,notEmpty" envDefault:"12M"`
 	OIDC                      *OidcConfig     `envPrefix:"OIDC__" env:",init" validate:"omitempty,required"`
 }

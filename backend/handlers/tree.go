@@ -19,6 +19,7 @@ import (
 func SetupTreeHandler(
 	api huma.API,
 	service services.TreeService,
+	fileSizeLimitBytes int64,
 	authProvider *middleware.AuthDetailsProvider,
 ) {
 	handler := TreeHandler{
@@ -45,13 +46,14 @@ func SetupTreeHandler(
 		OperationID: "GetNodeContentBySlug",
 	}, handler.GetNodeContent)
 	huma.Register(api, huma.Operation{
-		Method:      http.MethodPut,
-		Path:        "/api/tree/content/u/{username}/*",
-		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
-		Security:    defaultSecurityOp,
-		Tags:        []string{"Node Tree"},
-		Summary:     "Update node content by slug",
-		OperationID: "UpdateNodeContentBySlug",
+		Method:       http.MethodPut,
+		Path:         "/api/tree/content/u/{username}/*",
+		Middlewares:  huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		MaxBodyBytes: fileSizeLimitBytes,
+		Security:     defaultSecurityOp,
+		Tags:         []string{"Node Tree"},
+		Summary:      "Update node content by slug",
+		OperationID:  "UpdateNodeContentBySlug",
 	}, handler.PutNodeContent)
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodPut,

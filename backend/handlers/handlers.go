@@ -80,7 +80,7 @@ func SetupHandlers(
 	SetupTreeHandler(api, services.TreeService{}.New(
 		dao,
 		tc,
-	), &authProvider)
+	), int64(appConfig.FileSizeLimit), &authProvider)
 	if len(appConfig.StaticPath) != 0 {
 		if _, err := os.Stat(appConfig.StaticPath); errors.Is(err, os.ErrNotExist) {
 			return nil, err
