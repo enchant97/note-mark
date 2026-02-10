@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/enchant97/note-mark/backend/config"
@@ -12,7 +13,13 @@ func SetupMiscHandler(api huma.API, appConfig config.AppConfig) {
 	miscHandler := MiscHandler{
 		AppConfig: appConfig,
 	}
-	huma.Get(api, "/api/info", miscHandler.GetServerInfo)
+	huma.Register(api, huma.Operation{
+		Method:      http.MethodGet,
+		Path:        "/api/info",
+		Tags:        []string{"Miscellaneous"},
+		Summary:     "Get api server info",
+		OperationID: "GetServerInfo",
+	}, miscHandler.GetServerInfo)
 }
 
 type GetServerInfoOutput struct {

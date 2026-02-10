@@ -27,8 +27,17 @@ func SetupUsersHandler(
 		Method:        http.MethodPost,
 		Path:          "/api/users",
 		DefaultStatus: http.StatusCreated,
+		Tags:          []string{"Users"},
+		Summary:       "Create a user",
+		OperationID:   "CreateUser",
 	}, userHandler.PostCreateUser)
-	huma.Get(api, "/api/users/{username}", userHandler.GetUserByUsername)
+	huma.Register(api, huma.Operation{
+		Method:      http.MethodGet,
+		Path:        "/api/users/{username}",
+		Tags:        []string{"Users"},
+		Summary:     "Get user by username",
+		OperationID: "GetUserByUsername",
+	}, userHandler.GetUserByUsername)
 	huma.Register(api, huma.Operation{
 		Method: http.MethodGet,
 		Path:   "/api/users/search",
@@ -39,16 +48,33 @@ func SetupUsersHandler(
 				return huma.Middlewares{authProvider.AuthRequiredMiddleware}
 			}
 		}(),
+		Security: func() []map[string][]string {
+			if appConfig.EnableAnonymousUserSearch {
+				return []map[string][]string{}
+			}
+			return defaultSecurityOp
+		}(),
+		Tags:        []string{"Users"},
+		Summary:     "Search for username",
+		OperationID: "SearchForUsername",
 	}, userHandler.GetSearchForUser)
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodPut,
 		Path:        "/api/users/{username}",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		Security:    defaultSecurityOp,
+		Tags:        []string{"Users"},
+		Summary:     "Update user by username",
+		OperationID: "UpdateUserByUsername",
 	}, userHandler.PutCurrentUser)
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodPut,
 		Path:        "/api/users/{username}/password",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		Security:    defaultSecurityOp,
+		Tags:        []string{"Users"},
+		Summary:     "Update user password by username",
+		OperationID: "UpdateUserPasswordByUsername",
 	}, userHandler.PutCurrentUserPassword)
 }
 

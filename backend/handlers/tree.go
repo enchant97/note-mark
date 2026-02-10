@@ -26,34 +26,59 @@ func SetupTreeHandler(
 		authProvider: authProvider,
 	}
 	huma.Register(api, huma.Operation{
+
 		Method:      http.MethodGet,
 		Path:        "/api/tree/u/{username}",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		Security:    defaultSecurityOp,
+		Tags:        []string{"Node Tree"},
+		Summary:     "Get node tree for user",
+		OperationID: "GetNodeTreeForUser",
 	}, handler.GetNodeTreeByUsername)
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodGet,
 		Path:        "/api/tree/content/u/{username}/*",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		Security:    defaultSecurityOp,
+		Tags:        []string{"Node Tree"},
+		Summary:     "Get node content by slug",
+		OperationID: "GetNodeContentBySlug",
 	}, handler.GetNodeContent)
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodPut,
 		Path:        "/api/tree/content/u/{username}/*",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		Security:    defaultSecurityOp,
+		Tags:        []string{"Node Tree"},
+		Summary:     "Update node content by slug",
+		OperationID: "UpdateNodeContentBySlug",
 	}, handler.PutNodeContent)
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodPut,
 		Path:        "/api/tree/frontmatter/u/{username}/*",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		Security:    defaultSecurityOp,
+		Tags:        []string{"Node Tree"},
+		Summary:     "Update note frontmatter by slug",
+		OperationID: "UpdateNoteFrontmatterBySlug",
 	}, handler.PutNoteNodeFrontmatter)
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodPost,
 		Path:        "/api/tree/rename/u/{username}/*",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		Security:    defaultSecurityOp,
+		Tags:        []string{"Node Tree"},
+		Summary:     "Rename node by slug",
+		OperationID: "RenameNodeBySlug",
 	}, handler.PostRenameNode)
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodDelete,
 		Path:        "/api/tree/u/{username}/*",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		Security:    defaultSecurityOp,
+		Tags:        []string{"Node Tree"},
+		Summary:     "Delete node by slug",
+		OperationID: "DeleteNodeBySlug",
 	}, handler.DeleteNode)
 }
 

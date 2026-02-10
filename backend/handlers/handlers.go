@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -18,6 +19,8 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/go-playground/validator/v10"
 )
+
+var defaultSecurityOp = []map[string][]string{{"api": {}}}
 
 func SetupHandlers(
 	validate *validator.Validate,
@@ -46,6 +49,16 @@ func SetupHandlers(
 	config := huma.DefaultConfig("Note Mark - API", "1")
 	config.DocsPath = "/api/docs"
 	config.OpenAPIPath = "/api/openapi"
+	config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
+		"api": {
+			Type: "oauth2",
+			Flows: &huma.OAuthFlows{
+				AuthorizationCode: &huma.OAuthFlow{
+					TokenURL: fmt.Sprintf("%s/auth/o/token", appConfig.PublicUrl),
+				},
+			},
+		},
+	}
 	api := humachi.New(mux, config)
 	validatorProvider := core_middleware.ValidatorMiddleware{}.New(validate)
 	authProvider := core_middleware.AuthDetailsProvider{}.New(

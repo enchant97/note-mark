@@ -29,21 +29,36 @@ func SetupAuthHandler(
 		authProvider: *authProvider,
 	}
 	huma.Register(api, huma.Operation{
-		Method: http.MethodPost,
-		Path:   "/api/auth/s/start",
+		Method:      http.MethodPost,
+		Path:        "/api/auth/s/start",
+		Hidden:      true,
+		Tags:        []string{"Authentication"},
+		Summary:     "Start auth session",
+		OperationID: "StartSession",
 	}, handler.PostSessionStart)
 	huma.Register(api, huma.Operation{
-		Method: http.MethodDelete,
-		Path:   "/api/auth/s/end",
+		Method:      http.MethodDelete,
+		Path:        "/api/auth/s/end",
+		Hidden:      true,
+		Tags:        []string{"Authentication"},
+		Summary:     "End auth session",
+		OperationID: "EndSession",
 	}, handler.DeleteSessionEnd)
 	huma.Register(api, huma.Operation{
-		Method: http.MethodPost,
-		Path:   "/api/auth/o/token",
+		Method:      http.MethodPost,
+		Path:        "/api/auth/o/token",
+		Tags:        []string{"Authentication"},
+		Summary:     "Request access token",
+		OperationID: "RequestAccessToken",
 	}, handler.PostCreateToken)
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodGet,
 		Path:        "/api/auth/o/userinfo",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		Security:    defaultSecurityOp,
+		Tags:        []string{"Authentication"},
+		Summary:     "Get user info",
+		OperationID: "GetUserInfo",
 	}, handler.GetUserInfo)
 }
 
