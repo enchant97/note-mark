@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/conditional"
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/middleware"
 	"github.com/enchant97/note-mark/backend/services"
@@ -90,6 +91,7 @@ type TreeHandler struct {
 }
 
 type GetNodeTreeByUsernameInput struct {
+	conditional.Params
 	Username core.Username `path:"username"`
 }
 
@@ -100,6 +102,7 @@ type GetNodeTreeByUsernameOutput struct {
 }
 
 type GetNodeContentInput struct {
+	conditional.Params
 	Username core.Username `path:"username"`
 	Slug     core.NodeSlug `path:"*"`
 }
@@ -139,6 +142,12 @@ func (h TreeHandler) GetNodeTreeByUsername(
 	tree, treeModTime, err := h.service.GetTreeForUser(input.Username)
 	if err != nil {
 		return nil, err
+	}
+	// TODO run separate tree mod check before getting the tree into memory
+	if input.HasConditionalParams() {
+		if err := input.PreconditionFailed("", treeModTime); err != nil {
+			return nil, err
+		}
 	}
 	return &GetNodeTreeByUsernameOutput{
 		LastModified: treeModTime,
@@ -180,6 +189,11 @@ func (h TreeHandler) GetNodeContent(
 	if err != nil {
 		return nil, err
 	}
+	if input.HasConditionalParams() {
+		if err := input.PreconditionFailed("", nodeModTime); err != nil {
+			return nil, err
+		}
+	}
 	r, err := h.service.GetNodeContent(input.Username, sanitizedSlug)
 	if err != nil {
 		return nil, err
@@ -189,6 +203,7 @@ func (h TreeHandler) GetNodeContent(
 			if nodeType == core.NoteNode {
 				ctx.SetHeader("Content-Type", "text/markdown")
 			} else {
+				// TODO set actual content-type if possible
 				ctx.SetHeader("Content-Type", "application/octet-stream")
 			}
 			ctx.SetHeader("Last-Modified", core.TimeIntoHTTPFormat(nodeModTime))
