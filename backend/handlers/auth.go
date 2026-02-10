@@ -17,7 +17,7 @@ type AuthHandler struct {
 	authProvider middleware.AuthDetailsProvider
 }
 
-func (h AuthHandler) SetupAuthHandler(
+func SetupAuthHandler(
 	api huma.API,
 	service services.AuthService,
 	appConfig config.AppConfig,
