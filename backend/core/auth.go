@@ -48,8 +48,8 @@ type AccessToken struct {
 }
 
 type PasswordGrant struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Username string `json:"username" required:"false" validate:"required"`
+	Password string `json:"password" required:"false" validate:"required"`
 }
 
 type TokenExchangeGrant struct {
@@ -57,9 +57,9 @@ type TokenExchangeGrant struct {
 	Audience           string `json:"audience,omitempty"`
 	Scope              string `json:"scope,omitempty"`
 	RequestedTokenType string `json:"requested_token_type,omitempty"`
-	SubjectToken       string `json:"subject_token" validate:"required"`
-	SubjectTokenType   string `json:"subject_token_type" validate:"eq=urn:ietf:params:oauth:token-type:access_token"`
-	ActorToken         string `json:"actor_token,omitempty"  validate:"require_with=ActorTokenType"`
+	SubjectToken       string `json:"subject_token" required:"false" validate:"required"`
+	SubjectTokenType   string `json:"subject_token_type" required:"false" validate:"eq=urn:ietf:params:oauth:token-type:access_token"`
+	ActorToken         string `json:"actor_token,omitempty" validate:"require_with=ActorTokenType"`
 	ActorTokenType     string `json:"actor_token_type,omitempty" validate:"require_with=ActorToken,eq=urn:ietf:params:oauth:token-type:id_token"`
 }
 
