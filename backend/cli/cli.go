@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/enchant97/note-mark/backend/config"
+	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/db/migrations"
 	"github.com/enchant97/note-mark/backend/storage"
@@ -17,7 +18,14 @@ import (
 )
 
 func Entrypoint(appVersion string) error {
+	// Setup Validator
 	validate := validator.New(validator.WithRequiredStructEnabled())
+	validate.RegisterValidation("username", func(fl validator.FieldLevel) bool {
+		return core.IsValidUsername(fl.Field().String())
+	})
+	validate.RegisterValidation("slug_full", func(fl validator.FieldLevel) bool {
+		return core.IsValidFullSlug(fl.Field().String())
+	})
 	// Parse config
 	var appConfig config.AppConfig
 	if err := appConfig.ParseConfig(validate); err != nil {

@@ -92,42 +92,46 @@ type TreeHandler struct {
 
 type GetNodeTreeByUsernameInput struct {
 	conditional.Params
-	Username core.Username `path:"username"`
+	UsernamePath
 }
 
 type GetNodeTreeByUsernameOutput struct {
-	Username     core.Username `path:"username"`
-	LastModified time.Time     `header:"Last-Modified"`
+	UsernamePath
+	LastModified time.Time `header:"Last-Modified"`
 	Body         core.NodeTree
 }
 
 type GetNodeContentInput struct {
 	conditional.Params
-	Username core.Username `path:"username"`
-	Slug     core.NodeSlug `path:"*"`
+	UsernamePath
+	SlugPath
 }
 
 type PutNodeContentInput struct {
-	Username core.Username `path:"username"`
-	Slug     core.NodeSlug `path:"*"`
-	RawBody  []byte
+	UsernamePath
+	SlugPath
+	RawBody []byte
 }
 
 type PutNoteNodeFrontmatterInput struct {
-	Username core.Username `path:"username"`
-	Slug     core.NodeSlug `path:"*"`
-	Body     core.FrontMatter
+	UsernamePath
+	SlugPath
+	Body core.FrontMatter
 }
 
 type PostRenameNodeInput struct {
-	Username core.Username `path:"username"`
-	Slug     core.NodeSlug `path:"*"`
-	Body     string
+	UsernamePath
+	SlugPath
+	Body string `validate:"slug_full"`
+}
+
+func (m *PostRenameNodeInput) Resolve(ctx huma.Context) []error {
+	return middleware.ValidateRequestInput(ctx, m)
 }
 
 type DeleteNodeInput struct {
-	Username core.Username `path:"username"`
-	Slug     core.NodeSlug `path:"*"`
+	UsernamePath
+	SlugPath
 }
 
 func (h TreeHandler) GetNodeTreeByUsername(
@@ -155,10 +159,7 @@ func (h TreeHandler) GetNodeTreeByUsername(
 	}, nil
 }
 
-func validateNodeType(username core.Username, slug string) (core.NodeType, error) {
-	if !core.IsValidFullSlug(slug) {
-		return "", huma.Error422UnprocessableEntity("invalid slug")
-	}
+func getValidatedNodeType(username core.Username, slug string) (core.NodeType, error) {
 	var nodeType core.NodeType
 	if path.Ext(string(slug)) == "" {
 		nodeType = core.NoteNode
@@ -181,7 +182,7 @@ func (h TreeHandler) GetNodeContent(
 		return nil, huma.Error403Forbidden("you do not permission to view other users content")
 	}
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
-	nodeType, err := validateNodeType(input.Username, string(sanitizedSlug))
+	nodeType, err := getValidatedNodeType(input.Username, string(sanitizedSlug))
 	if err != nil {
 		return nil, err
 	}
@@ -224,7 +225,7 @@ func (h TreeHandler) PutNodeContent(
 		return nil, huma.Error403Forbidden("you do not permission to view other users content")
 	}
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
-	if _, err := validateNodeType(input.Username, string(sanitizedSlug)); err != nil {
+	if _, err := getValidatedNodeType(input.Username, string(sanitizedSlug)); err != nil {
 		return nil, err
 	}
 	r := bytes.NewReader(input.RawBody)
@@ -241,7 +242,7 @@ func (h TreeHandler) PutNoteNodeFrontmatter(
 		return nil, huma.Error403Forbidden("you do not permission to view other users content")
 	}
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
-	if nodeType, err := validateNodeType(input.Username, string(sanitizedSlug)); err != nil {
+	if nodeType, err := getValidatedNodeType(input.Username, string(sanitizedSlug)); err != nil {
 		return nil, err
 	} else if nodeType != core.NoteNode {
 		return nil, huma.Error422UnprocessableEntity("invalid slug")
@@ -259,12 +260,12 @@ func (h TreeHandler) PostRenameNode(
 		return nil, huma.Error403Forbidden("you do not permission to view other users content")
 	}
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
-	nodeType, err := validateNodeType(input.Username, string(sanitizedSlug))
+	nodeType, err := getValidatedNodeType(input.Username, string(sanitizedSlug))
 	if err != nil {
 		return nil, err
 	}
 	sanitizedNewSlug := core.NodeSlug(path.Clean(string(input.Body)))
-	newNodeType, err := validateNodeType(input.Username, string(sanitizedNewSlug))
+	newNodeType, err := getValidatedNodeType(input.Username, string(sanitizedNewSlug))
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +285,7 @@ func (h TreeHandler) DeleteNode(
 		return nil, huma.Error403Forbidden("you do not permission to view other users content")
 	}
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
-	if _, err := validateNodeType(input.Username, string(sanitizedSlug)); err != nil {
+	if _, err := getValidatedNodeType(input.Username, string(sanitizedSlug)); err != nil {
 		return nil, err
 	}
 	if !strings.HasPrefix(string(sanitizedSlug), ".trash/") {

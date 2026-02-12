@@ -97,7 +97,7 @@ type GetUserOutput struct {
 }
 
 type GetUserByUsername struct {
-	Username string `path:"username"`
+	UsernamePath
 }
 
 type PutUserInput struct {
@@ -141,7 +141,7 @@ func (h UsersHandler) GetUserByUsername(
 	ctx context.Context,
 	input *GetUserByUsername,
 ) (*GetUserOutput, error) {
-	if user, err := h.service.GetUserByUsername(input.Username); err != nil {
+	if user, err := h.service.GetUserByUsername(string(input.Username)); err != nil {
 		if errors.Is(err, core.ErrNotFound) {
 			return nil, huma.Error404NotFound("user does not exist")
 		} else {
@@ -160,10 +160,10 @@ func (h UsersHandler) PutCurrentUser(
 ) (*struct{}, error) {
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
 	currentUsername := authDetails.MustGetAuthenticatedUser().Username
-	if currentUsername != input.Username {
+	if currentUsername != string(input.Username) {
 		return nil, huma.Error403Forbidden("you do not have permission to update another users account")
 	}
-	if err := h.service.UpdateUserByUsername(input.Username, input.Body); err != nil {
+	if err := h.service.UpdateUserByUsername(string(input.Username), input.Body); err != nil {
 		return nil, err
 	} else {
 		return nil, nil
@@ -176,10 +176,10 @@ func (h UsersHandler) PutCurrentUserPassword(
 ) (*struct{}, error) {
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
 	currentUsername := authDetails.MustGetAuthenticatedUser().Username
-	if currentUsername != input.Username {
+	if currentUsername != string(input.Username) {
 		return nil, huma.Error403Forbidden("you do not have permission to update another users account")
 	}
-	if err := h.service.UpdateUserPasswordByUsername(input.Username, input.Body); err != nil {
+	if err := h.service.UpdateUserPasswordByUsername(string(input.Username), input.Body); err != nil {
 		if errors.Is(err, core.ErrFeatureDisabled) {
 			return nil, huma.Error403Forbidden("password changes have been disabled by the administrator")
 		} else if errors.Is(err, core.ErrInvalidCredentials) {
