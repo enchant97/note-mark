@@ -1,0 +1,15 @@
+{
+  "name": "note-mark-frontend",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "packageManager": "pnpm@10.25.0",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

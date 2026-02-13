@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "types": [],
+    "noEmit": true,
+    "isolatedModules": true,
+    "strictNullChecks": true,
+    "baseUrl": "./",
+    "paths": {
+      "~/*": [
+        "./src/*"
+      ]
+    }
+  }
+}
