@@ -1,4 +1,9 @@
 targets:
+  deps-frontend:
+    program: "pnpm"
+    args:
+      - i
+    cwd: frontend
   codegen-backend:
     program: go
     args:
@@ -6,6 +11,12 @@ targets:
       - sqlc
       - generate
     cwd: backend
+  dev-frontend:
+    program: pnpm
+    args:
+      - run
+      - dev
+    cwd: frontend
   dev-backend:
     program: go
     args:
