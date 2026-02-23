@@ -115,7 +115,7 @@ export default class Api {
     return await resp.json()
   }
   static async searchForUsername(query: string): Promise<string[]> {
-    let resp = await apiFetch(`users/search?=${query}`, {
+    let resp = await apiFetch(`users/search?username=${query}`, {
       method: HttpMethods.GET,
     })
     await throwResponseApiErrors(resp)
