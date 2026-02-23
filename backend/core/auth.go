@@ -59,15 +59,15 @@ type TokenExchangeGrant struct {
 	RequestedTokenType string `json:"requested_token_type,omitempty"`
 	SubjectToken       string `json:"subject_token" required:"false" validate:"required"`
 	SubjectTokenType   string `json:"subject_token_type" required:"false" validate:"eq=urn:ietf:params:oauth:token-type:access_token"`
-	ActorToken         string `json:"actor_token,omitempty" validate:"require_with=ActorTokenType"`
-	ActorTokenType     string `json:"actor_token_type,omitempty" validate:"require_with=ActorToken,eq=urn:ietf:params:oauth:token-type:id_token"`
+	ActorToken         string `json:"actor_token,omitempty" validate:"required_with=ActorTokenType"`
+	ActorTokenType     string `json:"actor_token_type,omitempty" validate:"required_with=ActorToken,eq=urn:ietf:params:oauth:token-type:id_token"`
 }
 
 // OAuth2.0 Access Token Request, following: RFC6749 + RFC8693
 type AccessTokenRequest struct {
-	GrantType          string `json:"grant_type" validate:"oneof=password urn:ietf:params:oauth:grant-type:token-exchange"`
-	PasswordGrant      `validate:"required_if=GrantType password,dive"`
-	TokenExchangeGrant `validate:"required_if=GrantType urn:ietf:params:oauth:grant-type:token-exchange,dive"`
+	GrantType           string `json:"grant_type" validate:"oneof=password urn:ietf:params:oauth:grant-type:token-exchange"`
+	*PasswordGrant      `validate:"required_if=GrantType password"`
+	*TokenExchangeGrant `validate:"required_if=GrantType urn:ietf:params:oauth:grant-type:token-exchange"`
 }
 
 // OpenID UserInfo Response

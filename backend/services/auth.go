@@ -45,9 +45,9 @@ func (s *AuthService) CreateAccessToken(request core.AccessTokenRequest) (core.A
 	var userUid uuid.UUID
 	var err error
 	if request.GrantType == "password" {
-		userUid, err = s.getUserForPasswordGrant(request.PasswordGrant)
+		userUid, err = s.getUserForPasswordGrant(*request.PasswordGrant)
 	} else {
-		userUid, err = s.getUserForTokenExchangeGrant(request.TokenExchangeGrant)
+		userUid, err = s.getUserForTokenExchangeGrant(*request.TokenExchangeGrant)
 	}
 	if err != nil {
 		return core.AccessToken{}, err
