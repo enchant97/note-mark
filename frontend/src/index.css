@@ -1,0 +1,127 @@
+@import "highlight.js/styles/atom-one-dark.css";
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@plugin "daisyui" {
+    themes: light, dark --default --prefersdark;
+    exclude: rootscrollgutter, rootcolor;
+}
+
+@plugin "daisyui/theme" {
+    name: "light";
+    --color-primary: #2a76b7;
+    --radius-box: var(--radius-xl);
+    --radius-field: var(--radius-xl);
+}
+
+@plugin "daisyui/theme" {
+    name: "dark";
+    --color-base-content: oklch(82% .02 264.4);
+    --color-primary: #235886;
+    --radius-box: var(--radius-3xl);
+    --radius-field: var(--radius-xl);
+}
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@utility shadow-glass {
+    box-shadow: inset -1px 1px 3px 0 rgba(0, 0, 0, 0.2), 0px 0px 5px 0px rgba(0, 0, 0, 0.1);
+
+    @variant dark {
+        box-shadow: inset -1px 1px 3px 0 rgba(255, 255, 255, 0.3), 0px 0px 5px 0px rgba(0, 0, 0, 0.4);
+    }
+}
+
+@layer base {
+    body {
+        @apply bg-base-100 text-base-content;
+    }
+}
+
+@layer components {
+    .bg-base-300-blur {
+        @apply bg-base-300/[.5] backdrop-blur-md;
+    }
+}
+
+@layer utilities {
+
+    .dropdown {
+        /* fixes: <https://github.com/saadeghi/daisyui/issues/4343> */
+        overflow: unset;
+    }
+
+    .tn-tree-node-expand-btn {
+        @apply btn btn-square btn-xs shadow-glass;
+    }
+
+    .tn-active {
+        @apply bg-primary;
+    }
+
+    .split {
+        @apply flex gap-4;
+
+        .gutter {
+            @apply hover:bg-base-300 duration-300 shadow-glass rounded-box cursor-ew-resize;
+        }
+    }
+
+    .drawer-toggle:checked+.drawer-content+.drawer-side {
+        @apply max-lg:bg-black/40;
+    }
+
+    .drawer-side>.drawer-overlay {
+        background-color: initial;
+    }
+
+    .backdrop-glass {
+        @apply backdrop-blur-md bg-base-100/70;
+    }
+
+    .full-screen {
+        z-index: 100;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+
+    .prose {
+        input {
+            margin: 0 .4rem 0 0;
+        }
+
+        table {
+            width: auto;
+        }
+
+        img {
+            @apply shadow-glass rounded-box;
+        }
+    }
+
+    .input {
+        @apply w-full shadow-glass;
+    }
+
+    .btn,
+    .card,
+    .menu,
+    .select {
+        @apply shadow-glass;
+    }
+
+    .menu,
+    .navbar {
+        @apply rounded-box;
+    }
+
+    .breadcrumb-disabled {
+        @apply text-base-content/75;
+    }
+
+    .breadcrumb-disabled:hover {
+        @apply no-underline cursor-not-allowed;
+    }
+}

@@ -6,10 +6,26 @@
   "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
   },
   "packageManager": "pnpm@10.25.0",
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@tailwindcss/typography": "^0.5.19",
+    "@tailwindcss/vite": "^4.2.1",
+    "daisyui": "^5.5.19",
+    "tailwindcss": "^4.2.1",
+    "vite": "^7.3.1",
+    "vite-plugin-solid": "^2.11.10",
+    "vite-tsconfig-paths": "^6.1.1"
+  },
+  "dependencies": {
+    "@solidjs/router": "^0.15.4",
+    "feather-icons": "^4.29.2",
+    "highlight.js": "^11.11.1",
+    "openid-client": "^6.8.2",
+    "solid-js": "^1.9.11"
   }
 }
