@@ -44,6 +44,9 @@ importers:
       solid-js:
         specifier: ^1.9.11
         version: 1.9.11
+      solid-tree-navigator:
+        specifier: github:enchant97/solid-tree-navigator#f45670b5998b3779a5a7e9de2411c744af2986bf
+        version: https://codeload.github.com/enchant97/solid-tree-navigator/tar.gz/f45670b5998b3779a5a7e9de2411c744af2986bf(@solidjs/router@0.15.4(solid-js@1.9.11))(solid-js@1.9.11)
       split.js:
         specifier: ^1.6.5
         version: 1.6.5
@@ -1011,6 +1014,13 @@ packages:
     resolution: {integrity: sha512-F3aPsX6hVw9ttm5LYlth8Q15x6MlI/J3Dn+o3EQyRTtTxidepSTwAYdozt01/YA+7ObcciagGEyXIopGZzQtbA==}
     peerDependencies:
       solid-js: ^1.3
+
+  solid-tree-navigator@https://codeload.github.com/enchant97/solid-tree-navigator/tar.gz/f45670b5998b3779a5a7e9de2411c744af2986bf:
+    resolution: {tarball: https://codeload.github.com/enchant97/solid-tree-navigator/tar.gz/f45670b5998b3779a5a7e9de2411c744af2986bf}
+    version: 0.0.0
+    peerDependencies:
+      '@solidjs/router': ^0.15.3
+      solid-js: ^1.9.7
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -2021,6 +2031,11 @@ snapshots:
       solid-js: 1.9.11
     transitivePeerDependencies:
       - supports-color
+
+  solid-tree-navigator@https://codeload.github.com/enchant97/solid-tree-navigator/tar.gz/f45670b5998b3779a5a7e9de2411c744af2986bf(@solidjs/router@0.15.4(solid-js@1.9.11))(solid-js@1.9.11):
+    dependencies:
+      '@solidjs/router': 0.15.4(solid-js@1.9.11)
+      solid-js: 1.9.11
 
   source-map-js@1.2.1: {}
 

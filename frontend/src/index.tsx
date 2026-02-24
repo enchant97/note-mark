@@ -12,6 +12,7 @@ import User from './routes/[username]/(user)';
 import MainApp from './components/MainApp';
 import Profile from './routes/profile';
 import ScratchPad from './routes/scratch-pad';
+import Node from './routes/[username]/[...fullSlug]';
 
 const root = document.getElementById('root')!
 root.innerHTML = ""
@@ -36,6 +37,7 @@ render(() => (
       <Route component={RequireApiSetupGuard}>
         <Route path="/" component={MainApp}>
           <Route path="/:username" component={User} />
+          <Route path="/:username/*fullSlug" component={Node} />
         </Route>
       </Route>
     </Route>

@@ -6,7 +6,9 @@ import Icon from "~/components/Icon";
 import { useSession } from "~/contexts/SessionProvider";
 
 export default function User() {
-  const params = useParams()
+  const params = useParams<{
+    username: string,
+  }>()
   const { setModal, clearModal } = useModal()
   const { isAuthenticated, userInfo } = useSession()
 
@@ -33,6 +35,7 @@ export default function User() {
             }>
             <A
               class="btn join-item"
+              classList={{ "btn-disabled": userInfo()?.preferred_username === params.username }}
               href={`/${userInfo()?.preferred_username}`}
             >My Notes</A>
           </Show>
