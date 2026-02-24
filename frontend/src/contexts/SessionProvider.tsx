@@ -21,7 +21,7 @@ const makeSessionContext = () => {
     isAuthenticated: () => (userInfo() ?? null) !== null,
     userInfo,
     refetchUserInfo,
-    endSession: action(async () => {
+    endSessionAction: action(async () => {
       await Api.authSessionEnd()
       mutateUserInfo(null)
       StorageHandler.clearSettings()

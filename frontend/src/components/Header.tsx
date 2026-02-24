@@ -1,7 +1,7 @@
 import { createEffect, createSignal, For, Show } from "solid-js"
 import { getTheme, setTheme, THEMES } from "~/core/theme-switcher"
 import Icon from "./Icon"
-import { A, useSubmission } from "@solidjs/router"
+import { A, useAction, useSubmission } from "@solidjs/router"
 import { useSession } from "~/contexts/SessionProvider"
 
 function ThemeSwitcher() {
@@ -37,8 +37,9 @@ function ThemeSwitcher() {
 }
 
 function ProfileDropdown() {
-  const { userInfo, endSession } = useSession()
-  const endSessionSubmission = useSubmission(endSession)
+  const { userInfo, endSessionAction } = useSession()
+  const endSession = useAction(endSessionAction)
+  const endSessionSubmission = useSubmission(endSessionAction)
 
   return (
     <details class="dropdown dropdown-end">
