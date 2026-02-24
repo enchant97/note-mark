@@ -1,0 +1,19 @@
+[package]
+name = "renderer"
+version = "1.0.0"
+edition = "2024"
+rust-version = "1.92"
+description = "markdown renderer for Note Mark frontend"
+repository = "https://github.com/enchant97/note-mark"
+license = "AGPL-3.0-only"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+pulldown-cmark = { version = "0.13", default-features = false, features = [ "html" ] }
+wasm-bindgen = "0.2"
+
+[profile.release]
+lto = true
+opt-level = 's'

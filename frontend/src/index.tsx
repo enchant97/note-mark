@@ -11,9 +11,12 @@ import Home from './routes/(home)';
 import User from './routes/[username]/(user)';
 import MainApp from './components/MainApp';
 import Profile from './routes/profile';
+import ScratchPad from './routes/scratch-pad';
 
 const root = document.getElementById('root')!
 root.innerHTML = ""
+
+import("../renderer/pkg").then(() => { console.debug("wasm backend loaded") })
 
 setTheme(getTheme()) // TODO remove this later
 
@@ -21,6 +24,7 @@ render(() => (
   <Router>
     <Route path="/" component={Wrapper}>
       <Route path="/" component={() => <RequireApiSetupGuard><Home /></RequireApiSetupGuard>} />
+      <Route path="/scratch-pad" component={ScratchPad} />
       <Route component={RequireNoAuthGuard}>
         <Route path="/auth/signup" component={() => <RequireSignupAllowedGuard><Signup /></RequireSignupAllowedGuard>} />
         <Route path="/auth/login" component={Login} />

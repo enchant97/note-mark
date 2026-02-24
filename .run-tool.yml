@@ -4,6 +4,18 @@ targets:
     args:
       - i
     cwd: frontend
+  deps-backend:
+    program: go
+    args:
+      - mod
+      - download
+    cwd: backend
+  build-frontend-wasm:
+    program: pnpm
+    args:
+      - run
+      - wasm
+    cwd: frontend
   codegen-backend:
     program: go
     args:
@@ -17,6 +29,8 @@ targets:
       - run
       - dev
     cwd: frontend
+    before_hooks:
+      - build-frontend-wasm
   dev-backend:
     program: go
     args:
