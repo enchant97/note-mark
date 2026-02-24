@@ -27,7 +27,7 @@ export default function Signup() {
         name: formDetails.name || undefined,
       })
       pushToast({ message: "created new account", type: ToastType.SUCCESS })
-      navigate("/login")
+      navigate("/auth/login")
     } catch (err) {
       if (err.status === HttpErrors.Forbidden) {
         pushToast({ message: "server is not accepting new accounts", type: ToastType.ERROR })
@@ -112,7 +112,7 @@ export default function Signup() {
                   {loading() && <span class="loading loading-spinner"></span>}
                   Create User
                 </button>
-                <A class="btn join-item" href="/login">Have An Account?</A>
+                <A class="btn join-item" href="/auth/login">Have An Account?</A>
               </div>
             </form>
           </div>

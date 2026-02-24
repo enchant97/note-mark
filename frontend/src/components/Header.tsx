@@ -1,7 +1,7 @@
 import { createEffect, createSignal, For, Show } from "solid-js"
 import { getTheme, setTheme, THEMES } from "~/core/theme-switcher"
 import Icon from "./Icon"
-import { A } from "@solidjs/router"
+import { A, useSubmission } from "@solidjs/router"
 import { useSession } from "~/contexts/SessionProvider"
 
 function ThemeSwitcher() {
@@ -37,17 +37,21 @@ function ThemeSwitcher() {
 }
 
 function ProfileDropdown() {
-  const { userInfo } = useSession()
+  const { userInfo, endSession } = useSession()
+  const endSessionSubmission = useSubmission(endSession)
 
   return (
     <details class="dropdown dropdown-end">
       <summary class="btn btn-circle"><Icon name="user" /></summary>
       <menu class="mt-2 p-2 menu dropdown-content z-[1] bg-base-100 w-52">
-        <Show when={userInfo()} fallback={<li><A href="/login">Login</A></li>} keyed>
+        <Show when={userInfo()} fallback={<li><A href="/auth/login">Login</A></li>} keyed>
           {user => <>
             <li class="menu-title"><span>Logged In As: <span class="kbd kbd-sm">{user.preferred_username}</span></span></li>
             <li><A href="/profile">My Profile</A></li>
-            <li><A href="/logout">Logout</A></li>
+            <li><button
+              disabled={endSessionSubmission.pending}
+              onClick={() => endSession()}
+            >Logout</button></li>
           </>}
         </Show>
       </menu>

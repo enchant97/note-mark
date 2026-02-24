@@ -1,6 +1,8 @@
+import { action } from "@solidjs/router"
 import { createContext, createResource, useContext } from "solid-js"
 import Api, { ApiError, HttpErrors } from "~/core/api"
 import { optionExpect } from "~/core/helpers"
+import StorageHandler from "~/core/storage"
 
 const makeSessionContext = () => {
   const [apiInfo] = createResource(Api.getServerInfo)
@@ -19,7 +21,12 @@ const makeSessionContext = () => {
     isAuthenticated: () => (userInfo() ?? null) !== null,
     userInfo,
     refetchUserInfo,
-    clearUserInfo: () => mutateUserInfo(null)
+    endSession: action(async () => {
+      await Api.authSessionEnd()
+      mutateUserInfo(null)
+      StorageHandler.clearSettings()
+      return { ok: true }
+    }),
   } as const
 }
 

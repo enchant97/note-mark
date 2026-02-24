@@ -32,7 +32,7 @@ export default function Home() {
               <div class="justify-center" classList={{ 'join': apiInfo()?.enableAnonymousUserSearch }}>
                 <A
                   class="join-item btn"
-                  href="/login"
+                  href="/auth/login"
                 >Login</A>
                 {userInfo() && <A class="btn join-item btn-outline" href={`/${userInfo()?.preferred_username}`}>My Notes</A>}
                 {apiInfo()?.enableAnonymousUserSearch && <button

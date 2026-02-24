@@ -6,7 +6,7 @@ import { useSession } from "~/contexts/SessionProvider"
 export function RequireAuthGuard(props: ParentProps) {
   const { isAuthenticated } = useSession()
   const check = () => { return isAuthenticated() === true }
-  return <ShowOrRedirect when={check} redirectTo="/login">{props.children}</ShowOrRedirect>
+  return <ShowOrRedirect when={check} redirectTo="/auth/login">{props.children}</ShowOrRedirect>
 }
 
 export function RequireNoAuthGuard(props: ParentProps) {
@@ -18,7 +18,7 @@ export function RequireNoAuthGuard(props: ParentProps) {
 export function RequireSignupAllowedGuard(props: ParentProps) {
   const { apiInfo } = useSession()
   const check = () => apiInfo()?.allowInternalSignup === true
-  return <ShowOrRedirect when={check} redirectTo="/login">{props.children}</ShowOrRedirect>
+  return <ShowOrRedirect when={check} redirectTo="/auth/login">{props.children}</ShowOrRedirect>
 }
 
 export function RequireApiSetupGuard(props: ParentProps) {

@@ -43,7 +43,7 @@ export default function Login() {
     )
     verification.save()
     const code_challenge = await oidcClient.calculatePKCECodeChallenge(verification.pkceCodeVerifier)
-    const callbackUrl = (new URL("/oidc-callback", window.location.origin)).toString()
+    const callbackUrl = (new URL("/auth/oidc-callback", window.location.origin)).toString()
     const scope = "openid profile"
     const parameters: Record<string, string> = {
       redirect_uri: callbackUrl,
@@ -138,7 +138,7 @@ export default function Login() {
                     </button>
                     {apiInfo()?.allowInternalSignup !== false && <A
                       class="btn join-item"
-                      href="/signup"
+                      href="/auth/signup"
                       classList={{ "btn-disabled": !apiInfo() }}
                     >Need An Account?</A>}
                   </div>

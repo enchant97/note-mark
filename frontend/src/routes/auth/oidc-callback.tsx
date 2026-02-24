@@ -19,7 +19,7 @@ export default function OidcCallback() {
 
   const [oidcResult] = createResource(apiInfo, async (apiInfo) => {
     if (apiInfo.oidcProvider === undefined) {
-      navigate("/login")
+      navigate("/auth/login")
       return
     }
     const oidcConfig = await oidcClient.discovery(
@@ -61,7 +61,7 @@ export default function OidcCallback() {
                     Error exchanging details with provider.
                   </p>
                   <p class="pt-2 pb-6">{`(${oidcResult.error.message})`}</p>
-                  <A class="btn btn-primary" href="/login">Back To Login</A>
+                  <A class="btn btn-primary" href="/auth/login">Back To Login</A>
                 </>
               }>
                 <p class="py-6">
