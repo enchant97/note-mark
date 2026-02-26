@@ -10,10 +10,11 @@ export interface NoteEngineReadOnly {
 
 export interface NoteEngine extends NoteEngineReadOnly {
   setContent: (newContent: string) => any
+  tryFromRaw: (raw: string) => any
 }
 
 export function createNoteEngine(rawContent: string): NoteEngine {
-  const noteEngine = NoteEngineInternal.try_from_raw(rawContent)
+  let noteEngine = NoteEngineInternal.try_from_raw(rawContent)
   const [content, setContent] = createSignal(noteEngine.content)
   return {
     content,
@@ -26,5 +27,9 @@ export function createNoteEngine(rawContent: string): NoteEngine {
       return DOMPurify.sanitize(unsanitized_html)
     },
     tryIntoRaw: () => noteEngine.try_into_raw(),
+    tryFromRaw: (raw: string) => {
+      noteEngine = NoteEngineInternal.try_from_raw(raw)
+      setContent(noteEngine.content)
+    },
   }
 }

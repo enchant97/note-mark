@@ -1,5 +1,5 @@
 import { action, useAction, useParams, useSubmission } from "@solidjs/router"
-import { createMemo, createResource, createSignal, Show } from "solid-js";
+import { createEffect, createResource, createSignal, Show } from "solid-js";
 import LoadingRing from "~/components/loading/LoadingRing";
 import Note, { NoteMode } from "~/components/note/Note";
 import Api from "~/core/api";
@@ -11,6 +11,7 @@ function NoteNode() {
     username: string,
     fullSlug: string,
   }>()
+  const noteEngine = createNoteEngine("")
   const [noteModeSetting, setNoteModeSetting] = StorageHandler.createSettingSignal("note_mode", false)
   const noteMode = () => {
     let stored = noteModeSetting() as NoteMode | null
@@ -26,16 +27,14 @@ function NoteNode() {
       if (content instanceof Blob) { throw new Error("expected a note node") }
       return content
     })
-  const noteEngine = createMemo(() => {
+  createEffect(() => {
     const raw = rawNoteContent()
-    if (raw === undefined) { return }
-    return createNoteEngine(raw)
+    if (raw) { noteEngine.tryFromRaw(raw) }
   })
   const [saved, setSaved] = createSignal(true)
   const saveAction = action(async (content: string) => {
-    const currentNoteEngine = noteEngine()!
-    currentNoteEngine.setContent(content)
-    const newRawNote = currentNoteEngine.tryIntoRaw()
+    noteEngine.setContent(content)
+    const newRawNote = noteEngine.tryIntoRaw()
     Api.updateNodeContent(params.username, params.fullSlug, newRawNote)
     setSaved(true)
     return { ok: true }
@@ -49,9 +48,9 @@ function NoteNode() {
         <menu class="menu menu-horizontal">
         </menu>
       </div>
-      <Show when={noteEngine()} fallback={<LoadingRing />}>{(noteEngine) => (
+      <Show when={!rawNoteContent.loading} fallback={<LoadingRing />}>
         <Note
-          noteEngine={noteEngine()}
+          noteEngine={noteEngine}
           mode={noteMode()}
           setMode={(mode) => {
             if (mode === NoteMode.RENDERED) { setNoteModeSetting(null) }
@@ -63,7 +62,6 @@ function NoteNode() {
           setSaved={setSaved}
           saving={() => saveSubmission.pending ?? false}
         />
-      )}
       </Show>
     </div>
   );
