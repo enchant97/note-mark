@@ -13,8 +13,13 @@ export interface NoteEngine extends NoteEngineReadOnly {
   tryFromRaw: (raw: string) => any
 }
 
-export function createNoteEngine(rawContent: string): NoteEngine {
-  let noteEngine = NoteEngineInternal.try_from_raw(rawContent)
+export function createNoteEngine(rawContent?: string): NoteEngine {
+  let noteEngine: NoteEngineInternal
+  if (rawContent === undefined) {
+    noteEngine = new NoteEngineInternal()
+  } else {
+    noteEngine = NoteEngineInternal.try_from_raw(rawContent)
+  }
   const [content, setContent] = createSignal(noteEngine.content)
   return {
     content,

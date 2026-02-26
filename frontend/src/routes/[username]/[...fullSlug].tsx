@@ -11,7 +11,7 @@ function NoteNode() {
     username: string,
     fullSlug: string,
   }>()
-  const noteEngine = createNoteEngine("")
+  const noteEngine = createNoteEngine()
   const [noteModeSetting, setNoteModeSetting] = StorageHandler.createSettingSignal("note_mode", false)
   const noteMode = () => {
     let stored = noteModeSetting() as NoteMode | null
