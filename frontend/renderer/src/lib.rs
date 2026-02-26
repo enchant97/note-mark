@@ -83,7 +83,7 @@ impl NoteEngine {
         let mut raw = String::new();
         raw.push_str("---\n");
         raw.push_str(&serde_yaml2::to_string(&self.frontmatter).map_err(|err| err.to_string())?);
-        raw.push_str("\n---\n\n");
+        raw.push_str("\n---\n");
         raw.push_str(&self.content);
         Ok(raw)
     }
