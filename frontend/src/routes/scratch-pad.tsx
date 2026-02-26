@@ -2,7 +2,6 @@ import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import Header from "~/components/Header";
 import Note, { NoteMode } from "~/components/note/Note";
-import { EditorState } from "~/components/editor/Editor";
 import StorageHandler from "~/core/storage";
 import Icon from "~/components/Icon";
 import { useSession } from "~/contexts/SessionProvider";
@@ -22,15 +21,16 @@ export default function ScratchPad() {
   const { userInfo } = useSession()
   const noteEngine = createNoteEngine(readContent())
   const [mode, setMode] = createSignal(NoteMode.EDIT)
-  const [state, setState] = createStore<EditorState>({
+  const [state, setState] = createStore({
     saving: false,
-    unsaved: false,
+    saved: true,
   })
 
   const onSave = (content: string) => {
-    writeContent(content, userInfo() !== undefined)
-    setState({ unsaved: false, saving: false })
     noteEngine.setContent(content)
+    const newRawNote = noteEngine.tryIntoRaw()
+    writeContent(newRawNote, userInfo() !== undefined)
+    setState({ saved: true, saving: false })
   }
 
   return (
@@ -46,9 +46,10 @@ export default function ScratchPad() {
           mode={mode()}
           setMode={setMode}
           isEditAllowed={true}
-          state={state}
-          setState={setState}
           onSave={onSave}
+          saved={() => state.saved}
+          setSaved={(v: boolean) => setState({ saved: v })}
+          saving={() => state.saving}
         />
       </div>
     </div>
