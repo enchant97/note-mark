@@ -1,10 +1,11 @@
 import { useParams } from "@solidjs/router"
-import { createResource, Show } from "solid-js";
+import { createMemo, createResource, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { EditorState } from "~/components/editor/Editor";
 import LoadingRing from "~/components/loading/LoadingRing";
 import Note, { NoteMode } from "~/components/note/Note";
 import Api from "~/core/api";
+import { createNoteEngine } from "~/core/note-engine";
 import StorageHandler from "~/core/storage"
 
 function NoteNode() {
@@ -20,21 +21,29 @@ function NoteNode() {
     }
     return stored
   }
-  const [noteContent, { mutate: setNoteContent }] = createResource(
+  const [rawNoteContent] = createResource(
     () => [params.username, params.fullSlug],
     async ([username, fullSlug]) => {
       const content = await Api.getNodeContent(username, fullSlug)
       if (content instanceof Blob) { throw new Error("expected a note node") }
       return content
     })
+  const noteEngine = createMemo(() => {
+    const raw = rawNoteContent()
+    if (raw === undefined) { return }
+    return createNoteEngine(raw)
+  })
   const [state, setState] = createStore<EditorState>({
     saving: false,
     unsaved: false,
   })
 
   const save = async (content: string) => {
+    const currentNoteEngine = noteEngine()!
     setState({ saving: false, unsaved: false })
-    setNoteContent(content)
+    currentNoteEngine.setContent(content)
+    const newRawNote = currentNoteEngine.tryIntoRaw()
+    // TODO save the note
   }
 
   return (
@@ -43,20 +52,20 @@ function NoteNode() {
         <menu class="menu menu-horizontal">
         </menu>
       </div>
-      <Show when={!noteContent.loading} fallback={<LoadingRing />}>
+      <Show when={noteEngine()} fallback={<LoadingRing />}>{(noteEngine) => (
         <Note
+          noteEngine={noteEngine()}
           mode={noteMode()}
           setMode={(mode) => {
             if (mode === NoteMode.RENDERED) { setNoteModeSetting(null) }
             else { setNoteModeSetting(mode) }
           }}
-          content={() => noteContent() || ""}
-          setContent={setNoteContent}
           isEditAllowed={true}
           state={state}
           setState={setState}
           onSave={(content) => save(content)}
         />
+      )}
       </Show>
     </div>
   );

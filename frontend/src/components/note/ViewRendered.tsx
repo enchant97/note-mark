@@ -1,12 +1,12 @@
-import { Accessor, createEffect, createResource } from 'solid-js';
-import render from '~/core/renderer';
+import { createEffect, createResource } from 'solid-js';
 import hljs from 'highlight.js/lib/common';
+import { NoteEngineReadOnly } from '~/core/note-engine';
 
-export default function NoteViewRendered(props: { content: Accessor<string> }) {
+export default function NoteViewRendered(props: { noteEngine: NoteEngineReadOnly }) {
 
-  const [contentRendered] = createResource(() => [props.content()], ([content]) => {
+  const [contentRendered] = createResource(() => [props.noteEngine.content()], () => {
     try {
-      return render(content)
+      return props.noteEngine.render()
     } catch {
       return "<p>Unable to render markdown, maybe you got the templating syntax incorrect?<p>"
     }

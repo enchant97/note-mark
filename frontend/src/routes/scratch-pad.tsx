@@ -6,6 +6,7 @@ import { EditorState } from "~/components/editor/Editor";
 import StorageHandler from "~/core/storage";
 import Icon from "~/components/Icon";
 import { useSession } from "~/contexts/SessionProvider";
+import { createNoteEngine } from "~/core/note-engine";
 
 const SCRATCH_PAD_CONTENT_KEY = "scratch_pad_content"
 
@@ -19,9 +20,8 @@ function writeContent(content: string, isAuthenticated: boolean) {
 
 export default function ScratchPad() {
   const { userInfo } = useSession()
-
+  const noteEngine = createNoteEngine(readContent())
   const [mode, setMode] = createSignal(NoteMode.EDIT)
-  const [content, setContent] = createSignal(readContent())
   const [state, setState] = createStore<EditorState>({
     saving: false,
     unsaved: false,
@@ -30,7 +30,7 @@ export default function ScratchPad() {
   const onSave = (content: string) => {
     writeContent(content, userInfo() !== undefined)
     setState({ unsaved: false, saving: false })
-    setContent(content)
+    noteEngine.setContent(content)
   }
 
   return (
@@ -42,10 +42,9 @@ export default function ScratchPad() {
       </h1>
       <div class="px-6">
         <Note
+          noteEngine={noteEngine}
           mode={mode()}
           setMode={setMode}
-          content={content}
-          setContent={setContent}
           isEditAllowed={true}
           state={state}
           setState={setState}

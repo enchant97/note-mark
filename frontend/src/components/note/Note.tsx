@@ -8,6 +8,7 @@ import { copyToClipboard } from "~/core/helpers";
 import { ToastType, useToast } from "~/contexts/ToastProvider";
 import Editor, { EditorState } from "~/components/editor/Editor";
 import Split from "split.js";
+import { NoteEngineReadOnly } from "~/core/note-engine";
 
 const AUTO_SAVE_TIMEOUT = 2400;
 
@@ -23,8 +24,6 @@ const EditorSplitScreen: Component<{ noteProps: NoteProps, isFullscreen: Accesso
   let renderedElement: HTMLDivElement
   let splitInstsance: Split.Instance
 
-  let [currentContent, setCurrentContent] = createSignal(untrack(noteProps.content))
-
   onMount(() => {
     splitInstsance = Split([editorElement, renderedElement], {
       sizes: [66, 33],
@@ -39,27 +38,25 @@ const EditorSplitScreen: Component<{ noteProps: NoteProps, isFullscreen: Accesso
     <div class="split">
       <div ref={(el) => editorElement = el} class="w-full max-h-[90vh] overflow-y-scroll">
         <Editor
-          content={untrack(noteProps.content)}
+          content={untrack(noteProps.noteEngine.content)}
           autoSaveTimeout={AUTO_SAVE_TIMEOUT}
           onSave={noteProps.onSave}
           state={noteProps.state}
           setState={noteProps.setState}
           isFullscreen={isFullscreen}
-          onContentChange={setCurrentContent}
         />
       </div>
       <div ref={(el) => renderedElement = el} class="shadow-glass rounded-box p-2 w-full max-h-[90vh] overflow-y-scroll">
-        <NoteViewRendered content={currentContent} />
+        <NoteViewRendered noteEngine={noteProps.noteEngine} />
       </div>
     </div>
   )
 }
 
 type NoteProps = {
+  noteEngine: NoteEngineReadOnly,
   mode: NoteMode,
   setMode: (mode: NoteMode) => any,
-  content: Accessor<string>,
-  setContent: (content: string) => any,
   isEditAllowed: boolean,
   state: Store<EditorState>
   setState: SetStoreFunction<EditorState>
@@ -72,7 +69,7 @@ export default function Note(props: NoteProps) {
 
   const copyContentsToClipboard = async () => {
     try {
-      await copyToClipboard(props.content() || "")
+      await copyToClipboard(props.noteEngine.content() || "")
       pushToast({ message: "copied to clipboard", type: ToastType.SUCCESS })
     } catch (err) {
       pushToast({ message: err.message, type: ToastType.ERROR })
@@ -158,18 +155,18 @@ export default function Note(props: NoteProps) {
         </div>
       </div>
       <Switch fallback={
-        <Show when={props.content().replace("\n", "").length !== 0} fallback={<NoteViewEmpty />}>
-          <NoteViewRendered content={props.content} />
+        <Show when={props.noteEngine.content().replace("\n", "").length !== 0} fallback={<NoteViewEmpty />}>
+          <NoteViewRendered noteEngine={props.noteEngine} />
         </Show>
       }>
         <Match when={props.mode === NoteMode.PLAIN}>
-          <Show when={props.content().replace("\n", "").length !== 0} fallback={<NoteViewEmpty />}>
-            <NoteViewPlain content={props.content} />
+          <Show when={props.noteEngine.content().replace("\n", "").length !== 0} fallback={<NoteViewEmpty />}>
+            <NoteViewPlain content={props.noteEngine.content} />
           </Show>
         </Match>
         <Match when={props.mode === NoteMode.EDIT}>
           <Editor
-            content={untrack(props.content)}
+            content={untrack(props.noteEngine.content)}
             autoSaveTimeout={AUTO_SAVE_TIMEOUT}
             onSave={props.onSave}
             state={props.state}
