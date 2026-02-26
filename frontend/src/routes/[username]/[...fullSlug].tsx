@@ -1,5 +1,6 @@
 import { action, useAction, useParams, useSubmission } from "@solidjs/router"
 import { createEffect, createResource, createSignal, Show } from "solid-js";
+import Breadcrumb from "~/components/Breadcrumb";
 import LoadingRing from "~/components/loading/LoadingRing";
 import Note, { NoteMode } from "~/components/note/Note";
 import Api from "~/core/api";
@@ -47,6 +48,7 @@ function NoteNode() {
       <div class="flex gap-4 flex-col sm:flex-row">
         <menu class="menu menu-horizontal">
         </menu>
+        <Breadcrumb class="flex-1" username={params.username} fullSlug={params.fullSlug} />
       </div>
       <Show when={!rawNoteContent.loading} fallback={<LoadingRing />}>
         <Note
