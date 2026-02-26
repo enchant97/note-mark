@@ -6,7 +6,6 @@ use wasm_bindgen::prelude::*;
 
 /// The note frontmatter, allowing for extra fields.
 #[derive(Serialize, Deserialize, Default, Clone)]
-#[wasm_bindgen]
 pub struct Frontmatter {
     #[serde(default)]
     title: Option<String>,
@@ -100,13 +99,18 @@ impl NoteEngine {
     }
 
     #[wasm_bindgen(getter)]
-    pub fn frontmatter(&self) -> Frontmatter {
-        self.frontmatter.clone()
+    pub fn frontmatter(&self) -> Result<JsValue, String> {
+        let s = serde_wasm_bindgen::Serializer::json_compatible();
+        self.frontmatter
+            .serialize(&s)
+            .map_err(|err| err.to_string())
     }
 
     #[wasm_bindgen(setter)]
-    pub fn set_frontmatter(&mut self, frontmatter: Frontmatter) {
-        self.frontmatter = frontmatter
+    pub fn set_frontmatter(&mut self, frontmatter: JsValue) -> Result<(), String> {
+        self.frontmatter =
+            serde_wasm_bindgen::from_value(frontmatter).map_err(|err| err.to_string())?;
+        Ok(())
     }
 
     /// Render the note content into HTML. Requires sanitization.
