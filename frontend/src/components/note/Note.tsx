@@ -1,12 +1,11 @@
-import { Accessor, Component, Match, Show, Switch, createSignal, onCleanup, onMount, untrack } from "solid-js";
-import { SetStoreFunction, Store } from "solid-js/store";
+import { Accessor, Component, Match, Setter, Show, Switch, createSignal, onCleanup, onMount, untrack } from "solid-js";
 import NoteViewPlain from "~/components/note/ViewPlain";
 import NoteViewRendered from "~/components/note/ViewRendered";
 import NoteViewEmpty from "~/components/note/ViewEmpty";
 import Icon from "~/components/Icon";
 import { copyToClipboard } from "~/core/helpers";
 import { ToastType, useToast } from "~/contexts/ToastProvider";
-import Editor, { EditorState } from "~/components/editor/Editor";
+import Editor from "~/components/editor/Editor";
 import Split from "split.js";
 import { NoteEngineReadOnly } from "~/core/note-engine";
 
@@ -41,8 +40,9 @@ const EditorSplitScreen: Component<{ noteProps: NoteProps, isFullscreen: Accesso
           content={untrack(noteProps.noteEngine.content)}
           autoSaveTimeout={AUTO_SAVE_TIMEOUT}
           onSave={noteProps.onSave}
-          state={noteProps.state}
-          setState={noteProps.setState}
+          saved={noteProps.saved}
+          setSaved={noteProps.setSaved}
+          saving={noteProps.saving}
           isFullscreen={isFullscreen}
         />
       </div>
@@ -58,9 +58,10 @@ type NoteProps = {
   mode: NoteMode,
   setMode: (mode: NoteMode) => any,
   isEditAllowed: boolean,
-  state: Store<EditorState>
-  setState: SetStoreFunction<EditorState>
   onSave: (content: string) => any
+  saved: Accessor<boolean>
+  setSaved: Setter<boolean>
+  saving: () => boolean
 }
 
 export default function Note(props: NoteProps) {
@@ -78,8 +79,8 @@ export default function Note(props: NoteProps) {
 
   const query_navigation_allowed = () => {
     return (
-      !props.state.unsaved ||
-      props.state.unsaved && confirm("Note not saved, are you sure?")
+      props.saved ||
+      !props.saved && confirm("Note not saved, are you sure?")
     )
   }
 
@@ -169,8 +170,9 @@ export default function Note(props: NoteProps) {
             content={untrack(props.noteEngine.content)}
             autoSaveTimeout={AUTO_SAVE_TIMEOUT}
             onSave={props.onSave}
-            state={props.state}
-            setState={props.setState}
+            saved={props.saved}
+            setSaved={props.setSaved}
+            saving={props.saving}
             isFullscreen={isFullscreen}
           />
         </Match>

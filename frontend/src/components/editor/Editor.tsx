@@ -1,8 +1,7 @@
 import { EditorView, basicSetup } from "codemirror";
 import { Compartment, EditorSelection, EditorState as InternalEditorState } from "@codemirror/state";
 import { indentMore, indentLess } from "@codemirror/commands";
-import { Accessor, For, createEffect, createSignal, onCleanup, onMount } from "solid-js";
-import { SetStoreFunction, Store } from "solid-js/store";
+import { Accessor, For, Setter, createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import Icon from "~/components/Icon";
 import { keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands"
@@ -48,17 +47,13 @@ const editorTheme = EditorView.baseTheme({
   },
 })
 
-export type EditorState = {
-  unsaved: boolean
-  saving: boolean
-}
-
 export type EditorProps = {
   content: string
   autoSaveTimeout: number
   onSave: (content: string) => void
-  state: Store<EditorState>
-  setState: SetStoreFunction<EditorState>
+  saved: Accessor<boolean>
+  setSaved: Setter<boolean>
+  saving: () => boolean
   isFullscreen: Accessor<boolean>
   onContentChange?: (content: string) => any
 }
@@ -88,7 +83,7 @@ export default function Editor(props: EditorProps) {
   }
 
   const onInput = (state: InternalEditorState) => {
-    props.setState({ unsaved: true })
+    props.setSaved(false)
     if (props.onContentChange !== undefined) {
       props.onContentChange(state.doc.toString())
     }
@@ -193,7 +188,7 @@ export default function Editor(props: EditorProps) {
   onCleanup(() => {
     window.removeEventListener("scroll", handleScroll)
     clearTimeout(autosaveTimeout)
-    props.setState({ unsaved: false })
+    props.setSaved(true)
   })
 
   onMount(() => {
@@ -217,7 +212,7 @@ export default function Editor(props: EditorProps) {
             indentWithTab,
             {
               key: "Mod-s", run: () => {
-                if (!props.state.saving)
+                if (!props.saving())
                   triggerSave()
                 return true
               }
@@ -268,7 +263,7 @@ export default function Editor(props: EditorProps) {
                 checked={autoSave()}
                 oninput={(ev) => {
                   let v = ev.currentTarget.checked
-                  if (v && props.state.unsaved) { triggerSave() }
+                  if (v && !props.saved()) { triggerSave() }
                   setAutoSave(v)
                 }}
               />
@@ -277,14 +272,14 @@ export default function Editor(props: EditorProps) {
             </span></label></li>
             <li><button
               class="btn btn-sm btn-square"
-              disabled={props.state.saving}
-              classList={{ "btn-error": props.state.unsaved }}
+              disabled={props.saving()}
+              classList={{ "btn-error": !props.saved() }}
               type="button"
               title="Save"
               onclick={() => triggerSave()}
             >
-              {props.state.saving && <span class="loading loading-spinner text-warning"></span>}
-              {!props.state.saving && <Icon name="save" />}
+              {props.saving() && <span class="loading loading-spinner text-warning"></span>}
+              {!props.saving() && <Icon name="save" />}
             </button></li>
           </ul>
         </menu>

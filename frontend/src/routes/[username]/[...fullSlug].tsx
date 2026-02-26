@@ -1,7 +1,5 @@
-import { useParams } from "@solidjs/router"
-import { createMemo, createResource, Show } from "solid-js";
-import { createStore } from "solid-js/store";
-import { EditorState } from "~/components/editor/Editor";
+import { action, useAction, useParams, useSubmission } from "@solidjs/router"
+import { createMemo, createResource, createSignal, Show } from "solid-js";
 import LoadingRing from "~/components/loading/LoadingRing";
 import Note, { NoteMode } from "~/components/note/Note";
 import Api from "~/core/api";
@@ -33,18 +31,17 @@ function NoteNode() {
     if (raw === undefined) { return }
     return createNoteEngine(raw)
   })
-  const [state, setState] = createStore<EditorState>({
-    saving: false,
-    unsaved: false,
-  })
-
-  const save = async (content: string) => {
+  const [saved, setSaved] = createSignal(true)
+  const saveAction = action(async (content: string) => {
     const currentNoteEngine = noteEngine()!
-    setState({ saving: false, unsaved: false })
     currentNoteEngine.setContent(content)
     const newRawNote = currentNoteEngine.tryIntoRaw()
     // TODO save the note
-  }
+    setSaved(true)
+    return { ok: true }
+  })
+  const saveSubmission = useSubmission(saveAction)
+  const save = useAction(saveAction)
 
   return (
     <div class="flex flex-col gap-4 mt-6">
@@ -61,9 +58,10 @@ function NoteNode() {
             else { setNoteModeSetting(mode) }
           }}
           isEditAllowed={true}
-          state={state}
-          setState={setState}
           onSave={(content) => save(content)}
+          saved={saved}
+          setSaved={setSaved}
+          saving={() => saveSubmission.pending ?? false}
         />
       )}
       </Show>
