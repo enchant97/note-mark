@@ -36,7 +36,7 @@ function NoteNode() {
     const currentNoteEngine = noteEngine()!
     currentNoteEngine.setContent(content)
     const newRawNote = currentNoteEngine.tryIntoRaw()
-    // TODO save the note
+    Api.updateNodeContent(params.username, params.fullSlug, newRawNote)
     setSaved(true)
     return { ok: true }
   })

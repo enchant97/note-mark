@@ -18,8 +18,9 @@ func WrapDbError(err error) error {
 	if errors.Is(err, sql.ErrNoRows) {
 		return errors.Join(err, ErrNotFound)
 	} else if err, ok := err.(*sqlite.Error); ok {
-		switch err.Code() {
-		case sqlite3.SQLITE_CONSTRAINT_UNIQUE:
+		switch err.Code() { // find at: <https://sqlite.org/rescode.html>
+		case sqlite3.SQLITE_CONSTRAINT_UNIQUE: // 2067
+		case sqlite3.SQLITE_CONSTRAINT_PRIMARYKEY: // 1555
 			return errors.Join(err, ErrConflict)
 		}
 	}
