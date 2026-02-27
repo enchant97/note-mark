@@ -94,12 +94,13 @@ export default function MainApp({ children }: ParentProps) {
               <span class="flex-1">NOTEBOOKS</span>
             </li>
             <ul class="p-2 flex-1 overflow-auto bg-base-100 shadow-glass rounded-box">
-              <Show when={nodeTreeListSorted()} fallback={<LoadingRing />}>
+              <Show when={nodeTreeListSorted} fallback={<LoadingRing />}>{(nodeTree) => (
                 <TreeNavigator
-                  nodes={nodeTreeListSorted}
+                  nodes={nodeTree()}
                   fileIcon={FileIcon}
                   folderIcon={FolderIcon}
                 />
+              )}
               </Show>
             </ul>
             <li>
