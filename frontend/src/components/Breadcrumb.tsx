@@ -31,7 +31,7 @@ export default function Breadcrumb(props: { class?: string, username: string, fu
                   end={true}
                   href={`/${p}`}
                 >
-                  <Icon name="user" size={16} />
+                  <Icon name="file" size={16} />
                   <span class="ml-1">{currentSlugPart}</span>
                 </A>
               </li>
