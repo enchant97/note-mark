@@ -7,6 +7,12 @@ export function optionExpect<T>(v: Option<T>, message: string): T {
   return v
 }
 
+export function compare(a: any, b: any): number {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
 /*
  * copies given object to clipboard,
  * throws an `Error` with reason on failure
