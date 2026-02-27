@@ -28,8 +28,12 @@ export function createNoteEngine(rawContent?: string): NoteEngine {
       setContent(newContent)
     },
     render: () => {
+      const startTime = performance.now()
       const unsanitized_html = noteEngine.render_to_html()
-      return DOMPurify.sanitize(unsanitized_html)
+      const sanitized_html = DOMPurify.sanitize(unsanitized_html)
+      const endTime = performance.now()
+      console.debug(`[PERF] rendering note took ${endTime - startTime}ms`)
+      return sanitized_html
     },
     tryIntoRaw: () => noteEngine.try_into_raw(),
     tryFromRaw: (raw: string) => {

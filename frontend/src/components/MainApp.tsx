@@ -69,7 +69,7 @@ export default function MainApp({ children }: ParentProps) {
     const startTime = performance.now()
     const items = sortNodeTreeList(nodes, sortChoice())
     const endTime = performance.now()
-    console.debug(`sorting node tree took ${endTime - startTime}ms`)
+    console.debug(`[PERF] sorting node tree took ${endTime - startTime}ms`)
     return items
   }
 
