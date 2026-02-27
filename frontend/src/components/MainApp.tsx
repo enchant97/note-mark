@@ -7,6 +7,7 @@ import { useParams } from "@solidjs/router";
 import Api from "~/core/api";
 import { NodeTree } from "~/core/types";
 import SortSelect, { SortChoice } from "./input/SortSelect";
+import { NodeTreeProvider } from "~/contexts/NodeTreeProvider";
 
 function nodeTreeIntoNodeList(tree: NodeTree, username: string, parentSlug?: string) {
   return Object.values(tree).filter((node) => node.type === "note").map((node) => {
@@ -79,7 +80,13 @@ export default function MainApp({ children }: ParentProps) {
       <div class="drawer-content min-h-screen pb-8">
         <Header />
         <div class="px-2 mt-2">
-          {children}
+          <Show when={!nodeTree.loading} fallback={<LoadingRing />}>
+            <NodeTreeProvider
+              nodeTree={() => nodeTree()!}
+            >
+              {children}
+            </NodeTreeProvider>
+          </Show>
         </div>
       </div>
       <div class="drawer-side z-40 p-2">
