@@ -51,13 +51,13 @@ function sortNodeTreeList(nodes: any[], method: SortChoice): any[] {
   }
 }
 
-export default function MainApp({ children }: ParentProps) {
+export default function MainApp(props: ParentProps) {
   const params = useParams<{
     username: string,
     fullSlug: string,
   }>()
   const [sortChoice, setSortChoice] = createSignal(SortChoice.NAME_ASC)
-  const [nodeTree] = createResource(() => params.username, async (username) => {
+  const [nodeTree, { mutate: setNodeTree }] = createResource(() => params.username, async (username) => {
     return await Api.getNodeTree(username)
   })
   const nodeTreeList = () => {
@@ -83,8 +83,9 @@ export default function MainApp({ children }: ParentProps) {
           <Show when={!nodeTree.loading} fallback={<LoadingRing />}>
             <NodeTreeProvider
               nodeTree={() => nodeTree()!}
+              setNodeTree={(tree: NodeTree) => setNodeTree(tree)}
             >
-              {children}
+              {props.children}
             </NodeTreeProvider>
           </Show>
         </div>
