@@ -36,15 +36,19 @@ type NodeSlug string
 type NodeTree map[NodeSlug]*Node
 
 type FrontMatter struct {
-	Title string `json:"title"`
+	Title string `json:"title,omitempty"`
+}
+
+type NoteNodeFields struct {
+	FrontMatter FrontMatter `json:"frontmatter"`
+	Children    NodeTree    `json:"children"`
 }
 
 type Node struct {
-	FrontMatter
-	Slug     NodeSlug  `json:"slug"`
-	Type     NodeType  `json:"type"`
-	ModTime  time.Time `json:"modTime"`
-	Children NodeTree  `json:"children"`
+	Slug    NodeSlug  `json:"slug"`
+	Type    NodeType  `json:"type"`
+	ModTime time.Time `json:"modTime"`
+	*NoteNodeFields
 }
 
 type OidcProviderInfo struct {

@@ -1,7 +1,7 @@
 import { Accessor, createContext, ParentProps, useContext } from "solid-js"
 import { optionExpect } from "~/core/helpers"
 import { insertNode } from "~/core/tree";
-import { Frontmatter, NodeTree } from "~/core/types";
+import type { NodeEntry, NodeTree } from "~/core/types";
 
 interface NodeTreeContextProps {
   setNodeTree: (tree: NodeTree) => any
@@ -11,10 +11,10 @@ interface NodeTreeContextProps {
 function makeNodeTreeContext({ nodeTree, setNodeTree }: NodeTreeContextProps) {
   return {
     nodeTree,
-    insertNode: (fullSlug: string, frontmatter: Frontmatter) => {
+    insertNode: (nodeEntry: NodeEntry) => {
       // XXX requires modern browsers (2022), maybe polyfill with core-js
       const newNodeTree = structuredClone(nodeTree())
-      insertNode(newNodeTree, fullSlug, frontmatter)
+      insertNode(newNodeTree, nodeEntry)
       setNodeTree(newNodeTree)
     }
   } as const

@@ -1,5 +1,5 @@
 export interface Frontmatter {
-  title: string
+  title?: string
 }
 
 export enum NodeType {
@@ -10,11 +10,22 @@ export enum NodeType {
 export type NodeSlug = string
 export type NodeTree = Record<NodeSlug, NodeTreeNode>
 
-export interface NodeTreeNode extends Frontmatter {
+export type NodeTreeNode = {
   slug: NodeSlug
-  type: string
-  modTime: string
+  modTime: string // TODO extend from ModTime instead
+} & ({
+  type: "note"
+  frontmatter: Frontmatter
   children: NodeTree
+} | {
+  type: "asset"
+})
+
+export interface NodeEntry {
+  fullSlug: string
+  nodeType: "note" | "asset"
+  modTime: string
+  frontmatter?: Frontmatter
 }
 
 export interface OidcProviderInfo {

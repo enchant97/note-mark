@@ -364,9 +364,12 @@ func (tc *TreeController) insertNodeIntoMemory(
 	} else {
 		// make a default note node (will get updated later from discovery)
 		node := core.Node{
-			Slug:     core.NodeSlug(slugParts[0]),
-			Type:     core.NoteNode,
-			Children: core.NodeTree{},
+			Slug: core.NodeSlug(slugParts[0]),
+			Type: core.NoteNode,
+			NoteNodeFields: &core.NoteNodeFields{
+				FrontMatter: core.FrontMatter{},
+				Children:    core.NodeTree{},
+			},
 		}
 		currentTree[core.NodeSlug(slugParts[0])] = &node
 		currentNode = &node
@@ -376,9 +379,12 @@ func (tc *TreeController) insertNodeIntoMemory(
 		slugPart := core.NodeSlug(slugPart)
 		if _, exists := currentNode.Children[slugPart]; !exists {
 			currentNode.Children[slugPart] = &core.Node{
-				Slug:     slugPart,
-				Type:     core.NoteNode,
-				Children: core.NodeTree{},
+				Slug: slugPart,
+				Type: core.NoteNode,
+				NoteNodeFields: &core.NoteNodeFields{
+					FrontMatter: core.FrontMatter{},
+					Children:    core.NodeTree{},
+				},
 			}
 		}
 		currentNode = currentNode.Children[slugPart]
@@ -388,7 +394,12 @@ func (tc *TreeController) insertNodeIntoMemory(
 	currentNode.Type = nodeEntry.Type
 	// handle noteNode
 	if nodeEntry.Type == core.NoteNode {
-		currentNode.FrontMatter = frontmatter
+		currentNode.NoteNodeFields = &core.NoteNodeFields{
+			FrontMatter: frontmatter,
+			Children:    currentNode.Children,
+		}
+	} else {
+		currentNode.NoteNodeFields = nil
 	}
 	return nil
 }

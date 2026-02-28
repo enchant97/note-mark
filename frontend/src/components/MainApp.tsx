@@ -9,15 +9,15 @@ import { NodeTree } from "~/core/types";
 import SortSelect, { SortChoice } from "./input/SortSelect";
 import { NodeTreeProvider } from "~/contexts/NodeTreeProvider";
 
-function nodeTreeIntoNodeList(tree: NodeTree, username: string, parentSlug?: string) {
+function nodeTreeIntoNotesList(tree: NodeTree, username: string, parentSlug?: string) {
   return Object.values(tree).filter((node) => node.type === "note").map((node) => {
     const fullSlug = parentSlug
       ? `${parentSlug}/${node.slug}`
       : node.slug
     const href = `/${username}/${fullSlug}`
-    const children = nodeTreeIntoNodeList(node.children, username, fullSlug)
+    const children = nodeTreeIntoNotesList(node.children, username, fullSlug)
     return {
-      title: node.title || node.slug,
+      title: node.frontmatter.title || node.slug,
       fullSlug,
       href,
       ...(children.length ? { nodes: children } : {})
@@ -25,11 +25,11 @@ function nodeTreeIntoNodeList(tree: NodeTree, username: string, parentSlug?: str
   })
 }
 
-function sortNodeTreeList(nodes: any[], method: SortChoice): any[] {
+function sortNotesList(nodes: any[], method: SortChoice): any[] {
   const sortedChildren = nodes
     .map(node => ({
       ...node,
-      ...(node.nodes?.length ? { nodes: sortNodeTreeList(node.nodes, method) } : {})
+      ...(node.nodes?.length ? { nodes: sortNotesList(node.nodes, method) } : {})
     }))
   switch (method) {
     case SortChoice.NAME_ASC:
@@ -60,15 +60,15 @@ export default function MainApp(props: ParentProps) {
   const [nodeTree, { mutate: setNodeTree }] = createResource(() => params.username, async (username) => {
     return await Api.getNodeTree(username)
   })
-  const nodeTreeList = () => {
+  const notesList = () => {
     if (nodeTree.loading) { return }
-    return nodeTreeIntoNodeList(nodeTree() ?? {}, params.username)
+    return nodeTreeIntoNotesList(nodeTree() ?? {}, params.username)
   }
-  const nodeTreeListSorted = () => {
-    const nodes = nodeTreeList()
+  const notesListSorted = () => {
+    const nodes = notesList()
     if (nodes === undefined) { return }
     const startTime = performance.now()
-    const items = sortNodeTreeList(nodes, sortChoice())
+    const items = sortNotesList(nodes, sortChoice())
     const endTime = performance.now()
     console.debug(`[PERF] sorting node tree took ${endTime - startTime}ms`)
     return items
@@ -102,7 +102,7 @@ export default function MainApp(props: ParentProps) {
               <span class="flex-1">NOTEBOOKS</span>
             </li>
             <ul class="p-2 flex-1 overflow-auto bg-base-100 shadow-glass rounded-box">
-              <Show when={nodeTreeListSorted} fallback={<LoadingRing />}>{(nodeTree) => (
+              <Show when={notesListSorted} fallback={<LoadingRing />}>{(nodeTree) => (
                 <TreeNavigator
                   nodes={nodeTree()}
                   fileIcon={FileIcon}
