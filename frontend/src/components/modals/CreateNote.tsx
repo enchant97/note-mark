@@ -5,19 +5,22 @@ import Api from "~/core/api";
 import Icon from "../Icon";
 import { createEffect } from "solid-js";
 
-const createNoteAction = action(async (username: string, currentFullSlug: string, formData: FormData) => {
+const createNoteAction = action(async (where: { username: string, parentSlug?: string }, formData: FormData) => {
   const slug = formData.get("slug")?.toString()
   const title = formData.get("title")?.toString()
   if (slug === undefined) {
     throw "invalid form data"
   }
   // TODO validation
-  await Api.updateNoteNodeFrontmatter(username, `${currentFullSlug}/${slug}`, {
+  const fullSlug = where.parentSlug
+    ? `${where.parentSlug}/${slug}`
+    : slug
+  await Api.updateNoteNodeFrontmatter(where.username, fullSlug, {
     title: title,
   })
   return {
     ok: true, data: {
-      fullSlug: `${currentFullSlug}/${slug}`,
+      fullSlug,
       nodeType: "note",
       modTime: (new Date()).toISOString(),
       frontmatter: {
@@ -29,7 +32,7 @@ const createNoteAction = action(async (username: string, currentFullSlug: string
 
 export default function CreateNoteModal(props: {
   currentUsername: string,
-  currentFullSlug: string,
+  currentFullSlug?: string,
   onClose: (nodeEntry?: NodeEntry) => any,
 }) {
   const submission = useSubmission(createNoteAction)
@@ -39,7 +42,10 @@ export default function CreateNoteModal(props: {
   })
   return (
     <BaseModal title="Create Note">
-      <form action={createNoteAction.with(props.currentUsername, props.currentFullSlug)} method="post">
+      <form action={createNoteAction.with({
+        username: props.currentUsername,
+        parentSlug: props.currentFullSlug,
+      })} method="post">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">Note details</legend>
           <label class="input validator">
