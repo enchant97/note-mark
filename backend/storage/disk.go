@@ -142,12 +142,21 @@ func (sc *DiskStorageController) UpdateNoteNodeFrontmatter(
 	newFrontmatter core.FrontMatter,
 ) error {
 	r, err := sc.ReadNoteNode(username, slug)
-	if err != nil {
+	var content []byte
+	var fm core.FrontMatter
+	if err != nil && errors.Is(err, core.ErrNotFound) {
+		// Create new note
+		content = []byte{}
+	} else if err == nil {
+		// Update existing note
+		defer r.Close()
+		content, err = frontmatter.Parse(r, &fm)
+		if err != nil {
+			return err
+		}
+	} else {
 		return err
 	}
-	defer r.Close()
-	var fm core.FrontMatter
-	content, err := frontmatter.Parse(r, &fm)
 	rawFm, err := yaml.Marshal(&newFrontmatter)
 	if err != nil {
 		return err

@@ -1,18 +1,26 @@
-import { action, useAction, useParams, useSubmission } from "@solidjs/router"
+import { action, useAction, useNavigate, useParams, useSubmission } from "@solidjs/router"
 import { createEffect, createResource, createSignal, Show } from "solid-js";
 import Breadcrumb from "~/components/Breadcrumb";
+import Icon from "~/components/Icon";
 import LoadingRing from "~/components/loading/LoadingRing";
+import CreateNoteModal from "~/components/modals/CreateNote";
 import Note, { NoteMode } from "~/components/note/Note";
+import { useModal } from "~/contexts/ModalProvider";
+import { useNodeTree } from "~/contexts/NodeTreeProvider";
 import Api from "~/core/api";
 import { createNoteEngine } from "~/core/note-engine";
 import StorageHandler from "~/core/storage"
+import type { NodeEntry } from "~/core/types";
 
 function NoteNode() {
   const params = useParams<{
     username: string,
     fullSlug: string,
   }>()
+  const nodeTree = useNodeTree()
   const noteEngine = createNoteEngine()
+  const { setModal, clearModal } = useModal()
+  const navigate = useNavigate()
   const [noteModeSetting, setNoteModeSetting] = StorageHandler.createSettingSignal("note_mode", false)
   const noteMode = () => {
     let stored = noteModeSetting() as NoteMode | null
@@ -43,10 +51,36 @@ function NoteNode() {
   const saveSubmission = useSubmission(saveAction)
   const save = useAction(saveAction)
 
+  const onCreateNoteClick = () => {
+    setModal({
+      component: CreateNoteModal,
+      props: {
+        currentUsername: params.username,
+        currentFullSlug: params.fullSlug,
+        onClose: (nodeEntry?: NodeEntry) => {
+          clearModal()
+          if (nodeEntry) {
+            nodeTree.insertNode(nodeEntry)
+            navigate(`/${params.username}/${nodeEntry.fullSlug}`)
+          }
+        },
+      },
+    })
+  }
+
   return (
     <div class="flex flex-col gap-4 mt-6">
       <div class="flex gap-4 flex-col sm:flex-row">
         <menu class="menu menu-horizontal">
+          <li>
+            <button
+              onclick={onCreateNoteClick}
+              type="button"
+              title="Create New Note"
+            >
+              <Icon name="file-plus" />
+            </button>
+          </li>
         </menu>
         <Breadcrumb class="flex-1" username={params.username} fullSlug={params.fullSlug} />
       </div>
