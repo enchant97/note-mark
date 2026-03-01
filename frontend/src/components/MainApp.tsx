@@ -3,13 +3,21 @@ import Header from '~/components/Header';
 import LoadingRing from "./loading/LoadingRing";
 import TreeNavigator from 'solid-tree-navigator';
 import Icon, { FileIcon, FolderIcon } from '~/components/Icon';
-import { useParams } from "@solidjs/router";
+import { useNavigate, useParams } from "@solidjs/router";
 import Api from "~/core/api";
 import { NodeTree } from "~/core/types";
 import SortSelect, { SortChoice } from "./input/SortSelect";
 import { NodeTreeProvider } from "~/contexts/NodeTreeProvider";
+import { useModal } from "~/contexts/ModalProvider";
+import ContentSearchModal from "./modals/ContentSearch";
 
-function nodeTreeIntoNotesList(tree: NodeTree, username: string, parentSlug?: string) {
+interface NodeListItem {
+  title: string
+  fullSlug: string
+  nodes?: NodeListItem[]
+}
+
+function nodeTreeIntoNotesList(tree: NodeTree, username: string, parentSlug?: string): NodeListItem[] {
   return Object.values(tree).filter((node) => node.type === "note").map((node) => {
     const fullSlug = parentSlug
       ? `${parentSlug}/${node.slug}`
@@ -25,7 +33,7 @@ function nodeTreeIntoNotesList(tree: NodeTree, username: string, parentSlug?: st
   })
 }
 
-function sortNotesList(nodes: any[], method: SortChoice): any[] {
+function sortNotesList(nodes: NodeListItem[], method: SortChoice): NodeListItem[] {
   const sortedChildren = nodes
     .map(node => ({
       ...node,
@@ -51,11 +59,17 @@ function sortNotesList(nodes: any[], method: SortChoice): any[] {
   }
 }
 
+function flattenNodesList(nodes: NodeListItem[]): NodeListItem[] {
+  return nodes.flatMap(({ nodes = [], ...rest }) => [rest, ...flattenNodesList(nodes)])
+}
+
 export default function MainApp(props: ParentProps) {
   const params = useParams<{
     username: string,
     fullSlug: string,
   }>()
+  const { setModal, clearModal } = useModal()
+  const navigate = useNavigate()
   const [sortChoice, setSortChoice] = createSignal(SortChoice.NAME_ASC)
   const [nodeTree, { mutate: setNodeTree }] = createResource(() => params.username, async (username) => {
     return await Api.getNodeTree(username)
@@ -72,6 +86,22 @@ export default function MainApp(props: ParentProps) {
     const endTime = performance.now()
     console.debug(`[PERF] sorting node tree took ${endTime - startTime}ms`)
     return items
+  }
+
+  const onContentSearchClick = () => {
+    let sortedItems = flattenNodesList(notesList() ?? [])
+      .sort((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base', numeric: true }))
+    setModal({
+      component: ContentSearchModal,
+      props: {
+        sortedItems,
+        onClose: (item?: { href: string }) => {
+          clearModal()
+          if (item === undefined) { return }
+          navigate(item.href)
+        },
+      },
+    })
   }
 
   return (
@@ -98,6 +128,13 @@ export default function MainApp(props: ParentProps) {
               <Icon name="align-left" />
               <SortSelect name="drawerSortMode" onChange={setSortChoice} selected={sortChoice()} />
             </label></li>
+            <li><button
+              onClick={() => onContentSearchClick()}
+              class="btn btn-sm"
+              type="button">
+              <Icon name="search" />
+              Search
+            </button></li>
             <li class="menu-title flex flex-row">
               <span class="flex-1">NOTEBOOKS</span>
             </li>
