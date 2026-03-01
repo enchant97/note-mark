@@ -10,10 +10,13 @@ import SortSelect, { SortChoice } from "./input/SortSelect";
 import { NodeTreeProvider } from "~/contexts/NodeTreeProvider";
 import { useModal } from "~/contexts/ModalProvider";
 import ContentSearchModal from "./modals/ContentSearch";
+import { compare } from "~/core/helpers";
 
 interface NodeListItem {
   title: string
   fullSlug: string
+  modTime: string
+  href: string
   nodes?: NodeListItem[]
 }
 
@@ -28,6 +31,7 @@ function nodeTreeIntoNotesList(tree: NodeTree, username: string, parentSlug?: st
       title: node.frontmatter.title || node.slug,
       fullSlug,
       href,
+      modTime: node.modTime,
       ...(children.length ? { nodes: children } : {})
     }
   })
@@ -44,16 +48,10 @@ function sortNotesList(nodes: NodeListItem[], method: SortChoice): NodeListItem[
       return sortedChildren.sort((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base', numeric: true }))
     case SortChoice.NAME_DEC:
       return sortedChildren.sort((a, b) => b.title.localeCompare(a.title, 'en', { sensitivity: 'base', numeric: true }))
-    /* TODO add this back when nodes have timestamps
-    case SortChoice.UPDATED_ASC:
-      return sortedChildren.sort((a, b) => compare(a.updatedAt, b.updatedAt))
-    case SortChoice.UPDATED_DEC:
-      return sortedChildren.sort((a, b) => compare(b.updatedAt, a.updatedAt))
-    case SortChoice.CREATED_ASC:
-      return sortedChildren.sort((a, b) => compare(a.createdAt, b.createdAt))
-    case SortChoice.CREATED_DEC:
-      return sortedChildren.sort((a, b) => compare(b.createdAt, a.createdAt))
-    */
+    case SortChoice.MOD_TIME_ASC:
+      return sortedChildren.sort((a, b) => compare(a.modTime, b.modTime))
+    case SortChoice.MOD_TIME_DEC:
+      return sortedChildren.sort((a, b) => compare(b.modTime, a.modTime))
     default:
       return sortedChildren
   }
@@ -90,6 +88,7 @@ export default function MainApp(props: ParentProps) {
 
   const onContentSearchClick = () => {
     let sortedItems = flattenNodesList(notesList() ?? [])
+      .map((node) => ({ title: node.title, href: node.href }))
       .sort((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base', numeric: true }))
     setModal({
       component: ContentSearchModal,

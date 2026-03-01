@@ -1,10 +1,8 @@
 export enum SortChoice {
   NAME_ASC = "NAME_ASC",
   NAME_DEC = "NAME_DEC",
-  UPDATED_ASC = "UPDATED_ASC",
-  UPDATED_DEC = "UPDATED_DEC",
-  CREATED_ASC = "CREATED_ASC",
-  CREATED_DEC = "CREATED_DEC",
+  MOD_TIME_ASC = "MOD_TIME_ASC",
+  MOD_TIME_DEC = "MOD_TIME_DEC",
 }
 
 export default function SortSelect(props: {
@@ -20,10 +18,8 @@ export default function SortSelect(props: {
     >
       <option selected={props.selected === SortChoice.NAME_ASC} value={SortChoice.NAME_ASC}>Name (A to Z)</option>
       <option selected={props.selected === SortChoice.NAME_DEC} value={SortChoice.NAME_DEC}>Name (Z to A)</option>
-      <option selected={props.selected === SortChoice.UPDATED_DEC} value={SortChoice.UPDATED_DEC}>Modified (latest first)</option>
-      <option selected={props.selected === SortChoice.UPDATED_ASC} value={SortChoice.UPDATED_ASC}>Modified (oldest first)</option>
-      <option selected={props.selected === SortChoice.CREATED_DEC} value={SortChoice.CREATED_DEC}>Created (latest first)</option>
-      <option selected={props.selected === SortChoice.CREATED_ASC} value={SortChoice.CREATED_ASC}>Created (oldest first)</option>
+      <option selected={props.selected === SortChoice.MOD_TIME_DEC} value={SortChoice.MOD_TIME_DEC}>Modified (latest first)</option>
+      <option selected={props.selected === SortChoice.MOD_TIME_ASC} value={SortChoice.MOD_TIME_ASC}>Modified (oldest first)</option>
     </select >
   )
 }
