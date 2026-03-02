@@ -4,10 +4,13 @@ import Breadcrumb from "~/components/Breadcrumb";
 import Icon from "~/components/Icon";
 import LoadingRing from "~/components/loading/LoadingRing";
 import CreateNoteModal from "~/components/modals/CreateNote";
+import PrintModal from "~/components/modals/Print";
 import Note, { NoteMode } from "~/components/note/Note";
 import { useModal } from "~/contexts/ModalProvider";
 import { useNodeTree } from "~/contexts/NodeTreeProvider";
+import { ToastType, useToast } from "~/contexts/ToastProvider";
 import Api from "~/core/api";
+import { copyToClipboard, download, StringSource } from "~/core/helpers";
 import { createNoteEngine } from "~/core/note-engine";
 import StorageHandler from "~/core/storage"
 import type { NodeEntry } from "~/core/types";
@@ -21,7 +24,11 @@ function NoteNode() {
   const noteEngine = createNoteEngine()
   const { setModal, clearModal } = useModal()
   const navigate = useNavigate()
+  const { pushToast } = useToast()
   const [noteModeSetting, setNoteModeSetting] = StorageHandler.createSettingSignal("note_mode", false)
+  const noteSlug = () => {
+    return params.fullSlug.split("/").pop()
+  }
   const noteMode = () => {
     let stored = noteModeSetting() as NoteMode | null
     if (stored === null) {
@@ -68,6 +75,33 @@ function NoteNode() {
     })
   }
 
+  const onSettingsClick = () => {
+    pushToast({ message: "WIP", type: ToastType.ERROR })
+  }
+
+  const onAssetsClick = () => {
+    pushToast({ message: "WIP", type: ToastType.ERROR })
+  }
+
+  const onShareClick = async () => {
+    try {
+      await copyToClipboard(location.href)
+      pushToast({ message: "copied to clipboard", type: ToastType.SUCCESS })
+    } catch (err) {
+      pushToast({ message: err.message, type: ToastType.ERROR })
+    }
+  }
+
+  const onPrintClick = async () => {
+    setModal({
+      component: PrintModal,
+      props: {
+        onClose: clearModal,
+        noteEngine,
+      },
+    })
+  }
+
   return (
     <div class="flex flex-col gap-4 mt-6">
       <div class="flex gap-4 flex-col sm:flex-row">
@@ -79,8 +113,67 @@ function NoteNode() {
               title="Create New Note"
             >
               <Icon name="file-plus" />
+              New
             </button>
           </li>
+          <li><button
+            onclick={onSettingsClick}
+            type="button"
+            title="Note Settings"
+          >
+            <Icon name="settings" />
+            Settings
+          </button></li>
+          <li><button
+            onClick={onAssetsClick}
+            type="button"
+            title="Note Assets"
+          >
+            <Icon name="image" />
+            Assets
+          </button></li>
+          <li><details class="dropdown">
+            <summary><Icon name="more-horizontal" /></summary>
+            <ul class="p-2 menu dropdown-content z-[1] w-52 backdrop-glass">
+              <li><button
+                onClick={(ev) => {
+                  onShareClick()
+                  ev.currentTarget.closest("details")?.removeAttribute("open")
+                }}
+                type="button"
+                classList={{ "hidden": !window.isSecureContext }}
+              >
+                <Icon name="link" />
+                Copy Page Link
+              </button></li>
+              <li><button
+                onClick={(ev) => {
+                  let content = noteEngine.tryIntoRaw()
+                  if (content) {
+                    download(
+                      new StringSource(content, "text/markdown"),
+                      `${noteSlug()}.md`,
+                    )
+                  }
+                  ev.currentTarget.closest("details")?.removeAttribute("open")
+                }}
+                type="button"
+              >
+                <Icon name="download" />
+                Download Note
+              </button></li>
+              <li><button
+                onClick={(ev) => {
+                  onPrintClick()
+                  ev.currentTarget.closest("details")?.removeAttribute("open")
+                }}
+                type="button"
+              >
+                <Icon name="printer" />
+                Print Note
+              </button></li>
+            </ul>
+          </details></li>
         </menu>
         <Breadcrumb class="flex-1" username={params.username} fullSlug={params.fullSlug} />
       </div>
