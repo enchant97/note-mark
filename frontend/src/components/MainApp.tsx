@@ -5,12 +5,14 @@ import TreeNavigator from 'solid-tree-navigator';
 import Icon, { FileIcon, FolderIcon } from '~/components/Icon';
 import { useNavigate, useParams } from "@solidjs/router";
 import Api from "~/core/api";
-import { NodeTree } from "~/core/types";
+import { NodeEntry, NodeTree } from "~/core/types";
 import SortSelect, { SortChoice } from "./input/SortSelect";
 import { NodeTreeProvider } from "~/contexts/NodeTreeProvider";
 import { useModal } from "~/contexts/ModalProvider";
 import ContentSearchModal from "./modals/ContentSearch";
 import { compare } from "~/core/helpers";
+import CreateNoteModal from "./modals/CreateNote";
+import { insertNode } from "~/core/tree";
 
 interface NodeListItem {
   title: string
@@ -103,6 +105,24 @@ export default function MainApp(props: ParentProps) {
     })
   }
 
+  const onCreateNoteClick = () => {
+    setModal({
+      component: CreateNoteModal,
+      props: {
+        currentUsername: params.username,
+        onClose: (nodeEntry?: NodeEntry) => {
+          clearModal()
+          if (nodeEntry) {
+            const newNodeTree = structuredClone(nodeTree()!)
+            insertNode(newNodeTree, nodeEntry)
+            setNodeTree(newNodeTree)
+            navigate(`/${params.username}/${nodeEntry.fullSlug}`)
+          }
+        },
+      },
+    })
+  }
+
   return (
     <div class="drawer lg:drawer-open">
       <input id="main-drawer" type="checkbox" class="drawer-toggle" />
@@ -134,8 +154,13 @@ export default function MainApp(props: ParentProps) {
               <Icon name="search" />
               Search
             </button></li>
-            <li class="menu-title flex flex-row">
+            <li class="menu-title flex flex-row items-center">
               <span class="flex-1">NOTEBOOKS</span>
+              <button
+                class="btn btn-sm"
+                title="New Note"
+                onClick={onCreateNoteClick}
+              ><Icon name="file-plus" /></button>
             </li>
             <ul class="p-2 flex-1 overflow-auto bg-base-100 shadow-glass rounded-box">
               <Show when={notesListSorted} fallback={<LoadingRing />}>{(nodeTree) => (
