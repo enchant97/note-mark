@@ -1,15 +1,18 @@
 import DOMPurify from 'dompurify';
 import { NoteEngine as NoteEngineInternal } from '../../renderer/pkg';
 import { Accessor, createSignal } from 'solid-js';
+import { Frontmatter } from '~/core/types';
 
 export interface NoteEngineReadOnly {
   content: Accessor<string>
+  frontmatter: Accessor<Frontmatter>,
   render: () => string
   tryIntoRaw: () => string
 }
 
 export interface NoteEngine extends NoteEngineReadOnly {
   setContent: (newContent: string) => any
+  setFrontmatter: (newFrontmatter: Frontmatter) => any
   tryFromRaw: (raw: string) => any
 }
 
@@ -21,11 +24,17 @@ export function createNoteEngine(rawContent?: string): NoteEngine {
     noteEngine = NoteEngineInternal.try_from_raw(rawContent)
   }
   const [content, setContent] = createSignal(noteEngine.content)
+  const [frontmatter, setFrontmatter] = createSignal<Frontmatter>(noteEngine.frontmatter)
   return {
     content,
     setContent: (newContent: string) => {
       noteEngine.content = newContent
       setContent(newContent)
+    },
+    frontmatter,
+    setFrontmatter: (newFrontmatter: Frontmatter) => {
+      noteEngine.frontmatter = newFrontmatter
+      setFrontmatter(newFrontmatter)
     },
     render: () => {
       const startTime = performance.now()
@@ -39,6 +48,7 @@ export function createNoteEngine(rawContent?: string): NoteEngine {
     tryFromRaw: (raw: string) => {
       noteEngine = NoteEngineInternal.try_from_raw(raw)
       setContent(noteEngine.content)
+      setFrontmatter(noteEngine.frontmatter)
     },
   }
 }

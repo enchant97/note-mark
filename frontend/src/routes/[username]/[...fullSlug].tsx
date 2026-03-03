@@ -5,6 +5,7 @@ import Icon from "~/components/Icon";
 import LoadingRing from "~/components/loading/LoadingRing";
 import CreateNoteModal from "~/components/modals/CreateNote";
 import PrintModal from "~/components/modals/Print";
+import UpdateNoteModal from "~/components/modals/UpdateNote";
 import Note, { NoteMode } from "~/components/note/Note";
 import { useModal } from "~/contexts/ModalProvider";
 import { useNodeTree } from "~/contexts/NodeTreeProvider";
@@ -76,7 +77,28 @@ function NoteNode() {
   }
 
   const onSettingsClick = () => {
-    pushToast({ message: "WIP", type: ToastType.ERROR })
+    setModal({
+      component: UpdateNoteModal,
+      props: {
+        currentUsername: params.username,
+        currentFullSlug: params.fullSlug,
+        currentFrontmatter: noteEngine.frontmatter(),
+        onClose: (nodeEntry?: NodeEntry) => {
+          clearModal()
+          if (nodeEntry) {
+            if (nodeEntry.fullSlug === params.fullSlug) {
+              // only frontmatter was changed
+              noteEngine.setFrontmatter(nodeEntry.frontmatter!)
+              // TODO update tree
+            } else {
+              // note was renamed
+              // TODO update tree
+              // TODO navigate to updated note or parent (if moved to trash)
+            }
+          }
+        },
+      },
+    })
   }
 
   const onAssetsClick = () => {
