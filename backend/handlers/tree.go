@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"path"
-	"strings"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -75,8 +74,17 @@ func SetupTreeHandler(
 		OperationID: "RenameNodeBySlug",
 	}, handler.PostRenameNode)
 	huma.Register(api, huma.Operation{
+		Method:      http.MethodPost,
+		Path:        "/api/tree/move-to-trash/u/{username}/*",
+		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		Security:    defaultSecurityOp,
+		Tags:        []string{"Node Tree"},
+		Summary:     "Move node to trash",
+		OperationID: "MoveToTrashByNodeBySlug",
+	}, handler.PostMoveNodeToTrash)
+	huma.Register(api, huma.Operation{
 		Method:      http.MethodDelete,
-		Path:        "/api/tree/u/{username}/*",
+		Path:        "/api/tree/u/{username}/.trash/*",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
 		Security:    defaultSecurityOp,
 		Tags:        []string{"Node Tree"},
@@ -127,6 +135,11 @@ type PostRenameNodeInput struct {
 
 func (m *PostRenameNodeInput) Resolve(ctx huma.Context) []error {
 	return middleware.ValidateRequestInput(ctx, m)
+}
+
+type MoveNodeToTrashInput struct {
+	UsernamePath
+	SlugPath
 }
 
 type DeleteNodeInput struct {
@@ -275,6 +288,35 @@ func (h TreeHandler) PostRenameNode(
 	return nil, h.service.RenameNode(input.Username, sanitizedSlug, sanitizedNewSlug)
 }
 
+func (h TreeHandler) PostMoveNodeToTrash(
+	ctx context.Context,
+	input *MoveNodeToTrashInput,
+) (*struct{}, error) {
+	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
+	currentUsername := authDetails.MustGetAuthenticatedUser().Username
+	if currentUsername != string(input.Username) {
+		return nil, huma.Error403Forbidden("you do not permission to view other users content")
+	}
+	sanitizedSlug := path.Clean(string(input.Slug))
+	nodeType, err := getValidatedNodeType(input.Username, string(sanitizedSlug))
+	if err != nil {
+		return nil, err
+	}
+	sanitizedNewSlug := path.Join(".trash/", sanitizedSlug)
+	newNodeType, err := getValidatedNodeType(input.Username, sanitizedNewSlug)
+	if err != nil {
+		return nil, err
+	}
+	if nodeType != newNodeType {
+		return nil, huma.Error422UnprocessableEntity("invalid slug")
+	}
+	return nil, h.service.RenameNode(
+		input.Username,
+		core.NodeSlug(sanitizedSlug),
+		core.NodeSlug(sanitizedNewSlug),
+	)
+}
+
 func (h TreeHandler) DeleteNode(
 	ctx context.Context,
 	input *DeleteNodeInput,
@@ -284,12 +326,10 @@ func (h TreeHandler) DeleteNode(
 	if currentUsername != string(input.Username) {
 		return nil, huma.Error403Forbidden("you do not permission to view other users content")
 	}
-	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
-	if _, err := getValidatedNodeType(input.Username, string(sanitizedSlug)); err != nil {
+	sanitizedSlug := path.Clean(string(input.Slug))
+	sanitizedSlug = path.Join(".trash/", sanitizedSlug)
+	if _, err := getValidatedNodeType(input.Username, sanitizedSlug); err != nil {
 		return nil, err
 	}
-	if !strings.HasPrefix(string(sanitizedSlug), ".trash/") {
-		return nil, huma.Error422UnprocessableEntity("invalid slug, must have '.trash/' prefix")
-	}
-	return nil, h.service.DeleteNode(input.Username, sanitizedSlug)
+	return nil, h.service.DeleteNode(input.Username, core.NodeSlug(sanitizedSlug))
 }

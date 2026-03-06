@@ -183,6 +183,12 @@ export default class Api {
     })
     await throwResponseApiErrors(resp)
   }
+  static async moveNodeToTrash(username: string, slug: string) {
+    let resp = await apiFetch(`tree/move-to-trash/u/${username}/${slug}`, {
+      method: HttpMethods.POST,
+    })
+    await throwResponseApiErrors(resp)
+  }
   static async deleteNode(username: string, slug: string) {
     let resp = await apiFetch(`tree/u/${username}/${slug}`, {
       method: HttpMethods.DELETE,

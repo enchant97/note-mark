@@ -56,7 +56,7 @@ const deleteNoteAction = action(async (where: {
     return { ok: true, newFullSlug: null }
   }
   // move to node trash
-  await Api.renameNode(where.username, where.currentFullSlug, `.trash/${where.currentFullSlug}`)
+  await Api.moveNodeToTrash(where.username, where.currentFullSlug)
   return { ok: true, newFullSlug: `.trash/${where.currentFullSlug}` }
 })
 
