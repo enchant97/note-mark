@@ -13,6 +13,7 @@ import MainApp from './components/MainApp';
 import Profile from './routes/profile';
 import ScratchPad from './routes/scratch-pad';
 import Node from './routes/[username]/[...fullSlug]';
+import Redirect from './components/Redirect';
 
 const root = document.getElementById('root')!
 root.innerHTML = ""
@@ -38,6 +39,7 @@ render(() => (
         <Route path="/" component={MainApp}>
           <Route path="/:username" component={User} />
           <Route path="/:username/*fullSlug" component={Node} />
+          <Route path="/:username/.trash/*" component={() => <Redirect href="/" />} />
         </Route>
       </Route>
     </Route>

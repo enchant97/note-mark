@@ -76,7 +76,8 @@ export default function MainApp(props: ParentProps) {
   })
   const notesList = () => {
     if (nodeTree.loading) { return }
-    return nodeTreeIntoNotesList(nodeTree() ?? {}, params.username)
+    const { ".trash": _, ...tree } = nodeTree() ?? {}
+    return nodeTreeIntoNotesList(tree, params.username)
   }
   const notesListSorted = () => {
     const nodes = notesList()
