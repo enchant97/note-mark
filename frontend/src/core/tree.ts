@@ -7,7 +7,7 @@ export function insertNode(nodeTree: NodeTree, nodeEntry: NodeEntry) {
   const slugParts = nodeEntry.fullSlug.split("/")
   let currentNode: NodeTreeNode
   // handle top level node
-  if (nodeTree.hasOwnProperty(slugParts[0])) {
+  if (Object.hasOwn(nodeTree, slugParts[0])) {
     currentNode = nodeTree[slugParts[0]]
   } else {
     const newNode: NodeTreeNode = {
@@ -27,7 +27,7 @@ export function insertNode(nodeTree: NodeTree, nodeEntry: NodeEntry) {
         throw new Error(`node of type '${currentNode.type}' expected 'note'`)
       }
       // XXX requires modern browsers (2022), maybe polyfill with core-js
-      if (!Object.hasOwn(currentNode, slugPart)) {
+      if (!Object.hasOwn(currentNode.children, slugPart)) {
         // node needs creation, create a default note node
         currentNode.children[slugPart] = {
           slug: slugPart,
@@ -53,4 +53,53 @@ export function insertNode(nodeTree: NodeTree, nodeEntry: NodeEntry) {
     delete currentNode["children"]
     delete currentNode["frontmatter"]
   }
+}
+
+/**
+ * In-memory rename of a node, also updating frontmatter
+ */
+export function renameNode(nodeTree: NodeTree, currentFullSlug: string, nodeEntry: NodeEntry) {
+  insertNode(nodeTree, nodeEntry)
+  deleteNode(nodeTree, currentFullSlug)
+}
+
+/**
+ * In-memory deletion of a node and any children
+ */
+export function deleteNode(nodeTree: NodeTree, fullSlug: string) {
+  console.log(nodeTree)
+  const slugParts = fullSlug.split("/")
+  const nodeSlug = slugParts.pop()
+  if (!nodeSlug) {
+    throw "not enough slug parts"
+  }
+  if (slugParts.length === 0) {
+    if (!Object.hasOwn(nodeTree, nodeSlug)) {
+      throw "not found"
+    }
+    delete nodeTree[nodeSlug]
+    return
+  }
+  let currentNode: NodeTreeNode
+  // handle top level node
+  if (Object.hasOwn(nodeTree, slugParts[0])) {
+    currentNode = nodeTree[slugParts[0]]
+  } else { throw "not found" }
+  // handle further nodes
+  if (slugParts.shift() !== undefined) {
+    for (const slugPart of slugParts) {
+      if (currentNode.type !== "note") {
+        throw `node of type '${currentNode.type}' expected 'note'`
+      }
+      if (!Object.hasOwn(currentNode.children, slugPart)) {
+        throw "not found"
+      }
+      currentNode = currentNode.children[slugPart]
+    }
+  }
+  // reached target, delete the node
+  if (currentNode.type !== "note") {
+    throw `node of type '${currentNode.type}' expected 'note'`
+  }
+  delete currentNode.children[nodeSlug]
 }

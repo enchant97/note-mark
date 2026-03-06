@@ -452,26 +452,35 @@ func (tc *TreeController) tryDeleteFromMemory(
 	} else {
 		return core.ErrNotFound
 	}
-	dirParts, nodeSlug := path.Split(string(fullSlug))
-	var currentNode *core.Node
-	// handle top level node
-	if node, exists := currentTree[core.NodeSlug(dirParts[0])]; exists {
-		currentNode = node
+	dirSlug, nodeSlug := path.Split(string(fullSlug))
+	dirSlug = strings.TrimSuffix(dirSlug, "/")
+	if dirSlug == "" {
+		if _, exists := currentTree[core.NodeSlug(nodeSlug)]; exists {
+			delete(currentTree, core.NodeSlug(nodeSlug))
+			return nil
+		}
 	} else {
-		return core.ErrNotFound
-	}
-	// handle further nodes
-	for _, slugPart := range dirParts[1:] {
-		slugPart := core.NodeSlug(slugPart)
-		if _, exists := currentNode.Children[slugPart]; exists {
-			currentNode = currentNode.Children[slugPart]
+		dirParts := strings.Split(dirSlug, "/")
+		var currentNode *core.Node
+		// handle top level node
+		if node, exists := currentTree[core.NodeSlug(dirParts[0])]; exists {
+			currentNode = node
 		} else {
 			return core.ErrNotFound
 		}
-	}
-	if _, exists := currentNode.Children[core.NodeSlug(nodeSlug)]; exists {
-		delete(currentNode.Children, core.NodeSlug(nodeSlug))
-		return nil
+		// handle further nodes
+		for _, slugPart := range dirParts[1:] {
+			slugPart := core.NodeSlug(slugPart)
+			if _, exists := currentNode.Children[slugPart]; exists {
+				currentNode = currentNode.Children[slugPart]
+			} else {
+				return core.ErrNotFound
+			}
+		}
+		if _, exists := currentNode.Children[core.NodeSlug(nodeSlug)]; exists {
+			delete(currentNode.Children, core.NodeSlug(nodeSlug))
+			return nil
+		}
 	}
 	return core.ErrNotFound
 }

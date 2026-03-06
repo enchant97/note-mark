@@ -83,18 +83,26 @@ function NoteNode() {
         currentUsername: params.username,
         currentFullSlug: params.fullSlug,
         currentFrontmatter: noteEngine.frontmatter(),
-        onClose: (nodeEntry?: NodeEntry) => {
+        onClose: (nodeEntry?: NodeEntry | null) => {
           clearModal()
           if (nodeEntry) {
             if (nodeEntry.fullSlug === params.fullSlug) {
               // only frontmatter was changed
               noteEngine.setFrontmatter(nodeEntry.frontmatter!)
-              // TODO update tree
+              nodeTree.insertNode(nodeEntry)
             } else {
-              // note was renamed
-              // TODO update tree
-              // TODO navigate to updated note or parent (if moved to trash)
+              // note was renamed and possibility frontmatter was updated
+              nodeTree.renameNode(params.fullSlug, nodeEntry)
+              if (nodeEntry.fullSlug.startsWith(".trash/")) {
+                navigate(`/${params.username}`)
+              } else {
+                navigate(`/${params.username}/${nodeEntry.fullSlug}`)
+              }
             }
+          } else if (nodeEntry === null) {
+            // note was permanently deleted
+            nodeTree.deleteNode(params.fullSlug)
+            navigate(`/${params.username}`)
           }
         },
       },

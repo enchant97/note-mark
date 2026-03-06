@@ -1,36 +1,74 @@
-import { action, useSubmission } from "@solidjs/router";
+import { action, useAction, useSubmission } from "@solidjs/router";
 import BaseModal from "./Base";
 import { Frontmatter, NodeEntry } from "~/core/types";
 import Icon from "../Icon";
 import { createEffect } from "solid-js";
 import { createStore } from "solid-js/store";
 import NoteFormFields from "../input/NoteFormFields";
+import Api from "~/core/api";
+import { isEqual } from "lodash";
 
 const updateNoteAction = action(async (where: {
   username: string,
   currentFullSlug: string,
   currentFrontmatter: Frontmatter,
 }, formData: FormData) => {
-  // TODO
-  return { ok: true }
+  const title = formData.get("title")?.toString()
+  const slug = formData.get("slug")?.toString()
+  const parentSlug = formData.get("parentSlug")?.toString()
+  const extraProperties = formData.get("extraProperties")?.toString()
+  if (title === undefined || slug === undefined || parentSlug === undefined || extraProperties === undefined) {
+    throw "invalid form data"
+  }
+  const fullSlug = parentSlug
+    ? `${parentSlug}/${slug}`
+    : slug
+  const frontmatter = {
+    ...JSON.parse(extraProperties),
+    title,
+  }
+  // if frontmatter has changed, update
+  // XXX can we get away with not using `lodash.isEqual()`
+  if (!isEqual(where.currentFrontmatter, frontmatter)) {
+    await Api.updateNoteNodeFrontmatter(where.username, where.currentFullSlug, frontmatter)
+  }
+  // if node has moved, update
+  if (where.currentFullSlug !== fullSlug) {
+    await Api.renameNode(where.username, where.currentFullSlug, fullSlug)
+  }
+  return {
+    ok: true, nodeEntry: {
+      fullSlug,
+      nodeType: "note",
+      modTime: (new Date()).toISOString(),
+      frontmatter,
+    }
+  } as const
 })
 
 const deleteNoteAction = action(async (where: {
   username: string,
   currentFullSlug: string,
-}, formData: FormData) => {
-  // TODO
-  return { ok: true }
+}) => {
+  // permanently delete node
+  if (where.currentFullSlug.startsWith(".trash/")) {
+    await Api.deleteNode(where.username, where.currentFullSlug)
+    return { ok: true, newFullSlug: null }
+  }
+  // move to node trash
+  await Api.renameNode(where.username, where.currentFullSlug, `.trash/${where.currentFullSlug}`)
+  return { ok: true, newFullSlug: `.trash/${where.currentFullSlug}` }
 })
 
 export default function UpdateNoteModal(props: {
   currentUsername: string,
   currentFullSlug: string,
   currentFrontmatter: Frontmatter,
-  onClose: (nodeEntry?: NodeEntry) => any,
+  onClose: (nodeEntry?: NodeEntry | null) => any,
 }) {
   const updateSubmission = useSubmission(updateNoteAction)
   const deleteSubmission = useSubmission(deleteNoteAction)
+  const deleteNode = useAction(deleteNoteAction)
   const pending = () => updateSubmission.pending || deleteSubmission.pending
   const currentExtraProperties = () => {
     // NOTE this requires ensuring to always remove registered properties
@@ -39,18 +77,34 @@ export default function UpdateNoteModal(props: {
   }
   const [fields, setFields] = createStore({
     title: props.currentFrontmatter.title ?? "",
-    slug: "",
-    parentSlug: props.currentFullSlug ?? "",
+    slug: props.currentFullSlug.split("/").pop()!,
+    parentSlug: props.currentFullSlug.split("/").slice(0, -1).join("/"),
     extraProperties: JSON.stringify(currentExtraProperties()),
   })
   createEffect(() => {
     if (updateSubmission.result === undefined) { return }
-    props.onClose(updateSubmission.result.data)
+    props.onClose(updateSubmission.result.nodeEntry)
   })
   createEffect(() => {
     if (deleteSubmission.result === undefined) { return }
-    props.onClose(deleteSubmission.result.data)
+    const newFullSlug = deleteSubmission.result.newFullSlug
+    if (newFullSlug === null) {
+      props.onClose(null)
+    } else {
+      props.onClose({
+        fullSlug: newFullSlug,
+        nodeType: "note",
+        modTime: (new Date()).toISOString(),
+        frontmatter: props.currentFrontmatter,
+      })
+    }
   })
+  const onDeleteClick = () => {
+    deleteNode({
+      username: props.currentUsername,
+      currentFullSlug: props.currentFullSlug,
+    })
+  }
   return (
     <BaseModal title="Update Note">
       <form action={updateNoteAction.with({
@@ -58,36 +112,41 @@ export default function UpdateNoteModal(props: {
         currentFullSlug: props.currentFullSlug,
         currentFrontmatter: props.currentFrontmatter,
       })} method="post">
-      </form>
-      <NoteFormFields fields={fields} setFields={setFields} />
-      <details class="collapse bg-base-100 border-base-300 border">
-        <summary class="collapse-title font-semibold">Extra Properties</summary>
-        <div class="collapse-content">
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend">Properties (JSON)</legend>
-            <textarea
-              class="textarea h-24 w-full"
-              name="extraProperties"
-              value={fields.extraProperties}
-              onInput={(ev) => setFields({ extraProperties: ev.currentTarget.value })}
-              placeholder="{  }"
-              aria-label="extra properties"
-            ></textarea>
-            <p class="label">Extra frontmatter properties, provided in JSON format.</p>
-          </fieldset>
+        <NoteFormFields fields={fields} setFields={setFields} />
+        <details class="collapse bg-base-100 border-base-300 border">
+          <summary class="collapse-title font-semibold">Extra Properties</summary>
+          <div class="collapse-content">
+            <fieldset class="fieldset">
+              <legend class="fieldset-legend">Properties (JSON)</legend>
+              <textarea
+                class="textarea h-24 w-full"
+                name="extraProperties"
+                value={fields.extraProperties}
+                onInput={(ev) => setFields({ extraProperties: ev.currentTarget.value })}
+                placeholder="{  }"
+                aria-label="extra properties"
+              ></textarea>
+              <p class="label">Extra frontmatter properties, provided in JSON format.</p>
+            </fieldset>
+          </div>
+        </details>
+        <div class="modal-action">
+          <button
+            onClick={onDeleteClick}
+            class="btn btn-error btn-outline"
+            classList={{ loading: pending() }}
+            type="button"
+          >
+            <Icon name="trash" />
+            Delete
+          </button>
+          <button class="btn btn-primary" classList={{ loading: pending() }} type="submit">
+            <Icon name="save" />
+            Save
+          </button>
+          <button onclick={() => props.onClose()} class="btn" type="button">Cancel</button>
         </div>
-      </details>
-      <div class="modal-action">
-        <button class="btn btn-error btn-outline" classList={{ loading: pending() }} type="button">
-          <Icon name="trash" />
-          Delete
-        </button>
-        <button class="btn btn-primary" classList={{ loading: pending() }} type="submit">
-          <Icon name="save" />
-          Save
-        </button>
-        <button onclick={() => props.onClose()} class="btn" type="button">Cancel</button>
-      </div>
+      </form>
     </BaseModal>
   )
 }

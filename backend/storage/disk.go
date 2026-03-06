@@ -175,11 +175,10 @@ func (sc *DiskStorageController) RenameNoteNode(
 	slug string,
 	newSlug string,
 ) error {
-	if err := sc.renameFileOrFolder(username, slug, newSlug); err != nil {
+	if err := sc.renameFileOrFolder(username, slug, newSlug); err != nil && !errors.Is(err, core.ErrNotFound) {
 		return err
 	}
 	err := sc.renameFileOrFolder(username, slug+".md", newSlug+".md")
-	// handle if note directory existed, but not a note file (blank note)
 	if errors.Is(err, core.ErrNotFound) {
 		return nil
 	}

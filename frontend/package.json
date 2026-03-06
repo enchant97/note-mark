@@ -15,6 +15,7 @@
   "devDependencies": {
     "@tailwindcss/typography": "latest",
     "@tailwindcss/vite": "^4.2.1",
+    "@types/lodash": "^4.17.24",
     "daisyui": "^5.5.19",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
@@ -35,9 +36,10 @@
     "dompurify": "^3.3.1",
     "feather-icons": "^4.29.2",
     "highlight.js": "^11.11.1",
+    "lodash": "^4.17.23",
     "openid-client": "^6.8.2",
     "solid-js": "^1.9.11",
-    "split.js": "^1.6.5",
-    "solid-tree-navigator": "github:enchant97/solid-tree-navigator#f45670b5998b3779a5a7e9de2411c744af2986bf"
+    "solid-tree-navigator": "github:enchant97/solid-tree-navigator#f45670b5998b3779a5a7e9de2411c744af2986bf",
+    "split.js": "^1.6.5"
   }
 }

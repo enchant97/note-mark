@@ -1,6 +1,6 @@
 import { Accessor, createContext, ParentProps, useContext } from "solid-js"
 import { optionExpect } from "~/core/helpers"
-import { insertNode } from "~/core/tree";
+import { deleteNode, insertNode, renameNode } from "~/core/tree";
 import type { NodeEntry, NodeTree } from "~/core/types";
 
 interface NodeTreeContextProps {
@@ -16,7 +16,17 @@ function makeNodeTreeContext({ nodeTree, setNodeTree }: NodeTreeContextProps) {
       const newNodeTree = structuredClone(nodeTree())
       insertNode(newNodeTree, nodeEntry)
       setNodeTree(newNodeTree)
-    }
+    },
+    renameNode: (currentFullSlug: string, nodeEntry: NodeEntry) => {
+      const newNodeTree = structuredClone(nodeTree())
+      renameNode(newNodeTree, currentFullSlug, nodeEntry)
+      setNodeTree(newNodeTree)
+    },
+    deleteNode: (fullSlug: string) => {
+      const newNodeTree = structuredClone(nodeTree())
+      deleteNode(newNodeTree, fullSlug)
+      setNodeTree(newNodeTree)
+    },
   } as const
 }
 

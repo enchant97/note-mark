@@ -178,7 +178,8 @@ export default class Api {
   static async renameNode(username: string, slug: string, newSlug: string) {
     let resp = await apiFetch(`tree/rename/u/${username}/${slug}`, {
       method: HttpMethods.POST,
-      body: newSlug,
+      body: JSON.stringify(newSlug),
+      headers: { "Content-Type": "application/json" },
     })
     await throwResponseApiErrors(resp)
   }
