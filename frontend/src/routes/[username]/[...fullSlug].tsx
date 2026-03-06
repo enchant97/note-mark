@@ -46,7 +46,7 @@ function NoteNode() {
     })
   createEffect(() => {
     const raw = rawNoteContent()
-    if (raw) { noteEngine.tryFromRaw(raw) }
+    if (raw !== undefined) { noteEngine.tryFromRaw(raw) }
   })
   const [saved, setSaved] = createSignal(true)
   const saveAction = action(async (content: string) => {
