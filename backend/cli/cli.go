@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/enchant97/note-mark/backend/db/migrations"
 	"github.com/enchant97/note-mark/backend/storage"
 	"github.com/enchant97/note-mark/backend/tree"
+	"github.com/go-chi/httplog/v3"
 	"github.com/go-playground/validator/v10"
 	"github.com/urfave/cli/v3"
 )
@@ -31,6 +33,20 @@ func Entrypoint(appVersion string) error {
 	if err := appConfig.ParseConfig(validate); err != nil {
 		return err
 	}
+	// Setup logger
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource:   appConfig.EnvMode == "development",
+		ReplaceAttr: httplog.SchemaECS.Concise(appConfig.EnvMode == "development").ReplaceAttr,
+	}))
+	if appConfig.EnvMode == "production" {
+		logger.With(
+			slog.String("app", "note-mark"),
+			slog.String("version", appVersion),
+			slog.String("env", appConfig.EnvMode),
+		)
+	}
+	slog.SetDefault(logger)
+	slog.SetLogLoggerLevel(slog.LevelInfo) // TODO configure this using envvars
 	// Setup DB
 	dbPath := filepath.Join(appConfig.DataPath, "db.sqlite")
 	if err := migrations.MigrateDB(fmt.Sprintf("sqlite://%s", dbPath)); err != nil {
@@ -59,7 +75,7 @@ func Entrypoint(appVersion string) error {
 				Name:  "serve",
 				Usage: "run the api server",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return commandServe(validate, appConfig, &dao, &tc)
+					return commandServe(logger, validate, appConfig, &dao, &tc)
 				},
 			},
 			{

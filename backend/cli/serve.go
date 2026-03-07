@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -16,12 +17,19 @@ import (
 )
 
 func commandServe(
+	logger *slog.Logger,
 	validate *validator.Validate,
 	appConfig config.AppConfig,
 	dao *db.DAO,
 	tc *tree.TreeController,
 ) error {
-	if mux, err := handlers.SetupHandlers(validate, appConfig, dao, tc); err != nil {
+	if mux, err := handlers.SetupHandlers(
+		logger,
+		validate,
+		appConfig,
+		dao,
+		tc,
+	); err != nil {
 		return err
 	} else {
 		// Start server

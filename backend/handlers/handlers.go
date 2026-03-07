@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -17,12 +18,14 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-chi/httplog/v3"
 	"github.com/go-playground/validator/v10"
 )
 
 var defaultSecurityOp = []map[string][]string{{"api": {}}}
 
 func SetupHandlers(
+	logger *slog.Logger,
 	validate *validator.Validate,
 	appConfig config.AppConfig,
 	dao *db.DAO,
@@ -35,9 +38,15 @@ func SetupHandlers(
 			h.ServeHTTP(w, r)
 		})
 	})
-	mux.Use(middleware.Logger)
+	mux.Use(httplog.RequestLogger(logger, &httplog.Options{
+		Level:         slog.LevelDebug,
+		Schema:        httplog.SchemaECS,
+		RecoverPanics: true,
+		//Skip: func(req *http.Request, respStatus int) bool {
+		//	return respStatus == http.StatusNotFound || respStatus == http.StatusMethodNotAllowed
+		//},
+	}))
 	mux.Use(middleware.Heartbeat("/heartbeat"))
-	mux.Use(middleware.Recoverer)
 	mux.Use(cors.Handler(cors.Options{
 		OptionsPassthrough: false,
 		AllowedOrigins:     []string{appConfig.PublicUrl},

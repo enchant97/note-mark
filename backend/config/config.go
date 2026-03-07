@@ -36,4 +36,5 @@ type AppConfig struct {
 	EnableAnonymousUserSearch bool            `env:"ENABLE_ANONYMOUS_USER_SEARCH,notEmpty" envDefault:"true"`
 	FileSizeLimit             Bytes           `env:"FILE_SIZE_LIMIT,notEmpty" envDefault:"12M"`
 	OIDC                      *OidcConfig     `envPrefix:"OIDC__" env:",init" validate:"omitempty,required"`
+	EnvMode                   string          `env:"ENV_MODE" envDefault:"production" validate:"oneof=production development"`
 }
