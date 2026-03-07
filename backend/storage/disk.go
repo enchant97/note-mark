@@ -170,11 +170,46 @@ func (sc *DiskStorageController) UpdateNoteNodeFrontmatter(
 	return sc.WriteNoteNode(username, slug, bytes.NewBuffer(newContent))
 }
 
+func (sc *DiskStorageController) doesNoteNodeExist(
+	username core.Username,
+	slug string,
+) (bool, error) {
+	absNoteDir := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+	// check whether note directory exists
+	f, err := os.Open(absNoteDir)
+	if err == nil {
+		defer f.Close()
+		_, err = f.Readdirnames(1)
+		if err == nil {
+			// directory was not empty
+			return true, nil
+		} else if err != io.EOF {
+			// something bad happened
+			return false, err
+		}
+		// directory is empty
+	} else if !errors.Is(err, fs.ErrNotExist) {
+		// something bad happened
+		return false, err
+	}
+	// check whether note file exists
+	if _, err := os.Stat(absNoteDir + ".md"); errors.Is(err, fs.ErrNotExist) {
+		return false, nil
+	} else {
+		return true, err
+	}
+}
+
 func (sc *DiskStorageController) RenameNoteNode(
 	username core.Username,
 	slug string,
 	newSlug string,
 ) error {
+	if exists, err := sc.doesNoteNodeExist(username, newSlug); err != nil {
+		return err
+	} else if exists == true {
+		return core.ErrConflict
+	}
 	if err := sc.renameFileOrFolder(username, slug, newSlug); err != nil && !errors.Is(err, core.ErrNotFound) {
 		return err
 	}
