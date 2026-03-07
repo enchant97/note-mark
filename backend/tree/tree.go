@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
+	"log/slog"
 	"path"
 	"strings"
 	"sync"
@@ -268,7 +268,7 @@ func (tc *TreeController) Load() error {
 			context.Background(),
 			string(username),
 		); err == nil && core.IsTreeCacheCompatible(cacheEntry.CacheVersion) {
-			log.Printf("found cached tree for user '%s'\n", username)
+			slog.Info("found cached tree", "username", username)
 			var cachedTree core.NodeTree
 			if err := core.UnmarshalTreeCache(core.TreeCacheEntry{
 				Cache:   cacheEntry.Cache,
@@ -296,7 +296,7 @@ func (tc *TreeController) Load() error {
 // Assumes tree mutex has been locked for writing.
 func (tc *TreeController) updateCacheFromMemory(username core.Username) error {
 	if tree, exists := tc.tree[username]; exists {
-		log.Printf("saving tree to cache for user '%s'\n", username)
+		slog.Info("saving tree to cache", "username", username)
 		cacheEntry, err := core.MarshalTreeCache(tree)
 		if err != nil {
 			return err
@@ -327,7 +327,7 @@ func (tc *TreeController) updateCacheFromMemory(username core.Username) error {
 // Assumes tree mutex has been locked for writing.
 func (tc *TreeController) ingestFromStorage(username core.Username) error {
 	return tc.sc.DiscoverNodesForUser(username, func(nodeEntry core.NodeEntry) error {
-		log.Printf("ingest: %s/%s\n", username, nodeEntry.FullSlug)
+		slog.Info("ingest node", "username", username, "slug", nodeEntry.FullSlug)
 		var frontmatter core.FrontMatter
 		if nodeEntry.Type == core.NoteNode {
 			fm, err := tc.sc.ReadNoteNodeFrontMatter(username, string(nodeEntry.FullSlug))
