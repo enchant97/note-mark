@@ -142,6 +142,10 @@ type MoveNodeToTrashInput struct {
 	SlugPath
 }
 
+type MoveNodeToTrashOutput struct {
+	Body string `doc:"Slug to where it is now located in trash" example:"\".trash/20060102T150405.000Z/my-note\""`
+}
+
 type DeleteNodeInput struct {
 	UsernamePath
 	SlugPath
@@ -291,7 +295,7 @@ func (h TreeHandler) PostRenameNode(
 func (h TreeHandler) PostMoveNodeToTrash(
 	ctx context.Context,
 	input *MoveNodeToTrashInput,
-) (*struct{}, error) {
+) (*MoveNodeToTrashOutput, error) {
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
 	currentUsername := authDetails.MustGetAuthenticatedUser().Username
 	if currentUsername != string(input.Username) {
@@ -302,7 +306,8 @@ func (h TreeHandler) PostMoveNodeToTrash(
 	if err != nil {
 		return nil, err
 	}
-	sanitizedNewSlug := path.Join(".trash/", sanitizedSlug)
+	timestamp := time.Now().UTC()
+	sanitizedNewSlug := path.Join(".trash/", timestamp.Format("20060102T150405.000Z"), sanitizedSlug)
 	newNodeType, err := getValidatedNodeType(input.Username, sanitizedNewSlug)
 	if err != nil {
 		return nil, err
@@ -310,11 +315,16 @@ func (h TreeHandler) PostMoveNodeToTrash(
 	if nodeType != newNodeType {
 		return nil, huma.Error422UnprocessableEntity("invalid slug")
 	}
-	return nil, h.service.RenameNode(
+	if h.service.RenameNode(
 		input.Username,
 		core.NodeSlug(sanitizedSlug),
 		core.NodeSlug(sanitizedNewSlug),
-	)
+	) != nil {
+		return nil, err
+	}
+	return &MoveNodeToTrashOutput{
+		Body: sanitizedNewSlug,
+	}, nil
 }
 
 func (h TreeHandler) DeleteNode(
