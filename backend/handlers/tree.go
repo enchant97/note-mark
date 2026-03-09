@@ -207,7 +207,7 @@ func (h TreeHandler) GetNodeContent(
 		return nil, err
 	}
 	if input.HasConditionalParams() {
-		if err := input.PreconditionFailed("", nodeModTime); err != nil {
+		if err := input.PreconditionFailed("", nodeModTime.Truncate(time.Second)); err != nil {
 			return nil, err
 		}
 	}

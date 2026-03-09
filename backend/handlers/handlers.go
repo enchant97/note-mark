@@ -35,6 +35,7 @@ func SetupHandlers(
 	mux.Use(func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Server", "note-mark")
+			w.Header().Set("Cache-Control", "no-cache, private")
 			h.ServeHTTP(w, r)
 		})
 	})

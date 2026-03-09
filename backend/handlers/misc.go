@@ -3,8 +3,10 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/conditional"
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
 )
@@ -12,6 +14,7 @@ import (
 func SetupMiscHandler(api huma.API, appConfig config.AppConfig) {
 	miscHandler := MiscHandler{
 		AppConfig: appConfig,
+		setupTime: time.Now().UTC(),
 	}
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodGet,
@@ -23,17 +26,25 @@ func SetupMiscHandler(api huma.API, appConfig config.AppConfig) {
 }
 
 type GetServerInfoOutput struct {
-	Body core.ServerInfo
+	Body         core.ServerInfo
+	CacheControl string    `header:"Cache-Control"`
+	LastModified time.Time `header:"Last-Modified"`
 }
 
 type MiscHandler struct {
 	AppConfig config.AppConfig
+	setupTime time.Time
 }
 
 func (h MiscHandler) GetServerInfo(
 	ctx context.Context,
-	input *struct{},
+	input *conditional.Params,
 ) (*GetServerInfoOutput, error) {
+	if input.HasConditionalParams() {
+		if err := input.PreconditionFailed("", h.setupTime.Truncate(time.Second)); err != nil {
+			return nil, err
+		}
+	}
 	var oidcProvider *core.OidcProviderInfo
 	if h.AppConfig.OIDC != nil {
 		oidcProvider = &core.OidcProviderInfo{
@@ -49,5 +60,8 @@ func (h MiscHandler) GetServerInfo(
 			AllowInternalLogin:        h.AppConfig.EnableInternalLogin,
 			EnableAnonymousUserSearch: h.AppConfig.EnableAnonymousUserSearch,
 			OidcProvider:              oidcProvider,
-		}}, nil
+		},
+		CacheControl: "no-cache, public",
+		LastModified: h.setupTime,
+	}, nil
 }
