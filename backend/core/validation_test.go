@@ -33,6 +33,36 @@ func TestIsValidUsername(t *testing.T) {
 	}
 }
 
+func TestIsValidFullSlug(t *testing.T) {
+	tests := []struct {
+		slug   string
+		expect bool
+	}{
+		{"n", true},
+		{"my-note", true},
+		{"my-note/and-somthing", true},
+		{"note/00", true},
+		{"note/asset.jpg", true},
+		{"N", false},
+		{"my-note.md", false},
+		{"note/0!", false},
+		{"note/asset.JPG", false},
+	}
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			actual := IsValidFullSlug(tt.slug)
+			if actual != tt.expect {
+				t.Errorf(
+					"actual '%v' expect '%v' (slug '%s')",
+					actual,
+					tt.expect,
+					tt.slug,
+				)
+			}
+		})
+	}
+}
+
 func TestIsValidNodeSlug(t *testing.T) {
 	tests := []struct {
 		nodeSlug string
