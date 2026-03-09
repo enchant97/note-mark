@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	validUsernameRegex = regexp.MustCompile(`[a-zA-Z0-9]+`)
+	validUsernameRegex = regexp.MustCompile(`^[a-zA-Z0-9]+$`)
 	validFullSlugRegex = regexp.MustCompile(`^[a-z0-9-]+(?:\/[a-z0-9-]+)*(?:\.[a-z0-9-]+)*$`)
 )
 

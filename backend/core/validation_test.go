@@ -4,6 +4,35 @@ import (
 	"testing"
 )
 
+func TestIsValidUsername(t *testing.T) {
+	tests := []struct {
+		username string
+		expect   bool
+	}{
+		{"l", true},
+		{"123", true},
+		{"leo", true},
+		{"Leo", true},
+		{"Steve1234", true},
+		{"invalid!", false},
+		{"", false},
+		{".", false},
+	}
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			actual := IsValidUsername(tt.username)
+			if actual != tt.expect {
+				t.Errorf(
+					"actual '%v' expect '%v' (username '%s')",
+					actual,
+					tt.expect,
+					tt.username,
+				)
+			}
+		})
+	}
+}
+
 func TestIsValidNodeSlug(t *testing.T) {
 	tests := []struct {
 		nodeSlug string
