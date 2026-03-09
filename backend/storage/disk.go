@@ -5,8 +5,8 @@ import (
 	"errors"
 	"io"
 	"io/fs"
+	"log/slog"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -291,7 +291,6 @@ func (sc *DiskStorageController) DiscoverNodesForUser(
 		if len(relPathSplit) <= 1 {
 			return nil
 		}
-		nodeUsername := relPathSplit[0]
 		var nodeSlug string
 		var nodeType core.NodeType
 		var nodeModTime time.Time
@@ -324,7 +323,13 @@ func (sc *DiskStorageController) DiscoverNodesForUser(
 			nodeType = core.AssetNode
 		}
 		// final, more strict node check
-		if !IsValidNodeSlug(path.Join(nodeUsername, nodeSlug), nodeType) {
+		if !core.IsValidNodeSlug(nodeSlug, nodeType) {
+			slog.Warn(
+				"ignore node, slug does not match required format",
+				"username", username,
+				"slug", nodeSlug,
+				"type", nodeType,
+			)
 			return nil
 		}
 		return fn(core.NodeEntry{}.New(
@@ -347,7 +352,12 @@ func (sc *DiskStorageController) DiscoverUsers(fn DiscoverUsersFunc) error {
 	}
 	for _, entry := range dirEntry {
 		if entry.IsDir() {
-			fn(core.Username(entry.Name()))
+			username := entry.Name()
+			if core.IsValidUsername(username) {
+				fn(core.Username(username))
+			} else {
+				slog.Warn("ignore username, does not match required format", "username", username)
+			}
 		}
 	}
 	return nil

@@ -13,7 +13,6 @@ import (
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/middleware"
 	"github.com/enchant97/note-mark/backend/services"
-	"github.com/enchant97/note-mark/backend/storage"
 )
 
 func SetupTreeHandler(
@@ -176,14 +175,14 @@ func (h TreeHandler) GetNodeTreeByUsername(
 	}, nil
 }
 
-func getValidatedNodeType(username core.Username, slug string) (core.NodeType, error) {
+func getValidatedNodeType(fullSlug string) (core.NodeType, error) {
 	var nodeType core.NodeType
-	if path.Ext(string(slug)) == "" {
+	if path.Ext(string(fullSlug)) == "" {
 		nodeType = core.NoteNode
 	} else {
 		nodeType = core.AssetNode
 	}
-	if valid := storage.IsValidNodeSlug(path.Join(string(username), slug), nodeType); !valid {
+	if valid := core.IsValidNodeSlug(fullSlug, nodeType); !valid {
 		return "", huma.Error422UnprocessableEntity("invalid slug")
 	}
 	return nodeType, nil
@@ -199,7 +198,7 @@ func (h TreeHandler) GetNodeContent(
 		return nil, huma.Error403Forbidden("you do not permission to view other users content")
 	}
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
-	nodeType, err := getValidatedNodeType(input.Username, string(sanitizedSlug))
+	nodeType, err := getValidatedNodeType(string(sanitizedSlug))
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +241,7 @@ func (h TreeHandler) PutNodeContent(
 		return nil, huma.Error403Forbidden("you do not permission to view other users content")
 	}
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
-	if _, err := getValidatedNodeType(input.Username, string(sanitizedSlug)); err != nil {
+	if _, err := getValidatedNodeType(string(sanitizedSlug)); err != nil {
 		return nil, err
 	}
 	r := bytes.NewReader(input.RawBody)
@@ -259,7 +258,7 @@ func (h TreeHandler) PutNoteNodeFrontmatter(
 		return nil, huma.Error403Forbidden("you do not permission to view other users content")
 	}
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
-	if nodeType, err := getValidatedNodeType(input.Username, string(sanitizedSlug)); err != nil {
+	if nodeType, err := getValidatedNodeType(string(sanitizedSlug)); err != nil {
 		return nil, err
 	} else if nodeType != core.NoteNode {
 		return nil, huma.Error422UnprocessableEntity("invalid slug")
@@ -277,12 +276,12 @@ func (h TreeHandler) PostRenameNode(
 		return nil, huma.Error403Forbidden("you do not permission to view other users content")
 	}
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
-	nodeType, err := getValidatedNodeType(input.Username, string(sanitizedSlug))
+	nodeType, err := getValidatedNodeType(string(sanitizedSlug))
 	if err != nil {
 		return nil, err
 	}
 	sanitizedNewSlug := core.NodeSlug(path.Clean(string(input.Body)))
-	newNodeType, err := getValidatedNodeType(input.Username, string(sanitizedNewSlug))
+	newNodeType, err := getValidatedNodeType(string(sanitizedNewSlug))
 	if err != nil {
 		return nil, err
 	}
@@ -302,13 +301,13 @@ func (h TreeHandler) PostMoveNodeToTrash(
 		return nil, huma.Error403Forbidden("you do not permission to view other users content")
 	}
 	sanitizedSlug := path.Clean(string(input.Slug))
-	nodeType, err := getValidatedNodeType(input.Username, string(sanitizedSlug))
+	nodeType, err := getValidatedNodeType(string(sanitizedSlug))
 	if err != nil {
 		return nil, err
 	}
 	timestamp := time.Now().UTC()
 	sanitizedNewSlug := path.Join(".trash/", timestamp.Format("20060102T150405.000Z"), sanitizedSlug)
-	newNodeType, err := getValidatedNodeType(input.Username, sanitizedNewSlug)
+	newNodeType, err := getValidatedNodeType(sanitizedNewSlug)
 	if err != nil {
 		return nil, err
 	}
@@ -338,7 +337,7 @@ func (h TreeHandler) DeleteNode(
 	}
 	sanitizedSlug := path.Clean(string(input.Slug))
 	sanitizedSlug = path.Join(".trash/", sanitizedSlug)
-	if _, err := getValidatedNodeType(input.Username, sanitizedSlug); err != nil {
+	if _, err := getValidatedNodeType(sanitizedSlug); err != nil {
 		return nil, err
 	}
 	return nil, h.service.DeleteNode(input.Username, core.NodeSlug(sanitizedSlug))
