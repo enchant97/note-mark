@@ -3,14 +3,16 @@ package cli
 import (
 	"context"
 	"database/sql"
+	"log/slog"
 
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/storage"
+	"github.com/enchant97/note-mark/backend/tree"
 	"golang.org/x/sync/errgroup"
 )
 
-func commandClean(dao *db.DAO, sc storage.StorageController) error {
+func commandCleanUsers(dao *db.DAO, sc storage.StorageController) error {
 	for {
 		users, err := dao.Queries.AdminGetDeletedUsers(context.Background(), 4)
 		if err != nil {
@@ -22,6 +24,7 @@ func commandClean(dao *db.DAO, sc storage.StorageController) error {
 		var wg errgroup.Group
 		for _, user := range users {
 			wg.Go(func() error {
+				slog.Info("delete user", "username", user.Username)
 				tx, err := dao.DB.BeginTx(context.Background(), &sql.TxOptions{})
 				if err != nil {
 					return err
@@ -41,4 +44,14 @@ func commandClean(dao *db.DAO, sc storage.StorageController) error {
 			return err
 		}
 	}
+}
+
+func commandCleanTrash(
+	sc storage.StorageController,
+	tree tree.TreeController,
+) error {
+	return sc.DiscoverUsers(func(username core.Username) error {
+		slog.Info("delete trash for user", "username", username)
+		return tree.DeleteNode(username, ".trash")
+	})
 }

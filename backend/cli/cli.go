@@ -103,9 +103,22 @@ func Entrypoint(appVersion string) error {
 			},
 			{
 				Name:  "clean",
-				Usage: "permanently removes users marked for deletion",
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					return commandClean(&dao, &sc)
+				Usage: "remove old entries",
+				Commands: []*cli.Command{
+					{
+						Name:  "users",
+						Usage: "permanently removes users marked for deletion",
+						Action: func(ctx context.Context, cmd *cli.Command) error {
+							return commandCleanUsers(&dao, &sc)
+						},
+					},
+					{
+						Name:  "trash",
+						Usage: "permanently removes all items in users trash",
+						Action: func(ctx context.Context, cmd *cli.Command) error {
+							return commandCleanTrash(&sc, tc)
+						},
+					},
 				},
 			},
 			{
