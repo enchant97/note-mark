@@ -2,6 +2,7 @@ import DOMPurify from 'dompurify';
 import { NoteEngine as NoteEngineInternal } from '../../renderer/pkg';
 import { Accessor, createSignal } from 'solid-js';
 import { Frontmatter } from '~/core/types';
+import { ApiServerBaseUrl } from '~/core/api';
 
 export interface NoteEngineReadOnly {
   content: Accessor<string>
@@ -17,11 +18,14 @@ export interface NoteEngine extends NoteEngineReadOnly {
 }
 
 export function createNoteEngine(rawContent?: string): NoteEngine {
+  let engineOptions = {
+    apiBaseUrl: ApiServerBaseUrl,
+  }
   let noteEngine: NoteEngineInternal
   if (rawContent === undefined) {
-    noteEngine = new NoteEngineInternal()
+    noteEngine = new NoteEngineInternal(engineOptions)
   } else {
-    noteEngine = NoteEngineInternal.try_from_raw(rawContent)
+    noteEngine = NoteEngineInternal.try_from_raw(rawContent, engineOptions)
   }
   const [content, setContent] = createSignal(noteEngine.content)
   const [frontmatter, setFrontmatter] = createSignal<Frontmatter>(noteEngine.frontmatter)
@@ -46,7 +50,7 @@ export function createNoteEngine(rawContent?: string): NoteEngine {
     },
     tryIntoRaw: () => noteEngine.try_into_raw(),
     tryFromRaw: (raw: string) => {
-      noteEngine = NoteEngineInternal.try_from_raw(raw)
+      noteEngine = NoteEngineInternal.try_from_raw(raw, engineOptions)
       setContent(noteEngine.content)
       setFrontmatter(noteEngine.frontmatter)
     },

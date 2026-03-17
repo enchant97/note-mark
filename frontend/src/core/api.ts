@@ -50,7 +50,7 @@ async function throwResponseApiErrors(v: Response) {
   }
 }
 
-const ApiServerBaseUrl = (new URL("/api", import.meta.env.VITE_BACKEND_URL || window.location.origin)).toString()
+export const ApiServerBaseUrl = (new URL("/api", import.meta.env.VITE_BACKEND_URL || window.location.origin)).toString()
 
 /**
  * @throws {ApiError}
