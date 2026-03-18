@@ -28,7 +28,7 @@ fn resolve_path(api_base_url: &Url, unresolved_path: &str) -> String {
         };
         // join absolute path with api content url
         api_base_url
-            .join(&format!("/tree/content/u{abs_path}"))
+            .join(&format!("tree/content/u{abs_path}"))
             .expect("failed to join path")
             .to_string()
     }

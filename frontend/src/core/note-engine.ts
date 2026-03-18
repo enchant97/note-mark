@@ -19,7 +19,7 @@ export interface NoteEngine extends NoteEngineReadOnly {
 
 export function createNoteEngine(rawContent?: string): NoteEngine {
   let engineOptions = {
-    apiBaseUrl: ApiServerBaseUrl,
+    apiBaseUrl: ApiServerBaseUrl + "/",
   }
   let noteEngine: NoteEngineInternal
   if (rawContent === undefined) {
