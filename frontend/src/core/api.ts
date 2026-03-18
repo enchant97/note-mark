@@ -58,7 +58,7 @@ export const ApiServerBaseUrl = (new URL("/api", window.location.origin)).toStri
 async function apiFetch(url: string, init?: RequestInit) {
   let reqURL = `${ApiServerBaseUrl}/${url}`
   try {
-    let resp = await fetch(reqURL, { credentials: "include", ...init })
+    let resp = await fetch(reqURL, init)
     return resp
   } catch (err) {
     throw new ApiError(HttpErrors.NetworkError, undefined, { cause: err })
