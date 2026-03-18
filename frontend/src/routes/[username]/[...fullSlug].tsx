@@ -164,7 +164,7 @@ function NoteNode() {
           </button></li>
           <li><details class="dropdown">
             <summary><Icon name="more-horizontal" /></summary>
-            <ul class="p-2 menu dropdown-content z-[1] w-52 backdrop-glass">
+            <ul class="p-2 menu dropdown-content z-1 w-52 backdrop-glass">
               <li><button
                 onClick={(ev) => {
                   onShareClick()
