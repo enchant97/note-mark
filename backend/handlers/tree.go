@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"path"
@@ -217,16 +218,26 @@ func (h TreeHandler) GetNodeContent(
 	}
 	return &huma.StreamResponse{
 		Body: func(ctx huma.Context) {
+			defer r.Close()
+			// read initial chunk of data for mime-type sniffing later
+			var first512 [512]byte
+			_, err := io.ReadFull(r, first512[:])
+			if err != nil && !errors.Is(err, io.ErrUnexpectedEOF) && !errors.Is(err, io.EOF) {
+				ctx.SetStatus(http.StatusInternalServerError)
+				return
+			}
+			// set headers
+			ctx.SetHeader("Last-Modified", core.TimeIntoHTTPFormat(nodeModTime))
 			if nodeType == core.NoteNode {
 				ctx.SetHeader("Content-Type", "text/markdown")
 			} else {
-				// TODO set actual content-type if possible
-				ctx.SetHeader("Content-Type", "application/octet-stream")
+				contentType := http.DetectContentType(first512[:])
+				ctx.SetHeader("Content-Type", contentType)
 			}
-			ctx.SetHeader("Last-Modified", core.TimeIntoHTTPFormat(nodeModTime))
+			// send content
 			w := ctx.BodyWriter()
+			w.Write(first512[:])
 			io.Copy(w, r)
-			r.Close()
 		},
 	}, nil
 }
