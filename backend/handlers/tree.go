@@ -221,7 +221,7 @@ func (h TreeHandler) GetNodeContent(
 			defer r.Close()
 			// read initial chunk of data for mime-type sniffing later
 			var first512 [512]byte
-			_, err := io.ReadFull(r, first512[:])
+			first512Length, err := io.ReadFull(r, first512[:])
 			if err != nil && !errors.Is(err, io.ErrUnexpectedEOF) && !errors.Is(err, io.EOF) {
 				ctx.SetStatus(http.StatusInternalServerError)
 				return
@@ -236,7 +236,7 @@ func (h TreeHandler) GetNodeContent(
 			}
 			// send content
 			w := ctx.BodyWriter()
-			w.Write(first512[:])
+			w.Write(first512[:first512Length])
 			io.Copy(w, r)
 		},
 	}, nil
