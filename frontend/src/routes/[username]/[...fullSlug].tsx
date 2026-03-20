@@ -1,5 +1,5 @@
 import { action, useAction, useNavigate, useParams, useSubmission } from "@solidjs/router"
-import { createEffect, createResource, createSignal, Show } from "solid-js";
+import { createResource, createSignal, Show } from "solid-js";
 import Breadcrumb from "~/components/Breadcrumb";
 import Icon from "~/components/Icon";
 import LoadingRing from "~/components/loading/LoadingRing";
@@ -42,12 +42,9 @@ function NoteNode() {
     async ([username, fullSlug]) => {
       const content = await Api.getNodeContent(username, fullSlug)
       if (content instanceof Blob) { throw new Error("expected a note node") }
+      noteEngine.tryFromRaw(content)
       return content
     })
-  createEffect(() => {
-    const raw = rawNoteContent()
-    if (raw !== undefined) { noteEngine.tryFromRaw(raw) }
-  })
   const [saved, setSaved] = createSignal(true)
   const saveAction = action(async (content: string) => {
     noteEngine.setContent(content)
