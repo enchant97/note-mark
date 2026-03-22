@@ -178,7 +178,7 @@ func (h TreeHandler) GetNodeTreeByUsername(
 
 func getValidatedNodeType(fullSlug string) (core.NodeType, error) {
 	var nodeType core.NodeType
-	if path.Ext(string(fullSlug)) == "" {
+	if path.Ext(fullSlug) == "" {
 		nodeType = core.NoteNode
 	} else {
 		nodeType = core.AssetNode
@@ -312,24 +312,13 @@ func (h TreeHandler) PostMoveNodeToTrash(
 		return nil, huma.Error403Forbidden("you do not permission to view other users content")
 	}
 	sanitizedSlug := path.Clean(string(input.Slug))
-	nodeType, err := getValidatedNodeType(string(sanitizedSlug))
-	if err != nil {
-		return nil, err
-	}
 	timestamp := time.Now().UTC()
 	sanitizedNewSlug := path.Join(".trash/", timestamp.Format("20060102T150405.000Z"), sanitizedSlug)
-	newNodeType, err := getValidatedNodeType(sanitizedNewSlug)
-	if err != nil {
-		return nil, err
-	}
-	if nodeType != newNodeType {
-		return nil, huma.Error422UnprocessableEntity("invalid slug")
-	}
-	if h.service.RenameNode(
+	if err := h.service.RenameNode(
 		input.Username,
 		core.NodeSlug(sanitizedSlug),
 		core.NodeSlug(sanitizedNewSlug),
-	) != nil {
+	); err != nil {
 		return nil, err
 	}
 	return &MoveNodeToTrashOutput{

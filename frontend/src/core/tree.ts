@@ -64,6 +64,27 @@ export function renameNode(nodeTree: NodeTree, currentFullSlug: string, nodeEntr
 }
 
 /**
+ * Try and get node from in-memory store.
+ */
+export function tryGetNode(nodeTree: NodeTree, fullSlug: string) {
+  const slugParts = fullSlug.split("/")
+  const topSlug = slugParts.shift()
+  if (topSlug === undefined) { return null }
+  let currentNode: NodeTreeNode
+  // handle top level node
+  if (Object.hasOwn(nodeTree, topSlug)) {
+    currentNode = nodeTree[topSlug]
+  } else { return null }
+  // handle further nodes
+  for (const slugPart of slugParts) {
+    if (currentNode.type === "note" && Object.hasOwn(currentNode.children, slugPart)) {
+      currentNode = currentNode.children[slugPart]
+    } else { return null }
+  }
+  return currentNode
+}
+
+/**
  * In-memory deletion of a node and any children
  */
 export function deleteNode(nodeTree: NodeTree, fullSlug: string) {

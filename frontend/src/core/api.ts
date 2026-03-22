@@ -157,11 +157,11 @@ export default class Api {
     }
     return await resp.blob()
   }
-  static async updateNodeContent(username: string, slug: string, content: string | File) {
+  static async updateNodeContent(username: string, slug: string, content: string | Blob | File) {
     let resp = await apiFetch(`tree/content/u/${username}/${slug}`, {
       method: HttpMethods.PUT,
       headers: {
-        "Content-Type": content instanceof String ? "text/markdown" : (content.type || "application/octet-stream")
+        "Content-Type": (content instanceof String || typeof content === "string") ? "text/markdown" : (content.type || "application/octet-stream")
       },
       body: content,
     })

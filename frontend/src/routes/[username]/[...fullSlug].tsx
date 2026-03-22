@@ -1,8 +1,9 @@
 import { action, useAction, useNavigate, useParams, useSubmission } from "@solidjs/router"
-import { createResource, createSignal, Show } from "solid-js";
+import { batch, createResource, createSignal, Show } from "solid-js";
 import Breadcrumb from "~/components/Breadcrumb";
 import Icon from "~/components/Icon";
 import LoadingRing from "~/components/loading/LoadingRing";
+import AssetsModal, { AssetEntry } from "~/components/modals/Assets";
 import CreateNoteModal from "~/components/modals/CreateNote";
 import PrintModal from "~/components/modals/Print";
 import UpdateNoteModal from "~/components/modals/UpdateNote";
@@ -14,7 +15,7 @@ import Api from "~/core/api";
 import { copyToClipboard, download, StringSource } from "~/core/helpers";
 import { createNoteEngine } from "~/core/note-engine";
 import StorageHandler from "~/core/storage"
-import type { NodeEntry } from "~/core/types";
+import type { NodeEntry, NodeSlug } from "~/core/types";
 
 function NoteNode() {
   const params = useParams<{
@@ -107,7 +108,49 @@ function NoteNode() {
   }
 
   const onAssetsClick = () => {
-    pushToast({ message: "WIP", type: ToastType.ERROR })
+    const currentNode = nodeTree.tryGetNode(params.fullSlug)
+    if (currentNode === null || currentNode.type !== "note") { return }
+    const assetEntries = Object
+      .values(currentNode.children)
+      .filter((v) => v.type === "asset")
+      .reduce((obj, item) => (obj[item.slug] = {
+        fullSlug: `${params.fullSlug}/${item.slug}`,
+        modTime: item.modTime,
+      }, obj), {})
+    setModal({
+      component: AssetsModal,
+      props: {
+        currentUsername: params.username,
+        currentParentSlug: params.fullSlug,
+        assets: assetEntries,
+        onClose: (newAssets: Record<NodeSlug, AssetEntry>) => {
+          clearModal()
+          batch(() => {
+            for (const [slug, entry] of Object.entries(newAssets)) {
+              const currentAssetFullSlug = `${params.fullSlug}/${slug}`
+              if (entry.fullSlug === null) {
+                // handle permanent deletion
+                nodeTree.deleteNode(currentAssetFullSlug)
+              } else if (entry.fullSlug !== currentAssetFullSlug) {
+                // handle asset rename/move
+                nodeTree.renameNode(currentAssetFullSlug, {
+                  fullSlug: entry.fullSlug,
+                  nodeType: "asset",
+                  modTime: entry.modTime,
+                })
+              } else if (nodeTree.tryGetNode(entry.fullSlug) === null) { // TODO make a doesNodeExist function (reduce mem allocations)
+                // handle new asset
+                nodeTree.insertNode({
+                  fullSlug: entry.fullSlug,
+                  nodeType: "asset",
+                  modTime: entry.modTime,
+                })
+              }
+            }
+          })
+        },
+      },
+    })
   }
 
   const onShareClick = async () => {

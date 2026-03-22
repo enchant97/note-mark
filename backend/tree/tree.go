@@ -174,12 +174,16 @@ func (tc *TreeController) RenameNode(
 			return err
 		}
 	}
+    frontmatter := core.FrontMatter{}
+    if node.NoteNodeFields != nil {
+        frontmatter = node.FrontMatter
+    }
 	// update in-memory tree
 	if err := tc.insertNodeIntoMemory(username, core.NodeEntry{
 		FullSlug: newFullSlug,
 		Type:     node.Type,
 		ModTime:  time.Now(),
-	}, node.FrontMatter); err != nil {
+	}, frontmatter); err != nil {
 		return err
 	}
 	if err := tc.tryDeleteFromMemory(username, currentFullSlug); err != nil {
