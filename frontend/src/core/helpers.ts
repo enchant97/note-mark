@@ -11,22 +11,25 @@ export function optionExpect<T>(v: Option<T>, message: string): T {
 }
 
 export function toSlug(v: string): string {
-  return v.toLowerCase().replaceAll(" ", "-").replaceAll(/[^a-z0-9-]/g, "")
+  return v.trim().replaceAll(/[^0-9a-zA-Z- _]/g, "")
 }
 
-export function toSlugWithSuffix(v: string, suffixLength = SLUG_SUFFIX_LENGTH): string {
+export function toMachineSlug(v: string): string {
+  return v.toLowerCase().replaceAll(" ", "-").replaceAll(/[^0-9a-z-_]/g, "")
+}
+
+export function toMachineSlugWithSuffix(v: string, suffixLength = SLUG_SUFFIX_LENGTH): string {
   let suffix = "-";
   for (let i = 0; i < suffixLength; i++) {
     suffix += SLUG_SUFFIX_CHARS[Math.floor(Math.random() * SLUG_SUFFIX_CHARS.length)]
   }
-  return toSlug(v) + suffix
+  return toMachineSlug(v) + suffix
 }
 
 export function toPathSlug(v: string): string {
   return v
-    .toLowerCase()
-    .replaceAll(" ", "-")
-    .replaceAll(/[^a-z0-9-/]/g, "")
+    .trim()
+    .replaceAll(/[^0-9a-zA-Z- _/]/g, "")
     .split("/")
     .filter((v) => v !== "")
     .join("/")

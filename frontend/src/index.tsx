@@ -38,7 +38,7 @@ render(() => (
       <Route component={RequireApiSetupGuard}>
         <Route path="/" component={MainApp}>
           <Route path="/:username" component={User} />
-          <Route path="/:username/*fullSlug" component={Node} />
+          <Route path="/:username/*encodedFullSlug" component={Node} />
           <Route path="/:username/.trash/*" component={() => <Redirect href="/" />} />
         </Route>
       </Route>

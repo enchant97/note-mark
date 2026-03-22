@@ -20,8 +20,9 @@ import type { NodeEntry, NodeSlug } from "~/core/types";
 function NoteNode() {
   const params = useParams<{
     username: string,
-    fullSlug: string,
+    encodedFullSlug: string,
   }>()
+  const decodedFullSlug = () => decodeURI(params.encodedFullSlug)
   const nodeTree = useNodeTree()
   const noteEngine = createNoteEngine()
   const { setModal, clearModal } = useModal()
@@ -29,7 +30,7 @@ function NoteNode() {
   const { pushToast } = useToast()
   const [noteModeSetting, setNoteModeSetting] = StorageHandler.createSettingSignal("note_mode", false)
   const noteSlug = () => {
-    return params.fullSlug.split("/").pop()
+    return decodedFullSlug().split("/").pop()
   }
   const noteMode = () => {
     let stored = noteModeSetting() as NoteMode | null
@@ -39,7 +40,7 @@ function NoteNode() {
     return stored
   }
   const [rawNoteContent] = createResource(
-    () => [params.username, params.fullSlug],
+    () => [params.username, decodedFullSlug()],
     async ([username, fullSlug]) => {
       const content = await Api.getNodeContent(username, fullSlug)
       if (content instanceof Blob) { throw new Error("expected a note node") }
@@ -50,7 +51,7 @@ function NoteNode() {
   const saveAction = action(async (content: string) => {
     noteEngine.setContent(content)
     const newRawNote = noteEngine.tryIntoRaw()
-    Api.updateNodeContent(params.username, params.fullSlug, newRawNote)
+    Api.updateNodeContent(params.username, decodedFullSlug(), newRawNote)
     setSaved(true)
     return { ok: true }
   })
@@ -62,7 +63,7 @@ function NoteNode() {
       component: CreateNoteModal,
       props: {
         currentUsername: params.username,
-        currentFullSlug: params.fullSlug,
+        currentFullSlug: decodedFullSlug(),
         onClose: (nodeEntry?: NodeEntry) => {
           clearModal()
           if (nodeEntry) {
@@ -79,18 +80,18 @@ function NoteNode() {
       component: UpdateNoteModal,
       props: {
         currentUsername: params.username,
-        currentFullSlug: params.fullSlug,
+        currentFullSlug: decodedFullSlug(),
         currentFrontmatter: noteEngine.frontmatter(),
         onClose: (nodeEntry?: NodeEntry | null) => {
           clearModal()
           if (nodeEntry) {
-            if (nodeEntry.fullSlug === params.fullSlug) {
+            if (nodeEntry.fullSlug === decodedFullSlug()) {
               // only frontmatter was changed
               noteEngine.setFrontmatter(nodeEntry.frontmatter!)
               nodeTree.insertNode(nodeEntry)
             } else {
               // note was renamed and possibility frontmatter was updated
-              nodeTree.renameNode(params.fullSlug, nodeEntry)
+              nodeTree.renameNode(decodedFullSlug(), nodeEntry)
               if (nodeEntry.fullSlug.startsWith(".trash/")) {
                 navigate(`/${params.username}`)
               } else {
@@ -99,7 +100,7 @@ function NoteNode() {
             }
           } else if (nodeEntry === null) {
             // note was permanently deleted
-            nodeTree.deleteNode(params.fullSlug)
+            nodeTree.deleteNode(decodedFullSlug())
             navigate(`/${params.username}`)
           }
         },
@@ -108,26 +109,26 @@ function NoteNode() {
   }
 
   const onAssetsClick = () => {
-    const currentNode = nodeTree.tryGetNode(params.fullSlug)
+    const currentNode = nodeTree.tryGetNode(decodedFullSlug())
     if (currentNode === null || currentNode.type !== "note") { return }
     const assetEntries = Object
       .values(currentNode.children)
       .filter((v) => v.type === "asset")
       .reduce((obj, item) => (obj[item.slug] = {
-        fullSlug: `${params.fullSlug}/${item.slug}`,
+        fullSlug: `${decodedFullSlug()}/${item.slug}`,
         modTime: item.modTime,
       }, obj), {})
     setModal({
       component: AssetsModal,
       props: {
         currentUsername: params.username,
-        currentParentSlug: params.fullSlug,
+        currentParentSlug: decodedFullSlug(),
         assets: assetEntries,
         onClose: (newAssets: Record<NodeSlug, AssetEntry>) => {
           clearModal()
           batch(() => {
             for (const [slug, entry] of Object.entries(newAssets)) {
-              const currentAssetFullSlug = `${params.fullSlug}/${slug}`
+              const currentAssetFullSlug = `${decodedFullSlug()}/${slug}`
               if (entry.fullSlug === null) {
                 // handle permanent deletion
                 nodeTree.deleteNode(currentAssetFullSlug)
@@ -245,7 +246,7 @@ function NoteNode() {
             </ul>
           </details></li>
         </menu>
-        <Breadcrumb class="flex-1" username={params.username} fullSlug={params.fullSlug} />
+        <Breadcrumb class="flex-1" username={params.username} fullSlug={decodedFullSlug()} />
       </div>
       <Show when={!rawNoteContent.loading} fallback={<LoadingRing />}>
         <Note

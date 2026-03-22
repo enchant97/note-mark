@@ -43,10 +43,11 @@ func TestIsValidFullSlug(t *testing.T) {
 		{"my-note/and-somthing", true},
 		{"note/00", true},
 		{"note/asset.jpg", true},
-		{"N", false},
+		{"note/My Amazing Picture.jpg", true},
+		{"My Note", true},
+		{"note/asset.JPG", true},
 		{"my-note.md", false},
 		{"note/0!", false},
-		{"note/asset.JPG", false},
 	}
 	for _, tt := range tests {
 		t.Run("", func(t *testing.T) {

@@ -1,5 +1,5 @@
 import { SetStoreFunction } from "solid-js/store";
-import { toPathSlug, toSlug, toSlugWithSuffix } from "~/core/helpers";
+import { toMachineSlugWithSuffix, toPathSlug, toSlug } from "~/core/helpers";
 
 interface Fields {
   title: string,
@@ -20,7 +20,7 @@ export default function NoteFormFields(props: {
           value={props.fields.title}
           onInput={(ev) => props.setFields({
             title: ev.currentTarget.value,
-            slug: toSlugWithSuffix(ev.currentTarget.value),
+            slug: toMachineSlugWithSuffix(ev.currentTarget.value),
           })}
           name="title"
           type="text"
