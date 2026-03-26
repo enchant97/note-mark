@@ -8,10 +8,14 @@ import (
 
 type NodeType string
 type Username string
+type AccessControlMode string
 
 const (
 	NoteNode  = "note"
 	AssetNode = "asset"
+
+	AccessControlReadMode  AccessControlMode = "read"
+	AccessControlWriteMode AccessControlMode = "write"
 )
 
 type NodeEntry struct {
@@ -35,8 +39,14 @@ func (ne NodeEntry) New(
 type NodeSlug string
 type NodeTree map[NodeSlug]*Node
 
+type AccessControl struct {
+	PublicRead bool                           `json:"publicRead,omitempty"`
+	Users      map[Username]AccessControlMode `json:"users,omitempty"`
+}
+
 type FrontMatter struct {
-	Title string `json:"title,omitempty"`
+	Title         string         `json:"title,omitempty"`
+	AccessControl *AccessControl `json:"accessControl,omitempty"`
 }
 
 type NoteNodeFields struct {

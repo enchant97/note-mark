@@ -3,7 +3,9 @@ package handlers
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"path"
@@ -14,6 +16,7 @@ import (
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/middleware"
 	"github.com/enchant97/note-mark/backend/services"
+	"github.com/enchant97/note-mark/backend/tree"
 )
 
 func SetupTreeHandler(
@@ -30,7 +33,6 @@ func SetupTreeHandler(
 
 		Method:      http.MethodGet,
 		Path:        "/api/tree/u/{username}",
-		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
 		Security:    defaultSecurityOp,
 		Tags:        []string{"Node Tree"},
 		Summary:     "Get node tree for user",
@@ -105,8 +107,8 @@ type GetNodeTreeByUsernameInput struct {
 
 type GetNodeTreeByUsernameOutput struct {
 	UsernamePath
-	LastModified time.Time `header:"Last-Modified"`
-	Body         core.NodeTree
+	ETag string `header:"ETag"`
+	Body core.NodeTree
 }
 
 type GetNodeContentInput struct {
@@ -151,28 +153,49 @@ type DeleteNodeInput struct {
 	SlugPath
 }
 
+// Make a "personal" ETag.
+// This ensures the client only caches the current data for their current authentication.
+//
+// Requires to be wrapped in "" when used in a HTTP Header.
+func makePersonalETagValue(authenticatedUser *core.AuthenticatedUser, modTime time.Time) string {
+	h := sha256.New()
+	d, err := modTime.MarshalBinary()
+	if err != nil {
+		panic("failed to marshal modTime")
+	}
+	h.Write(d)
+	if authenticatedUser != nil {
+		h.Write(authenticatedUser.UserUID[:])
+	}
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
 func (h TreeHandler) GetNodeTreeByUsername(
 	ctx context.Context,
 	input *GetNodeTreeByUsernameInput,
 ) (*GetNodeTreeByUsernameOutput, error) {
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
-	currentUsername := authDetails.MustGetAuthenticatedUser().Username
-	if currentUsername != string(input.Username) {
-		return nil, huma.Error403Forbidden("you do not permission to view other users content")
-	}
-	tree, treeModTime, err := h.service.GetTreeForUser(input.Username)
+	optionalAuthUser := authDetails.GetOptionalAuthenticatedUser()
+	nodeTree, treeModTime, err := h.service.GetTreeForUser(input.Username)
 	if err != nil {
 		return nil, err
 	}
 	// TODO run separate tree mod check before getting the tree into memory
+	etagValue := makePersonalETagValue(optionalAuthUser, treeModTime)
 	if input.HasConditionalParams() {
-		if err := input.PreconditionFailed("", treeModTime); err != nil {
+		if err := input.PreconditionFailed(etagValue, treeModTime); err != nil {
 			return nil, err
 		}
 	}
+	// filter tree (if required)
+	if optionalAuthUser == nil {
+		nodeTree = tree.FilteredNodeTree(nodeTree, nil)
+	} else if optionalAuthUser.Username != string(input.Username) {
+		nodeTree = tree.FilteredNodeTree(nodeTree, (*core.Username)(&optionalAuthUser.Username))
+	}
 	return &GetNodeTreeByUsernameOutput{
-		LastModified: treeModTime,
-		Body:         tree,
+		ETag: fmt.Sprintf(`"%s"`, etagValue),
+		Body: nodeTree,
 	}, nil
 }
 
@@ -194,7 +217,8 @@ func (h TreeHandler) GetNodeContent(
 	input *GetNodeContentInput,
 ) (*huma.StreamResponse, error) {
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
-	currentUsername := authDetails.MustGetAuthenticatedUser().Username
+	authenticatedUser := authDetails.MustGetAuthenticatedUser()
+	currentUsername := authenticatedUser.Username
 	if currentUsername != string(input.Username) {
 		return nil, huma.Error403Forbidden("you do not permission to view other users content")
 	}
@@ -207,8 +231,9 @@ func (h TreeHandler) GetNodeContent(
 	if err != nil {
 		return nil, err
 	}
+	etagValue := makePersonalETagValue(&authenticatedUser, nodeModTime)
 	if input.HasConditionalParams() {
-		if err := input.PreconditionFailed("", nodeModTime.Truncate(time.Second)); err != nil {
+		if err := input.PreconditionFailed(etagValue, nodeModTime); err != nil {
 			return nil, err
 		}
 	}
@@ -227,7 +252,7 @@ func (h TreeHandler) GetNodeContent(
 				return
 			}
 			// set headers
-			ctx.SetHeader("Last-Modified", core.TimeIntoHTTPFormat(nodeModTime))
+			ctx.SetHeader("ETag", fmt.Sprintf(`"%s"`, etagValue))
 			if nodeType == core.NoteNode {
 				ctx.SetHeader("Content-Type", "text/markdown")
 			} else {
