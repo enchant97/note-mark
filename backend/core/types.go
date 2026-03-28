@@ -40,13 +40,13 @@ type NodeSlug string
 type NodeTree map[NodeSlug]*Node
 
 type AccessControl struct {
-	PublicRead bool                           `json:"publicRead,omitempty"`
-	Users      map[Username]AccessControlMode `json:"users,omitempty"`
+	PublicRead bool                           `json:"publicRead,omitempty" yaml:"publicRead"`
+    Users      map[Username]AccessControlMode `json:"users,omitempty" yaml:"users,omitempty"`
 }
 
 type FrontMatter struct {
-	Title         string         `json:"title,omitempty"`
-	AccessControl *AccessControl `json:"accessControl,omitempty"`
+    Title         string         `json:"title,omitempty" yaml:"title"`
+	AccessControl *AccessControl `json:"accessControl,omitempty" yaml:"accessControl,omitempty"`
 }
 
 type NoteNodeFields struct {
