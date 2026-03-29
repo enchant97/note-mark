@@ -102,7 +102,10 @@ func updateMostPermissivePermissions(acBase *core.AccessControl, newAc core.Acce
 // Will search from top-level down to the given node,
 // selecting the most permissive permissions available.
 func GetNodeAccessControl(tree core.NodeTree, fullSlug core.NodeSlug) (core.AccessControl, error) {
-	ac := core.AccessControl{}
+	ac := core.AccessControl{
+		PublicRead: false,
+		Users:      make(map[core.Username]core.AccessControlMode),
+	}
 	slugParts := strings.Split(string(fullSlug), "/")
 	var currentNode *core.Node
 	// handle top-level

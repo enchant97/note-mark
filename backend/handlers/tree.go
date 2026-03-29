@@ -279,11 +279,19 @@ func (h TreeHandler) PutNodeContent(
 	input *PutNodeContentInput,
 ) (*struct{}, error) {
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
-	currentUsername := authDetails.MustGetAuthenticatedUser().Username
-	if currentUsername != string(input.Username) {
-		return nil, huma.Error403Forbidden("you do not permission to view other users content")
-	}
+	authenticatedUser := authDetails.MustGetAuthenticatedUser()
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
+	// access control check
+	if acMode, err := h.service.GetAvailableNodeAccessControlMode(
+		&authenticatedUser,
+		input.Username,
+		sanitizedSlug,
+	); err != nil {
+		return nil, err
+	} else if acMode == nil || *acMode != core.AccessControlWriteMode {
+		return nil, huma.Error403Forbidden("you don't have permission")
+	}
+	// update node
 	if _, err := getValidatedNodeType(string(sanitizedSlug)); err != nil {
 		return nil, err
 	}
@@ -296,16 +304,24 @@ func (h TreeHandler) PutNoteNodeFrontmatter(
 	input *PutNoteNodeFrontmatterInput,
 ) (*struct{}, error) {
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
-	currentUsername := authDetails.MustGetAuthenticatedUser().Username
-	if currentUsername != string(input.Username) {
-		return nil, huma.Error403Forbidden("you do not permission to view other users content")
-	}
+	authenticatedUser := authDetails.MustGetAuthenticatedUser()
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
 	if nodeType, err := getValidatedNodeType(string(sanitizedSlug)); err != nil {
 		return nil, err
 	} else if nodeType != core.NoteNode {
 		return nil, huma.Error422UnprocessableEntity("invalid slug")
 	}
+	// access control check
+	if acMode, err := h.service.GetAvailableNodeAccessControlMode(
+		&authenticatedUser,
+		input.Username,
+		sanitizedSlug,
+	); err != nil {
+		return nil, err
+	} else if acMode == nil || *acMode != core.AccessControlWriteMode {
+		return nil, huma.Error403Forbidden("you don't have permission")
+	}
+	// update frontmatter
 	return nil, h.service.UpdateNoteNodeFrontmatter(input.Username, sanitizedSlug, input.Body)
 }
 
@@ -314,15 +330,29 @@ func (h TreeHandler) PostRenameNode(
 	input *PostRenameNodeInput,
 ) (*struct{}, error) {
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
-	currentUsername := authDetails.MustGetAuthenticatedUser().Username
-	if currentUsername != string(input.Username) {
-		return nil, huma.Error403Forbidden("you do not permission to view other users content")
-	}
+	authenticatedUser := authDetails.MustGetAuthenticatedUser()
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
+	if nodeType, err := getValidatedNodeType(string(sanitizedSlug)); err != nil {
+		return nil, err
+	} else if nodeType != core.NoteNode {
+		return nil, huma.Error422UnprocessableEntity("invalid slug")
+	}
+	// access control check
+	if acMode, err := h.service.GetAvailableNodeAccessControlMode(
+		&authenticatedUser,
+		input.Username,
+		sanitizedSlug,
+	); err != nil {
+		return nil, err
+	} else if acMode == nil || *acMode != core.AccessControlWriteMode {
+		return nil, huma.Error403Forbidden("you don't have permission")
+	}
+	// get node type
 	nodeType, err := getValidatedNodeType(string(sanitizedSlug))
 	if err != nil {
 		return nil, err
 	}
+	// node rename
 	sanitizedNewSlug := core.NodeSlug(path.Clean(string(input.Body)))
 	newNodeType, err := getValidatedNodeType(string(sanitizedNewSlug))
 	if err != nil {
@@ -339,11 +369,23 @@ func (h TreeHandler) PostMoveNodeToTrash(
 	input *MoveNodeToTrashInput,
 ) (*MoveNodeToTrashOutput, error) {
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
-	currentUsername := authDetails.MustGetAuthenticatedUser().Username
-	if currentUsername != string(input.Username) {
-		return nil, huma.Error403Forbidden("you do not permission to view other users content")
-	}
+	authenticatedUser := authDetails.MustGetAuthenticatedUser()
 	sanitizedSlug := path.Clean(string(input.Slug))
+	if nodeType, err := getValidatedNodeType(sanitizedSlug); err != nil {
+		return nil, err
+	} else if nodeType != core.NoteNode {
+		return nil, huma.Error422UnprocessableEntity("invalid slug")
+	}
+	// access control check
+	if acMode, err := h.service.GetAvailableNodeAccessControlMode(
+		&authenticatedUser,
+		input.Username,
+		core.NodeSlug(sanitizedSlug),
+	); err != nil {
+		return nil, err
+	} else if acMode == nil || *acMode != core.AccessControlWriteMode {
+		return nil, huma.Error403Forbidden("you don't have permission")
+	}
 	timestamp := time.Now().UTC()
 	sanitizedNewSlug := path.Join(".trash/", timestamp.Format("20060102T150405.000Z"), sanitizedSlug)
 	if err := h.service.RenameNode(
@@ -365,7 +407,7 @@ func (h TreeHandler) DeleteNode(
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
 	currentUsername := authDetails.MustGetAuthenticatedUser().Username
 	if currentUsername != string(input.Username) {
-		return nil, huma.Error403Forbidden("you do not permission to view other users content")
+		return nil, huma.Error403Forbidden("you don't have permission")
 	}
 	sanitizedSlug := path.Clean(string(input.Slug))
 	sanitizedSlug = path.Join(".trash/", sanitizedSlug)
