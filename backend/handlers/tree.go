@@ -225,7 +225,7 @@ func (h TreeHandler) GetNodeContent(
 	); err != nil {
 		return nil, err
 	} else if accessMode == nil {
-		return nil, huma.Error404NotFound("node by given slug not found, or you don't have permission")
+		return nil, huma.Error404NotFound("not found, or you don't have permission")
 	}
 	// try get node type
 	nodeType, err := getValidatedNodeType(string(sanitizedSlug))
