@@ -40,7 +40,6 @@ func SetupTreeHandler(
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodGet,
 		Path:        "/api/tree/content/u/{username}/*",
-		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
 		Security:    defaultSecurityOp,
 		Tags:        []string{"Node Tree"},
 		Summary:     "Get node content by slug",
@@ -215,26 +214,36 @@ func (h TreeHandler) GetNodeContent(
 	input *GetNodeContentInput,
 ) (*huma.StreamResponse, error) {
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
-	authenticatedUser := authDetails.MustGetAuthenticatedUser()
-	currentUsername := authenticatedUser.Username
-	if currentUsername != string(input.Username) {
-		return nil, huma.Error403Forbidden("you do not permission to view other users content")
-	}
+	optionalAuthUser := authDetails.GetOptionalAuthenticatedUser()
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
+	// check if has permission
+	// (specific permission does not matter, as all modes are "read" permitted)
+	if accessMode, err := h.service.GetAvailableNodeAccessControlMode(
+		optionalAuthUser,
+		input.Username,
+		sanitizedSlug,
+	); err != nil {
+		return nil, err
+	} else if accessMode == nil {
+		return nil, huma.Error404NotFound("node by given slug not found, or you don't have permission")
+	}
+	// try get node type
 	nodeType, err := getValidatedNodeType(string(sanitizedSlug))
 	if err != nil {
 		return nil, err
 	}
+	// ETag handling
 	nodeModTime, err := h.service.GetNodeModTime(input.Username, sanitizedSlug)
 	if err != nil {
 		return nil, err
 	}
-	etagValue := makePersonalETagValue(&authenticatedUser, nodeModTime)
+	etagValue := makePersonalETagValue(optionalAuthUser, nodeModTime)
 	if input.HasConditionalParams() {
 		if err := input.PreconditionFailed(etagValue, nodeModTime); err != nil {
 			return nil, err
 		}
 	}
+	// get node content
 	r, err := h.service.GetNodeContent(input.Username, sanitizedSlug)
 	if err != nil {
 		return nil, err

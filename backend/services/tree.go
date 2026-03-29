@@ -49,6 +49,34 @@ func (s *TreeService) GetNodeModTime(
 	return s.tc.GetTreeModTimeForNode(username, slug)
 }
 
+func (s *TreeService) GetAvailableNodeAccessControlMode(
+	optionalAuthUser *core.AuthenticatedUser,
+	username core.Username,
+	fullSlug core.NodeSlug,
+) (*core.AccessControlMode, error) {
+	if nodeTree, exists := s.tc.TryGetNodeTreeForUser(username); exists {
+		ac, err := tree.GetNodeAccessControl(nodeTree, fullSlug)
+		if err != nil {
+			return nil, err
+		}
+		var acMode core.AccessControlMode = ""
+		if optionalAuthUser == nil && ac.PublicRead {
+			acMode = core.AccessControlReadMode
+		} else if optionalAuthUser != nil && optionalAuthUser.Username == string(username) {
+			acMode = core.AccessControlWriteMode
+		} else if optionalAuthUser != nil {
+			if mode, exists := ac.Users[core.Username(optionalAuthUser.Username)]; exists {
+				acMode = mode
+			}
+		}
+		if acMode == "" {
+			return nil, nil
+		}
+		return &acMode, nil
+	}
+	return nil, core.ErrNotFound
+}
+
 func (s *TreeService) GetNodeContent(
 	username core.Username,
 	slug core.NodeSlug,
