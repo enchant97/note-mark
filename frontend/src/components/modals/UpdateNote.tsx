@@ -125,6 +125,9 @@ export default function UpdateNoteModal(props: {
                 onInput={(ev) => setFields({ extraProperties: ev.currentTarget.value })}
                 placeholder="{  }"
                 aria-label="extra properties"
+                autocorrect="off"
+                autocomplete="off"
+                autocapitalize="off"
               ></textarea>
               <p class="label">Extra frontmatter properties, provided in JSON format.</p>
             </fieldset>
