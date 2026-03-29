@@ -22,15 +22,24 @@ func (s TreeService) New(dao *db.DAO, tc *tree.TreeController) TreeService {
 	}
 }
 
-func (s *TreeService) GetTreeForUser(username core.Username) (core.NodeTree, time.Time, error) {
-	treeModTime, err := s.tc.GetTreeModTimeForUser(username)
-	if err != nil {
-		return nil, time.Time{}, core.ErrNotFound
+func (s *TreeService) GetTreeModTime(username core.Username) (time.Time, error) {
+	return s.tc.GetTreeModTimeForUser(username)
+}
+
+func (s *TreeService) GetTreeForUser(
+	optionalAuthUser *core.AuthenticatedUser,
+	username core.Username,
+) (core.NodeTree, error) {
+	nodeTree, exists := s.tc.TryGetNodeTreeForUser(username)
+	if !exists {
+		return nil, core.ErrNotFound
 	}
-	if tree, ok := s.tc.TryGetNodeTreeForUser(username); ok {
-		return tree, treeModTime, nil
+	if optionalAuthUser == nil {
+		return tree.FilteredNodeTree(nodeTree, nil), nil
+	} else if optionalAuthUser.Username != string(username) {
+		return tree.FilteredNodeTree(nodeTree, &username), nil
 	}
-	return nil, time.Time{}, core.ErrNotFound
+	return nodeTree, nil
 }
 
 func (s *TreeService) GetNodeModTime(

@@ -16,7 +16,6 @@ import (
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/middleware"
 	"github.com/enchant97/note-mark/backend/services"
-	"github.com/enchant97/note-mark/backend/tree"
 )
 
 func SetupTreeHandler(
@@ -176,22 +175,21 @@ func (h TreeHandler) GetNodeTreeByUsername(
 ) (*GetNodeTreeByUsernameOutput, error) {
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
 	optionalAuthUser := authDetails.GetOptionalAuthenticatedUser()
-	nodeTree, treeModTime, err := h.service.GetTreeForUser(input.Username)
+	// ETag Creation & ConditionalParams handling
+	treeModTime, err := h.service.GetTreeModTime(input.Username)
 	if err != nil {
 		return nil, err
 	}
-	// TODO run separate tree mod check before getting the tree into memory
 	etagValue := makePersonalETagValue(optionalAuthUser, treeModTime)
 	if input.HasConditionalParams() {
 		if err := input.PreconditionFailed(etagValue, treeModTime); err != nil {
 			return nil, err
 		}
 	}
-	// filter tree (if required)
-	if optionalAuthUser == nil {
-		nodeTree = tree.FilteredNodeTree(nodeTree, nil)
-	} else if optionalAuthUser.Username != string(input.Username) {
-		nodeTree = tree.FilteredNodeTree(nodeTree, (*core.Username)(&optionalAuthUser.Username))
+	// Get actual nodeTree
+	nodeTree, err := h.service.GetTreeForUser(optionalAuthUser, input.Username)
+	if err != nil {
+		return nil, err
 	}
 	return &GetNodeTreeByUsernameOutput{
 		ETag: fmt.Sprintf(`"%s"`, etagValue),
