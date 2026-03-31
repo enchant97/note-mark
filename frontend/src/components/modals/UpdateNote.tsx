@@ -1,12 +1,13 @@
 import { action, useAction, useSubmission } from "@solidjs/router";
 import BaseModal from "./Base";
-import { Frontmatter, NodeEntry } from "~/core/types";
+import { AccessControl, AccessControlUsers, Frontmatter, NodeEntry } from "~/core/types";
 import Icon from "../Icon";
 import { createEffect } from "solid-js";
 import { createStore } from "solid-js/store";
 import NoteFormFields from "../input/NoteFormFields";
 import Api from "~/core/api";
 import { isEqual } from "lodash";
+import AccessControlEditor from "../input/AccessControlEditor";
 
 const updateNoteAction = action(async (where: {
   username: string,
@@ -14,6 +15,13 @@ const updateNoteAction = action(async (where: {
   currentFrontmatter: Frontmatter,
 }, formData: FormData) => {
   const title = formData.get("title")?.toString()
+  const acPublicRead = formData.get("accessControlPublicRead") === "1"
+  const acByUser: AccessControlUsers = Object.fromEntries(
+    (formData.getAll("accessControlByUser") ?? []).map((v) => v.toString().split(":")))
+  const accessControl: AccessControl = {
+    publicRead: acPublicRead,
+    users: acByUser,
+  }
   const slug = formData.get("slug")?.toString()
   const parentSlug = formData.get("parentSlug")?.toString()
   const extraProperties = formData.get("extraProperties")?.toString()
@@ -26,6 +34,7 @@ const updateNoteAction = action(async (where: {
   const frontmatter = {
     ...JSON.parse(extraProperties),
     title,
+    accessControl,
   }
   // if frontmatter has changed, update
   // XXX can we get away with not using `lodash.isEqual()`
@@ -72,19 +81,21 @@ export default function UpdateNoteModal(props: {
   const pending = () => updateSubmission.pending || deleteSubmission.pending
   const currentExtraProperties = () => {
     // NOTE this requires ensuring to always remove registered properties
-    const { title: _, ...extraProperties } = props.currentFrontmatter
+    const { title: _, accessControl: _2, ...extraProperties } = props.currentFrontmatter
     return extraProperties
   }
   const [fields, setFields] = createStore({
     title: props.currentFrontmatter.title ?? "",
     slug: props.currentFullSlug.split("/").pop()!,
     parentSlug: props.currentFullSlug.split("/").slice(0, -1).join("/"),
-    extraProperties: JSON.stringify(currentExtraProperties()),
+    accessControl: props.currentFrontmatter.accessControl,
+    extraProperties: JSON.stringify(currentExtraProperties(), null, 2),
   })
   createEffect(() => {
     if (updateSubmission.result === undefined) { return }
     props.onClose(updateSubmission.result.nodeEntry)
-  })
+    updateSubmission.clear()
+  }, { name: "onUpdateSubmission" })
   createEffect(() => {
     if (deleteSubmission.result === undefined) { return }
     const newFullSlug = deleteSubmission.result.newFullSlug
@@ -98,7 +109,8 @@ export default function UpdateNoteModal(props: {
         frontmatter: props.currentFrontmatter,
       })
     }
-  })
+    deleteSubmission.clear()
+  }, { name: "onDeleteSubmission" })
   const onDeleteClick = () => {
     deleteNode({
       username: props.currentUsername,
@@ -113,6 +125,12 @@ export default function UpdateNoteModal(props: {
         currentFrontmatter: props.currentFrontmatter,
       })} method="post">
         <NoteFormFields fields={fields} setFields={setFields} />
+        <AccessControlEditor
+          accessControl={fields.accessControl ?? { publicRead: false }}
+          setAccessControl={(accessControl) => {
+            setFields({ accessControl })
+          }}
+        />
         <details class="collapse bg-base-100 border-base-300 border">
           <summary class="collapse-title font-semibold">Extra Properties</summary>
           <div class="collapse-content">

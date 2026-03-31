@@ -1,5 +1,17 @@
+export type Username = string
+
+export type AccessControlMode = "read" | "write"
+
+export type AccessControlUsers = Record<Username, AccessControlMode>
+
+export interface AccessControl {
+  publicRead: boolean
+  users?: AccessControlUsers
+}
+
 export interface Frontmatter {
   title?: string
+  accessControl?: AccessControl
 }
 
 export enum NodeType {
