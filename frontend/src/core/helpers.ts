@@ -1,3 +1,5 @@
+import type { AccessControl, AccessControlMode } from "./types";
+
 const SLUG_SUFFIX_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789"
 const SLUG_SUFFIX_LENGTH = 5;
 
@@ -76,4 +78,35 @@ export async function copyToClipboard(content: string) {
     console.error("failure to copy text to clipboard", err)
     throw new Error("unable to access clipboard, permission may not be granted?")
   }
+}
+
+/**
+ * Convert the named access control mode into a number.
+ * Starting from least permissive: 0.
+ *
+ * Only for use in comparisons, numbers may not be stable across updates.
+ */
+export function accessControlModeToLevelNumber(mode: AccessControlMode): number {
+  switch (mode) {
+    case "write":
+      return 1
+    default:
+      return 0
+  }
+}
+
+export function getAccessControlModeForUser(
+  ac: AccessControl,
+  username?: string,
+): AccessControlMode | null {
+  if (username !== undefined) {
+    if (Object.hasOwn(ac.users ?? {}, username)) {
+      return ac.users![username]
+    } else if (ac.publicRead) {
+      return "read"
+    }
+  } else if (ac.publicRead) {
+    return "read"
+  }
+  return null
 }

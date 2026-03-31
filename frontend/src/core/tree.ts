@@ -1,4 +1,5 @@
-import type { Frontmatter, NodeEntry, NodeTree, NodeTreeNode } from "./types"
+import { accessControlModeToLevelNumber, getAccessControlModeForUser } from "./helpers"
+import type { AccessControlMode, Frontmatter, NodeEntry, NodeTree, NodeTreeNode } from "./types"
 
 /**
  * In-memory insertion of a node
@@ -123,4 +124,39 @@ export function deleteNode(nodeTree: NodeTree, fullSlug: string) {
     throw `node of type '${currentNode.type}' expected 'note'`
   }
   delete currentNode.children[nodeSlug]
+}
+
+export function getNodeAccessControlMode(
+  nodeTree: NodeTree,
+  fullSlug: string,
+  username?: string,
+): AccessControlMode {
+  let mode: AccessControlMode = "read"
+  const slugParts = fullSlug.split("/")
+  const topSlug = slugParts.shift()
+  if (topSlug === undefined) { throw "expected node" }
+  let currentNode: NodeTreeNode
+  // handle top level node
+  if (Object.hasOwn(nodeTree, topSlug)) {
+    currentNode = nodeTree[topSlug]
+    if (currentNode.type === "note" && currentNode.frontmatter.accessControl) {
+      const ac = getAccessControlModeForUser(currentNode.frontmatter.accessControl, username)
+      if (ac !== null && accessControlModeToLevelNumber(ac) > accessControlModeToLevelNumber(mode)) {
+        mode = ac
+      }
+    }
+  } else { throw "expected node" }
+  // handle further nodes
+  for (const slugPart of slugParts) {
+    if (currentNode.type === "note" && Object.hasOwn(currentNode.children, slugPart)) {
+      currentNode = currentNode.children[slugPart]
+      if (currentNode.type === "note" && currentNode.frontmatter.accessControl) {
+        const ac = getAccessControlModeForUser(currentNode.frontmatter.accessControl, username)
+        if (ac !== null && accessControlModeToLevelNumber(ac) > accessControlModeToLevelNumber(mode)) {
+          mode = ac
+        }
+      }
+    } else { throw "expected node" }
+  }
+  return mode
 }

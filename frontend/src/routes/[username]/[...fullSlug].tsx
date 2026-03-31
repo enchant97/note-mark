@@ -10,6 +10,7 @@ import UpdateNoteModal from "~/components/modals/UpdateNote";
 import Note, { NoteMode } from "~/components/note/Note";
 import { useModal } from "~/contexts/ModalProvider";
 import { useNodeTree } from "~/contexts/NodeTreeProvider";
+import { useSession } from "~/contexts/SessionProvider";
 import { ToastType, useToast } from "~/contexts/ToastProvider";
 import Api from "~/core/api";
 import { copyToClipboard, download, StringSource } from "~/core/helpers";
@@ -28,6 +29,7 @@ function NoteNode() {
   const { setModal, clearModal } = useModal()
   const navigate = useNavigate()
   const { pushToast } = useToast()
+  const { userInfo } = useSession()
   const [noteModeSetting, setNoteModeSetting] = StorageHandler.createSettingSignal("note_mode", false)
   const noteSlug = () => {
     return decodedFullSlug().split("/").pop()
@@ -38,6 +40,11 @@ function NoteNode() {
       return NoteMode.RENDERED
     }
     return stored
+  }
+  const hasWritePermission = () => {
+    const username = userInfo()?.preferred_username
+    if (params.username === username) { return true }
+    return nodeTree.getNodeAccessControlMode(decodedFullSlug(), username) === "write"
   }
   const [rawNoteContent] = createResource(
     () => [params.username, decodedFullSlug()],
@@ -177,32 +184,34 @@ function NoteNode() {
     <div class="flex flex-col gap-4 mt-6">
       <div class="flex gap-4 flex-col sm:flex-row">
         <menu class="menu menu-horizontal">
-          <li>
-            <button
-              onclick={onCreateNoteClick}
+          <Show when={hasWritePermission()}>
+            <li>
+              <button
+                onclick={onCreateNoteClick}
+                type="button"
+                title="Create New Note"
+              >
+                <Icon name="file-plus" />
+                New
+              </button>
+            </li>
+            <li><button
+              onclick={onSettingsClick}
               type="button"
-              title="Create New Note"
+              title="Note Settings"
             >
-              <Icon name="file-plus" />
-              New
-            </button>
-          </li>
-          <li><button
-            onclick={onSettingsClick}
-            type="button"
-            title="Note Settings"
-          >
-            <Icon name="settings" />
-            Settings
-          </button></li>
-          <li><button
-            onClick={onAssetsClick}
-            type="button"
-            title="Note Assets"
-          >
-            <Icon name="image" />
-            Assets
-          </button></li>
+              <Icon name="settings" />
+              Settings
+            </button></li>
+            <li><button
+              onClick={onAssetsClick}
+              type="button"
+              title="Note Assets"
+            >
+              <Icon name="image" />
+              Assets
+            </button></li>
+          </Show>
           <li><details class="dropdown">
             <summary><Icon name="more-horizontal" /></summary>
             <ul class="p-2 menu dropdown-content z-1 w-52 backdrop-glass">
@@ -256,7 +265,7 @@ function NoteNode() {
             if (mode === NoteMode.RENDERED) { setNoteModeSetting(null) }
             else { setNoteModeSetting(mode) }
           }}
-          isEditAllowed={true}
+          isEditAllowed={hasWritePermission()}
           onSave={(content) => save(content)}
           saved={saved}
           setSaved={setSaved}

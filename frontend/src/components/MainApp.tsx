@@ -13,6 +13,7 @@ import ContentSearchModal from "./modals/ContentSearch";
 import { compare } from "~/core/helpers";
 import CreateNoteModal from "./modals/CreateNote";
 import { insertNode } from "~/core/tree";
+import { useSession } from "~/contexts/SessionProvider";
 
 interface NodeListItem {
   title: string
@@ -68,6 +69,7 @@ export default function MainApp(props: ParentProps) {
     username: string,
     fullSlug: string,
   }>()
+  const { userInfo } = useSession()
   const { setModal, clearModal } = useModal()
   const navigate = useNavigate()
   const [sortChoice, setSortChoice] = createSignal(SortChoice.NAME_ASC)
@@ -157,11 +159,13 @@ export default function MainApp(props: ParentProps) {
             </button></li>
             <li class="menu-title flex flex-row items-center">
               <span class="flex-1">NOTEBOOKS</span>
-              <button
-                class="btn btn-sm"
-                title="New Note"
-                onClick={onCreateNoteClick}
-              ><Icon name="file-plus" /></button>
+              <Show when={userInfo()?.preferred_username === params.username}>
+                <button
+                  class="btn btn-sm"
+                  title="New Note"
+                  onClick={onCreateNoteClick}
+                ><Icon name="file-plus" /></button>
+              </Show>
             </li>
             <ul class="p-2 flex-1 overflow-auto bg-base-100 shadow-glass rounded-box">
               <Show when={notesListSorted} fallback={<LoadingRing />}>{(nodeTree) => (
