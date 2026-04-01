@@ -177,7 +177,7 @@ func (h TreeHandler) GetNodeTreeByUsername(
 	// ETag Creation & ConditionalParams handling
 	treeModTime, err := h.service.GetTreeModTime(input.Username)
 	if err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	}
 	etagValue := makePersonalETagValue(optionalAuthUser, treeModTime)
 	if input.HasConditionalParams() {
@@ -188,7 +188,7 @@ func (h TreeHandler) GetNodeTreeByUsername(
 	// Get actual nodeTree
 	nodeTree, err := h.service.GetTreeForUser(optionalAuthUser, input.Username)
 	if err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	}
 	return &GetNodeTreeByUsernameOutput{
 		ETag: fmt.Sprintf(`"%s"`, etagValue),
@@ -223,19 +223,19 @@ func (h TreeHandler) GetNodeContent(
 		input.Username,
 		sanitizedSlug,
 	); err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	} else if accessMode == nil {
 		return nil, huma.Error404NotFound("not found, or you don't have permission")
 	}
 	// try get node type
 	nodeType, err := getValidatedNodeType(string(sanitizedSlug))
 	if err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	}
 	// ETag handling
 	nodeModTime, err := h.service.GetNodeModTime(input.Username, sanitizedSlug)
 	if err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	}
 	etagValue := makePersonalETagValue(optionalAuthUser, nodeModTime)
 	if input.HasConditionalParams() {
@@ -246,7 +246,7 @@ func (h TreeHandler) GetNodeContent(
 	// get node content
 	r, err := h.service.GetNodeContent(input.Username, sanitizedSlug)
 	if err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	}
 	return &huma.StreamResponse{
 		Body: func(ctx huma.Context) {
@@ -287,13 +287,13 @@ func (h TreeHandler) PutNodeContent(
 		input.Username,
 		sanitizedSlug,
 	); err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	} else if acMode == nil || *acMode != core.AccessControlWriteMode {
 		return nil, huma.Error403Forbidden("you don't have permission")
 	}
 	// update node
 	if _, err := getValidatedNodeType(string(sanitizedSlug)); err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	}
 	r := bytes.NewReader(input.RawBody)
 	return nil, h.service.UpdateNodeContent(input.Username, sanitizedSlug, r)
@@ -307,7 +307,7 @@ func (h TreeHandler) PutNoteNodeFrontmatter(
 	authenticatedUser := authDetails.MustGetAuthenticatedUser()
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
 	if nodeType, err := getValidatedNodeType(string(sanitizedSlug)); err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	} else if nodeType != core.NoteNode {
 		return nil, huma.Error422UnprocessableEntity("invalid slug")
 	}
@@ -322,7 +322,9 @@ func (h TreeHandler) PutNoteNodeFrontmatter(
 		return nil, huma.Error403Forbidden("you don't have permission")
 	}
 	// update frontmatter
-	return nil, h.service.UpdateNoteNodeFrontmatter(input.Username, sanitizedSlug, input.Body)
+	return nil, toGenericHTTPError(
+		h.service.UpdateNoteNodeFrontmatter(input.Username, sanitizedSlug, input.Body),
+	)
 }
 
 func (h TreeHandler) PostRenameNode(
@@ -333,7 +335,7 @@ func (h TreeHandler) PostRenameNode(
 	authenticatedUser := authDetails.MustGetAuthenticatedUser()
 	sanitizedSlug := core.NodeSlug(path.Clean(string(input.Slug)))
 	if nodeType, err := getValidatedNodeType(string(sanitizedSlug)); err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	} else if nodeType != core.NoteNode {
 		return nil, huma.Error422UnprocessableEntity("invalid slug")
 	}
@@ -343,25 +345,27 @@ func (h TreeHandler) PostRenameNode(
 		input.Username,
 		sanitizedSlug,
 	); err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	} else if acMode == nil || *acMode != core.AccessControlWriteMode {
 		return nil, huma.Error403Forbidden("you don't have permission")
 	}
 	// get node type
 	nodeType, err := getValidatedNodeType(string(sanitizedSlug))
 	if err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	}
 	// node rename
 	sanitizedNewSlug := core.NodeSlug(path.Clean(string(input.Body)))
 	newNodeType, err := getValidatedNodeType(string(sanitizedNewSlug))
 	if err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	}
 	if nodeType != newNodeType {
 		return nil, huma.Error422UnprocessableEntity("invalid slug")
 	}
-	return nil, h.service.RenameNode(input.Username, sanitizedSlug, sanitizedNewSlug)
+	return nil, toGenericHTTPError(
+		h.service.RenameNode(input.Username, sanitizedSlug, sanitizedNewSlug),
+	)
 }
 
 func (h TreeHandler) PostMoveNodeToTrash(
@@ -372,7 +376,7 @@ func (h TreeHandler) PostMoveNodeToTrash(
 	authenticatedUser := authDetails.MustGetAuthenticatedUser()
 	sanitizedSlug := path.Clean(string(input.Slug))
 	if nodeType, err := getValidatedNodeType(sanitizedSlug); err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	} else if nodeType != core.NoteNode {
 		return nil, huma.Error422UnprocessableEntity("invalid slug")
 	}
@@ -382,7 +386,7 @@ func (h TreeHandler) PostMoveNodeToTrash(
 		input.Username,
 		core.NodeSlug(sanitizedSlug),
 	); err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	} else if acMode == nil || *acMode != core.AccessControlWriteMode {
 		return nil, huma.Error403Forbidden("you don't have permission")
 	}
@@ -393,7 +397,7 @@ func (h TreeHandler) PostMoveNodeToTrash(
 		core.NodeSlug(sanitizedSlug),
 		core.NodeSlug(sanitizedNewSlug),
 	); err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	}
 	return &MoveNodeToTrashOutput{
 		Body: sanitizedNewSlug,
@@ -412,7 +416,9 @@ func (h TreeHandler) DeleteNode(
 	sanitizedSlug := path.Clean(string(input.Slug))
 	sanitizedSlug = path.Join(".trash/", sanitizedSlug)
 	if _, err := getValidatedNodeType(sanitizedSlug); err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	}
-	return nil, h.service.DeleteNode(input.Username, core.NodeSlug(sanitizedSlug))
+	return nil, toGenericHTTPError(
+		h.service.DeleteNode(input.Username, core.NodeSlug(sanitizedSlug)),
+	)
 }

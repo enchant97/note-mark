@@ -88,8 +88,7 @@ func (h *AuthHandler) PostSessionStart(
 ) (*SetCookieOutput, error) {
 	at, err := h.service.CreateAccessToken(input.Body)
 	if err != nil {
-		// TODO handle errors
-		return nil, err
+		return nil, huma.Error401Unauthorized("failed to authenticate")
 	}
 	return &SetCookieOutput{
 		SetCookie: h.authProvider.CreateSessionCookie(at),
@@ -111,8 +110,7 @@ func (h *AuthHandler) PostCreateToken(
 ) (*PostCreateTokenOutput, error) {
 	at, err := h.service.CreateAccessToken(input.Body)
 	if err != nil {
-		// TODO handle errors
-		return nil, err
+		return nil, huma.Error401Unauthorized("failed to authenticate")
 	}
 	return &PostCreateTokenOutput{
 		Body: at,
@@ -127,8 +125,7 @@ func (h *AuthHandler) GetUserInfo(
 	currentUsername := authDetails.MustGetAuthenticatedUser().Username
 	userInfo, err := h.service.GetUserInfoByUsername(currentUsername)
 	if err != nil {
-		// TODO handle errors
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	}
 	return &GetUserInfoOutput{
 		Body: userInfo,

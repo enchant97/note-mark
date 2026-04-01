@@ -128,7 +128,7 @@ func (h UsersHandler) PostCreateUser(
 		} else if errors.Is(err, core.ErrConflict) {
 			return nil, huma.Error409Conflict("user with that username already exists")
 		} else {
-			return nil, err
+			return nil, toGenericHTTPError(err)
 		}
 	} else {
 		return &PostCreateUserOutput{
@@ -145,7 +145,7 @@ func (h UsersHandler) GetUserByUsername(
 		if errors.Is(err, core.ErrNotFound) {
 			return nil, huma.Error404NotFound("user does not exist")
 		} else {
-			return nil, err
+			return nil, toGenericHTTPError(err)
 		}
 	} else {
 		return &GetUserOutput{
@@ -164,7 +164,7 @@ func (h UsersHandler) PutCurrentUser(
 		return nil, huma.Error403Forbidden("you do not have permission to update another users account")
 	}
 	if err := h.service.UpdateUserByUsername(string(input.Username), input.Body); err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	} else {
 		return nil, nil
 	}
@@ -185,7 +185,7 @@ func (h UsersHandler) PutCurrentUserPassword(
 		} else if errors.Is(err, core.ErrInvalidCredentials) {
 			return nil, huma.Error403Forbidden("current password invalid")
 		} else {
-			return nil, err
+			return nil, toGenericHTTPError(err)
 		}
 	} else {
 		return nil, nil
@@ -197,7 +197,7 @@ func (h UsersHandler) GetSearchForUser(
 	input *GetSearchForUserInput,
 ) (*GetSearchForUserOutput, error) {
 	if users, err := h.service.GetUsernameSearch(input.Username); err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	} else {
 		return &GetSearchForUserOutput{
 			Body: users,
