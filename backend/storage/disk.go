@@ -66,7 +66,7 @@ func (sc *DiskStorageController) readFile(
 	absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
 	f, err := os.Open(absPath)
 	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
+		if errors.Is(err, os.ErrNotExist) {
 			return nil, errors.Join(core.ErrNotFound)
 		}
 		return nil, err
@@ -85,7 +85,7 @@ func (sc *DiskStorageController) renameFileOrFolder(
 		return err
 	}
 	if err := os.Rename(currentAbsPath, newAbsPath); err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
+		if errors.Is(err, os.ErrNotExist) {
 			return errors.Join(core.ErrNotFound)
 		}
 		return err
@@ -110,7 +110,7 @@ func (sc *DiskStorageController) ReadNoteNode(
 		return r, nil
 	} else if errors.Is(err, core.ErrNotFound) {
 		absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
-		if _, err := os.Stat(absPath); errors.Is(err, fs.ErrNotExist) {
+		if _, err := os.Stat(absPath); errors.Is(err, os.ErrNotExist) {
 			return nil, errors.Join(err, core.ErrNotFound)
 		} else if err != nil {
 			return nil, err
@@ -188,12 +188,12 @@ func (sc *DiskStorageController) doesNoteNodeExist(
 			return false, err
 		}
 		// directory is empty
-	} else if !errors.Is(err, fs.ErrNotExist) {
+	} else if !errors.Is(err, os.ErrNotExist) {
 		// something bad happened
 		return false, err
 	}
 	// check whether note file exists
-	if _, err := os.Stat(absNoteDir + ".md"); errors.Is(err, fs.ErrNotExist) {
+	if _, err := os.Stat(absNoteDir + ".md"); errors.Is(err, os.ErrNotExist) {
 		return false, nil
 	} else {
 		return true, err
@@ -228,7 +228,7 @@ func (sc *DiskStorageController) DeleteNoteNode(
 	os.RemoveAll(absPath)
 	err := os.Remove(absPath + ".md")
 	// handle if note directory existed, but not a note file (blank note)
-	if errors.Is(err, fs.ErrNotExist) {
+	if errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
 	return err
@@ -262,12 +262,18 @@ func (sc *DiskStorageController) DeleteAssetNode(
 	slug string,
 ) error {
 	absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
-	return os.Remove(absPath)
+	if err := os.Remove(absPath); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	return nil
 }
 
 func (sc *DiskStorageController) DeleteUser(username core.Username) error {
 	absPath := filepath.Join(sc.rootPath, string(username))
-	return os.RemoveAll(absPath)
+	if err := os.RemoveAll(absPath); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	return nil
 }
 
 func (sc *DiskStorageController) DiscoverNodesForUser(
@@ -302,7 +308,7 @@ func (sc *DiskStorageController) DiscoverNodesForUser(
 		}
 		if d.IsDir() {
 			// skip registering directory as note node if note file exists for it
-			if _, err := os.Stat(absPath + ".md"); !errors.Is(err, fs.ErrNotExist) {
+			if _, err := os.Stat(absPath + ".md"); !errors.Is(err, os.ErrNotExist) {
 				return err
 			}
 		} else {
