@@ -133,6 +133,9 @@ func (sc *DiskStorageController) ReadNoteNodeFrontMatter(
 	defer r.Close()
 	var fm core.FrontMatter
 	_, err = frontmatter.Parse(r, &fm)
+	if err != nil {
+		return core.FrontMatter{}, errors.Join(err, core.ErrParsingContent)
+	}
 	return fm, err
 }
 
@@ -152,7 +155,7 @@ func (sc *DiskStorageController) UpdateNoteNodeFrontmatter(
 		defer r.Close()
 		content, err = frontmatter.Parse(r, &fm)
 		if err != nil {
-			return err
+			return errors.Join(err, core.ErrParsingContent)
 		}
 	} else {
 		return err
