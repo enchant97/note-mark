@@ -61,7 +61,7 @@ async function apiFetch(url: string, init?: RequestInit) {
     let resp = await fetch(reqURL, init)
     return resp
   } catch (err) {
-    throw new ApiError(HttpErrors.NetworkError, undefined, { cause: err })
+    throw new ApiError(HttpErrors.NetworkError, "an unexpected network error happened", { cause: err })
   }
 }
 

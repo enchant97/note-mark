@@ -1,9 +1,10 @@
-import { Component, For, createResource, createSignal } from "solid-js";
+import { Component, For, Show, createResource, createSignal } from "solid-js";
 import { A } from "@solidjs/router";
 import BaseModal from "./Base";
 import Api from "~/core/api";
 import { apiErrorIntoToast, useToast } from "~/contexts/ToastProvider";
 import Icon from "~/components/Icon";
+import AlertBox from "../AlertBox";
 
 type UserSearchModalProps = {
   onClose: () => void
@@ -47,6 +48,9 @@ const UserSearchModal: Component<UserSearchModalProps> = (props) => {
           {user => <li><A class="btn justify-start" onclick={() => props.onClose()} href={`/${user}`}>{user}</A></li>}
         </For>
       </ul>
+      <Show when={users.error}>{err =>
+        <AlertBox content={err()} level="error" />
+      }</Show>
       <div class="modal-action">
         <button
           onclick={() => props.onClose()}

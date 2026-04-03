@@ -2,12 +2,13 @@ import { action, useAction, useSubmission } from "@solidjs/router";
 import BaseModal from "./Base";
 import { AccessControl, AccessControlUsers, Frontmatter, NodeEntry } from "~/core/types";
 import Icon from "../Icon";
-import { createEffect } from "solid-js";
+import { createEffect, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import NoteFormFields from "../input/NoteFormFields";
 import Api from "~/core/api";
 import { isEqual } from "lodash";
 import AccessControlEditor from "../input/AccessControlEditor";
+import AlertBox from "../AlertBox";
 
 const updateNoteAction = action(async (where: {
   username: string,
@@ -99,6 +100,7 @@ export default function UpdateNoteModal(props: {
   createEffect(() => {
     if (deleteSubmission.result === undefined) { return }
     const newFullSlug = deleteSubmission.result.newFullSlug
+    updateSubmission.clear()
     if (newFullSlug === null) {
       props.onClose(null)
     } else {
@@ -151,6 +153,12 @@ export default function UpdateNoteModal(props: {
             </fieldset>
           </div>
         </details>
+        <Show when={updateSubmission.error}>{err =>
+          <AlertBox content={err()} level="error" />
+        }</Show>
+        <Show when={deleteSubmission.error}>{err =>
+          <AlertBox content={err()} level="error" />
+        }</Show>
         <div class="modal-action">
           <button
             onClick={onDeleteClick}
@@ -165,7 +173,15 @@ export default function UpdateNoteModal(props: {
             <Icon name="save" />
             Save
           </button>
-          <button onclick={() => props.onClose()} class="btn" type="button">Cancel</button>
+          <button
+            onclick={() => {
+              updateSubmission.clear()
+              deleteSubmission.clear()
+              props.onClose()
+            }}
+            class="btn"
+            type="button"
+          >Cancel</button>
         </div>
       </form>
     </BaseModal>

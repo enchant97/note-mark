@@ -2,9 +2,10 @@ import { NodeSlug } from "~/core/types";
 import BaseModal from "./Base";
 import Icon from "../Icon";
 import { createStore } from "solid-js/store";
-import { createEffect, For } from "solid-js";
+import { createEffect, For, Show } from "solid-js";
 import { action, useAction, useSubmission } from "@solidjs/router";
 import Api from "~/core/api";
+import AlertBox from "../AlertBox";
 
 export interface AssetEntry {
   fullSlug: NodeSlug | null
@@ -161,9 +162,19 @@ export default function AssetsModal(props: {
           </For>
         </ul>
       </div>
+      <Show when={createSubmission.error}>{err =>
+        <AlertBox content={err()} level="error" />
+      }</Show>
+      <Show when={deleteSubmission.error}>{err =>
+        <AlertBox content={err()} level="error" />
+      }</Show>
       <div class="modal-action">
         <button
-          onClick={() => props.onClose(currentAssets)}
+          onClick={() => {
+            deleteSubmission.clear()
+            createSubmission.clear()
+            props.onClose(currentAssets)
+          }}
           disabled={globalLoading()}
           class="btn"
           type="button"

@@ -3,9 +3,10 @@ import BaseModal from "./Base";
 import { action, useSubmission } from "@solidjs/router";
 import Api from "~/core/api";
 import Icon from "../Icon";
-import { createEffect } from "solid-js";
+import { createEffect, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import NoteFormFields from "../input/NoteFormFields";
+import AlertBox from "../AlertBox";
 
 const createNoteAction = action(async (where: { username: string }, formData: FormData) => {
   const parentSlug = formData.get("parentSlug")?.toString()
@@ -53,6 +54,9 @@ export default function CreateNoteModal(props: {
         username: props.currentUsername,
       })} method="post">
         <NoteFormFields fields={fields} setFields={setFields} />
+        <Show when={submission.error}>{err =>
+          <AlertBox content={err()} level="error" />
+        }</Show>
         <div class="modal-action">
           <button class="btn btn-primary" classList={{ loading: submission.pending }} type="submit">
             <Icon name="file-plus" />

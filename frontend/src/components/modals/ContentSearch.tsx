@@ -1,7 +1,8 @@
-import { createResource, createSignal, For, Suspense } from "solid-js";
+import { createResource, createSignal, For, Show, Suspense } from "solid-js";
 import BaseModal from "./Base";
 import LoadingSpin from "../loading/LoadingSpin";
 import Icon from "../Icon";
+import AlertBox from "../AlertBox";
 
 interface Item {
   title: string
@@ -48,6 +49,9 @@ export default function ContentSearchModal(props: {
           </For>
         </Suspense>
       </ul>
+      <Show when={searchResult.error}>{err =>
+        <AlertBox content={err()} level="error" />
+      }</Show>
       <div class="modal-action">
         <button
           onclick={() => props.onClose()}
