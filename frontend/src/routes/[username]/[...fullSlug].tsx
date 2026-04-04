@@ -1,5 +1,5 @@
 import { action, useAction, useNavigate, useParams, useSubmission } from "@solidjs/router"
-import { batch, createResource, createSignal, Show } from "solid-js";
+import { batch, createEffect, createResource, createSignal, on, Show } from "solid-js";
 import Breadcrumb from "~/components/Breadcrumb";
 import Icon from "~/components/Icon";
 import LoadingRing from "~/components/loading/LoadingRing";
@@ -11,8 +11,8 @@ import Note, { NoteMode } from "~/components/note/Note";
 import { useModal } from "~/contexts/ModalProvider";
 import { useNodeTree } from "~/contexts/NodeTreeProvider";
 import { useSession } from "~/contexts/SessionProvider";
-import { ToastType, useToast } from "~/contexts/ToastProvider";
-import Api from "~/core/api";
+import { apiErrorIntoToast, ToastType, useToast } from "~/contexts/ToastProvider";
+import Api, { ApiError, HttpErrors } from "~/core/api";
 import { copyToClipboard, download, StringSource } from "~/core/helpers";
 import { createNoteEngine } from "~/core/note-engine";
 import StorageHandler from "~/core/storage"
@@ -58,12 +58,28 @@ function NoteNode() {
   const saveAction = action(async (content: string) => {
     noteEngine.setContent(content)
     const newRawNote = noteEngine.tryIntoRaw()
-    Api.updateNodeContent(params.username, decodedFullSlug(), newRawNote)
+    await Api.updateNodeContent(params.username, decodedFullSlug(), newRawNote)
     setSaved(true)
     return { ok: true }
   })
   const saveSubmission = useSubmission(saveAction)
   const save = useAction(saveAction)
+
+  createEffect(on(() => rawNoteContent.error, (err) => {
+    if (err && !rawNoteContent.loading) {
+      if (err instanceof ApiError && err.status === HttpErrors.NotFound) {
+        pushToast({ message: "content not found, redirecting", type: ToastType.ERROR })
+        navigate(`/${params.username}`)
+      } else {
+        pushToast(apiErrorIntoToast(err, "loading note content"))
+      }
+    }
+  }), { name: "onContentLoadError" })
+  createEffect(on(() => saveSubmission.error, (err) => {
+    if (err && !saveSubmission.pending) {
+      pushToast(apiErrorIntoToast(err, "saving note content"))
+    }
+  }), { name: "onSaveError" })
 
   const onCreateNoteClick = () => {
     setModal({

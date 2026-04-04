@@ -38,9 +38,6 @@ export class ApiError extends Error {
 async function throwResponseApiErrors(v: Response) {
   if (!v.ok) {
     if (v.headers.get("Content-Type") === "application/problem+json") {
-      if (v.status === 412) {
-        throw new ApiError(v.status, "Possible resource conflict detected (server version ahead of clients)")
-      }
       // process RFC 9457 problem data
       throw new ApiError(v.status, (await v.json()).detail)
     } else {
