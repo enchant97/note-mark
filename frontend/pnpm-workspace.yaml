@@ -1,4 +1,5 @@
+minimumReleaseAge: 2880 # two days
 onlyBuiltDependencies:
-  - core-js
-  - esbuild
-  - wasm-pack
+    - core-js
+    - esbuild
+    - wasm-pack
