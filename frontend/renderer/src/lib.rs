@@ -37,16 +37,13 @@ impl Context {
 }
 
 #[wasm_bindgen]
-pub struct Renderer {
-    template_parser: liquid::Parser,
-}
+pub struct Renderer;
 
 #[wasm_bindgen]
 impl Renderer {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
-        let template_parser = liquid::ParserBuilder::new().build().unwrap();
-        Self { template_parser }
+        Self {}
     }
 
     #[wasm_bindgen]
@@ -58,19 +55,7 @@ impl Renderer {
     }
 
     #[wasm_bindgen]
-    pub fn parse_templated_markdown(&self, raw: &str, context: Context) -> Option<String> {
-        // HACK temporary fix to solve issue #231; double braces not escaping
-        //let template = self.template_parser.parse(raw).unwrap();
-        //let globals = liquid::to_object(&context).ok()?;
-        //template.render(&globals).ok()
-        return Some(raw.to_owned());
-    }
-
-    #[wasm_bindgen]
-    pub fn render(&self, raw: &str, context: Context) -> Option<String> {
-        if let Some(out) = self.parse_templated_markdown(raw, context) {
-            return Some(self.markdown_to_html(&out));
-        }
-        None
+    pub fn render(&self, raw: &str, _context: Context) -> Option<String> {
+        Some(self.markdown_to_html(&raw))
     }
 }
