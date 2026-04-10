@@ -2,6 +2,7 @@ package services
 
 import (
 	"io"
+	"log"
 
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/storage"
@@ -94,11 +95,26 @@ func (s AssetsService) GetNoteAssets(
 }
 
 func (s AssetsService) GetNoteAssetContentByID(
+	currentUserID *uuid.UUID,
 	noteID uuid.UUID,
 	assetID uuid.UUID,
 	storage_backend storage.StorageController) (db.NoteAsset, storage.AssetFileInfo, io.ReadCloser, error) {
+	// check whether can get note asset
+	var noteExists int64
+	if err := db.DB.
+		Model(&db.Note{}).
+		Preload("Book").
+		Joins("JOIN books ON books.id = notes.book_id").
+		Where("owner_id = ? OR is_public = ?", currentUserID, true).
+		Where("notes.id = ?", noteID).
+		Count(&noteExists).Error; err != nil {
+		log.Println(err)
+		return db.NoteAsset{}, storage.AssetFileInfo{}, nil, dbErrorToServiceError(err)
+	} else if noteExists == 0 {
+		return db.NoteAsset{}, storage.AssetFileInfo{}, nil, NotFoundError
+	}
+	// get note asset
 	var noteAsset db.NoteAsset
-
 	if err := db.DB.
 		First(&noteAsset, "id = ? AND note_id = ?", assetID, noteID).
 		Error; err != nil {

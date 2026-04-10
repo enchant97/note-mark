@@ -122,11 +122,13 @@ func (h AssetsHandler) GetNoteAssets(
 	}
 }
 
-// TODO Work out way to authenticate this
 func (h AssetsHandler) GetNoteAssetContentByID(
 	ctx context.Context,
 	input *GetNoteAssetContentByIDInput) (*huma.StreamResponse, error) {
+	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
+	optionalUserUID := authDetails.GetOptionalUserID()
 	if asset, info, stream, err := h.AssetsService.GetNoteAssetContentByID(
+		optionalUserUID,
 		input.NoteID,
 		input.AssetID,
 		h.Storage); err != nil {
