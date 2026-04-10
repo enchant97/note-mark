@@ -144,13 +144,21 @@ func (h AssetsHandler) GetNoteAssetContentByID(
 		}
 		return &huma.StreamResponse{
 			Body: func(ctx huma.Context) {
-				ctx.SetHeader("Content-Type", info.MimeType)
+				ctx.SetHeader("X-Content-Type-Options", "nosniff")
+				if info.MimeType == "" || info.MimeType == "text/html" || info.MimeType == "image/svg+xml" {
+					ctx.SetHeader("Content-Type", "application/octet-stream")
+					ctx.SetHeader(
+						"Content-Disposition",
+						fmt.Sprintf("attachment; filename=\"%s\"", asset.Name))
+				} else {
+					ctx.SetHeader("Content-Type", info.MimeType)
+					ctx.SetHeader(
+						"Content-Disposition",
+						fmt.Sprintf("inline; filename=\"%s\"", asset.Name))
+				}
 				ctx.SetHeader(
 					"Last-Modified",
 					core.TimeIntoHTTPFormat(info.LastModified))
-				ctx.SetHeader(
-					"Content-Disposition",
-					fmt.Sprintf("inline; filename=\"%s\"", asset.Name))
 				writer := ctx.BodyWriter()
 				io.Copy(writer, stream)
 				stream.Close()
