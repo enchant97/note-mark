@@ -29,6 +29,7 @@ func (s AuthService) GetAccessToken(
 	if err := db.DB.
 		First(&user, "username = ?", username).
 		Select("id", "password").Error; err != nil {
+		user.IsPasswordMatch(password) // prevent CWE-208
 		return core.AccessToken{}, InvalidCredentialsError
 	}
 

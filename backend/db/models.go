@@ -33,6 +33,8 @@ type User struct {
 	OidcRegistrations []OidcUser `gorm:"foreignKey:UserID" json:"oidcRegistrations,omitempty"`
 }
 
+var nullPasswordHash, _ = bcrypt.GenerateFromPassword([]byte("null"), bcrypt.DefaultCost)
+
 func (u *User) SetPassword(newPlainPassword string) {
 	hashedPw, err := bcrypt.GenerateFromPassword([]byte(newPlainPassword), bcrypt.DefaultCost)
 	if err != nil {
@@ -42,10 +44,14 @@ func (u *User) SetPassword(newPlainPassword string) {
 }
 
 func (u *User) IsPasswordMatch(plainPassword string) bool {
+	var current []byte
 	if len(u.Password) == 0 {
-		return false
+		// prevent CWE-208
+		current = nullPasswordHash
+	} else {
+		current = u.Password
 	}
-	if err := bcrypt.CompareHashAndPassword(u.Password, []byte(plainPassword)); err == nil {
+	if err := bcrypt.CompareHashAndPassword(current, []byte(plainPassword)); err == nil {
 		return true
 	}
 	return false
