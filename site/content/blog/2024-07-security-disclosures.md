@@ -9,6 +9,6 @@ A stored cross-site scripting (XSS) vulnerability in Note Mark version v0.13.0 a
 - patched versions: `0.13.1`
 - cwe: `CWE-79`
 - cve: `CVE-2024-41819`
-- score: `4.6`
+- score: `4.6/10`
 - credit: [@alessio-romano](https://github.com/alessio-romano) (reporter)
 - more info: <https://github.com/enchant97/note-mark/security/advisories/GHSA-rm48-9mqf-8jc3>
