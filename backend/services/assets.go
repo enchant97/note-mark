@@ -2,7 +2,6 @@ package services
 
 import (
 	"io"
-	"log"
 
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/storage"
@@ -108,7 +107,6 @@ func (s AssetsService) GetNoteAssetContentByID(
 		Where("owner_id = ? OR is_public = ?", currentUserID, true).
 		Where("notes.id = ?", noteID).
 		Count(&noteExists).Error; err != nil {
-		log.Println(err)
 		return db.NoteAsset{}, storage.AssetFileInfo{}, nil, dbErrorToServiceError(err)
 	} else if noteExists == 0 {
 		return db.NoteAsset{}, storage.AssetFileInfo{}, nil, NotFoundError
