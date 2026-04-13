@@ -1,4 +1,4 @@
-import { createResource, createSignal, ParentProps, Show } from "solid-js";
+import { createEffect, createResource, createSignal, on, ParentProps, Show } from "solid-js";
 import Header from '~/components/Header';
 import LoadingRing from "./loading/LoadingRing";
 import TreeNavigator from 'solid-tree-navigator';
@@ -14,6 +14,7 @@ import { compare } from "~/core/helpers";
 import CreateNoteModal from "./modals/CreateNote";
 import { insertNode } from "~/core/tree";
 import { useSession } from "~/contexts/SessionProvider";
+import { apiErrorIntoToast, useToast } from "~/contexts/ToastProvider";
 
 interface NodeListItem {
   title: string
@@ -69,6 +70,7 @@ export default function MainApp(props: ParentProps) {
     username: string,
     fullSlug: string,
   }>()
+  const { pushToast } = useToast()
   const { userInfo } = useSession()
   const { setModal, clearModal } = useModal()
   const navigate = useNavigate()
@@ -90,6 +92,12 @@ export default function MainApp(props: ParentProps) {
     console.debug(`[PERF] sorting node tree took ${endTime - startTime}ms`)
     return items
   }
+
+  createEffect(on(() => nodeTree.error, (err) => {
+    if (err && !nodeTree.loading) {
+      pushToast(apiErrorIntoToast(err, "loading user tree"))
+    }
+  }), { name: "onNodeTreeError" })
 
   const onContentSearchClick = () => {
     let sortedItems = flattenNodesList(notesList() ?? [])
