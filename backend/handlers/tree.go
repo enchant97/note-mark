@@ -259,11 +259,17 @@ func (h TreeHandler) GetNodeContent(
 				return
 			}
 			// set headers
+			ctx.SetHeader("X-Content-Type-Options", "nosniff")
 			ctx.SetHeader("ETag", fmt.Sprintf(`"%s"`, etagValue))
 			if nodeType == core.NoteNode {
 				ctx.SetHeader("Content-Type", "text/markdown")
 			} else {
 				contentType := http.DetectContentType(first512[:])
+				// prevents XSS on restricted types
+				if contentType == "text/html" || contentType == "image/svg+xml" {
+					ctx.SetHeader("Content-Disposition", "attachment")
+					contentType = "application/octet-stream"
+				}
 				ctx.SetHeader("Content-Type", contentType)
 			}
 			// send content
