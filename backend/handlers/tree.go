@@ -223,6 +223,7 @@ func (h TreeHandler) GetNodeContent(
 		optionalAuthUser,
 		input.Username,
 		sanitizedSlug,
+		false,
 	); err != nil {
 		return nil, toGenericHTTPError(err)
 	} else if accessMode == nil {
@@ -293,6 +294,7 @@ func (h TreeHandler) PutNodeContent(
 		&authenticatedUser,
 		input.Username,
 		sanitizedSlug,
+		true,
 	); err != nil {
 		return nil, toGenericHTTPError(err)
 	} else if acMode == nil || *acMode != core.AccessControlWriteMode {
@@ -323,6 +325,7 @@ func (h TreeHandler) PutNoteNodeFrontmatter(
 		&authenticatedUser,
 		input.Username,
 		sanitizedSlug,
+		true,
 	); err != nil {
 		return nil, toGenericHTTPError(err)
 	} else if acMode == nil || *acMode != core.AccessControlWriteMode {
@@ -351,6 +354,7 @@ func (h TreeHandler) PostRenameNode(
 		&authenticatedUser,
 		input.Username,
 		sanitizedSlug,
+		false,
 	); err != nil {
 		return nil, toGenericHTTPError(err)
 	} else if acMode == nil || *acMode != core.AccessControlWriteMode {
@@ -392,6 +396,7 @@ func (h TreeHandler) PostMoveNodeToTrash(
 		&authenticatedUser,
 		input.Username,
 		core.NodeSlug(sanitizedSlug),
+		false,
 	); err != nil {
 		return nil, toGenericHTTPError(err)
 	} else if acMode == nil || *acMode != core.AccessControlWriteMode {

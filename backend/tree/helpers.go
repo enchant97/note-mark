@@ -74,7 +74,13 @@ func updateMostPermissivePermissions(acBase *core.AccessControl, newAc core.Acce
 //
 // Will search from top-level down to the given node,
 // selecting the most permissive permissions available.
-func GetNodeAccessControl(tree core.NodeTree, fullSlug core.NodeSlug) (core.AccessControl, error) {
+//
+// Enable `useParentFallback` when node may not exist (like when creating a note).
+func GetNodeAccessControl(
+	tree core.NodeTree,
+	fullSlug core.NodeSlug,
+	useParentFallback bool,
+) (core.AccessControl, error) {
 	ac := core.AccessControl{
 		PublicRead: false,
 		Users:      make(map[core.Username]core.AccessControlMode),
@@ -88,6 +94,7 @@ func GetNodeAccessControl(tree core.NodeTree, fullSlug core.NodeSlug) (core.Acce
 		}
 		currentNode = node
 	} else {
+		// never use `useParentFallback`, top node has no parent
 		return core.AccessControl{}, core.ErrNotFound
 	}
 	// handle further nodes
@@ -99,10 +106,13 @@ func GetNodeAccessControl(tree core.NodeTree, fullSlug core.NodeSlug) (core.Acce
 			}
 			currentNode = currentNode.Children[slugPart]
 		} else {
+			if useParentFallback {
+				return ac, nil
+			}
 			return core.AccessControl{}, core.ErrNotFound
 		}
 	}
-	if currentNode == nil {
+	if currentNode == nil && !useParentFallback {
 		return core.AccessControl{}, core.ErrNotFound
 	}
 	return ac, nil
