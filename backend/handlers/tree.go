@@ -296,7 +296,7 @@ func (h TreeHandler) PutNodeContent(
 		return nil, toGenericHTTPError(err)
 	}
 	r := bytes.NewReader(input.RawBody)
-	return nil, h.service.UpdateNodeContent(input.Username, sanitizedSlug, r)
+	return nil, toGenericHTTPError(h.service.UpdateNodeContent(input.Username, sanitizedSlug, r))
 }
 
 func (h TreeHandler) PutNoteNodeFrontmatter(
@@ -317,7 +317,7 @@ func (h TreeHandler) PutNoteNodeFrontmatter(
 		input.Username,
 		sanitizedSlug,
 	); err != nil {
-		return nil, err
+		return nil, toGenericHTTPError(err)
 	} else if acMode == nil || *acMode != core.AccessControlWriteMode {
 		return nil, huma.Error403Forbidden("you don't have permission")
 	}
