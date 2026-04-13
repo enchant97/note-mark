@@ -84,6 +84,8 @@ func (s *AuthService) getUserForPasswordGrant(request core.PasswordGrant) (uuid.
 	}
 	user, err := core.WrapDbErrorWithValue(s.dao.Queries.GetUserPassword(context.Background(), request.Username))
 	if err != nil {
+		// prevent CWE-208
+		core.DoesPasswordMatchHashed("null", core.NullPasswordHash)
 		return uuid.Nil, err
 	}
 	if !core.DoesPasswordMatchHashed(request.Password, user.PasswordHash) {

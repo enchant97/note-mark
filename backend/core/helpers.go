@@ -9,6 +9,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var NullPasswordHash, _ = bcrypt.GenerateFromPassword([]byte("null"), bcrypt.DefaultCost)
+
 func MustNewUID() uuid.UUID {
 	uid, err := uuid.NewV7()
 	return uuid.Must(uid, err)

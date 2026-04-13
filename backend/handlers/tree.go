@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -266,7 +267,7 @@ func (h TreeHandler) GetNodeContent(
 			} else {
 				contentType := http.DetectContentType(first512[:])
 				// prevents XSS on restricted types
-				if contentType == "text/html" || contentType == "image/svg+xml" {
+				if strings.HasPrefix(contentType, "text/html") || strings.HasPrefix(contentType, "image/svg+xml") {
 					ctx.SetHeader("Content-Disposition", "attachment")
 					contentType = "application/octet-stream"
 				}
