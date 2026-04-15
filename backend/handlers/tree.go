@@ -386,10 +386,8 @@ func (h TreeHandler) PostMoveNodeToTrash(
 	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
 	authenticatedUser := authDetails.MustGetAuthenticatedUser()
 	sanitizedSlug := path.Clean(string(input.Slug))
-	if nodeType, err := getValidatedNodeType(sanitizedSlug); err != nil {
+	if _, err := getValidatedNodeType(sanitizedSlug); err != nil {
 		return nil, toGenericHTTPError(err)
-	} else if nodeType != core.NoteNode {
-		return nil, huma.Error422UnprocessableEntity("invalid slug")
 	}
 	// access control check
 	if acMode, err := h.service.GetAvailableNodeAccessControlMode(
