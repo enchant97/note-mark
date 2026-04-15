@@ -6,6 +6,8 @@ import { createEffect, For, Show } from "solid-js";
 import { action, useAction, useSubmission } from "@solidjs/router";
 import Api from "~/core/api";
 import AlertBox from "../AlertBox";
+import { copyToClipboard } from "~/core/helpers";
+import { ToastType, useToast } from "~/contexts/ToastProvider";
 
 export interface AssetEntry {
   fullSlug: NodeSlug | null
@@ -56,6 +58,7 @@ export default function AssetsModal(props: {
   onClose: (assets: Record<NodeSlug, AssetEntry>) => any,
 }) {
   let assetUploadInput: HTMLInputElement
+  const { pushToast } = useToast()
   const [createFields, setCreateFields] = createStore<{ slug: string, file: File | null }>({
     slug: "",
     file: null,
@@ -137,28 +140,54 @@ export default function AssetsModal(props: {
         <span class="text-md font-bold">Existing Assets</span>
         <ul class="list gap-2">
           <For each={currentAssetList()}>
-            {asset => (
-              <li class="list-row bg-base-100 rounded-box shadow-glass items-center">
-                <div><Icon name="file" /></div>
-                <div>{asset.fullSlug!.split("/").pop()}</div>
-                <div class="join">
-                  <button
-                    onClick={() => {
-                      deleteAsset({
-                        username: props.currentUsername,
-                        parentSlug: props.currentParentSlug,
-                      },
-                        asset.fullSlug!.split("/").pop()!)
-                    }}
-                    disabled={globalLoading()}
-                    class="btn btn-sm btn-outline btn-error join-item"
-                    title={`Delete "${asset.fullSlug!.split("/").pop()}"`}
-                  >
-                    <Icon name="trash" />
-                  </button>
-                </div>
-              </li>
-            )}
+            {asset => {
+              const assetSlug = asset.fullSlug!.split("/").pop()!
+              return (
+                <li class="list-row bg-base-100 rounded-box shadow-glass items-center">
+                  <div><Icon name="file" /></div>
+                  <div>{asset.fullSlug!.split("/").pop()}</div>
+                  <div class="join">
+                    <button
+                      class="btn btn-sm join-item"
+                      title={`Copy Link "${assetSlug}"`}
+                      onClick={async () => {
+                        let assetUrl = Api.makeAssetUrl(props.currentUsername, asset.fullSlug!)
+                        try {
+                          await copyToClipboard(assetUrl)
+                          pushToast({ message: "copied to clipboard", type: ToastType.SUCCESS })
+                        } catch (err) {
+                          pushToast({ message: err.message, type: ToastType.ERROR })
+                        }
+                      }}
+                    >
+                      <Icon name="link" />
+                    </button>
+                    <a
+                      class="btn btn-sm join-item"
+                      href={Api.makeAssetUrl(props.currentUsername, asset.fullSlug!)}
+                      target="_blank"
+                      title={`Open "${assetSlug}"`}
+                    >
+                      <Icon name="external-link" />
+                    </a>
+                    <button
+                      onClick={() => {
+                        deleteAsset({
+                          username: props.currentUsername,
+                          parentSlug: props.currentParentSlug,
+                        },
+                          assetSlug)
+                      }}
+                      disabled={globalLoading()}
+                      class="btn btn-sm btn-outline btn-error join-item"
+                      title={`Delete "${assetSlug}"`}
+                    >
+                      <Icon name="trash" />
+                    </button>
+                  </div>
+                </li>
+              )
+            }}
           </For>
         </ul>
       </div>

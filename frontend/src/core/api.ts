@@ -193,4 +193,7 @@ export default class Api {
     })
     await throwResponseApiErrors(resp)
   }
+  static makeAssetUrl(username: string, assetFullSlug: string) {
+    return `${ApiServerBaseUrl}/tree/content/u/${username}/${assetFullSlug}`
+  }
 }
