@@ -1,0 +1,17 @@
+# file: docker-compose.yml
+# built-for: 1.0.0
+volumes:
+  data:
+
+services:
+  note-mark:
+    image: ghcr.io/enchant97/note-mark:{{< app-version >}}
+    restart: unless-stopped
+    volumes:
+      - data:/data
+    environment:
+      # !!! REPLACE These !!!
+      AUTH_TOKEN__SECRET: "!!! REPLACE ME !!!"
+      PUBLIC_URL: "http://notemark.example.com"
+    ports:
+      - 80:8080
