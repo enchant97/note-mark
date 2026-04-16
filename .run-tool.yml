@@ -46,3 +46,9 @@ targets:
       - .
     env_file: .env
     cwd: backend
+  dev-site:
+    program: hugo
+    args:
+      - serve
+      - -D
+    cwd: site
