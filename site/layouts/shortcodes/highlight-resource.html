@@ -1,0 +1,3 @@
+{{ with .Page.Resources.GetMatch (.Get "file") }}
+    {{ highlight .Content ($.Get "lang") }}
+{{ end }}

@@ -1,0 +1,110 @@
+---
+title: V0.19
+---
+This minimal copy of the V0 documentation. Use this to assist in migrating to V1.
+
+> If you need the original documentation, build your own docs from the source-code of a V0 tag.
+
+## Example Docker Compose
+
+```yaml
+# file: docker-compose.yml
+volumes:
+  data:
+
+services:
+  note-mark:
+    image: ghcr.io/enchant97/note-mark-aio:{{< app-version >}}
+    restart: unless-stopped
+    volumes:
+      - data:/data
+    environment:
+      JWT_SECRET: "!!! REPLACE ME !!!"
+      PUBLIC_URL: "http://notemark.example.com"
+    ports:
+      - 80:8080
+```
+
+## Configuration
+Configuration of the Note Mark is done through environment variables. See the below options:
+
+| Key              | Description                               | Default   | Docker Default
+|:---------------- |:----------------------------------------- |:----------|:--------------- |
+| BIND__HOST       | What ip to listen on                      | 127.0.0.1 | 0.0.0.0         |
+| BIND__PORT       | Port to bind to                           | 8080      | 8080            |
+| BIND__UNIX_SOCKET | Listen on unix socket, overrides HOST/PORT when set | - | - |
+| DB__TYPE         | Type of DB (sqlite or postgres)           |           | sqlite          |
+| DB__URI          | URI (or file path if using SQLite)        |           | /data/db.sqlite |
+| JWT_SECRET       | base64 encoded secret                     |           |                 |
+| TOKEN_EXPIRY     | seconds until a token expires             | 259200    | 259200          |
+| DATA_PATH        | Where to store app data                   |           | /data           |
+| STATIC_PATH      | Host static files                         |           |                 |
+| PUBLIC_URL       | The URL where app is accessed from | | |
+| ENABLE_INTERNAL_SIGNUP | Whether to enable new internal accounts | true | true |
+| ENABLE_INTERNAL_LOGIN | Whether to enable new logins for internal accounts | true | true |
+| NOTE_SIZE_LIMIT  | Max file size for note                    |  1M       | 1M              |
+| ASSET_SIZE_LIMIT | Max file size for uploaded assets         |  12M      | 12M             |
+| OIDC__DISPLAY_NAME | The provider name (used for UI) | - | - |
+| OIDC__PROVIDER_NAME | The provider name (used for DB) | - | - |
+| OIDC__ISSUER_URL | The OIDC issuer url | - | - |
+| OIDC__CLIENT_ID | The OIDC client id | - | - |
+| OIDC__ENABLE_USER_CREATION | Whether to automatically create users | true | true |
+
+> *TIP* A secret can be generated using: `openssl rand -base64 32`
+
+### Database URI
+These have been copied from the ORM docs, more info found on [gorm.io](https://gorm.io/docs/connecting_to_the_database.html).
+
+sqlite:
+
+```text
+/path/to/db.sqlite
+```
+
+postgres:
+
+```text
+host=localhost user=user password=pass dbname=notemark port=5432 sslmode=disable TimeZone=Europe/London
+```
+
+### PUBLIC_URL
+This **MUST** be set to your front-end URL and **NOT** end in a trailing slash e.g. `https://notemark.example.com`.
+
+## CLI
+Usage
+```sh
+docker compose exec note-mark /note-mark --help
+```
+
+### Export For V1
+Migrating to V1 is easy with the in-built export tool.
+
+Notes:
+
+- You will need to create your users before import.
+- If using Docker you will need to mount a volume to export into
+
+Add Volume:
+
+```yaml
+    volumes:
+      - data:/data
+      - ./notemark-export:/export
+```
+
+Command:
+
+```sh
+note-mark migrate export-v1 --export-dir /export
+```
+
+
+Export Structure:
+
+```text
+{username}/
+    {book-slug}/
+        {note-slug}.md
+        {note-slug}/
+            {asset-name}
+```
