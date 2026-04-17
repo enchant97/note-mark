@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.3] - 2026-04-17
+### Fixed
+- security vulnerability GHSA-3gr9-485j-v4xf
+- security vulnerability GHSA-pxf8-6wqm-r6hh
+- security vulnerability GHSA-39q2-94rc-95cp (dependency)
+
 ## [0.19.2] - 2026-04-11
 ### Fixed
 - Stored XSS via Unrestricted Asset Upload (CVE-2026-40262)
