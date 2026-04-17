@@ -51,7 +51,7 @@ func (u *User) IsPasswordMatch(plainPassword string) bool {
 	} else {
 		current = u.Password
 	}
-	if err := bcrypt.CompareHashAndPassword(current, []byte(plainPassword)); err == nil {
+	if err := bcrypt.CompareHashAndPassword(current, []byte(plainPassword)); err == nil && len(u.Password) != 0 {
 		return true
 	}
 	return false
