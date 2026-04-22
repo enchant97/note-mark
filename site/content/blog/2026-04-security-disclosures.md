@@ -42,3 +42,38 @@ Fixed by adding a default password to check against when no user exists.
 - score: `3.7/10`
 - credit: [@QiaoNPC](https://github.com/QiaoNPC) (reporter)
 - more info: <https://github.com/enchant97/note-mark/security/advisories/GHSA-w6m9-39cv-2fwp>
+
+## DOMPurify (dependency)
+
+- affected versions: `<=0.19.2`
+- patched versions: `0.19.3`
+- cwe: `CWE-783`
+- cve: `unassigned`
+- score: `5.3/10`
+- more info <https://github.com/cure53/DOMPurify/security/advisories/GHSA-39q2-94rc-95cp>
+
+## Unauthenticated read of notes and assets in soft-deleted public books
+Notes and assets can still be accessed when a book has been soft-deleted on any book that was made public.
+
+Fixed by removing public access when soft-deleted.
+
+- affected versions: `<=0.19.2`
+- patched versions: `0.19.3`
+- cwe: `CWE-285`
+- cve: `CVE-2026-41572`
+- score: `5.3/10`
+- credit: [@adrgs](https://github.com/adrgs) (reporter)
+- more info: <https://github.com/enchant97/note-mark/security/advisories/GHSA-3gr9-485j-v4xf>
+
+## OIDC-registered users authenticated by submitting password "null"
+Any OIDC registered users that have not got an internal password set can login using the password "null".
+
+Only effects users that have a user with no password set.
+
+- affected versions: `=0.19.2`
+- patched versions: `0.19.3`
+- cwe: `CWE-287`
+- cve: `CVE-2026-41571`
+- score: `9.4/10`
+- credit: [@adrgs](https://github.com/adrgs) (reporter)
+- more info: <https://github.com/enchant97/note-mark/security/advisories/GHSA-pxf8-6wqm-r6hh>
