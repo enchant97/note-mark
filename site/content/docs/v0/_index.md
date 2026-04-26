@@ -14,7 +14,7 @@ volumes:
 
 services:
   note-mark:
-    image: ghcr.io/enchant97/note-mark-aio:{{< app-version >}}
+    image: ghcr.io/enchant97/note-mark-aio:0.19
     restart: unless-stopped
     volumes:
       - data:/data
