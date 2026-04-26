@@ -5,6 +5,8 @@ This minimal copy of the V0 documentation. Use this to assist in migrating to V1
 
 > If you need the original documentation, build your own docs from the source-code of a V0 tag.
 
+> Watch the [official video on YouTube](https://youtu.be/rwL99Ac5g98)
+
 ## Example Docker Compose
 
 ```yaml
