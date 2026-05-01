@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/conditional"
@@ -85,6 +86,10 @@ func (h AssetsHandler) PostNoteAsset(
 	ctx context.Context,
 	input *PostNoteAssetInput) (*PostNoteAssetOutput, error) {
 	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
+	// prevent CWE-20, CWE-22
+	if strings.ContainsAny(input.Name, "/\\") {
+		return nil, huma.Error422UnprocessableEntity("asset filename cannot contain path separators")
+	}
 	body := bytes.NewReader(input.RawBody)
 	if asset, err := h.AssetsService.CreateNoteAsset(
 		authDetails.GetAuthenticatedUser().UserID,

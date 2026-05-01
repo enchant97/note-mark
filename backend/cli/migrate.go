@@ -220,7 +220,13 @@ func commandMigrateExportData(appConfig config.AppConfig, exportDir string) erro
 									return err
 								} else {
 									defer r.Close()
-									f, err := os.Create(path.Join(assetsDir, asset.ID.String()+"."+asset.Name))
+									// prevent CWE-20, CWE-22
+									assetFileName := filepath.Base(asset.Name)
+									if assetFileName == "/" || assetFileName == "." {
+										log.Printf("disallowed asset filename found '%s', skipping\n", asset.Name)
+										continue
+									}
+									f, err := os.Create(path.Join(assetsDir, asset.ID.String()+"."+assetFileName))
 									if err != nil {
 										return err
 									}
@@ -325,7 +331,13 @@ func commandMigrateExportDataV1(appConfig config.AppConfig, exportDir string) er
 									return err
 								} else {
 									defer r.Close()
-									f, err := os.Create(filepath.Join(noteDir, asset.Name))
+									// prevent CWE-20, CWE-22
+									assetFileName := filepath.Base(asset.Name)
+									if assetFileName == "/" || assetFileName == "." {
+										log.Printf("disallowed asset filename found '%s', skipping\n", asset.Name)
+										continue
+									}
+									f, err := os.Create(filepath.Join(noteDir, assetFileName))
 									if err != nil {
 										return err
 									}
