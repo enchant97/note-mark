@@ -10,7 +10,7 @@ Configuration of the Note Mark is done through environment variables. See the be
 | BIND__UNIX_SOCKET | Listen on unix socket, overrides HOST/PORT when set | - | - |
 | DB__TYPE         | Type of DB (sqlite or postgres)           |           | sqlite          |
 | DB__URI          | URI (or file path if using SQLite)        |           | /data/db.sqlite |
-| JWT_SECRET       | base64 encoded secret                     |           |                 |
+| JWT_SECRET       | base64 encoded secret (must be at least 32 bytes) | | |
 | TOKEN_EXPIRY     | seconds until a token expires             | 259200    | 259200          |
 | DATA_PATH        | Where to store app data                   |           | /data           |
 | STATIC_PATH      | Host static files                         |           |                 |

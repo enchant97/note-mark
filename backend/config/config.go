@@ -28,7 +28,7 @@ type OidcConfig struct {
 type AppConfig struct {
 	Bind                      BindConfig    `envPrefix:"BIND__"`
 	DB                        DBConfig      `envPrefix:"DB__"`
-	JWTSecret                 Base64Decoded `env:"JWT_SECRET,notEmpty"`
+	JWTSecret                 Base64Decoded `env:"JWT_SECRET,notEmpty" validate:"gte=32"`
 	TokenExpiry               int64         `env:"TOKEN_EXPIRY" envDefault:"259200"`
 	DataPath                  string        `env:"DATA_PATH,notEmpty"`
 	StaticPath                string        `env:"STATIC_PATH"`
