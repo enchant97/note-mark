@@ -21,7 +21,7 @@ type OidcConfig struct {
 }
 
 type AuthTokenConfig struct {
-	Secret Base64Decoded `env:"SECRET,notEmpty"`
+	Secret Base64Decoded `env:"SECRET,notEmpty" validate:"gte=32"`
 	Expiry int64         `env:"EXPIRY" envDefault:"259200"`
 }
 

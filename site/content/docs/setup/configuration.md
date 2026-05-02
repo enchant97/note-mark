@@ -9,8 +9,8 @@ Configuration of the Note Mark is done through environment variables. See the be
 | BIND__PORT        | Port to bind to                                     | 8080      | 8080    |
 | BIND__UNIX_SOCKET | Listen on unix socket, overrides HOST/PORT when set | -         | -       |
 | | | | | |
-| AUTH_TOKEN__SECRET | base64 encoded secret         |        |        |
-| AUTH_TOKEN__EXPIRY | seconds until a token expires | 259200 | 259200 |
+| AUTH_TOKEN__SECRET | base64 encoded secret (must be at least 32 bytes) |        |        |
+| AUTH_TOKEN__EXPIRY | seconds until a token expires                     | 259200 | 259200 |
 | | | | | |
 | DATA_PATH   | Where to store app data            |   | /data   |
 | STATIC_PATH | Host static files                  | - | /static |
