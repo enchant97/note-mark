@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.4] - 2026-05-01
+### Fixed
+- security vulnerability GHSA-j88v-2chj-qfwx
+- security vulnerability GHSA-q6mh-rqwh-g786
+- security vulnerability GHSA-g49p-4qxj-88v3
+
 ## [0.19.3] - 2026-04-17
 ### Fixed
 - security vulnerability GHSA-3gr9-485j-v4xf
