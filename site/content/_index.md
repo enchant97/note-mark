@@ -1,7 +1,7 @@
 ---
 title: Welcome To Note Mark
 ---
-Note Mark is a lighting fast and minimal; web-based Markdown notes app. Featuring a sleek and responsive web UI.
+Note Mark is a lighting fast and minimal; web-based Markdown notes app. Featuring a sleek and responsive web UI. It's Open Source by design; ensuring you always own your notes and can transfer at any time.
 
 ## Top Features
 
@@ -35,7 +35,7 @@ View and edit your notes in beautifully styled [GFM](https://github.github.com/g
 
 {{% container/element %}}
 ### Note Sharing
-Integrated notebook sharing.
+Integrated note sharing.
 {{% /container/element %}}
 
 
@@ -47,5 +47,3 @@ Integrated notebook sharing.
 
 ## Support My Work
 Like this project? Consider supporting me financially so I can continue development. You can do that by [buying me a coffee](https://www.buymeacoffee.com/leospratt).
-
-> Please note I currently do not accept paid incentives for features.

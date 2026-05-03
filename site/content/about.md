@@ -16,7 +16,7 @@ WIP
 - Mobile Friendly
 - Friendly URLs for cleaner links
 - Dark & Light Theme
-- Notebook Sharing
+- Note Sharing
 - Stores data in a standard file/folder system
 - Multiple views for a note (rendered, plain)
 - Lighting fast editor with shortcuts
