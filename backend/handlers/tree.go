@@ -401,7 +401,9 @@ func (h TreeHandler) PostMoveNodeToTrash(
 		return nil, huma.Error403Forbidden("you don't have permission")
 	}
 	timestamp := time.Now().UTC()
-	sanitizedNewSlug := path.Join(".trash/", timestamp.Format("20060102T150405.000Z"), sanitizedSlug)
+	timestampSlug := timestamp.Format("20060102T150405.000Z")
+	timestampSlug = strings.Replace(timestampSlug, ".", "-", 1) // ensure path is a valid slug
+	sanitizedNewSlug := path.Join(".trash/", timestampSlug, sanitizedSlug)
 	if err := h.service.RenameNode(
 		input.Username,
 		core.NodeSlug(sanitizedSlug),
