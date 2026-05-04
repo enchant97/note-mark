@@ -93,6 +93,11 @@ func (sc *DiskStorageController) renameFileOrFolder(
 	return nil
 }
 
+func (sc *DiskStorageController) CreateUser(username core.Username) error {
+	absPath := filepath.Join(sc.rootPath, string(username))
+	return os.MkdirAll(absPath, os.ModePerm)
+}
+
 func (sc *DiskStorageController) WriteNoteNode(
 	username core.Username,
 	slug string,

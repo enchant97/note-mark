@@ -9,6 +9,7 @@ type DiscoverNodesFunc func(node core.NodeEntry) error
 type DiscoverUsersFunc func(username core.Username) error
 
 type StorageController interface {
+	CreateUser(username core.Username) error
 	WriteNoteNode(username core.Username, slug string, r io.Reader) error
 	ReadNoteNode(username core.Username, slug string) (io.ReadCloser, error)
 	ReadNoteNodeFrontMatter(username core.Username, slug string) (core.FrontMatter, error)

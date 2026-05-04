@@ -2,16 +2,19 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
+	"github.com/enchant97/note-mark/backend/tree"
 )
 
 func commandUserAdd(
 	dao *db.DAO,
+	tc *tree.TreeController,
 	username string,
 	password string,
 ) error {
@@ -24,6 +27,9 @@ func commandUserAdd(
 		}); err != nil {
 		return err
 	} else {
+		if err := tc.RegisterNewUser(core.Username(username)); err != nil && !errors.Is(err, core.ErrConflict) {
+			return err
+		}
 		fmt.Printf("User '%s' created with ID '%s'", username, uid)
 		return nil
 	}

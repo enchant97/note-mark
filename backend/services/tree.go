@@ -30,8 +30,8 @@ func (s *TreeService) GetTreeForUser(
 	optionalAuthUser *core.AuthenticatedUser,
 	username core.Username,
 ) (core.NodeTree, error) {
-	nodeTree, exists := s.tc.TryGetNodeTreeForUser(username)
-	if !exists {
+	nodeTree, err := s.tc.TryGetNodeTreeForUser(username)
+	if err != nil {
 		return nil, core.ErrNotFound
 	}
 	if optionalAuthUser == nil {
@@ -55,7 +55,7 @@ func (s *TreeService) GetAvailableNodeAccessControlMode(
 	fullSlug core.NodeSlug,
 	useParentFallback bool,
 ) (*core.AccessControlMode, error) {
-	if nodeTree, exists := s.tc.TryGetNodeTreeForUser(username); exists {
+	if nodeTree, err := s.tc.TryGetNodeTreeForUser(username); err == nil {
 		// skip access control check when user is the owner
 		if optionalAuthUser != nil && optionalAuthUser.Username == string(username) {
 			acMode := core.AccessControlWriteMode

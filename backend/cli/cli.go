@@ -135,7 +135,7 @@ func Entrypoint(appVersion string) error {
 						Action: func(ctx context.Context, cmd *cli.Command) error {
 							username := cmd.String("username")
 							password := cmd.String("password")
-							return commandUserAdd(&dao, username, password)
+							return commandUserAdd(&dao, &tc, username, password)
 						},
 					},
 					{

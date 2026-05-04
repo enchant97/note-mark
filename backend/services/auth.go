@@ -11,6 +11,7 @@ import (
 	"github.com/enchant97/note-mark/backend/config"
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
+	"github.com/enchant97/note-mark/backend/tree"
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 )
@@ -18,11 +19,16 @@ import (
 type AuthService struct {
 	appConfig    config.AppConfig
 	dao          *db.DAO
+	tc           *tree.TreeController
 	OidcProvider *oidc.Provider
 	OidcVerifier *oidc.IDTokenVerifier
 }
 
-func (s AuthService) New(appConfig config.AppConfig, dao *db.DAO) AuthService {
+func (s AuthService) New(
+	appConfig config.AppConfig,
+	dao *db.DAO,
+	tc *tree.TreeController,
+) AuthService {
 	var oidcProvider *oidc.Provider
 	var oidcVerifier *oidc.IDTokenVerifier
 	if appConfig.OIDC != nil {
@@ -36,6 +42,7 @@ func (s AuthService) New(appConfig config.AppConfig, dao *db.DAO) AuthService {
 	return AuthService{
 		appConfig:    appConfig,
 		dao:          dao,
+		tc:           tc,
 		OidcProvider: oidcProvider,
 		OidcVerifier: oidcVerifier,
 	}
@@ -144,6 +151,9 @@ func (s *AuthService) getOrCreateOidcUser(username string, userSub string) (uuid
 			ProviderName: s.appConfig.OIDC.ProviderName,
 		}); err != nil {
 			return uuid.Nil, core.WrapDbError(err)
+		}
+		if err := s.tc.RegisterNewUser(core.Username(username)); err != nil && !errors.Is(err, core.ErrConflict) {
+			return uuid.Nil, err
 		}
 		return userUid, tx.Commit()
 	} else if err != nil {

@@ -82,9 +82,10 @@ func SetupHandlers(
 	api.UseMiddleware(validatorProvider.Provider)
 	api.UseMiddleware(authProvider.ProviderMiddleware)
 	SetupMiscHandler(api, appConfig)
-	SetupAuthHandler(api, services.AuthService{}.New(appConfig, dao), appConfig, &authProvider)
+	SetupAuthHandler(api, services.AuthService{}.New(appConfig, dao, tc), appConfig, &authProvider)
 	SetupUsersHandler(api, services.UsersService{}.New(
 		dao,
+		tc,
 		appConfig.EnableInternalSignup,
 		appConfig.EnableInternalLogin,
 		appConfig.EnableAnonymousUserSearch,

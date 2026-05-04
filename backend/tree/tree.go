@@ -37,10 +37,20 @@ func (tc TreeController) New(sc storage.StorageController, dao *db.DAO) TreeCont
 func (tc *TreeController) GetTreeModTimeForUser(username core.Username) (time.Time, error) {
 	tc.mutex.RLock()
 	defer tc.mutex.RUnlock()
-	return core.WrapDbErrorWithValue(tc.dao.Queries.GetTreeCacheUpdatedAt(
+	modTime, err := core.WrapDbErrorWithValue(tc.dao.Queries.GetTreeCacheUpdatedAt(
 		context.Background(),
 		string(username),
 	))
+	if errors.Is(err, core.ErrNotFound) {
+		if _, err := core.WrapDbErrorWithValue(
+			tc.dao.Queries.GetUserUidByUsername(context.Background(), string(username)),
+		); err != nil {
+			return modTime, err
+		}
+		// fresh tree
+		return time.Now().UTC(), nil
+	}
+	return modTime, err
 }
 
 // Get the modification time for a users node.
@@ -58,11 +68,21 @@ func (tc *TreeController) GetTreeModTimeForNode(
 }
 
 // Get a node tree for a specific user, will return false if no tree exists.
-func (tc *TreeController) TryGetNodeTreeForUser(username core.Username) (core.NodeTree, bool) {
+func (tc *TreeController) TryGetNodeTreeForUser(username core.Username) (core.NodeTree, error) {
 	tc.mutex.RLock()
 	defer tc.mutex.RUnlock()
+	if _, err := tc.dao.Queries.GetUserUidByUsername(context.Background(), string(username)); err != nil {
+		return nil, core.WrapDbError(err)
+	}
 	v, exists := tc.tree[username]
-	return v, exists
+	if exists {
+		return v, nil
+	}
+	err := tc.unsafeRegisterNewUser(username)
+	if err != nil {
+		return tc.tree[username], nil
+	}
+	return nil, err
 }
 
 // Write a new or update existing note node to tree.
@@ -174,10 +194,10 @@ func (tc *TreeController) RenameNode(
 			return err
 		}
 	}
-    frontmatter := core.FrontMatter{}
-    if node.NoteNodeFields != nil {
-        frontmatter = node.FrontMatter
-    }
+	frontmatter := core.FrontMatter{}
+	if node.NoteNodeFields != nil {
+		frontmatter = node.FrontMatter
+	}
 	// update in-memory tree
 	if err := tc.insertNodeIntoMemory(username, core.NodeEntry{
 		FullSlug: newFullSlug,
@@ -240,6 +260,18 @@ func (tc *TreeController) Reset() error {
 	return nil
 }
 
+// Register a new user into the tree, also ensuring it exists in storage.
+//
+// errors with `core.ErrConflict` if user already exists.
+func (tc *TreeController) RegisterNewUser(username core.Username) error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	if _, exists := tc.tree[username]; exists {
+		return core.ErrConflict
+	}
+	return tc.unsafeRegisterNewUser(username)
+}
+
 // Load node tree for every discovered user.
 // Will error if in-memory tree is not in a fresh state.
 //
@@ -293,6 +325,18 @@ func (tc *TreeController) Load() error {
 		// insert entries into cache
 		return tc.updateCacheFromMemory(username)
 	})
+}
+
+// Register a new user into the tree, also ensuring it exists in storage.
+//
+// - will overwrite existing user in tree
+// - assumes tree mutex has been locked for writing
+func (tc *TreeController) unsafeRegisterNewUser(username core.Username) error {
+	tc.tree[username] = core.NodeTree{}
+	if err := tc.sc.CreateUser(username); err != nil {
+		return err
+	}
+	return tc.updateCacheFromMemory(username)
 }
 
 // Insert or update the tree cache from current tree state in-memory.

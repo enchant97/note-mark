@@ -9,6 +9,9 @@ RETURNING uid,created_at,updated_at,username,name;
 -- name: InsertOidcUserMapping :exec
 INSERT INTO oidc_users (user_uid, user_sub, provider_name) VALUES((SELECT uid FROM users WHERE username=?), ?, ?);
 
+-- name: GetUserUidByUsername :one
+SELECT uid FROM users WHERE username = ? AND deleted_at IS NULL LIMIT 1;
+
 -- name: GetUserByUsername :one
 SELECT uid,created_at,updated_at,username,name FROM users WHERE username = ? AND deleted_at IS NULL LIMIT 1;
 

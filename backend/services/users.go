@@ -2,13 +2,16 @@ package services
 
 import (
 	"context"
+	"errors"
 
 	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
+	"github.com/enchant97/note-mark/backend/tree"
 )
 
 type UsersService struct {
 	dao                       *db.DAO
+	tc                        *tree.TreeController
 	enableInternalSignup      bool
 	enableInternalLogin       bool
 	enableAnonymousUserSearch bool
@@ -16,12 +19,14 @@ type UsersService struct {
 
 func (s UsersService) New(
 	dao *db.DAO,
+	tc *tree.TreeController,
 	enableInternalSignup bool,
 	enableInternalLogin bool,
 	enableAnonymousUserSearch bool,
 ) UsersService {
 	return UsersService{
 		dao:                       dao,
+		tc:                        tc,
 		enableInternalSignup:      enableInternalSignup,
 		enableInternalLogin:       enableInternalLogin,
 		enableAnonymousUserSearch: enableAnonymousUserSearch,
@@ -45,6 +50,9 @@ func (s *UsersService) CreateUserWithPassword(
 			},
 		))
 	if err != nil {
+		return core.User{}, err
+	}
+	if err := s.tc.RegisterNewUser(core.Username(toCreate.Username)); err != nil && !errors.Is(err, core.ErrConflict) {
 		return core.User{}, err
 	}
 	return core.User{
