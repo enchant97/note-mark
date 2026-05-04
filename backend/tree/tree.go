@@ -79,7 +79,7 @@ func (tc *TreeController) TryGetNodeTreeForUser(username core.Username) (core.No
 		return v, nil
 	}
 	err := tc.unsafeRegisterNewUser(username)
-	if err != nil {
+	if err == nil {
 		return tc.tree[username], nil
 	}
 	return nil, err
