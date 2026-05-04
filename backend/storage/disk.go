@@ -332,7 +332,7 @@ func (sc *DiskStorageController) DiscoverNodesForUser(
 			nodeType = core.AssetNode
 		}
 		// final, more strict node check
-		if !core.IsValidNodeSlug(nodeSlug, nodeType) {
+		if !core.IsValidNodeSlug(strings.TrimPrefix(nodeSlug, ".trash/"), nodeType) {
 			slog.Warn(
 				"ignore node, slug does not match required format",
 				"username", username,
