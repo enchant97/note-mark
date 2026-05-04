@@ -16,7 +16,7 @@ function ThemeSwitcher() {
         <Icon name="sun" />
         <Icon name="moon" />
       </summary>
-      <ul class="mt-2 p-2 menu dropdown-content z-[1] w-52 bg-base-100">
+      <ul class="mt-2 p-2 menu dropdown-content z-1 w-52 bg-base-100">
         <For each={THEMES}>
           {(theme) => (
             <li><button
@@ -51,7 +51,7 @@ function ProfileDropdown() {
   return (
     <details class="dropdown dropdown-end">
       <summary class="btn btn-circle"><Icon name="user" /></summary>
-      <menu class="mt-2 p-2 menu dropdown-content z-[1] bg-base-100 w-52">
+      <menu class="mt-2 p-2 menu dropdown-content z-1 bg-base-100 w-52">
         <Show when={userInfo()} fallback={<li><A href="/auth/login">Login</A></li>} keyed>
           {user => <>
             <li class="menu-title"><span>Logged In As: <span class="kbd kbd-sm">{user.preferred_username}</span></span></li>

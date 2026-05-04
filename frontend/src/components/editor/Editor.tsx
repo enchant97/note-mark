@@ -250,7 +250,7 @@ export default function Editor(props: EditorProps) {
           "fixed": stickyToolbar(),
           "top-2": stickyToolbar(),
           "left-0": stickyToolbar(),
-          "z-[1]": stickyToolbar(),
+          "z-1": stickyToolbar(),
           "px-2": stickyToolbar(),
         }}
       >
