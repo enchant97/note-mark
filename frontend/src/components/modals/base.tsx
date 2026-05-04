@@ -1,16 +1,14 @@
-import type { Component, ParentProps } from 'solid-js';
+import type { ParentProps } from 'solid-js';
 
 type BaseModalProps = ParentProps & {
   title: string
 }
 
-const BaseModal: Component<BaseModalProps> = (props) => {
+export default function BaseModal(props: BaseModalProps) {
   return (
     <div class="modal-box backdrop-glass shadow-glass">
       <h3 class="font-bold text-lg">{props.title}</h3>
       {props.children}
     </div>
   );
-};
-
-export default BaseModal;
+}

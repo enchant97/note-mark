@@ -1,4 +1,4 @@
-import { Component, JSX } from "solid-js";
+import { JSX } from "solid-js";
 import feather from 'feather-icons';
 
 const ICON_SIZE_DEFAULT = 20
@@ -9,7 +9,7 @@ type IconProps = {
   class?: string
 } & JSX.SvgSVGAttributes<SVGSVGElement>
 
-const Icon: Component<IconProps> = ({ name, size, class: className, ...props }) => {
+export default function Icon({ name, size, class: className, ...props }: IconProps) {
   return (
     <svg
       width={size || ICON_SIZE_DEFAULT}
@@ -27,4 +27,10 @@ const Icon: Component<IconProps> = ({ name, size, class: className, ...props }) 
   )
 }
 
-export default Icon
+export function FileIcon({ }) {
+  return <Icon name={"file"} size={16} />
+}
+
+export function FolderIcon({ expand }) {
+  return <Icon name={expand() ? "chevron-down" : "chevron-right"} size={16} />
+}

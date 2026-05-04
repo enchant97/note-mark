@@ -4,27 +4,24 @@ title: Backups
 To avoid data-loss it is important for you to backup your application data.
 
 ## What Do I Need To Backup?
-Here's a simple list:
-
-- Notes & Assets, located at configured `DATA_PATH`.
-    - **DO NOT** edit any of these files outside of Note Mark.
-- Database, located at configured: `DB__URI`.
-    - If using a database server, you will need to perform a database dump.
-    - The database must be backed-up, important note metadata is stored there.
-
+Everything in the configured `DATA_PATH`. Just copy and store.
 
 ## How Is Data Stored?
-Note Mark uses a custom flat-file based storage mechanism. It also utilises a database for storing note/book metadata.
+Note Mark V1 stores your note data in a normal file/folder structure. It utilises a SQLite database for storing user details and the file/folder structure cache (called a tree-cache).
 
 Here is a example of how data is stored at `DATA_PATH`:
 
 ```text
-notes/
-    16/
-        16e29b6a-4798-4615-b186-a24b046a20ee/
-            note.md
-            assets/
-                fca590d9-dbfc-4b8b-b5b3-1e8359af7e1d.bin
+/data
+    /db.sqlite
+    /notes
+        /leo
+            /my-note.md
+            /my-note
+                /my-asset.jpg
 ```
 
-As you can see there is very little information stored outside of the database. However should something bad happen to the database the note content and any assets could be recovered from this folder.
+## Restore
+To restore you should just be able to copy all data back into the configured `DATA_PATH`.
+
+If you happen to loose/corrupt the database file, you will need to copy just the `notes` folder and then create the users and run the clear-cache command from the CLI.

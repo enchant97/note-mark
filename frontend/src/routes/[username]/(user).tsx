@@ -1,21 +1,21 @@
 import { A, useNavigate, useParams } from "@solidjs/router";
 import { Show } from "solid-js";
-import RecentNotes from "~/components/recent_notes";
-import UserSearchModal from "~/components/modals/user_search";
+import UserSearchModal from "~/components/modals/UserSearch";
 import { useModal } from "~/contexts/ModalProvider";
-import Icon from "~/components/icon";
-import NewBookModal from "~/components/modals/new_book";
-import { Book } from "~/core/types";
-import { useDrawer } from "~/contexts/DrawerProvider";
+import Icon from "~/components/Icon";
 import { useSession } from "~/contexts/SessionProvider";
-import Api from "~/core/api";
+import { useNodeTree } from "~/contexts/NodeTreeProvider";
+import CreateNoteModal from "~/components/modals/CreateNote";
+import { NodeEntry } from "~/core/types";
 
-const User = () => {
-  const params = useParams()
-  const navigate = useNavigate()
+export default function User() {
+  const params = useParams<{
+    username: string,
+  }>()
+  const nodeTree = useNodeTree()
   const { setModal, clearModal } = useModal()
-  const { isAuthenticated, userInfo, setIsAuthenticated } = useSession()
-  const drawer = useDrawer()
+  const { isAuthenticated, userInfo } = useSession()
+  const navigate = useNavigate()
 
   const openUserSearchModal = () => {
     setModal({
@@ -26,52 +26,48 @@ const User = () => {
     })
   }
 
-  const onNewBookClick = () => {
+  const onCreateNoteClick = () => {
     setModal({
-      component: NewBookModal,
+      component: CreateNoteModal,
       props: {
-        onClose: (newBook?: Book) => {
-          if (newBook) drawer.updateBook(newBook)
+        currentUsername: params.username,
+        onClose: (nodeEntry?: NodeEntry) => {
           clearModal()
-        }, user: userInfo()
+          if (nodeEntry) {
+            nodeTree.insertNode(nodeEntry)
+            navigate(`/${params.username}/${nodeEntry.fullSlug}`)
+          }
+        },
       },
     })
   }
 
   return (
     <div class="py-6 mt-6 flex flex-col gap-4 max-w-md mx-auto text-center">
-      <h1 class="text-4xl font-bold text-center">{drawer.currentUser()?.name || params.username}'s Area</h1>
+      <h1 class="text-4xl font-bold text-center">{params.username}'s Area</h1>
       <div class="text-center">
         <div class="join">
           <Show
-            when={userInfo() !== undefined} fallback={
-              <Show when={isAuthenticated()} fallback={
-                <A
-                  class="join-item btn"
-                  href="/login"
-                >Login</A>
-              }>
-                <button
-                  class="join-item btn" onclick={async () => {
-                    await Api.getLogout()
-                    setIsAuthenticated(false)
-                    navigate("/login")
-                  }}>Re-Login</button>
-              </Show>
+            when={isAuthenticated()} fallback={
+              <A
+                class="join-item btn"
+                href="/auth/login"
+              >Login</A>
             }>
-            <Show when={userInfo()?.username === params.username} fallback={
+            <Show when={userInfo()?.preferred_username === params.username} fallback={
               <A
                 class="btn join-item"
-                href={`/${userInfo()?.username}`}
+                href={`/${userInfo()?.preferred_username}`}
               >My Notes</A>
             }>
               <button
-                onClick={onNewBookClick}
                 class="btn join-item"
+                onclick={onCreateNoteClick}
                 type="button"
+                title="Create New Note"
               >
-                <Icon name="folder-plus" />
-                New Book
+                <Icon name="file-plus" />
+                New Note
               </button>
             </Show>
           </Show>
@@ -85,12 +81,6 @@ const User = () => {
           </button>
         </div>
       </div>
-      <div class="mx-4 p-2">
-        <h2 class="text-lg font-bold text-center">Recent Notes</h2>
-        <RecentNotes />
-      </div>
     </div>
   )
 }
-
-export default User;

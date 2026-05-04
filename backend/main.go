@@ -10,7 +10,7 @@ import (
 var Version = "unknown"
 
 func main() {
-    if err := cli.Entrypoint(Version); err != nil {
-        log.Fatal(err)
-    }
+	if err := cli.Entrypoint(Version); err != nil {
+		log.Fatal(err)
+	}
 }

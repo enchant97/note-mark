@@ -1,9 +1,21 @@
-import { defineConfig } from 'vite';
+import { defineConfig, Plugin } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths'
 import solidPlugin from 'vite-plugin-solid';
-import { VitePWA } from 'vite-plugin-pwa'
-import wasm from "vite-plugin-wasm";
 import tailwindcss from '@tailwindcss/vite';
+import wasm from "vite-plugin-wasm";
+
+function apiProxyPlugin(): Plugin {
+  return {
+    name: "api-proxy",
+    configureServer(server) {
+      server.config.server.proxy = {
+        "/api": {
+          target: "http://127.0.0.1:8080",
+        },
+      }
+    },
+  }
+}
 
 export default defineConfig({
   plugins: [
@@ -11,38 +23,12 @@ export default defineConfig({
     tailwindcss(),
     wasm(),
     solidPlugin(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      workbox: {
-        globPatterns: ['**/*.{js,wasm,css,html,svg}'],
-        navigateFallbackDenylist: [/^\/api/],
-      },
-      manifest: {
-        'short_name': 'Note Mark',
-        'icons': [
-          {
-            'src': '/icon.svg',
-            'type': 'image/svg+xml',
-            'sizes': '150x150'
-          }
-        ],
-        'start_url': '.',
-        'display': 'standalone',
-        'scope': '/',
-        'description': 'Lighting Fast & Minimal Markdown Note Taking App',
-        'shortcuts': [
-          {
-            'name': 'Scratch Pad',
-            'url': '/scratch-pad'
-          },
-        ],
-      },
-    }),
+    apiProxyPlugin(),
   ],
   server: {
     port: 3000,
   },
   build: {
-    target: 'esnext',
+    target: 'es2022',
   },
 });

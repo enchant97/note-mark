@@ -1,4 +1,5 @@
-import { Book, CreateBook, CreateNote, CreateUser, Note, NoteAsset, OAuth2AccessTokenRequest, ServerInfo, UpdateBook, UpdateNote, UpdateUser, UpdateUserPassword, User, ValueWithSlug } from "~/core/types"
+import { OAuth2AccessTokenRequest, OpenIdUserInfoResponse } from "./auth"
+import type { CreateUserWithPassword, Frontmatter, NodeTree, ServerInfo, UpdateUser, UpdateUserPassword, User } from "./types"
 
 export enum HttpMethods {
   GET = "GET",
@@ -26,8 +27,6 @@ export enum HttpErrors {
   InternalServerError = 500,
 }
 
-const HEADER_JSON = { "Content-Type": "application/json" }
-
 export class ApiError extends Error {
   readonly status: number | HttpErrors
   constructor(status: number | HttpErrors, message?: string, options?: ErrorOptions) {
@@ -39,17 +38,16 @@ export class ApiError extends Error {
 async function throwResponseApiErrors(v: Response) {
   if (!v.ok) {
     if (v.headers.get("Content-Type") === "application/problem+json") {
-      if (v.status === 412) {
-        throw new ApiError(v.status, "Possible resource conflict detected (server version ahead of clients)")
-      }
+      // process RFC 9457 problem data
       throw new ApiError(v.status, (await v.json()).detail)
     } else {
+      // process standard error codes
       throw new ApiError(v.status)
     }
   }
 }
 
-const ApiServerBaseUrl = (new URL("/api", import.meta.env.VITE_BACKEND_URL || window.location.origin)).toString()
+export const ApiServerBaseUrl = (new URL("/api", window.location.origin)).toString()
 
 /**
  * @throws {ApiError}
@@ -57,261 +55,145 @@ const ApiServerBaseUrl = (new URL("/api", import.meta.env.VITE_BACKEND_URL || wi
 async function apiFetch(url: string, init?: RequestInit) {
   let reqURL = `${ApiServerBaseUrl}/${url}`
   try {
-    let resp = await fetch(reqURL, { credentials: "include", ...init })
+    let resp = await fetch(reqURL, init)
     return resp
   } catch (err) {
-    throw new ApiError(HttpErrors.NetworkError, undefined, { cause: err })
+    throw new ApiError(HttpErrors.NetworkError, "an unexpected network error happened", { cause: err })
   }
 }
 
-class Api {
-  //
-  // Server
-  //
-  /**
-   * @throws {ApiError}
-   */
+export default class Api {
   static async getServerInfo(): Promise<ServerInfo> {
     let resp = await apiFetch("info")
     await throwResponseApiErrors(resp)
     return await resp.json()
   }
   //
-  // Authentication
+  // Session Authentication
   //
-  static async postToken(details: OAuth2AccessTokenRequest) {
-    let resp = await apiFetch("auth/token", {
+  static async authSessionStart(req: OAuth2AccessTokenRequest) {
+    let resp = await apiFetch("auth/s/start", {
       method: HttpMethods.POST,
-      headers: HEADER_JSON,
-      body: JSON.stringify(details),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
     })
     await throwResponseApiErrors(resp)
   }
-  static async postTokenPasswordFlow(username: string, password: string) {
-    return await Api.postToken({ grant_type: "password", username, password })
-  }
-  static async postExchangeOidcToken(
-    accessToken: string,
-    idToken: string,
-  ) {
-    let resp = await apiFetch("auth/oidc-exchange", {
-      method: HttpMethods.POST,
-      body: JSON.stringify({ accessToken, idToken }),
-      headers: HEADER_JSON,
+  static async authSessionEnd() {
+    let resp = await apiFetch("auth/s/end", {
+      method: HttpMethods.DELETE,
     })
     await throwResponseApiErrors(resp)
   }
-  static async getAmIAuthenticated(): Promise<boolean> {
-    let resp = await apiFetch("auth/am-i-authenticated", {
+  static async authGetUserInfo(): Promise<OpenIdUserInfoResponse> {
+    let resp = await apiFetch("auth/o/userinfo", {
       method: HttpMethods.GET,
-      headers: HEADER_JSON,
     })
     await throwResponseApiErrors(resp)
     return await resp.json()
-  }
-  static async getLogout() {
-    let resp = await apiFetch("auth/logout", {
-      method: HttpMethods.GET,
-    })
-    await throwResponseApiErrors(resp)
   }
   //
   // User
   //
-  static async createUser(user: CreateUser): Promise<User> {
+  static async createUser(user: CreateUserWithPassword): Promise<User> {
     let resp = await apiFetch("users", {
       method: HttpMethods.POST,
-      body: JSON.stringify(user),
-      headers: HEADER_JSON,
-    })
-    await throwResponseApiErrors(resp)
-    return await resp.json()
-  }
-  /**
-   * @throws {ApiError}
-   */
-  static async getUsersMe(): Promise<User> {
-    let resp = await apiFetch("users/me", {
-    })
-    await throwResponseApiErrors(resp)
-    return resp.json()
-  }
-  static async getUsersSearch(username: string): Promise<string[]> {
-    let reqURL = `users/search?username=${username}`
-    let resp = await apiFetch(reqURL)
-    await throwResponseApiErrors(resp)
-    return await resp.json()
-  }
-  static async updateUser(user: UpdateUser) {
-    let resp = await apiFetch("users/me", {
-      method: HttpMethods.PUT,
-      headers: HEADER_JSON,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(user),
     })
     await throwResponseApiErrors(resp)
-  }
-  static async updateUserPassword(details: UpdateUserPassword) {
-    let resp = await apiFetch("users/me/password", {
-      method: HttpMethods.PUT,
-      headers: HEADER_JSON,
-      body: JSON.stringify(details),
-    })
-    await throwResponseApiErrors(resp)
-  }
-  //
-  // Book
-  //
-  static async createBook(book: CreateBook): Promise<Book> {
-    let resp = await apiFetch("books", {
-      method: HttpMethods.POST,
-      headers: HEADER_JSON,
-      body: JSON.stringify(book),
-    })
-    await throwResponseApiErrors(resp)
     return await resp.json()
   }
-  static async updateBook(bookId: string, book: UpdateBook) {
-    let reqURL = `books/${bookId}`
-    let resp = await apiFetch(reqURL, {
-      method: HttpMethods.PUT,
-      headers: HEADER_JSON,
-      body: JSON.stringify(book),
-    })
-    await throwResponseApiErrors(resp)
-  }
-  static async deleteBook(bookId: string) {
-    let reqURL = `books/${bookId}`
-    let resp = await apiFetch(reqURL, {
-      method: HttpMethods.DELETE,
-    })
-    await throwResponseApiErrors(resp)
-  }
-  //
-  // Note
-  //
-  static async createNote(bookId: string, note: CreateNote): Promise<Note> {
-    let reqURL = `books/${bookId}/notes`
-    let resp = await apiFetch(reqURL, {
-      method: HttpMethods.POST,
-      headers: HEADER_JSON,
-      body: JSON.stringify(note),
-    })
-    await throwResponseApiErrors(resp)
-    return await resp.json()
-  }
-  static async getNotesRecents(): Promise<ValueWithSlug<Note>[]> {
-    let resp = await apiFetch("notes/recent")
-    await throwResponseApiErrors(resp)
-    return await resp.json()
-  }
-  static async getNotesByBookId(bookId: string, deleted: boolean = false): Promise<Note[]> {
-    let reqURL = `books/${bookId}/notes`
-    if (deleted === true) {
-      reqURL += "?deleted=true"
-    }
-    let resp = await apiFetch(reqURL)
-    await throwResponseApiErrors(resp)
-    return await resp.json()
-  }
-  static async getNoteContentById(noteId: string): Promise<string> {
-    let reqURL = `notes/${noteId}/content`
-    let resp = await apiFetch(reqURL)
-    await throwResponseApiErrors(resp)
-    return await resp.text()
-  }
-  static async updateNote(noteId: string, book: UpdateNote) {
-    let reqURL = `notes/${noteId}`
-    let resp = await apiFetch(reqURL, {
-      method: HttpMethods.PUT,
-      headers: HEADER_JSON,
-      body: JSON.stringify(book),
-    })
-    await throwResponseApiErrors(resp)
-  }
-  static async updateNoteContent(noteId: string, content: string, lastModified?: Date): Promise<Date> {
-    let reqURL = `notes/${noteId}/content`
-    let headers = {}
-    if (lastModified) {
-      headers["If-Unmodified-Since"] = lastModified.toUTCString()
-    }
-    let resp = await apiFetch(reqURL, {
-      method: HttpMethods.PUT,
-      body: content,
-      headers: headers,
-    })
-    await throwResponseApiErrors(resp)
-    return new Date(resp.headers.get("Date") || new Date().toISOString())
-  }
-  static async restoreNoteById(noteId: string) {
-    let reqURL = `notes/${noteId}/restore`
-    let resp = await apiFetch(reqURL, {
-      method: HttpMethods.PUT,
-    })
-    await throwResponseApiErrors(resp)
-  }
-  static async deleteNote(noteId: string, permanent: boolean = false) {
-    let reqURL = `notes/${noteId}?permanent=${permanent}`
-    let resp = await apiFetch(reqURL, {
-      method: HttpMethods.DELETE,
-    })
-    await throwResponseApiErrors(resp)
-  }
-  //
-  // Note Assets
-  //
-  static async createNoteAsset(noteId: string, file: File, name: string): Promise<NoteAsset> {
-    let reqURL = `notes/${noteId}/assets`
-    let resp = await apiFetch(reqURL, {
-      method: HttpMethods.POST,
-      headers: {
-        "X-Name": name,
-      },
-      body: file,
-    })
-    await throwResponseApiErrors(resp)
-    return await resp.json()
-  }
-  static getNoteAssetAccessUrl(noteId: string, assetId: string): string {
-    return `${ApiServerBaseUrl}/notes/${noteId}/assets/${assetId}`
-  }
-  static async getNoteAssets(noteId: string): Promise<NoteAsset[]> {
-    let reqURL = `notes/${noteId}/assets`
-    let resp = await apiFetch(reqURL, {
+  static async getUserByUsername(username: string): Promise<User> {
+    let resp = await apiFetch(`users/${username}`, {
       method: HttpMethods.GET,
     })
     await throwResponseApiErrors(resp)
     return await resp.json()
   }
-  static async deleteNoteAsset(noteId: string, assetId: string) {
-    let reqURL = `notes/${noteId}/assets/${assetId}`
-    let resp = await apiFetch(reqURL, {
-      method: HttpMethods.DELETE,
+  static async searchForUsername(query: string): Promise<string[]> {
+    let resp = await apiFetch(`users/search?username=${query}`, {
+      method: HttpMethods.GET,
+    })
+    await throwResponseApiErrors(resp)
+    return await resp.json()
+  }
+  static async updateUser(username: string, user: UpdateUser) {
+    let resp = await apiFetch(`users/${username}`, {
+      method: HttpMethods.PUT,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(user),
+    })
+    await throwResponseApiErrors(resp)
+  }
+  static async updateUserPassword(username: string, passwords: UpdateUserPassword) {
+    let resp = await apiFetch(`users/${username}/password`, {
+      method: HttpMethods.PUT,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(passwords),
     })
     await throwResponseApiErrors(resp)
   }
   //
-  // Slug Access
+  // Node Tree
   //
-  static async getUserByUsername(username: string, include?: "books" | "notes"): Promise<User> {
-    let reqURL = `slug/${username}`
-    if (include) { reqURL = `${reqURL}?include=${include}` }
-    let resp = await apiFetch(reqURL)
+  static async getNodeTree(username: string): Promise<NodeTree> {
+    let resp = await apiFetch(`tree/u/${username}`, {
+      method: HttpMethods.GET,
+    })
     await throwResponseApiErrors(resp)
     return await resp.json()
   }
-  static async getBookBySlug(username: string, bookSlug: string, include?: "notes"): Promise<Book> {
-    let reqURL = `slug/${username}/books/${bookSlug}`
-    if (include) { reqURL = `${reqURL}?include=${include}` }
-    let resp = await apiFetch(reqURL)
+  static async getNodeContent(username: string, slug: string): Promise<string | Blob> {
+    let resp = await apiFetch(`tree/content/u/${username}/${slug}`, {
+      method: HttpMethods.GET,
+    })
+    await throwResponseApiErrors(resp)
+    if (resp.headers.get("Content-Type") === "text/markdown") {
+      return await resp.text()
+    }
+    return await resp.blob()
+  }
+  static async updateNodeContent(username: string, slug: string, content: string | Blob | File) {
+    let resp = await apiFetch(`tree/content/u/${username}/${slug}`, {
+      method: HttpMethods.PUT,
+      headers: {
+        "Content-Type": (content instanceof String || typeof content === "string") ? "text/markdown" : (content.type || "application/octet-stream")
+      },
+      body: content,
+    })
+    await throwResponseApiErrors(resp)
+  }
+  static async updateNoteNodeFrontmatter(username: string, slug: string, frontmatter: Frontmatter) {
+    let resp = await apiFetch(`tree/frontmatter/u/${username}/${slug}`, {
+      method: HttpMethods.PUT,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(frontmatter),
+    })
+    await throwResponseApiErrors(resp)
+  }
+  static async renameNode(username: string, slug: string, newSlug: string) {
+    let resp = await apiFetch(`tree/rename/u/${username}/${slug}`, {
+      method: HttpMethods.POST,
+      body: JSON.stringify(newSlug),
+      headers: { "Content-Type": "application/json" },
+    })
+    await throwResponseApiErrors(resp)
+  }
+  static async moveNodeToTrash(username: string, slug: string): Promise<string> {
+    let resp = await apiFetch(`tree/move-to-trash/u/${username}/${slug}`, {
+      method: HttpMethods.POST,
+    })
     await throwResponseApiErrors(resp)
     return await resp.json()
   }
-  static async getNoteBySlug(username: string, bookSlug: string, noteSlug: string): Promise<Note> {
-    let reqURL = `slug/${username}/books/${bookSlug}/notes/${noteSlug}`
-    let resp = await apiFetch(reqURL)
+  static async deleteNode(username: string, slug: string) {
+    let resp = await apiFetch(`tree/u/${username}/${slug}`, {
+      method: HttpMethods.DELETE,
+    })
     await throwResponseApiErrors(resp)
-    return await resp.json()
+  }
+  static makeAssetUrl(username: string, assetFullSlug: string) {
+    return `${ApiServerBaseUrl}/tree/content/u/${username}/${assetFullSlug}`
   }
 }
-
-export default Api

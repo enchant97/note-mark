@@ -23,8 +23,8 @@ note-mark --help
 ```
 
 ## Available Commands
-- `serve`: run the web API server, depending on install method may include UI
+- `serve`: run the server
+- `clear-cache`: clear the tree cache
 - `clean`: remove old and unused data
 - `user`: user management such as: creation, setting a password, mapping oidc account
-- `migrate`: import and export data out of the app
 - `help`: shows the help for CLI

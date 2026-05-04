@@ -1,18 +1,17 @@
 import { EditorView, basicSetup } from "codemirror";
 import { Compartment, EditorSelection, EditorState as InternalEditorState } from "@codemirror/state";
 import { indentMore, indentLess } from "@codemirror/commands";
-import { Accessor, Component, For, createEffect, createSignal, onCleanup, onMount } from "solid-js";
-import { SetStoreFunction, Store } from "solid-js/store";
-import Icon from "../icon";
+import { Accessor, For, Setter, createEffect, createSignal, onCleanup, onMount } from "solid-js";
+import Icon from "~/components/Icon";
 import { keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands"
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { Vim, vim } from "@replit/codemirror-vim";
-import { useModal } from "../../contexts/ModalProvider";
-import CreateLinkModal from "./modals/create_link";
-import CreateImageModal from "./modals/create_image";
-import CreateTableModal from "./modals/create_table";
-import StorageHandler from "../../core/storage";
+import { useModal } from "~/contexts/ModalProvider";
+import CreateLinkModal from "./modals/CreateLink";
+import CreateImageModal from "./modals/CreateImage";
+import CreateTableModal from "./modals/CreateTable";
+import StorageHandler from "~/core/storage";
 
 const editorTheme = EditorView.baseTheme({
   "&.cm-editor": {
@@ -48,22 +47,18 @@ const editorTheme = EditorView.baseTheme({
   },
 })
 
-export type EditorState = {
-  unsaved: boolean
-  saving: boolean
-}
-
 export type EditorProps = {
   content: string
   autoSaveTimeout: number
   onSave: (content: string) => void
-  state: Store<EditorState>
-  setState: SetStoreFunction<EditorState>
+  saved: Accessor<boolean>
+  setSaved: Setter<boolean>
+  saving: () => boolean
   isFullscreen: Accessor<boolean>
   onContentChange?: (content: string) => any
 }
 
-const Editor: Component<EditorProps> = (props) => {
+export default function Editor(props: EditorProps) {
   let editorDiv: HTMLDivElement
   let editor: EditorView
   let toolbarElement: HTMLElement
@@ -88,7 +83,7 @@ const Editor: Component<EditorProps> = (props) => {
   }
 
   const onInput = (state: InternalEditorState) => {
-    props.setState({ unsaved: true })
+    props.setSaved(false)
     if (props.onContentChange !== undefined) {
       props.onContentChange(state.doc.toString())
     }
@@ -193,7 +188,7 @@ const Editor: Component<EditorProps> = (props) => {
   onCleanup(() => {
     window.removeEventListener("scroll", handleScroll)
     clearTimeout(autosaveTimeout)
-    props.setState({ unsaved: false })
+    props.setSaved(true)
   })
 
   onMount(() => {
@@ -217,7 +212,7 @@ const Editor: Component<EditorProps> = (props) => {
             indentWithTab,
             {
               key: "Mod-s", run: () => {
-                if (!props.state.saving)
+                if (!props.saving())
                   triggerSave()
                 return true
               }
@@ -255,7 +250,7 @@ const Editor: Component<EditorProps> = (props) => {
           "fixed": stickyToolbar(),
           "top-2": stickyToolbar(),
           "left-0": stickyToolbar(),
-          "z-[1]": stickyToolbar(),
+          "z-1": stickyToolbar(),
           "px-2": stickyToolbar(),
         }}
       >
@@ -268,7 +263,7 @@ const Editor: Component<EditorProps> = (props) => {
                 checked={autoSave()}
                 oninput={(ev) => {
                   let v = ev.currentTarget.checked
-                  if (v && props.state.unsaved) { triggerSave() }
+                  if (v && !props.saved()) { triggerSave() }
                   setAutoSave(v)
                 }}
               />
@@ -277,14 +272,14 @@ const Editor: Component<EditorProps> = (props) => {
             </span></label></li>
             <li><button
               class="btn btn-sm btn-square"
-              disabled={props.state.saving}
-              classList={{ "btn-error": props.state.unsaved }}
+              disabled={props.saving()}
+              classList={{ "btn-error": !props.saved() }}
               type="button"
               title="Save"
               onclick={() => triggerSave()}
             >
-              {props.state.saving && <span class="loading loading-spinner text-warning"></span>}
-              {!props.state.saving && <Icon name="save" />}
+              {props.saving() && <span class="loading loading-spinner text-warning"></span>}
+              {!props.saving() && <Icon name="save" />}
             </button></li>
           </ul>
         </menu>
@@ -438,5 +433,3 @@ const Editor: Component<EditorProps> = (props) => {
     </>
   )
 }
-
-export default Editor

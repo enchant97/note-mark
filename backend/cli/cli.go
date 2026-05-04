@@ -1,43 +1,130 @@
 package cli
 
 import (
-	"errors"
+	"context"
+	"database/sql"
+	"fmt"
+	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/enchant97/note-mark/backend/config"
-	"github.com/urfave/cli/v2"
+	"github.com/enchant97/note-mark/backend/core"
+	"github.com/enchant97/note-mark/backend/db"
+	"github.com/enchant97/note-mark/backend/db/migrations"
+	"github.com/enchant97/note-mark/backend/storage"
+	"github.com/enchant97/note-mark/backend/tree"
+	"github.com/go-chi/httplog/v3"
+	"github.com/go-playground/validator/v10"
+	"github.com/urfave/cli/v3"
 )
 
 func Entrypoint(appVersion string) error {
+	// Setup Validator
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	validate.RegisterValidation("username", func(fl validator.FieldLevel) bool {
+		return core.IsValidUsername(fl.Field().String())
+	})
+	validate.RegisterValidation("slug_full", func(fl validator.FieldLevel) bool {
+		return core.IsValidFullSlug(fl.Field().String())
+	})
 	// Parse config
 	var appConfig config.AppConfig
-	if err := appConfig.ParseConfig(); err != nil {
+	if err := appConfig.ParseConfig(validate); err != nil {
 		return err
 	}
-
-	app := &cli.App{
-		Version:              appVersion,
-		Usage:                "Backend API app for Note Mark",
-		EnableBashCompletion: true,
+	// Setup logger
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource:   appConfig.EnvMode == "development",
+		ReplaceAttr: httplog.SchemaECS.Concise(appConfig.EnvMode == "development").ReplaceAttr,
+	}))
+	if appConfig.EnvMode == "production" {
+		logger.With(
+			slog.String("app", "note-mark"),
+			slog.String("version", appVersion),
+			slog.String("env", appConfig.EnvMode),
+		)
+	}
+	slog.SetDefault(logger)
+	slog.SetLogLoggerLevel(slog.LevelInfo) // TODO configure this using envvars
+	// Setup DB
+	dbPath := filepath.Join(appConfig.DataPath, "db.sqlite")
+	if err := migrations.MigrateDB(fmt.Sprintf("sqlite://%s", dbPath)); err != nil {
+		return err
+	}
+	dbConn, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		return err
+	}
+	dao := db.DAO{}.New(dbConn, db.New(dbConn))
+	sc, err := storage.DiskStorageController{}.New(filepath.Join(appConfig.DataPath, "notes"))
+	if err != nil {
+		return err
+	}
+	tc := tree.TreeController{}.New(&sc, &dao)
+	if err := tc.Load(); err != nil {
+		return err
+	}
+	// Do CLI
+	app := &cli.Command{
+		Version:               appVersion,
+		Usage:                 "Backend API app for Note Mark",
+		EnableShellCompletion: true,
 		Commands: []*cli.Command{
 			{
 				Name:  "serve",
 				Usage: "run the api server",
-				Action: func(ctx *cli.Context) error {
-					return commandServe(appConfig)
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					return commandServe(logger, validate, appConfig, &dao, &tc)
+				},
+			},
+			{
+				Name:  "clear-cache",
+				Usage: "clear the tree cache",
+				Description: "clear cache can be used when note data is changed from outside" +
+					" of Note Mark (like when importing notes). " +
+					"Any instances of Note Mark will need to be restarted" +
+					" before this is taken into effect.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "username",
+						Aliases:  []string{"u"},
+						Required: false,
+						Usage:    "clear a specific users tree cache",
+					},
+				},
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					username := cmd.String("username")
+					if username == "" {
+						return dao.Queries.DeleteTreeCacheEntries(context.Background())
+					}
+					return dao.Queries.DeleteTreeCacheEntry(context.Background(), username)
 				},
 			},
 			{
 				Name:  "clean",
-				Usage: "cleans deleted and unused data",
-				Action: func(ctx *cli.Context) error {
-					return commandClean(appConfig)
+				Usage: "remove old entries",
+				Commands: []*cli.Command{
+					{
+						Name:  "users",
+						Usage: "permanently removes users marked for deletion",
+						Action: func(ctx context.Context, cmd *cli.Command) error {
+							return commandCleanUsers(&dao, &sc)
+						},
+					},
+					{
+						Name:  "trash",
+						Usage: "permanently removes all items in users trash",
+						Action: func(ctx context.Context, cmd *cli.Command) error {
+							return commandCleanTrash(&sc, tc)
+						},
+					},
 				},
 			},
 			{
 				Name:  "user",
 				Usage: "user management",
-				Subcommands: []*cli.Command{
+				Commands: []*cli.Command{
 					{
 						Name:  "add",
 						Usage: "add a new user",
@@ -45,10 +132,10 @@ func Entrypoint(appVersion string) error {
 							&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true},
 							&cli.StringFlag{Name: "password", Aliases: []string{"p"}, Required: true},
 						},
-						Action: func(ctx *cli.Context) error {
-							username := ctx.String("username")
-							password := ctx.String("password")
-							return commandUserAdd(appConfig, username, password)
+						Action: func(ctx context.Context, cmd *cli.Command) error {
+							username := cmd.String("username")
+							password := cmd.String("password")
+							return commandUserAdd(&dao, &tc, username, password)
 						},
 					},
 					{
@@ -57,9 +144,9 @@ func Entrypoint(appVersion string) error {
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true},
 						},
-						Action: func(ctx *cli.Context) error {
-							username := ctx.String("username")
-							return commandUserRemove(appConfig, username)
+						Action: func(ctx context.Context, cmd *cli.Command) error {
+							username := cmd.String("username")
+							return commandUserRemove(&dao, username)
 						},
 					},
 					{
@@ -69,10 +156,10 @@ func Entrypoint(appVersion string) error {
 							&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true},
 							&cli.StringFlag{Name: "password", Aliases: []string{"p"}, Required: true},
 						},
-						Action: func(ctx *cli.Context) error {
-							username := ctx.String("username")
-							password := ctx.String("password")
-							return commandUserSetPassword(appConfig, username, password)
+						Action: func(ctx context.Context, cmd *cli.Command) error {
+							username := cmd.String("username")
+							password := cmd.String("password")
+							return commandUserSetPassword(&dao, username, password)
 						},
 					},
 					{
@@ -81,9 +168,9 @@ func Entrypoint(appVersion string) error {
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "username", Aliases: []string{"u"}, Required: true},
 						},
-						Action: func(ctx *cli.Context) error {
-							username := ctx.String("username")
-							return commandUserRemovePassword(appConfig, username)
+						Action: func(ctx context.Context, cmd *cli.Command) error {
+							username := cmd.String("username")
+							return commandUserRemovePassword(&dao, username)
 						},
 					},
 					{
@@ -93,60 +180,15 @@ func Entrypoint(appVersion string) error {
 							&cli.StringFlag{Name: "username", Required: true},
 							&cli.StringFlag{Name: "user-sub", Required: true},
 						},
-						Action: func(ctx *cli.Context) error {
-							username := ctx.String("username")
-							userSub := ctx.String("user-sub")
-							return commandUserAddOidcMapping(appConfig, username, userSub)
-						},
-					},
-				},
-			},
-			{
-				Name:  "migrate",
-				Usage: "import and export data out of the app",
-				Subcommands: []*cli.Command{
-					{
-						Name:    "import",
-						Aliases: []string{"i"},
-						Usage:   "import data into the app",
-						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "import-dir", Aliases: []string{"d"}, Required: true},
-						},
-						Action: func(ctx *cli.Context) error {
-							importDir := ctx.String("import-dir")
-							if _, err := os.Stat(importDir); errors.Is(err, os.ErrNotExist) {
-								return cli.Exit("import-dir does not exist, or has no read permissions", 1)
-							}
-							return commandMigrateImportData(appConfig, importDir)
-						},
-					},
-					{
-						Name:    "export",
-						Aliases: []string{"e"},
-						Usage:   "export data from the app",
-						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "export-dir", Aliases: []string{"d"}, Required: true},
-						},
-						Action: func(ctx *cli.Context) error {
-							exportDir := ctx.String("export-dir")
-							return commandMigrateExportData(appConfig, exportDir)
-						},
-					},
-					{
-						Name:  "export-v1",
-						Usage: "export data for v1 of app",
-						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "export-dir", Aliases: []string{"d"}, Required: true},
-						},
-						Action: func(ctx *cli.Context) error {
-							exportDir := ctx.String("export-dir")
-							return commandMigrateExportDataV1(appConfig, exportDir)
+						Action: func(ctx context.Context, cmd *cli.Command) error {
+							username := cmd.String("username")
+							userSub := cmd.String("user-sub")
+							return commandUserAddOidcMapping(appConfig, &dao, username, userSub)
 						},
 					},
 				},
 			},
 		},
 	}
-
-	return app.Run(os.Args)
+	return app.Run(context.Background(), os.Args)
 }

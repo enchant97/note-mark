@@ -1,0 +1,128 @@
+package services
+
+import (
+	"io"
+	"path"
+	"time"
+
+	"github.com/enchant97/note-mark/backend/core"
+	"github.com/enchant97/note-mark/backend/db"
+	"github.com/enchant97/note-mark/backend/tree"
+)
+
+type TreeService struct {
+	dao *db.DAO
+	tc  *tree.TreeController
+}
+
+func (s TreeService) New(dao *db.DAO, tc *tree.TreeController) TreeService {
+	return TreeService{
+		dao: dao,
+		tc:  tc,
+	}
+}
+
+func (s *TreeService) GetTreeModTime(username core.Username) (time.Time, error) {
+	return s.tc.GetTreeModTimeForUser(username)
+}
+
+func (s *TreeService) GetTreeForUser(
+	optionalAuthUser *core.AuthenticatedUser,
+	username core.Username,
+) (core.NodeTree, error) {
+	nodeTree, err := s.tc.TryGetNodeTreeForUser(username)
+	if err != nil {
+		return nil, core.ErrNotFound
+	}
+	if optionalAuthUser == nil {
+		return tree.FilteredNodeTree(nodeTree, nil), nil
+	} else if optionalAuthUser.Username != string(username) {
+		return tree.FilteredNodeTree(nodeTree, &username), nil
+	}
+	return nodeTree, nil
+}
+
+func (s *TreeService) GetNodeModTime(
+	username core.Username,
+	slug core.NodeSlug,
+) (time.Time, error) {
+	return s.tc.GetTreeModTimeForNode(username, slug)
+}
+
+func (s *TreeService) GetAvailableNodeAccessControlMode(
+	optionalAuthUser *core.AuthenticatedUser,
+	username core.Username,
+	fullSlug core.NodeSlug,
+	useParentFallback bool,
+) (*core.AccessControlMode, error) {
+	if nodeTree, err := s.tc.TryGetNodeTreeForUser(username); err == nil {
+		// skip access control check when user is the owner
+		if optionalAuthUser != nil && optionalAuthUser.Username == string(username) {
+			acMode := core.AccessControlWriteMode
+			return &acMode, nil
+		}
+		ac, err := tree.GetNodeAccessControl(nodeTree, fullSlug, useParentFallback)
+		if err != nil {
+			return nil, err
+		}
+		var acMode core.AccessControlMode = ""
+		if optionalAuthUser == nil && ac.PublicRead {
+			acMode = core.AccessControlReadMode
+		} else if optionalAuthUser != nil {
+			if mode, exists := ac.Users[core.Username(optionalAuthUser.Username)]; exists {
+				acMode = mode
+			}
+		}
+		if acMode == "" {
+			return nil, nil
+		}
+		return &acMode, nil
+	}
+	return nil, core.ErrNotFound
+}
+
+func (s *TreeService) GetNodeContent(
+	username core.Username,
+	slug core.NodeSlug,
+) (io.ReadCloser, error) {
+	isNoteNode := path.Ext(string(slug)) == ""
+	if isNoteNode {
+		return s.tc.GetNoteNodeContent(username, slug)
+	}
+	return s.tc.GetAssetNodeContent(username, slug)
+}
+
+func (s *TreeService) UpdateNodeContent(
+	username core.Username,
+	slug core.NodeSlug,
+	r io.Reader,
+) error {
+	isNoteNode := path.Ext(string(slug)) == ""
+	if isNoteNode {
+		return s.tc.WriteNoteNode(username, slug, r)
+	}
+	return s.tc.WriteAssetNode(username, slug, r)
+}
+
+func (s *TreeService) UpdateNoteNodeFrontmatter(
+	username core.Username,
+	slug core.NodeSlug,
+	frontmatter core.FrontMatter,
+) error {
+	return s.tc.UpdateNoteNodeFrontmatter(username, slug, frontmatter)
+}
+
+func (s *TreeService) RenameNode(
+	username core.Username,
+	slug core.NodeSlug,
+	newSlug core.NodeSlug,
+) error {
+	return s.tc.RenameNode(username, slug, newSlug)
+}
+
+func (s *TreeService) DeleteNode(
+	username core.Username,
+	slug core.NodeSlug,
+) error {
+	return s.tc.DeleteNode(username, slug)
+}

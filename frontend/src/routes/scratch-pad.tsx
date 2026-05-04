@@ -1,12 +1,11 @@
-import { Component, createSignal } from "solid-js";
+import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
-import Header from "~/components/header";
-import Note, { NoteMode } from "~/components/note";
-import { EditorState } from "~/components/editor/editor";
+import Header from "~/components/Header";
+import Note, { NoteMode } from "~/components/note/Note";
 import StorageHandler from "~/core/storage";
-import Icon from "~/components/icon";
-import { Context } from "~/core/renderer";
+import Icon from "~/components/Icon";
 import { useSession } from "~/contexts/SessionProvider";
+import { createNoteEngine } from "~/core/note-engine";
 
 const SCRATCH_PAD_CONTENT_KEY = "scratch_pad_content"
 
@@ -18,20 +17,20 @@ function writeContent(content: string, isAuthenticated: boolean) {
   StorageHandler.writeSetting(SCRATCH_PAD_CONTENT_KEY, content, isAuthenticated)
 }
 
-const ScratchPad: Component = () => {
+export default function ScratchPad() {
   const { userInfo } = useSession()
-
+  const noteEngine = createNoteEngine(readContent())
   const [mode, setMode] = createSignal(NoteMode.EDIT)
-  const [content, setContent] = createSignal(readContent())
-  const [state, setState] = createStore<EditorState>({
+  const [state, setState] = createStore({
     saving: false,
-    unsaved: false,
+    saved: true,
   })
 
   const onSave = (content: string) => {
-    writeContent(content, userInfo() !== undefined)
-    setState({ unsaved: false, saving: false })
-    setContent(content)
+    noteEngine.setContent(content)
+    const newRawNote = noteEngine.tryIntoRaw()
+    writeContent(newRawNote, userInfo() !== undefined)
+    setState({ saved: true, saving: false })
   }
 
   return (
@@ -43,19 +42,16 @@ const ScratchPad: Component = () => {
       </h1>
       <div class="px-6">
         <Note
+          noteEngine={noteEngine}
           mode={mode()}
           setMode={setMode}
-          content={content}
-          setContent={setContent}
-          context={() => new Context("Note", "Scratch Pad")}
           isEditAllowed={true}
-          state={state}
-          setState={setState}
           onSave={onSave}
+          saved={() => state.saved}
+          setSaved={(v: boolean) => setState({ saved: v })}
+          saving={() => state.saving}
         />
       </div>
     </div>
   )
 }
-
-export default ScratchPad

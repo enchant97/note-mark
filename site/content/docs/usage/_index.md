@@ -1,6 +1,6 @@
 ---
 title: Usage
 ---
-WIP (Work In Progress).
+This section is designed for both admins and general users.
 
-- Watch the [official demo video](https://youtu.be/rwL99Ac5g98).
+WIP (Work In Progress).

@@ -1,27 +1,32 @@
+import { action } from "@solidjs/router"
 import { createContext, createResource, useContext } from "solid-js"
-import Api from "~/core/api"
-import { optionExpect } from "~/core/core"
-import { User } from "~/core/types"
+import Api, { ApiError, HttpErrors } from "~/core/api"
+import { optionExpect } from "~/core/helpers"
+import StorageHandler from "~/core/storage"
 
 const makeSessionContext = () => {
   const [apiInfo] = createResource(Api.getServerInfo)
-  const [isAuthenticated, { mutate: setIsAuthenticated }] = createResource(Api.getAmIAuthenticated)
-  const [userInfo, { mutate: setUserInfo }] = createResource(isAuthenticated, async (hasAuth) => {
-    if (!hasAuth) {
-      return null
+  const [userInfo, { mutate: mutateUserInfo, refetch: refetchUserInfo }] = createResource(async () => {
+    try {
+      return await Api.authGetUserInfo()
+    } catch (err) {
+      if (err instanceof ApiError && err.status === HttpErrors.Unauthorized) {
+        return null
+      }
+      throw err
     }
-    return await Api.getUsersMe()
   })
   return {
     apiInfo,
-    isAuthenticated,
+    isAuthenticated: () => (userInfo() ?? null) !== null,
     userInfo,
-    setIsAuthenticated,
-    setUserInfo: (v: User) => {
-      if (!v) {
-        setUserInfo(v)
-      }
-    },
+    refetchUserInfo,
+    endSessionAction: action(async () => {
+      await Api.authSessionEnd()
+      mutateUserInfo(null)
+      StorageHandler.clearSettings()
+      return { ok: true }
+    }),
   } as const
 }
 

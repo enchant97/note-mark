@@ -12,11 +12,6 @@ func (c *BindConfig) AsAddress() string {
 	return fmt.Sprintf("%s:%d", c.Host, c.Port)
 }
 
-type DBConfig struct {
-	URI  string `env:"URI,notEmpty"`
-	Type string `env:"TYPE,notEmpty" validate:"oneof=sqlite postgres"`
-}
-
 type OidcConfig struct {
 	DisplayName        string `env:"DISPLAY_NAME" validate:"required"`
 	ProviderName       string `env:"PROVIDER_NAME" validate:"required"`
@@ -25,18 +20,21 @@ type OidcConfig struct {
 	EnableUserCreation bool   `env:"ENABLE_USER_CREATION,notEmpty" envDefault:"true"`
 }
 
+type AuthTokenConfig struct {
+	Secret Base64Decoded `env:"SECRET,notEmpty" validate:"gte=32"`
+	Expiry int64         `env:"EXPIRY" envDefault:"259200"`
+}
+
 type AppConfig struct {
-	Bind                      BindConfig    `envPrefix:"BIND__"`
-	DB                        DBConfig      `envPrefix:"DB__"`
-	JWTSecret                 Base64Decoded `env:"JWT_SECRET,notEmpty" validate:"gte=32"`
-	TokenExpiry               int64         `env:"TOKEN_EXPIRY" envDefault:"259200"`
-	DataPath                  string        `env:"DATA_PATH,notEmpty"`
-	StaticPath                string        `env:"STATIC_PATH"`
-	PublicUrl                 string        `env:"PUBLIC_URL,notEmpty" validate:"http_url,endsnotwith=/,required"`
-	EnableInternalSignup      bool          `env:"ENABLE_INTERNAL_SIGNUP,notEmpty" envDefault:"true"`
-	EnableInternalLogin       bool          `env:"ENABLE_INTERNAL_LOGIN,notEmpty" envDefault:"true"`
-	EnableAnonymousUserSearch bool          `env:"ENABLE_ANONYMOUS_USER_SEARCH,notEmpty" envDefault:"true"`
-	NoteSizeLimit             Bytes         `env:"NOTE_SIZE_LIMIT,notEmpty" envDefault:"1M"`
-	AssetSizeLimit            Bytes         `env:"ASSET_SIZE_LIMIT,notEmpty" envDefault:"12M"`
-	OIDC                      *OidcConfig   `envPrefix:"OIDC__" env:",init" validate:"omitempty,required"`
+	Bind                      BindConfig      `envPrefix:"BIND__"`
+	AuthToken                 AuthTokenConfig `envPrefix:"AUTH_TOKEN__"`
+	DataPath                  string          `env:"DATA_PATH,notEmpty" validate:"dirpath,required"`
+	StaticPath                string          `env:"STATIC_PATH" validate:"omitempty,dirpath"`
+	PublicUrl                 string          `env:"PUBLIC_URL,notEmpty" validate:"http_url,endsnotwith=/,required"`
+	EnableInternalSignup      bool            `env:"ENABLE_INTERNAL_SIGNUP,notEmpty" envDefault:"true"`
+	EnableInternalLogin       bool            `env:"ENABLE_INTERNAL_LOGIN,notEmpty" envDefault:"true"`
+	EnableAnonymousUserSearch bool            `env:"ENABLE_ANONYMOUS_USER_SEARCH,notEmpty" envDefault:"true"`
+	FileSizeLimit             Bytes           `env:"FILE_SIZE_LIMIT,notEmpty" envDefault:"12M"`
+	OIDC                      *OidcConfig     `envPrefix:"OIDC__" env:",init" validate:"omitempty,required"`
+	EnvMode                   string          `env:"ENV_MODE" envDefault:"production" validate:"oneof=production development"`
 }

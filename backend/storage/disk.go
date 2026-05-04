@@ -1,233 +1,378 @@
 package storage
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"io/fs"
+	"log/slog"
 	"os"
-	"path"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"time"
 
-	"github.com/google/uuid"
-	"github.com/h2non/filetype"
+	"github.com/adrg/frontmatter"
+	"go.yaml.in/yaml/v4"
+
+	"github.com/enchant97/note-mark/backend/core"
 )
 
-const diskStorageNoteFileName = "note.md"
-
-// returns path as: `base / notes / note-id[:2] / note-id`
-func getNoteDirectory(base string, noteID uuid.UUID) string {
-	noteIDString := noteID.String()
-	noteIDStringPart := noteIDString[:2]
-	dirPath := path.Join(base, "notes", noteIDStringPart, noteIDString)
-	return dirPath
+var skipSystemFilesRegex = []*regexp.Regexp{
+	regexp.MustCompile(`^[Tt]humbs.db$`),
+	regexp.MustCompile(`^.*.DS_Store$`),
+	regexp.MustCompile(`^~\$`),
 }
 
-func getNoteAssetsDirectory(base string, noteID uuid.UUID) string {
-	return path.Join(getNoteDirectory(base, noteID), "assets/")
+type DiskStorageController struct {
+	rootPath string
 }
 
-func getNoteAssetFileName(assetID uuid.UUID) string {
-	return assetID.String() + ".bin"
-}
-
-type DiskController struct {
-	baseDataPath string
-}
-
-func (c DiskController) New(baseDataPath string) StorageController {
-	c = DiskController{
-		baseDataPath: baseDataPath,
+func (sc DiskStorageController) New(rootPath string) (DiskStorageController, error) {
+	if !filepath.IsAbs(rootPath) {
+		return DiskStorageController{}, errors.New("rootPath must be a absolute path")
 	}
-	return &c
+	err := os.MkdirAll(rootPath, os.ModePerm)
+	return DiskStorageController{
+		rootPath: rootPath,
+	}, err
 }
 
-func (c *DiskController) getNoteDirectory(noteID uuid.UUID) string {
-	return getNoteDirectory(c.baseDataPath, noteID)
-}
-
-func (c *DiskController) getNoteAssetsDirectory(noteID uuid.UUID) string {
-	return getNoteAssetsDirectory(c.baseDataPath, noteID)
-}
-
-func (c *DiskController) Setup() error {
-	if err := os.MkdirAll(c.baseDataPath, os.ModePerm); err != nil {
-		return errors.Join(err, ErrWrite)
+func (sc *DiskStorageController) writeFile(
+	username core.Username,
+	slug string,
+	r io.Reader,
+) error {
+	absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+	if err := os.MkdirAll(filepath.Dir(absPath), os.ModePerm); err != nil {
+		return err
 	}
-	return nil
-}
-
-func (c *DiskController) TearDown() error {
-	return nil
-}
-
-func (c *DiskController) WriteNote(noteID uuid.UUID, r io.Reader) error {
-	dirPath := c.getNoteDirectory(noteID)
-	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
-		return errors.Join(err, ErrWrite)
-	}
-	filePath := path.Join(dirPath, diskStorageNoteFileName)
-	f, err := os.Create(filePath)
+	f, err := os.Create(absPath)
 	if err != nil {
-		errors.Join(err, ErrWrite)
+		return err
 	}
 	defer f.Close()
 	_, err = io.Copy(f, r)
 	if err != nil {
-		return errors.Join(err, ErrWrite)
+		return err
 	}
 	return nil
 }
 
-func (c *DiskController) ReadNote(noteID uuid.UUID) (io.ReadCloser, error) {
-	filePath := path.Join(c.getNoteDirectory(noteID), diskStorageNoteFileName)
-	f, err := os.Open(filePath)
+func (sc *DiskStorageController) readFile(
+	username core.Username,
+	slug string,
+) (io.ReadCloser, error) {
+	absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+	f, err := os.Open(absPath)
 	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			return nil, errors.Join(err, ErrNotFound)
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, errors.Join(core.ErrNotFound)
 		}
-		return nil, errors.Join(err, ErrRead)
+		return nil, err
 	}
 	return f, nil
 }
 
-func (c *DiskController) ReadNoteChecksum(noteID uuid.UUID) (string, error) {
-	if reader, err := c.ReadNote(noteID); err != nil {
-		return "", err
-	} else {
-		defer reader.Close()
-		return MakeChecksum(reader)
+func (sc *DiskStorageController) renameFileOrFolder(
+	username core.Username,
+	slug string,
+	newSlug string,
+) error {
+	currentAbsPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+	newAbsPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(newSlug))
+	if err := os.MkdirAll(filepath.Dir(newAbsPath), os.ModePerm); err != nil {
+		return err
 	}
-}
-
-func (c *DiskController) DeleteNote(noteID uuid.UUID) error {
-	dirPath := c.getNoteDirectory(noteID)
-	if err := os.RemoveAll(dirPath); err != nil {
-		return errors.Join(err, ErrWrite)
-	}
-	return nil
-}
-
-func (c *DiskController) WriteNoteAsset(noteID uuid.UUID, assetID uuid.UUID, r io.Reader) error {
-	dirPath := c.getNoteAssetsDirectory(noteID)
-	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
-		return errors.Join(err, ErrWrite)
-	}
-	filePath := path.Join(dirPath, getNoteAssetFileName(assetID))
-	f, err := os.Create(filePath)
-	if err != nil {
-		errors.Join(err, ErrWrite)
-	}
-	defer f.Close()
-	_, err = io.Copy(f, r)
-	if err != nil {
-		return errors.Join(err, ErrWrite)
-	}
-	return nil
-}
-
-func (c *DiskController) ReadNoteAsset(noteID uuid.UUID, assetID uuid.UUID) (io.ReadCloser, error) {
-	filePath := path.Join(c.getNoteAssetsDirectory(noteID), getNoteAssetFileName(assetID))
-	f, err := os.Open(filePath)
-	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			return nil, errors.Join(err, ErrNotFound)
+	if err := os.Rename(currentAbsPath, newAbsPath); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return errors.Join(core.ErrNotFound)
 		}
-		return nil, errors.Join(err, ErrRead)
+		return err
 	}
-	return f, nil
+	return nil
 }
 
-func (c *DiskController) ReadNoteAssetChecksum(noteID uuid.UUID, assetID uuid.UUID) (string, error) {
-	if reader, err := c.ReadNoteAsset(noteID, assetID); err != nil {
-		return "", err
+func (sc *DiskStorageController) CreateUser(username core.Username) error {
+	absPath := filepath.Join(sc.rootPath, string(username))
+	return os.MkdirAll(absPath, os.ModePerm)
+}
+
+func (sc *DiskStorageController) WriteNoteNode(
+	username core.Username,
+	slug string,
+	r io.Reader,
+) error {
+	return sc.writeFile(username, slug+".md", r)
+}
+
+func (sc *DiskStorageController) ReadNoteNode(
+	username core.Username,
+	slug string,
+) (io.ReadCloser, error) {
+	if r, err := sc.readFile(username, slug+".md"); err == nil {
+		// note exists
+		return r, nil
+	} else if errors.Is(err, core.ErrNotFound) {
+		absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+		if _, err := os.Stat(absPath); errors.Is(err, os.ErrNotExist) {
+			return nil, errors.Join(err, core.ErrNotFound)
+		} else if err != nil {
+			return nil, err
+		}
+		// note does not exist, but a directory does (blank note)
+		return io.NopCloser(bytes.NewReader([]byte(""))), nil
 	} else {
-		defer reader.Close()
-		return MakeChecksum(reader)
+		return nil, err
 	}
 }
 
-func (c *DiskController) ReadNoteAssetMimeType(noteID uuid.UUID, assetID uuid.UUID) (string, error) {
-	if r, err := c.ReadNoteAsset(noteID, assetID); err != nil {
-		return "", err
-	} else {
+func (sc *DiskStorageController) ReadNoteNodeFrontMatter(
+	username core.Username,
+	slug string,
+) (core.FrontMatter, error) {
+	r, err := sc.ReadNoteNode(username, slug)
+	if err != nil {
+		return core.FrontMatter{}, err
+	}
+	defer r.Close()
+	var fm core.FrontMatter
+	_, err = frontmatter.Parse(r, &fm)
+	if err != nil {
+		return core.FrontMatter{}, errors.Join(err, core.ErrParsingContent)
+	}
+	return fm, err
+}
+
+func (sc *DiskStorageController) UpdateNoteNodeFrontmatter(
+	username core.Username,
+	slug string,
+	newFrontmatter core.FrontMatter,
+) error {
+	r, err := sc.ReadNoteNode(username, slug)
+	var content []byte
+	var fm core.FrontMatter
+	if err != nil && errors.Is(err, core.ErrNotFound) {
+		// Create new note
+		content = []byte{}
+	} else if err == nil {
+		// Update existing note
 		defer r.Close()
-		if kind, err := filetype.MatchReader(r); err != nil {
-			return "", err
-		} else {
-			return kind.MIME.Value, nil
+		content, err = frontmatter.Parse(r, &fm)
+		if err != nil {
+			return errors.Join(err, core.ErrParsingContent)
 		}
+	} else {
+		return err
+	}
+	rawFm, err := yaml.Marshal(&newFrontmatter)
+	if err != nil {
+		return err
+	}
+	newContent := bytes.Join([][]byte{
+		[]byte("---\n"),
+		rawFm,
+		[]byte("---\n\n"),
+		content,
+	}, []byte(""))
+	return sc.WriteNoteNode(username, slug, bytes.NewBuffer(newContent))
+}
+
+func (sc *DiskStorageController) doesNoteNodeExist(
+	username core.Username,
+	slug string,
+) (bool, error) {
+	absNoteDir := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+	// check whether note directory exists
+	f, err := os.Open(absNoteDir)
+	if err == nil {
+		defer f.Close()
+		_, err = f.Readdirnames(1)
+		if err == nil {
+			// directory was not empty
+			return true, nil
+		} else if err != io.EOF {
+			// something bad happened
+			return false, err
+		}
+		// directory is empty
+	} else if !errors.Is(err, os.ErrNotExist) {
+		// something bad happened
+		return false, err
+	}
+	// check whether note file exists
+	if _, err := os.Stat(absNoteDir + ".md"); errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	} else {
+		return true, err
 	}
 }
 
-func (c *DiskController) DeleteNoteAsset(noteID uuid.UUID, assetID uuid.UUID) error {
-	filePath := path.Join(c.getNoteAssetsDirectory(noteID), getNoteAssetFileName(assetID))
-	if err := os.Remove(filePath); err != nil {
-		return errors.Join(err, ErrWrite)
+func (sc *DiskStorageController) RenameNoteNode(
+	username core.Username,
+	slug string,
+	newSlug string,
+) error {
+	if exists, err := sc.doesNoteNodeExist(username, newSlug); err != nil {
+		return err
+	} else if exists == true {
+		return core.ErrConflict
+	}
+	if err := sc.renameFileOrFolder(username, slug, newSlug); err != nil && !errors.Is(err, core.ErrNotFound) {
+		return err
+	}
+	err := sc.renameFileOrFolder(username, slug+".md", newSlug+".md")
+	if errors.Is(err, core.ErrNotFound) {
+		return nil
+	}
+	return err
+}
+
+func (sc *DiskStorageController) DeleteNoteNode(
+	username core.Username,
+	slug string,
+) error {
+	absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+	os.RemoveAll(absPath)
+	err := os.Remove(absPath + ".md")
+	// handle if note directory existed, but not a note file (blank note)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	return err
+}
+
+func (sc *DiskStorageController) WriteAssetNode(
+	username core.Username,
+	slug string,
+	r io.Reader,
+) error {
+	return sc.writeFile(username, slug, r)
+}
+
+func (sc *DiskStorageController) ReadAssetNode(
+	username core.Username,
+	slug string,
+) (io.ReadCloser, error) {
+	return sc.readFile(username, slug)
+}
+
+func (sc *DiskStorageController) RenameAssetNode(
+	username core.Username,
+	slug string,
+	newSlug string,
+) error {
+	return sc.renameFileOrFolder(username, slug, newSlug)
+}
+
+func (sc *DiskStorageController) DeleteAssetNode(
+	username core.Username,
+	slug string,
+) error {
+	absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+	if err := os.Remove(absPath); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return err
 	}
 	return nil
 }
 
-func (c *DiskController) GetNoteAssetIDs(noteID uuid.UUID) ([]uuid.UUID, error) {
-	dirPath := c.getNoteAssetsDirectory(noteID)
-	entries, err := os.ReadDir(dirPath)
-	if err != nil {
-		return nil, errors.Join(err, ErrRead)
+func (sc *DiskStorageController) DeleteUser(username core.Username) error {
+	absPath := filepath.Join(sc.rootPath, string(username))
+	if err := os.RemoveAll(absPath); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return err
 	}
-	filtersEntries := make([]uuid.UUID, 0)
-	for _, entry := range entries {
-		if !entry.Type().IsRegular() && path.Ext(entry.Name()) == ".bin" {
-			if assetID, err := uuid.Parse(path.Base(entry.Name())); err == nil {
-				filtersEntries = append(filtersEntries, assetID)
-			}
-		}
-	}
-	return filtersEntries, nil
+	return nil
 }
 
-func (c *DiskController) GetNoteInfo(noteID uuid.UUID) (NoteFileInfo, error) {
-	filePath := path.Join(c.getNoteDirectory(noteID), diskStorageNoteFileName)
-	i, err := os.Stat(filePath)
-	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			return NoteFileInfo{}, errors.Join(err, ErrNotFound)
+func (sc *DiskStorageController) DiscoverNodesForUser(
+	username core.Username,
+	fn DiscoverNodesFunc,
+) error {
+	return filepath.WalkDir(filepath.Join(sc.rootPath, string(username)), func(
+		absPath string,
+		d fs.DirEntry,
+		err error,
+	) error {
+		if err != nil {
+			return err
 		}
-		return NoteFileInfo{}, errors.Join(err, ErrRead)
-	}
-	if checksum, err := c.ReadNoteChecksum(noteID); err != nil {
-		return NoteFileInfo{}, err
-	} else {
-		info := NoteFileInfo{
-			ContentLength: i.Size(),
-			LastModified:  i.ModTime(),
-			Checksum:      checksum,
+		relPath, err := filepath.Rel(sc.rootPath, absPath)
+		if err != nil {
+			return err
 		}
-		return info, nil
-	}
-}
-
-func (c *DiskController) GetNoteAssetInfo(noteID uuid.UUID, assetID uuid.UUID) (AssetFileInfo, error) {
-	filePath := path.Join(c.getNoteAssetsDirectory(noteID), getNoteAssetFileName(assetID))
-	i, err := os.Stat(filePath)
-	if err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			return AssetFileInfo{}, errors.Join(err, ErrNotFound)
+		relPathSplit := strings.SplitN(relPath, string(filepath.Separator), 2)
+		// skip if is root path or root/username
+		if len(relPathSplit) <= 1 {
+			return nil
 		}
-		return AssetFileInfo{}, errors.Join(err, ErrRead)
-	}
-	if checksum, err := c.ReadNoteAssetChecksum(noteID, assetID); err != nil {
-		return AssetFileInfo{}, err
-	} else {
-		if mimeType, err := c.ReadNoteAssetMimeType(noteID, assetID); err != nil {
-			return AssetFileInfo{}, err
+		var nodeSlug string
+		var nodeType core.NodeType
+		var nodeModTime time.Time
+		// get node modification time
+		if info, err := d.Info(); err != nil {
+			return err
 		} else {
-			info := AssetFileInfo{
-				FileInfo: FileInfo{
-					ContentLength: i.Size(),
-					LastModified:  i.ModTime(),
-					Checksum:      checksum,
-				},
-				MimeType: mimeType,
+			nodeModTime = info.ModTime()
+		}
+		if d.IsDir() {
+			// skip registering directory as note node if note file exists for it
+			if _, err := os.Stat(absPath + ".md"); !errors.Is(err, os.ErrNotExist) {
+				return err
 			}
-			return info, nil
+		} else {
+			// skip operating system files
+			filename := filepath.Base(absPath)
+			for _, regex := range skipSystemFilesRegex {
+				if regex.MatchString(filename) {
+					return nil
+				}
+			}
+		}
+		// make node slug & discover type
+		if filepath.Ext(absPath) == ".md" || d.IsDir() {
+			nodeSlug = strings.TrimSuffix(filepath.ToSlash(relPathSplit[1]), ".md")
+			nodeType = core.NoteNode
+		} else {
+			nodeSlug = filepath.ToSlash(relPathSplit[1])
+			nodeType = core.AssetNode
+		}
+		// final, more strict node check
+		if !core.IsValidNodeSlug(strings.TrimPrefix(nodeSlug, ".trash/"), nodeType) {
+			slog.Warn(
+				"ignore node, slug does not match required format",
+				"username", username,
+				"slug", nodeSlug,
+				"type", nodeType,
+			)
+			return nil
+		}
+		return fn(core.NodeEntry{}.New(
+			core.NodeSlug(nodeSlug),
+			nodeType,
+			nodeModTime,
+		))
+	})
+}
+
+func (sc *DiskStorageController) DiscoverUsers(fn DiscoverUsersFunc) error {
+	f, err := os.Open(sc.rootPath)
+	if err != nil {
+		return err
+	}
+	dirEntry, err := f.ReadDir(-1)
+	f.Close()
+	if err != nil {
+		return err
+	}
+	for _, entry := range dirEntry {
+		if entry.IsDir() {
+			username := entry.Name()
+			if core.IsValidUsername(username) {
+				fn(core.Username(username))
+			} else {
+				slog.Warn("ignore username, does not match required format", "username", username)
+			}
 		}
 	}
+	return nil
 }

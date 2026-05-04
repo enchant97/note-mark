@@ -37,6 +37,8 @@ FROM golang:1.25 as backend
     RUN go mod download && go mod verify
 
     COPY ./backend .
+
+    RUN go tool sqlc generate
     RUN CGO_ENABLED=0 go build -o /note-mark
 
 FROM gcr.io/distroless/static-debian12
@@ -48,8 +50,6 @@ FROM gcr.io/distroless/static-debian12
 
     ENV BIND__HOST=0.0.0.0
     ENV BIND__PORT=8080
-    ENV DB__URI=/data/db.sqlite
-    ENV DB__TYPE=sqlite
     ENV DATA_PATH=/data
     ENV STATIC_PATH=/static
 

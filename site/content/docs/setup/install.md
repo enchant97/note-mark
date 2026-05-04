@@ -5,14 +5,12 @@ title: 01 - Install
 ## Docker (Official)
 Note Mark is installed by using the all-in-one image, making deployment easier and more consistent.
 
-> Stuck? Watch the [demo video](https://youtu.be/rwL99Ac5g98).
-
 ### Pre-Built Image
 
 Below is the image name:
 
 ```text
-ghcr.io/enchant97/note-mark-aio
+ghcr.io/enchant97/note-mark
 ```
 
 The following labels are available:
@@ -27,7 +25,7 @@ The following labels are available:
 <major>.<minor>.<patch>
 ```
 
-> *IMPORTANT:* The `latest` label is deprecated and does not get updated
+> *IMPORTANT:* There is no `latest` label
 
 ### Build Your Own
 This may take some time depending on your internet and processor speed (about 15 mins on RPI 4).
@@ -48,12 +46,12 @@ volumes:
 
 services:
   note-mark:
-    image: ghcr.io/enchant97/note-mark-aio:{{< app-version >}}
+    image: ghcr.io/enchant97/note-mark:{{< app-version >}}
     restart: unless-stopped
     volumes:
       - data:/data
     environment:
-      JWT_SECRET: "!!! REPLACE ME !!!"
+      AUTH_TOKEN__SECRET: "!!! REPLACE ME !!!"
       PUBLIC_URL: "http://notemark.example.com"
     ports:
       - 80:8080

@@ -1,16 +1,40 @@
+import type { AccessControl, AccessControlMode } from "./types";
+
 const SLUG_SUFFIX_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789"
 const SLUG_SUFFIX_LENGTH = 5;
 
-export function toSlug(v: string): string {
-  return v.toLowerCase().replaceAll(" ", "-").replaceAll(/[^a-z0-9-]/g, "")
+export class Fatal extends Error { }
+
+export type Option<T> = T | undefined
+
+export function optionExpect<T>(v: Option<T>, message: string): T {
+  if (v === undefined) throw new Fatal(message)
+  return v
 }
 
-export function toSlugWithSuffix(v: string, suffixLength = SLUG_SUFFIX_LENGTH): string {
+export function toSlug(v: string): string {
+  return v.trim().replaceAll(/[^0-9a-zA-Z- _]/g, "")
+}
+
+export function toMachineSlug(v: string): string {
+  return v.toLowerCase().replaceAll(" ", "-").replaceAll(/[^0-9a-z-_]/g, "")
+}
+
+export function toMachineSlugWithSuffix(v: string, suffixLength = SLUG_SUFFIX_LENGTH): string {
   let suffix = "-";
   for (let i = 0; i < suffixLength; i++) {
     suffix += SLUG_SUFFIX_CHARS[Math.floor(Math.random() * SLUG_SUFFIX_CHARS.length)]
   }
-  return toSlug(v) + suffix
+  return toMachineSlug(v) + suffix
+}
+
+export function toPathSlug(v: string): string {
+  return v
+    .trim()
+    .replaceAll(/[^0-9a-zA-Z- _/]/g, "")
+    .split("/")
+    .filter((v) => v !== "")
+    .join("/")
 }
 
 export function compare(a: any, b: any): number {
@@ -54,4 +78,35 @@ export async function copyToClipboard(content: string) {
     console.error("failure to copy text to clipboard", err)
     throw new Error("unable to access clipboard, permission may not be granted?")
   }
+}
+
+/**
+ * Convert the named access control mode into a number.
+ * Starting from least permissive: 0.
+ *
+ * Only for use in comparisons, numbers may not be stable across updates.
+ */
+export function accessControlModeToLevelNumber(mode: AccessControlMode): number {
+  switch (mode) {
+    case "write":
+      return 1
+    default:
+      return 0
+  }
+}
+
+export function getAccessControlModeForUser(
+  ac: AccessControl,
+  username?: string,
+): AccessControlMode | null {
+  if (username !== undefined) {
+    if (Object.hasOwn(ac.users ?? {}, username)) {
+      return ac.users![username]
+    } else if (ac.publicRead) {
+      return "read"
+    }
+  } else if (ac.publicRead) {
+    return "read"
+  }
+  return null
 }

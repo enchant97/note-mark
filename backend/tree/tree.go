@@ -1,0 +1,536 @@
+package tree
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"io"
+	"log/slog"
+	"path"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/enchant97/note-mark/backend/core"
+	"github.com/enchant97/note-mark/backend/db"
+	"github.com/enchant97/note-mark/backend/storage"
+	"github.com/google/uuid"
+)
+
+type TreeController struct {
+	sc    storage.StorageController
+	dao   *db.DAO
+	mutex *sync.RWMutex
+	tree  map[core.Username]core.NodeTree
+}
+
+func (tc TreeController) New(sc storage.StorageController, dao *db.DAO) TreeController {
+	return TreeController{
+		sc:    sc,
+		dao:   dao,
+		mutex: &sync.RWMutex{},
+		tree:  map[core.Username]core.NodeTree{},
+	}
+}
+
+// Get the last modification time for a users tree.
+func (tc *TreeController) GetTreeModTimeForUser(username core.Username) (time.Time, error) {
+	tc.mutex.RLock()
+	defer tc.mutex.RUnlock()
+	modTime, err := core.WrapDbErrorWithValue(tc.dao.Queries.GetTreeCacheUpdatedAt(
+		context.Background(),
+		string(username),
+	))
+	if errors.Is(err, core.ErrNotFound) {
+		if _, err := core.WrapDbErrorWithValue(
+			tc.dao.Queries.GetUserUidByUsername(context.Background(), string(username)),
+		); err != nil {
+			return modTime, err
+		}
+		// fresh tree
+		return time.Now().UTC(), nil
+	}
+	return modTime, err
+}
+
+// Get the modification time for a users node.
+func (tc *TreeController) GetTreeModTimeForNode(
+	username core.Username,
+	fullSlug core.NodeSlug,
+) (time.Time, error) {
+	tc.mutex.RLock()
+	defer tc.mutex.RUnlock()
+	node, err := tc.tryGetNodeFromMemory(username, fullSlug)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return node.ModTime, nil
+}
+
+// Get a node tree for a specific user, will return false if no tree exists.
+func (tc *TreeController) TryGetNodeTreeForUser(username core.Username) (core.NodeTree, error) {
+	tc.mutex.RLock()
+	defer tc.mutex.RUnlock()
+	if _, err := tc.dao.Queries.GetUserUidByUsername(context.Background(), string(username)); err != nil {
+		return nil, core.WrapDbError(err)
+	}
+	v, exists := tc.tree[username]
+	if exists {
+		return v, nil
+	}
+	err := tc.unsafeRegisterNewUser(username)
+	if err == nil {
+		return tc.tree[username], nil
+	}
+	return nil, err
+}
+
+// Write a new or update existing note node to tree.
+func (tc *TreeController) WriteNoteNode(
+	username core.Username,
+	fullSlug core.NodeSlug,
+	r io.Reader,
+) error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	if err := tc.sc.WriteNoteNode(username, string(fullSlug), r); err != nil {
+		return err
+	}
+	frontmatter, err := tc.sc.ReadNoteNodeFrontMatter(username, string(fullSlug))
+	if err != nil {
+		return err
+	}
+	if err := tc.insertNodeIntoMemory(username, core.NodeEntry{
+		FullSlug: fullSlug,
+		Type:     core.NoteNode,
+		ModTime:  time.Now(),
+	}, frontmatter); err != nil {
+		return err
+	}
+	return tc.updateCacheFromMemory(username)
+}
+
+// Write a new or update existing asset node to tree.
+func (tc *TreeController) WriteAssetNode(
+	username core.Username,
+	fullSlug core.NodeSlug,
+	r io.Reader,
+) error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	if err := tc.sc.WriteAssetNode(username, string(fullSlug), r); err != nil {
+		return err
+	}
+	if err := tc.insertNodeIntoMemory(username, core.NodeEntry{
+		FullSlug: fullSlug,
+		Type:     core.AssetNode,
+		ModTime:  time.Now(),
+	}, core.FrontMatter{}); err != nil {
+		return err
+	}
+	return tc.updateCacheFromMemory(username)
+}
+
+func (tc *TreeController) UpdateNoteNodeFrontmatter(
+	username core.Username,
+	fullSlug core.NodeSlug,
+	newFrontmatter core.FrontMatter,
+) error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	// TODO return an error if note does not exist
+	if err := tc.sc.UpdateNoteNodeFrontmatter(username, string(fullSlug), newFrontmatter); err != nil {
+		return err
+	}
+	if err := tc.insertNodeIntoMemory(username, core.NodeEntry{
+		FullSlug: fullSlug,
+		Type:     core.NoteNode,
+		ModTime:  time.Now(),
+	}, newFrontmatter); err != nil {
+		return err
+	}
+	return tc.updateCacheFromMemory(username)
+}
+
+// Return a note node's content.
+func (tc *TreeController) GetNoteNodeContent(
+	username core.Username,
+	slug core.NodeSlug,
+) (io.ReadCloser, error) {
+	tc.mutex.RLock()
+	defer tc.mutex.RUnlock()
+	return tc.sc.ReadNoteNode(username, string(slug))
+}
+
+// Return a asset node's content.
+func (tc *TreeController) GetAssetNodeContent(
+	username core.Username,
+	slug core.NodeSlug,
+) (io.ReadCloser, error) {
+	tc.mutex.RLock()
+	defer tc.mutex.RUnlock()
+	return tc.sc.ReadAssetNode(username, string(slug))
+}
+
+// Rename a node.
+func (tc *TreeController) RenameNode(
+	username core.Username,
+	currentFullSlug core.NodeSlug,
+	newFullSlug core.NodeSlug,
+) error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	node, err := tc.tryGetNodeFromMemory(username, currentFullSlug)
+	if err != nil {
+		return err
+	}
+	// update storage
+	if node.Type == core.NoteNode {
+		if err := tc.sc.RenameNoteNode(username, string(currentFullSlug), string(newFullSlug)); err != nil {
+			return err
+		}
+	} else {
+		if err := tc.sc.RenameAssetNode(username, string(currentFullSlug), string(newFullSlug)); err != nil {
+			return err
+		}
+	}
+	frontmatter := core.FrontMatter{}
+	if node.NoteNodeFields != nil {
+		frontmatter = node.FrontMatter
+	}
+	// update in-memory tree
+	if err := tc.insertNodeIntoMemory(username, core.NodeEntry{
+		FullSlug: newFullSlug,
+		Type:     node.Type,
+		ModTime:  time.Now(),
+	}, frontmatter); err != nil {
+		return err
+	}
+	if err := tc.tryDeleteFromMemory(username, currentFullSlug); err != nil {
+		return err
+	}
+	// update cache
+	return tc.updateCacheFromMemory(username)
+}
+
+// Delete a node and any children.
+func (tc *TreeController) DeleteNode(
+	username core.Username,
+	fullSlug core.NodeSlug,
+) error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	node, err := tc.tryGetNodeFromMemory(username, fullSlug)
+	if err != nil {
+		return err
+	}
+	// update storage
+	if node.Type == core.NoteNode {
+		if err := tc.sc.DeleteNoteNode(username, string(fullSlug)); err != nil {
+			return err
+		}
+	} else {
+		if err := tc.sc.DeleteAssetNode(username, string(fullSlug)); err != nil {
+			return err
+		}
+	}
+	// update in-memory tree
+	if err := tc.tryDeleteFromMemory(username, fullSlug); err != nil {
+		return err
+	}
+	// update cache
+	return tc.updateCacheFromMemory(username)
+}
+
+func (tc *TreeController) DebugGetAsJSON() string {
+	tc.mutex.RLock()
+	defer tc.mutex.RUnlock()
+	b, _ := json.MarshalIndent(tc.tree, "", "  ")
+	return string(b)
+}
+
+// Reset the in-memory tree and DB cache to fresh state.
+func (tc *TreeController) Reset() error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	if err := tc.dao.Queries.DeleteTreeCacheEntries(context.Background()); err != nil {
+		return err
+	}
+	tc.tree = map[core.Username]core.NodeTree{}
+	return nil
+}
+
+// Register a new user into the tree, also ensuring it exists in storage.
+//
+// errors with `core.ErrConflict` if user already exists.
+func (tc *TreeController) RegisterNewUser(username core.Username) error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	if _, exists := tc.tree[username]; exists {
+		return core.ErrConflict
+	}
+	return tc.unsafeRegisterNewUser(username)
+}
+
+// Load node tree for every discovered user.
+// Will error if in-memory tree is not in a fresh state.
+//
+// 1. Ensure in-memory tree is not in a fresh state
+// 2. Insert user into DB if does not exist
+// 3. Get tree for user from cache (if exists)
+// 4. Get tree from ingesting from storage (if not in cache)
+// 5. Insert tree into DB cache (if not in cache)
+// 6. Add to in-memory tree
+func (tc *TreeController) Load() error {
+	tc.mutex.Lock()
+	defer tc.mutex.Unlock()
+	if len(tc.tree) != 0 {
+		return errors.New("tree not in fresh state")
+	}
+	return tc.sc.DiscoverUsers(func(username core.Username) error {
+		// ensure user exists in database
+		if _, err := tc.dao.Queries.InsertUser(context.Background(), db.InsertUserParams{
+			Uid:      uuid.Must(uuid.NewV7()),
+			Username: string(username),
+		}); err != nil && !errors.Is(core.WrapDbError(err), core.ErrConflict) {
+			return err
+		}
+		// ensure user exists in node tree
+		if _, exists := tc.tree[username]; !exists {
+			tc.tree[username] = core.NodeTree{}
+		}
+		// use cached tree if one exists
+		if cacheEntry, err := tc.dao.Queries.GetTreeCacheEntry(
+			context.Background(),
+			string(username),
+		); err == nil && core.IsTreeCacheCompatible(cacheEntry.CacheVersion) {
+			slog.Info("found cached tree", "username", username)
+			var cachedTree core.NodeTree
+			if err := core.UnmarshalTreeCache(core.TreeCacheEntry{
+				Cache:   cacheEntry.Cache,
+				Version: cacheEntry.CacheVersion,
+			}, &cachedTree); err != nil {
+				return err
+			}
+			tc.tree[username] = cachedTree
+			return nil
+		} else if !errors.Is(core.WrapDbError(err), core.ErrNotFound) {
+			return err
+		}
+		// discover from storage
+		err := tc.ingestFromStorage(username)
+		if err != nil {
+			return err
+		}
+		// insert entries into cache
+		return tc.updateCacheFromMemory(username)
+	})
+}
+
+// Register a new user into the tree, also ensuring it exists in storage.
+//
+// - will overwrite existing user in tree
+// - assumes tree mutex has been locked for writing
+func (tc *TreeController) unsafeRegisterNewUser(username core.Username) error {
+	tc.tree[username] = core.NodeTree{}
+	if err := tc.sc.CreateUser(username); err != nil {
+		return err
+	}
+	return tc.updateCacheFromMemory(username)
+}
+
+// Insert or update the tree cache from current tree state in-memory.
+//
+// Assumes tree mutex has been locked for writing.
+func (tc *TreeController) updateCacheFromMemory(username core.Username) error {
+	if tree, exists := tc.tree[username]; exists {
+		slog.Info("saving tree to cache", "username", username)
+		cacheEntry, err := core.MarshalTreeCache(tree)
+		if err != nil {
+			return err
+		}
+		// try and insert new cache
+		if err := tc.dao.Queries.InsertTreeCache(context.Background(), db.InsertTreeCacheParams{
+			Username:     string(username),
+			Cache:        cacheEntry.Cache,
+			CacheVersion: cacheEntry.Version,
+		}); err == nil {
+			return nil
+		} else if !errors.Is(core.WrapDbError(err), core.ErrConflict) {
+			return err
+		}
+		// update existing cache
+		return tc.dao.Queries.UpdateTreeCacheEntry(context.Background(), db.UpdateTreeCacheEntryParams{
+			Username:     string(username),
+			Cache:        cacheEntry.Cache,
+			CacheVersion: cacheEntry.Version,
+		})
+	}
+	// no tree exists
+	return nil
+}
+
+// Ingest nodes from storage for given username.
+//
+// Assumes tree mutex has been locked for writing.
+func (tc *TreeController) ingestFromStorage(username core.Username) error {
+	return tc.sc.DiscoverNodesForUser(username, func(nodeEntry core.NodeEntry) error {
+		slog.Info("ingest node", "username", username, "slug", nodeEntry.FullSlug)
+		var frontmatter core.FrontMatter
+		if nodeEntry.Type == core.NoteNode {
+			fm, err := tc.sc.ReadNoteNodeFrontMatter(username, string(nodeEntry.FullSlug))
+			if err != nil {
+				return err
+			}
+			frontmatter = fm
+		}
+		return tc.insertNodeIntoMemory(username, nodeEntry, frontmatter)
+	})
+}
+
+// Insert a node into in-memory tree.
+//
+// Assumes tree mutex has been locked for writing.
+func (tc *TreeController) insertNodeIntoMemory(
+	username core.Username,
+	nodeEntry core.NodeEntry,
+	frontmatter core.FrontMatter,
+) error {
+	var currentTree core.NodeTree
+	// handle username path
+	if tree, exists := tc.tree[username]; exists {
+		currentTree = tree
+	} else {
+		tc.tree[username] = core.NodeTree{}
+		currentTree = tc.tree[username]
+	}
+	slugParts := strings.Split(string(nodeEntry.FullSlug), "/")
+	var currentNode *core.Node
+	// handle top level node
+	if node, exists := currentTree[core.NodeSlug(slugParts[0])]; exists {
+		currentNode = node
+	} else {
+		// make a default note node (will get updated later from discovery)
+		node := core.Node{
+			ModTime: nodeEntry.ModTime,
+			Slug:    core.NodeSlug(slugParts[0]),
+			Type:    core.NoteNode,
+			NoteNodeFields: &core.NoteNodeFields{
+				FrontMatter: core.FrontMatter{},
+				Children:    core.NodeTree{},
+			},
+		}
+		currentTree[core.NodeSlug(slugParts[0])] = &node
+		currentNode = &node
+	}
+	// handle further nodes
+	for _, slugPart := range slugParts[1:] {
+		slugPart := core.NodeSlug(slugPart)
+		if _, exists := currentNode.Children[slugPart]; !exists {
+			currentNode.Children[slugPart] = &core.Node{
+				ModTime: nodeEntry.ModTime,
+				Slug:    slugPart,
+				Type:    core.NoteNode,
+				NoteNodeFields: &core.NoteNodeFields{
+					FrontMatter: core.FrontMatter{},
+					Children:    core.NodeTree{},
+				},
+			}
+		}
+		currentNode = currentNode.Children[slugPart]
+	}
+	// setup final node (the actual node we indented to add)
+	currentNode.ModTime = nodeEntry.ModTime
+	currentNode.Type = nodeEntry.Type
+	// handle noteNode
+	if nodeEntry.Type == core.NoteNode {
+		currentNode.NoteNodeFields = &core.NoteNodeFields{
+			FrontMatter: frontmatter,
+			Children:    currentNode.Children,
+		}
+	} else {
+		currentNode.NoteNodeFields = nil
+	}
+	return nil
+}
+
+// get a node into in-memory tree, if one exists.
+//
+// Assumes tree mutex has been locked for reading.
+func (tc *TreeController) tryGetNodeFromMemory(
+	username core.Username,
+	fullSlug core.NodeSlug,
+) (core.Node, error) {
+	var currentTree core.NodeTree
+	// handle username path
+	if tree, exists := tc.tree[username]; exists {
+		currentTree = tree
+	} else {
+		return core.Node{}, core.ErrNotFound
+	}
+	slugParts := strings.Split(string(fullSlug), "/")
+	var currentNode *core.Node
+	// handle top level node
+	if node, exists := currentTree[core.NodeSlug(slugParts[0])]; exists {
+		currentNode = node
+	} else {
+		return core.Node{}, core.ErrNotFound
+	}
+	// handle further nodes
+	for _, slugPart := range slugParts[1:] {
+		slugPart := core.NodeSlug(slugPart)
+		if _, exists := currentNode.Children[slugPart]; exists {
+			currentNode = currentNode.Children[slugPart]
+		} else {
+			return core.Node{}, core.ErrNotFound
+		}
+	}
+	return *currentNode, nil
+}
+
+// delete node from in-memory tree, if one exists.
+//
+// Assumes tree mutex has been locked for writing.
+func (tc *TreeController) tryDeleteFromMemory(
+	username core.Username,
+	fullSlug core.NodeSlug,
+) error {
+	var currentTree core.NodeTree
+	// handle username path
+	if tree, exists := tc.tree[username]; exists {
+		currentTree = tree
+	} else {
+		return core.ErrNotFound
+	}
+	dirSlug, nodeSlug := path.Split(string(fullSlug))
+	dirSlug = strings.TrimSuffix(dirSlug, "/")
+	if dirSlug == "" {
+		if _, exists := currentTree[core.NodeSlug(nodeSlug)]; exists {
+			delete(currentTree, core.NodeSlug(nodeSlug))
+			return nil
+		}
+	} else {
+		dirParts := strings.Split(dirSlug, "/")
+		var currentNode *core.Node
+		// handle top level node
+		if node, exists := currentTree[core.NodeSlug(dirParts[0])]; exists {
+			currentNode = node
+		} else {
+			return core.ErrNotFound
+		}
+		// handle further nodes
+		for _, slugPart := range dirParts[1:] {
+			slugPart := core.NodeSlug(slugPart)
+			if _, exists := currentNode.Children[slugPart]; exists {
+				currentNode = currentNode.Children[slugPart]
+			} else {
+				return core.ErrNotFound
+			}
+		}
+		if _, exists := currentNode.Children[core.NodeSlug(nodeSlug)]; exists {
+			delete(currentNode.Children, core.NodeSlug(nodeSlug))
+			return nil
+		}
+	}
+	return core.ErrNotFound
+}

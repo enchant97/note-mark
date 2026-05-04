@@ -2,6 +2,7 @@ package core
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -13,8 +14,75 @@ var (
 	DefaultJwtSigningMethod = jwt.SigningMethodHS256
 )
 
+type AuthenticatedUser struct {
+	UserUID  uuid.UUID
+	Username string
+}
+
+func (u *AuthenticatedUser) IntoClaims(expiresAt time.Time) JWTClaims {
+	return JWTClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   u.UserUID.String(),
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
+		},
+	}
+}
+
+type JWTClaims struct {
+	jwt.RegisteredClaims
+}
+
+func (c *JWTClaims) GetUserUID() (uuid.UUID, error) {
+	if userID, err := uuid.Parse(c.Subject); err != nil {
+		return uuid.Nil, err
+	} else {
+		return userID, nil
+	}
+}
+
+// OAuth2.0 Access Token, following: RFC6750 & RFC6749
+type AccessToken struct {
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	ExpiresIn   uint   `json:"expires_in"`
+}
+
+type PasswordGrant struct {
+	Username string `json:"username" required:"false" validate:"required"`
+	Password string `json:"password" required:"false" validate:"required"`
+}
+
+type TokenExchangeGrant struct {
+	Resource           string `json:"resource,omitempty"`
+	Audience           string `json:"audience,omitempty"`
+	Scope              string `json:"scope,omitempty"`
+	RequestedTokenType string `json:"requested_token_type,omitempty"`
+	SubjectToken       string `json:"subject_token" required:"false" validate:"required"`
+	SubjectTokenType   string `json:"subject_token_type" required:"false" validate:"eq=urn:ietf:params:oauth:token-type:access_token"`
+	ActorToken         string `json:"actor_token,omitempty" validate:"required_with=ActorTokenType"`
+	ActorTokenType     string `json:"actor_token_type,omitempty" validate:"required_with=ActorToken,eq=urn:ietf:params:oauth:token-type:id_token"`
+}
+
+// OAuth2.0 Access Token Request, following: RFC6749 + RFC8693
+type AccessTokenRequest struct {
+	GrantType           string `json:"grant_type" validate:"oneof=password urn:ietf:params:oauth:grant-type:token-exchange"`
+	*PasswordGrant      `validate:"required_if=GrantType password"`
+	*TokenExchangeGrant `validate:"required_if=GrantType urn:ietf:params:oauth:grant-type:token-exchange"`
+}
+
+// OpenID UserInfo Response
+type UserInfoResponse struct {
+	Sub               string  `json:"sub"`
+	Name              *string `json:"name,omitempty"`
+	PreferredUsername string  `json:"preferred_username"`
+}
+
 // Create token for authentication
-func CreateAuthenticationToken(user AuthenticatedUser, secretKey []byte, expiresDuration time.Duration) (AccessToken, error) {
+func CreateAuthenticationToken(
+	user AuthenticatedUser,
+	secretKey []byte,
+	expiresDuration time.Duration,
+) (AccessToken, error) {
 	expiresAt := time.Now().Add(expiresDuration)
 	claims := user.IntoClaims(expiresAt)
 	token := jwt.NewWithClaims(DefaultJwtSigningMethod, claims)
@@ -30,18 +98,18 @@ func CreateAuthenticationToken(user AuthenticatedUser, secretKey []byte, expires
 }
 
 // Parse a token and convert into a authenticated user
-func ParseAuthenticationToken(tokenString string, secretKey []byte) (AuthenticatedUser, error) {
-	if token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(t *jwt.Token) (interface{}, error) {
+func ParseAuthenticationToken(tokenString string, secretKey []byte) (uuid.UUID, error) {
+	if token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(t *jwt.Token) (any, error) {
 		return secretKey, nil
 	},
 		jwt.WithValidMethods([]string{DefaultJwtSigningMethod.Alg()}),
 		jwt.WithExpirationRequired()); err != nil {
-		return AuthenticatedUser{}, err
+		return uuid.Nil, err
 	} else {
 		if claims, ok := token.Claims.(*JWTClaims); !ok {
-			return AuthenticatedUser{}, JWTClaimsNotValidError
+			return uuid.Nil, JWTClaimsNotValidError
 		} else {
-			return claims.ToAuthenticatedUser()
+			return claims.GetUserUID()
 		}
 	}
 }
@@ -61,9 +129,9 @@ func (a *AuthenticationDetails) IsAuthenticated() bool {
 	return a.user != nil
 }
 
-func (a *AuthenticationDetails) GetAuthenticatedUser() AuthenticatedUser {
+func (a *AuthenticationDetails) MustGetAuthenticatedUser() AuthenticatedUser {
 	if a.user == nil {
-		panic("no authentication has been set")
+		log.Panicln("no authentication has been set")
 	}
 	return *a.user
 }
@@ -72,9 +140,9 @@ func (a *AuthenticationDetails) GetOptionalAuthenticatedUser() *AuthenticatedUse
 	return a.user
 }
 
-func (a *AuthenticationDetails) GetOptionalUserID() *uuid.UUID {
+func (a *AuthenticationDetails) GetOptionalUserUID() *uuid.UUID {
 	if a.user == nil {
 		return nil
 	}
-	return &a.user.UserID
+	return &a.user.UserUID
 }

@@ -16,6 +16,13 @@ targets:
       - run
       - wasm
     cwd: frontend
+  codegen-backend:
+    program: go
+    args:
+      - tool
+      - sqlc
+      - generate
+    cwd: backend
   dev-frontend:
     program: pnpm
     args:

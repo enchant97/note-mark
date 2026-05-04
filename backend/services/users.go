@@ -1,76 +1,132 @@
 package services
 
 import (
+	"context"
 	"errors"
 
-	"github.com/enchant97/note-mark/backend/config"
+	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
-	"github.com/google/uuid"
+	"github.com/enchant97/note-mark/backend/tree"
 )
 
-var UserSignupDisabledError = errors.New("user sign-up disabled")
-var UserPasswordInvalid = errors.New("user password invalid")
+type UsersService struct {
+	dao                       *db.DAO
+	tc                        *tree.TreeController
+	enableInternalSignup      bool
+	enableInternalLogin       bool
+	enableAnonymousUserSearch bool
+}
 
-type UsersService struct{}
-
-func (s UsersService) CreateUser(appConfig config.AppConfig, toCreate db.CreateUser) (db.User, error) {
-	if !appConfig.EnableInternalSignup {
-		return db.User{}, UserSignupDisabledError
+func (s UsersService) New(
+	dao *db.DAO,
+	tc *tree.TreeController,
+	enableInternalSignup bool,
+	enableInternalLogin bool,
+	enableAnonymousUserSearch bool,
+) UsersService {
+	return UsersService{
+		dao:                       dao,
+		tc:                        tc,
+		enableInternalSignup:      enableInternalSignup,
+		enableInternalLogin:       enableInternalLogin,
+		enableAnonymousUserSearch: enableAnonymousUserSearch,
 	}
-	user := toCreate.IntoUser()
-	return user, dbErrorToServiceError(db.DB.Create(&user).Error)
 }
 
-func (s UsersService) GetUserProfileByID(userID uuid.UUID) (db.User, error) {
-	var user db.User
-	return user, dbErrorToServiceError(db.DB.First(&user, "id = ?", userID).Error)
+func (s *UsersService) CreateUserWithPassword(
+	toCreate core.CreateUserWithPassword,
+) (core.User, error) {
+	if !s.enableInternalSignup {
+		return core.User{}, core.ErrFeatureDisabled
+	}
+	v, err := core.WrapDbErrorWithValue(
+		s.dao.Queries.InsertUserWithPassword(
+			context.Background(),
+			db.InsertUserWithPasswordParams{
+				Uid:          core.MustNewUID(),
+				Username:     toCreate.Username,
+				Name:         core.StringPtrToNullString(toCreate.Name),
+				PasswordHash: core.HashPassword(toCreate.Password),
+			},
+		))
+	if err != nil {
+		return core.User{}, err
+	}
+	if err := s.tc.RegisterNewUser(core.Username(toCreate.Username)); err != nil && !errors.Is(err, core.ErrConflict) {
+		return core.User{}, err
+	}
+	return core.User{
+		ModTime: core.ModTime{
+			CreatedAt: v.CreatedAt,
+			UpdatedAt: v.UpdatedAt,
+		},
+		Uid:      v.Uid,
+		Username: v.Username,
+		Name:     core.NullStringToStringPtr(v.Name),
+	}, nil
 }
 
-func (s UsersService) GetUserByUsername(
-	currentUserID *uuid.UUID,
+func (s *UsersService) GetUserByUsername(username string) (core.User, error) {
+	v, err := core.WrapDbErrorWithValue(
+		s.dao.Queries.GetUserByUsername(
+			context.Background(),
+			username,
+		))
+	if err != nil {
+		return core.User{}, err
+	}
+	return core.User{
+		ModTime: core.ModTime{
+			CreatedAt: v.CreatedAt,
+			UpdatedAt: v.UpdatedAt,
+		},
+		Uid:      v.Uid,
+		Username: v.Username,
+		Name:     core.NullStringToStringPtr(v.Name),
+	}, nil
+}
+
+func (s *UsersService) UpdateUserByUsername(username string, toUpdate core.UpdateUser) error {
+	return core.WrapDbError(s.dao.Queries.UpdateUser(context.Background(), db.UpdateUserParams{
+		Username: username,
+		Name:     core.StringPtrToNullString(toUpdate.Name),
+	}))
+}
+
+func (s *UsersService) UpdateUserPasswordByUsername(
 	username string,
-	getBooks bool,
-	getNotes bool) (db.User, error) {
-	query := db.DB
-	if getBooks || getNotes {
-		query = query.Preload("Books", "owner_id = ? OR is_public = ?", currentUserID, true)
+	v core.UpdateUserPassword,
+) error {
+	if !s.enableInternalLogin {
+		return core.ErrFeatureDisabled
 	}
-	if getNotes {
-		query = query.Preload("Books.Notes")
+	user, err := core.WrapDbErrorWithValue(
+		s.dao.Queries.GetUserPassword(
+			context.Background(),
+			username,
+		))
+	if err != nil {
+		return err
 	}
-	var user db.User
-	return user, dbErrorToServiceError(query.First(&user, "username = ?", username).Error)
+	if ok := core.DoesPasswordMatchHashed(v.ExistingPassword, user.PasswordHash); !ok {
+		return core.ErrInvalidCredentials
+	}
+	return core.WrapDbError(
+		s.dao.Queries.UpdateUserPasswordByUsername(
+			context.Background(),
+			db.UpdateUserPasswordByUsernameParams{
+				Username:     username,
+				PasswordHash: core.HashPassword(v.NewPassword),
+			}),
+	)
 }
 
-func (s UsersService) UpdateUserProfile(userID uuid.UUID, input db.UpdateUser) error {
-	return dbErrorToServiceError(db.DB.
-		Model(&db.User{}).
-		Where("id = ?", userID).
-		Updates(input).
-		Error)
-}
-
-func (s UsersService) UpdateUserPassword(userID uuid.UUID, input db.UpdateUserPassword) error {
-	var user db.User
-	if err := db.DB.
-		First(&user, "id = ?", userID).
-		Select("password").
-		Error; err != nil {
-		return dbErrorToServiceError(err)
+func (s *UsersService) GetUsernameSearch(username string) ([]string, error) {
+	if !s.enableAnonymousUserSearch {
+		return nil, core.ErrFeatureDisabled
 	}
-	if !user.IsPasswordMatch(input.ExistingPassword) {
-		return UserPasswordInvalid
-	}
-	user.SetPassword(input.NewPassword)
-	return dbErrorToServiceError(db.DB.Save(&user).Error)
-}
-
-func (s UsersService) GetSearchForUser(username string) ([]string, error) {
-	var users []string
-	return users, dbErrorToServiceError(db.DB.
-		Model(&db.User{}).
-		Limit(6).
-		Where("username LIKE ?", username+"%").
-		Pluck("username", &users).
-		Error)
+	return core.WrapDbErrorWithValue(
+		s.dao.Queries.GetUsernamesLike(
+			context.Background(),
+			username+"%"))
 }
