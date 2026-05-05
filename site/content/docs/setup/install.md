@@ -2,6 +2,8 @@
 title: 01 - Install
 ---
 
+> Looking to migrate your data from V0.19? [see migration guide]({{< ref "migrate-from-v0" >}})
+
 ## Docker (Official)
 Note Mark is installed by using the all-in-one image, making deployment easier and more consistent.
 

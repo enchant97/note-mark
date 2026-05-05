@@ -79,34 +79,4 @@ docker compose exec note-mark /note-mark --help
 ```
 
 ### Export For V1
-Migrating to V1 is easy with the in-built export tool.
-
-Notes:
-
-- You will need to create your users before import.
-- If using Docker you will need to mount a volume to export into
-
-Add Volume:
-
-```yaml
-    volumes:
-      - data:/data
-      - ./notemark-export:/export
-```
-
-Command:
-
-```sh
-note-mark migrate export-v1 --export-dir /export
-```
-
-
-Export Structure:
-
-```text
-{username}/
-    {book-slug}/
-        {note-slug}.md
-        {note-slug}/
-            {asset-name}
-```
+Migrating to V1 is easy with the in-built export tool. Find out more about [migrating here]({{< ref "migrate-from-v0" >}}).
