@@ -33,6 +33,7 @@
     "@replit/codemirror-vim": "^6.3.0",
     "@solidjs/router": "^0.15.4",
     "codemirror": "^6.0.2",
+    "core-js": "^3.49.0",
     "dompurify": "^3.3.3",
     "feather-icons": "^4.29.2",
     "highlight.js": "^11.11.1",

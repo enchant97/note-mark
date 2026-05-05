@@ -27,7 +27,6 @@ export function insertNode(nodeTree: NodeTree, nodeEntry: NodeEntry) {
       if (currentNode.type !== "note") {
         throw new Error(`node of type '${currentNode.type}' expected 'note'`)
       }
-      // XXX requires modern browsers (2022), maybe polyfill with core-js
       if (!Object.hasOwn(currentNode.children, slugPart)) {
         // node needs creation, create a default note node
         currentNode.children[slugPart] = {

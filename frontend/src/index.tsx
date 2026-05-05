@@ -1,3 +1,7 @@
+// START POLYFILLS
+import "core-js/actual/object"; // for: `Object.hasOwn()`
+import "core-js/actual/structured-clone"; // for: `structuredClone()`
+// END POLYFILLS
 import '~/index.css';
 import { Route, Router } from "@solidjs/router";
 import Wrapper from "./components/Wrapper";

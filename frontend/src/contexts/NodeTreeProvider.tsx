@@ -12,7 +12,6 @@ function makeNodeTreeContext({ nodeTree, setNodeTree }: NodeTreeContextProps) {
   return {
     nodeTree,
     insertNode: (nodeEntry: NodeEntry) => {
-      // XXX requires modern browsers (2022), maybe polyfill with core-js
       const newNodeTree = structuredClone(nodeTree())
       insertNode(newNodeTree, nodeEntry)
       setNodeTree(newNodeTree)
