@@ -34,10 +34,23 @@ func Entrypoint(appVersion string) error {
 		return err
 	}
 	// Setup logger
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		AddSource:   appConfig.EnvMode == "development",
-		ReplaceAttr: httplog.SchemaECS.Concise(appConfig.EnvMode == "development").ReplaceAttr,
-	}))
+	slog.SetLogLoggerLevel(appConfig.Logging.Level.ToSlogLevel())
+	var logger *slog.Logger
+	if appConfig.Logging.EnableJson {
+		// use JSON logging
+		logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+			Level:       appConfig.Logging.Level.ToSlogLevel(),
+			AddSource:   appConfig.EnvMode == "development",
+			ReplaceAttr: httplog.SchemaECS.Concise(appConfig.EnvMode == "development").ReplaceAttr,
+		}))
+	} else {
+		// use TEXT logging
+		logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+			Level:       appConfig.Logging.Level.ToSlogLevel(),
+			AddSource:   appConfig.EnvMode == "development",
+			ReplaceAttr: httplog.SchemaECS.Concise(appConfig.EnvMode == "development").ReplaceAttr,
+		}))
+	}
 	if appConfig.EnvMode == "production" {
 		logger.With(
 			slog.String("app", "note-mark"),
@@ -46,7 +59,6 @@ func Entrypoint(appVersion string) error {
 		)
 	}
 	slog.SetDefault(logger)
-	slog.SetLogLoggerLevel(slog.LevelInfo) // TODO configure this using envvars
 	// Setup DB
 	dbPath := filepath.Join(appConfig.DataPath, "db.sqlite")
 	if err := migrations.MigrateDB(fmt.Sprintf("sqlite://%s", dbPath)); err != nil {

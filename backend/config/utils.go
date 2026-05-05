@@ -3,7 +3,9 @@ package config
 import (
 	"encoding/base64"
 	"errors"
+	"log/slog"
 	"reflect"
+	"strings"
 
 	"github.com/caarlos0/env/v11"
 	"github.com/go-playground/validator/v10"
@@ -40,5 +42,22 @@ func (b *Bytes) UnmarshalText(text []byte) error {
 	} else {
 		*b = Bytes(v)
 		return nil
+	}
+}
+
+type LoggingLevel string
+
+func (l *LoggingLevel) ToSlogLevel() slog.Level {
+	switch strings.ToLower(string(*l)) {
+	case "debug":
+		return slog.LevelDebug
+	case "info":
+		return slog.LevelInfo
+	case "warn", "warning":
+		return slog.LevelWarn
+	case "error":
+		return slog.LevelError
+	default:
+		return slog.LevelInfo
 	}
 }

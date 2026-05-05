@@ -34,10 +34,10 @@ func commandServe(
 	} else {
 		// Start server
 		if appConfig.Bind.UnixSocket == "" {
-			slog.Info(fmt.Sprintf("Serving on http://%s", appConfig.Bind.AsAddress()))
+			slog.Warn(fmt.Sprintf("Serving on http://%s", appConfig.Bind.AsAddress()))
 			return http.ListenAndServe(appConfig.Bind.AsAddress(), mux)
 		} else {
-			slog.Info(fmt.Sprintf("Serving on %s", appConfig.Bind.UnixSocket))
+			slog.Warn(fmt.Sprintf("Serving on %s", appConfig.Bind.UnixSocket))
 			sock, err := net.Listen("unix", appConfig.Bind.UnixSocket)
 			if err != nil {
 				return err

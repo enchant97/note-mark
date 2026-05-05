@@ -1,6 +1,8 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type BindConfig struct {
 	Host       string `env:"HOST" envDefault:"127.0.0.1"`
@@ -25,6 +27,11 @@ type AuthTokenConfig struct {
 	Expiry int64         `env:"EXPIRY" envDefault:"259200"`
 }
 
+type LoggingConfig struct {
+	Level      LoggingLevel `env:"LEVEL" envDefault:"info" validate:"oneof=debug info warn warning error"`
+	EnableJson bool         `env:"ENABLE_JSON" envDefault:"true"`
+}
+
 type AppConfig struct {
 	Bind                      BindConfig      `envPrefix:"BIND__"`
 	AuthToken                 AuthTokenConfig `envPrefix:"AUTH_TOKEN__"`
@@ -36,5 +43,6 @@ type AppConfig struct {
 	EnableAnonymousUserSearch bool            `env:"ENABLE_ANONYMOUS_USER_SEARCH,notEmpty" envDefault:"true"`
 	FileSizeLimit             Bytes           `env:"FILE_SIZE_LIMIT,notEmpty" envDefault:"12M"`
 	OIDC                      *OidcConfig     `envPrefix:"OIDC__" env:",init" validate:"omitempty,required"`
+	Logging                   LoggingConfig   `envPrefix:"LOGGING__"`
 	EnvMode                   string          `env:"ENV_MODE" envDefault:"production" validate:"oneof=production development"`
 }

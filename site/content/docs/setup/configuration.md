@@ -28,6 +28,9 @@ Configuration of the Note Mark is done through environment variables. See the be
 | OIDC__CLIENT_ID            | The OIDC client id                    | -    | -    |
 | OIDC__ENABLE_USER_CREATION | Whether to automatically create users | true | true |
 | | | | | |
+| LOGGING__LEVEL       | Logging level (debug, info, warn, error)  | info | info |
+| LOGGING__ENABLE_JSON | Whether to enable JSON structured logging | true | true |
+| | | | | |
 | ENV_MODE | "production" or "development" | production | production |
 
 ## AUTH_TOKEN__SECRET
