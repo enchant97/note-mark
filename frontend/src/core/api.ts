@@ -85,6 +85,11 @@ export default class Api {
     })
     await throwResponseApiErrors(resp)
   }
+  static async authSessionHas(): Promise<boolean> {
+    let resp = await apiFetch("auth/s/has-session")
+    await throwResponseApiErrors(resp)
+    return await resp.json()
+  }
   static async authGetUserInfo(): Promise<OpenIdUserInfoResponse> {
     let resp = await apiFetch("auth/o/userinfo", {
       method: HttpMethods.GET,

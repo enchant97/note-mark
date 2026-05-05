@@ -8,7 +8,10 @@ const makeSessionContext = () => {
   const [apiInfo] = createResource(Api.getServerInfo)
   const [userInfo, { mutate: mutateUserInfo, refetch: refetchUserInfo }] = createResource(async () => {
     try {
-      return await Api.authGetUserInfo()
+      if (await Api.authSessionHas()) {
+        return await Api.authGetUserInfo()
+      }
+      return null
     } catch (err) {
       if (err instanceof ApiError && err.status === HttpErrors.Unauthorized) {
         return null

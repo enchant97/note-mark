@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -45,6 +46,14 @@ func SetupAuthHandler(
 		OperationID: "EndSession",
 	}, handler.DeleteSessionEnd)
 	huma.Register(api, huma.Operation{
+		Method:      http.MethodGet,
+		Path:        "/api/auth/s/has-session",
+		Hidden:      true,
+		Tags:        []string{"Authentication"},
+		Summary:     "Check whether client has a session",
+		OperationID: "HasSession",
+	}, handler.GetHasSession)
+	huma.Register(api, huma.Operation{
 		Method:      http.MethodPost,
 		Path:        "/api/auth/o/token",
 		Tags:        []string{"Authentication"},
@@ -60,6 +69,10 @@ func SetupAuthHandler(
 		Summary:     "Get user info",
 		OperationID: "GetUserInfo",
 	}, handler.GetUserInfo)
+}
+
+type GetHasSessionOutput struct {
+	Body bool
 }
 
 type RequestAccessTokenInput struct {
@@ -102,6 +115,21 @@ func (h *AuthHandler) DeleteSessionEnd(
 	return &SetCookieOutput{
 		SetCookie: h.authProvider.CreateClearSessionCookie(),
 	}, nil
+}
+
+func (h *AuthHandler) GetHasSession(
+	ctx context.Context,
+	input *struct{},
+) (*GetHasSessionOutput, error) {
+	authDetails, ok := h.authProvider.TryGetAuthDetails(ctx)
+	if !ok {
+		slog.Error("failed to acquire authentication context")
+		return nil, huma.Error500InternalServerError("Unexpected error, see server logs for more info")
+	}
+	if authDetails.IsAuthenticated() {
+		return &GetHasSessionOutput{Body: true}, nil
+	}
+	return &GetHasSessionOutput{Body: false}, nil
 }
 
 func (h *AuthHandler) PostCreateToken(
