@@ -43,7 +43,10 @@ func (sc *DiskStorageController) writeFile(
 	slug string,
 	r io.Reader,
 ) error {
-	absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+	absPath, err := createSecureNodePath(sc.rootPath, username, slug)
+	if err != nil {
+		return err
+	}
 	if err := os.MkdirAll(filepath.Dir(absPath), os.ModePerm); err != nil {
 		return err
 	}
@@ -63,7 +66,10 @@ func (sc *DiskStorageController) readFile(
 	username core.Username,
 	slug string,
 ) (io.ReadCloser, error) {
-	absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+	absPath, err := createSecureNodePath(sc.rootPath, username, slug)
+	if err != nil {
+		return nil, err
+	}
 	f, err := os.Open(absPath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
@@ -79,8 +85,14 @@ func (sc *DiskStorageController) renameFileOrFolder(
 	slug string,
 	newSlug string,
 ) error {
-	currentAbsPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
-	newAbsPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(newSlug))
+	currentAbsPath, err := createSecureNodePath(sc.rootPath, username, slug)
+	if err != nil {
+		return err
+	}
+	newAbsPath, err := createSecureNodePath(sc.rootPath, username, newSlug)
+	if err != nil {
+		return err
+	}
 	if err := os.MkdirAll(filepath.Dir(newAbsPath), os.ModePerm); err != nil {
 		return err
 	}
@@ -114,7 +126,10 @@ func (sc *DiskStorageController) ReadNoteNode(
 		// note exists
 		return r, nil
 	} else if errors.Is(err, core.ErrNotFound) {
-		absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+		absPath, err := createSecureNodePath(sc.rootPath, username, slug)
+		if err != nil {
+			return nil, err
+		}
 		if _, err := os.Stat(absPath); errors.Is(err, os.ErrNotExist) {
 			return nil, errors.Join(err, core.ErrNotFound)
 		} else if err != nil {
@@ -182,7 +197,10 @@ func (sc *DiskStorageController) doesNoteNodeExist(
 	username core.Username,
 	slug string,
 ) (bool, error) {
-	absNoteDir := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+	absNoteDir, err := createSecureNodePath(sc.rootPath, username, slug)
+	if err != nil {
+		return false, err
+	}
 	// check whether note directory exists
 	f, err := os.Open(absNoteDir)
 	if err == nil {
@@ -232,9 +250,12 @@ func (sc *DiskStorageController) DeleteNoteNode(
 	username core.Username,
 	slug string,
 ) error {
-	absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+	absPath, err := createSecureNodePath(sc.rootPath, username, slug)
+	if err != nil {
+		return err
+	}
 	os.RemoveAll(absPath)
-	err := os.Remove(absPath + ".md")
+	err = os.Remove(absPath + ".md")
 	// handle if note directory existed, but not a note file (blank note)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
@@ -269,7 +290,10 @@ func (sc *DiskStorageController) DeleteAssetNode(
 	username core.Username,
 	slug string,
 ) error {
-	absPath := filepath.Join(sc.rootPath, string(username), filepath.FromSlash(slug))
+	absPath, err := createSecureNodePath(sc.rootPath, username, slug)
+	if err != nil {
+		return err
+	}
 	if err := os.Remove(absPath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return err
 	}

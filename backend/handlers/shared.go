@@ -29,7 +29,9 @@ func toGenericHTTPError(err error) error {
 	if err == nil {
 		return nil
 	}
-	if errors.Is(err, core.ErrNotFound) {
+	if errors.Is(err, core.ErrSlugInvalid) {
+		return huma.Error400BadRequest("invalid request content")
+	} else if errors.Is(err, core.ErrNotFound) {
 		return huma.Error404NotFound("not found, or you don't have permission")
 	} else if errors.Is(err, core.ErrConflict) {
 		return huma.Error409Conflict("conflict detected")

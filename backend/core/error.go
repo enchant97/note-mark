@@ -13,6 +13,7 @@ var ErrConflict = errors.New("conflict")
 var ErrParsingContent = errors.New("failed to parse content")
 var ErrInvalidCredentials = errors.New("invalid credentials")
 var ErrFeatureDisabled = errors.New("feature is disabled")
+var ErrSlugInvalid = errors.New("slug invalid")
 
 // / wrap a database error with a specific service error
 func WrapDbError(err error) error {
