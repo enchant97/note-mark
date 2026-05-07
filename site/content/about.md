@@ -6,7 +6,7 @@ Note Mark is a lighting fast and minimal; web-based Markdown notes app. Featurin
 Like what you hear? Take a look below:
 
 ## Showcase
-WIP
+![Preview Image Showing App](site/static/preview.webp)
 
 ## Demo Video
 WIP
