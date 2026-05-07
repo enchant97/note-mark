@@ -12,6 +12,8 @@ export default function Profile() {
   const { apiInfo, userInfo, refetchUserInfo } = useSession()
 
   const onUpdateProfileClick = () => {
+    // TODO request actual user info (to get modTime, etc...)
+    const user = userInfo()
     setModal({
       component: UpdateUserModal,
       props: {
@@ -21,7 +23,11 @@ export default function Profile() {
           }
           clearModal()
         },
-        user: userInfo(),
+        user: {
+          uid: user?.sub,
+          username: user?.preferred_username,
+          name: user?.name,
+        },
       },
     })
   }
