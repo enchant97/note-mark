@@ -23,7 +23,7 @@
     "vite-plugin-solid": "^2.11.12",
     "vite-plugin-wasm": "^3.6.0",
     "vite-tsconfig-paths": "^6.1.1",
-    "wasm-pack": "^0.14.0"
+    "wasm-pack": "^0.15.0"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.3",
