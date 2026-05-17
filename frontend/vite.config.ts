@@ -1,5 +1,4 @@
 import { defineConfig, Plugin } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths'
 import solidPlugin from 'vite-plugin-solid';
 import tailwindcss from '@tailwindcss/vite';
 import wasm from "vite-plugin-wasm";
@@ -19,7 +18,6 @@ function apiProxyPlugin(): Plugin {
 
 export default defineConfig({
   plugins: [
-    tsconfigPaths(),
     tailwindcss(),
     wasm(),
     solidPlugin(),
@@ -31,4 +29,7 @@ export default defineConfig({
   build: {
     target: 'es2022',
   },
+  resolve: {
+    tsconfigPaths: true,
+  }
 });
