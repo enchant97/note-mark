@@ -18,6 +18,18 @@ import Profile from './routes/profile';
 import ScratchPad from './routes/scratch-pad';
 import Node from './routes/[username]/[...fullSlug]';
 import Redirect from './components/Redirect';
+import { useRegisterSW } from "virtual:pwa-register/solid";
+
+useRegisterSW({
+  immediate: true,
+  onRegisteredSW(swUrl, r) {
+    console.debug(`Service Worker at: ${swUrl}`)
+    r && setInterval(() => {
+      console.debug("Checking for Service Worker update")
+      r.update()
+    }, 3_600_000) // check every hour
+  }
+})
 
 const root = document.getElementById('root')!
 root.innerHTML = ""

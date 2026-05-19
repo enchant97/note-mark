@@ -20,6 +20,7 @@
     "tailwindcss": "^4.3.0",
     "typescript": "^5.9.3",
     "vite": "^8.0.10",
+    "vite-plugin-pwa": "^1.3.0",
     "vite-plugin-solid": "^2.11.12",
     "vite-plugin-wasm": "^3.6.0",
     "wasm-pack": "^0.15.0"
@@ -40,6 +41,8 @@
     "openid-client": "^6.8.4",
     "solid-js": "^1.9.12",
     "solid-tree-navigator": "github:enchant97/solid-tree-navigator#f45670b5998b3779a5a7e9de2411c744af2986bf",
-    "split.js": "^1.6.5"
+    "split.js": "^1.6.5",
+    "workbox-build": "^7.4.1",
+    "workbox-window": "^7.4.1"
   }
 }
