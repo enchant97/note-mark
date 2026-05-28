@@ -10,7 +10,7 @@
 @plugin "daisyui/theme" {
     name: "light";
     --color-primary: #2a76b7;
-    --radius-box: var(--radius-xl);
+    --radius-box: var(--radius-3xl);
     --radius-field: var(--radius-xl);
 }
 
