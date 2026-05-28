@@ -53,10 +53,18 @@
 
     .tn-tree-node-expand-btn {
         @apply btn btn-square btn-xs shadow-glass;
+
+        svg {
+            @apply duration-300;
+        }
     }
 
     .tn-active {
         @apply bg-primary dark:text-base-content text-base-300;
+    }
+
+    .tn-tree li[aria-expanded="true"] .tn-tree-node-expand-btn svg {
+        @apply rotate-90;
     }
 
     .split {
