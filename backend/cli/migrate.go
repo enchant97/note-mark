@@ -184,11 +184,24 @@ func commandMigrateExportData(appConfig config.AppConfig, exportDir string) erro
 				log.Printf("starting export on user '%s'\n", user.Username)
 
 				for _, book := range user.Books {
-					bookDir := path.Join(exportDir, user.Username, book.Slug)
+					// prevent CWE-20, CWE-22: slug/username path components must
+					// not escape the export directory (sibling of GHSA-g49p).
+					bookSlug := filepath.Base(book.Slug)
+					userName := filepath.Base(user.Username)
+					if bookSlug != book.Slug || userName != user.Username {
+						log.Printf("disallowed path component found, skipping user '%s' book '%s'\n", user.Username, book.Slug)
+						continue
+					}
+					bookDir := path.Join(exportDir, userName, bookSlug)
 					for _, note := range book.Notes {
 						log.Printf("exporting '%s/%s/%s'\n", user.Username, book.Slug, note.Slug)
 
-						noteDir := path.Join(bookDir, note.Slug)
+						noteSlug := filepath.Base(note.Slug)
+						if noteSlug != note.Slug {
+							log.Printf("disallowed note slug found, skipping '%s'\n", note.Slug)
+							continue
+						}
+						noteDir := path.Join(bookDir, noteSlug)
 						if err := os.MkdirAll(noteDir, os.ModePerm); err != nil {
 							return err
 						}
@@ -284,12 +297,25 @@ func commandMigrateExportDataV1(appConfig config.AppConfig, exportDir string) er
 				log.Printf("starting export on user '%s'\n", user.Username)
 
 				for _, book := range user.Books {
-					bookDir := filepath.Join(exportDir, user.Username, book.Slug)
+					// prevent CWE-20, CWE-22: slug/username path components must
+					// not escape the export directory (sibling of GHSA-g49p).
+					bookSlug := filepath.Base(book.Slug)
+					userName := filepath.Base(user.Username)
+					if bookSlug != book.Slug || userName != user.Username {
+						log.Printf("disallowed path component found, skipping user '%s' book '%s'\n", user.Username, book.Slug)
+						continue
+					}
+					bookDir := filepath.Join(exportDir, userName, bookSlug)
 					if err := os.MkdirAll(bookDir, os.ModePerm); err != nil {
 						return err
 					}
 					for _, note := range book.Notes {
 						log.Printf("exporting '%s/%s/%s'\n", user.Username, book.Slug, note.Slug)
+						noteSlug := filepath.Base(note.Slug)
+						if noteSlug != note.Slug {
+							log.Printf("disallowed note slug found, skipping '%s'\n", note.Slug)
+							continue
+						}
 						// export note content
 						r, err := storage_backend.ReadNote(note.ID)
 						if err != nil && errors.Is(err, storage.ErrNotFound) {
@@ -298,7 +324,7 @@ func commandMigrateExportDataV1(appConfig config.AppConfig, exportDir string) er
 							return err
 						}
 						defer r.Close()
-						f, err := os.Create(filepath.Join(bookDir, note.Slug+".md"))
+						f, err := os.Create(filepath.Join(bookDir, noteSlug+".md"))
 						if err != nil {
 							return err
 						}
@@ -322,7 +348,7 @@ func commandMigrateExportDataV1(appConfig config.AppConfig, exportDir string) er
 						// export note assets
 						if len(note.Assets) != 0 {
 							log.Printf("exporting '%s/%s/%s' assets\n", user.Username, book.Slug, note.Slug)
-							noteDir := filepath.Join(bookDir, note.Slug)
+							noteDir := filepath.Join(bookDir, noteSlug)
 							if err := os.MkdirAll(noteDir, os.ModePerm); err != nil {
 								return err
 							}

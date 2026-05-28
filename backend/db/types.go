@@ -7,7 +7,7 @@ import (
 )
 
 type CreateUser struct {
-	Username string  `json:"username" minLength:"3" maxLength:"30" pattern:"[a-zA-Z0-9]+"`
+	Username string  `json:"username" minLength:"3" maxLength:"30" pattern:"^[a-zA-Z0-9]+$"`
 	Password string  `json:"password"`
 	Name     *string `json:"name" require:"false" maxLength:"128"`
 }
@@ -23,7 +23,7 @@ func (u *CreateUser) IntoUser() User {
 
 type CreateBook struct {
 	Name     string `json:"name" required:"true" minLength:"1" maxLength:"80"`
-	Slug     string `json:"slug" required:"true" minLength:"1" maxLength:"80" pattern:"[a-z0-9-]+"`
+	Slug     string `json:"slug" required:"true" minLength:"1" maxLength:"80" pattern:"^[a-z0-9-]+$"`
 	IsPublic bool   `json:"isPublic,omitempty" default:"false"`
 }
 
@@ -38,7 +38,7 @@ func (b *CreateBook) IntoBook(ownerID uuid.UUID) Book {
 
 type CreateNote struct {
 	Name string `json:"name" required:"true" minLength:"1" maxLength:"80"`
-	Slug string `json:"slug" required:"true" minLength:"1" maxLength:"80" pattern:"[a-z0-9-]+"`
+	Slug string `json:"slug" required:"true" minLength:"1" maxLength:"80" pattern:"^[a-z0-9-]+$"`
 }
 
 func (n *CreateNote) IntoNote(bookID uuid.UUID) Note {
@@ -67,12 +67,12 @@ type UpdateUserPassword struct {
 type UpdateBook struct {
 	UpdatedAt time.Time `json:"-" hidden:"true" readOnly:"true"`
 	Name      string    `json:"name" require:"true" minLength:"1" maxLength:"80"`
-	Slug      string    `json:"slug" require:"true" minLength:"1" maxLength:"80" pattern:"[a-z0-9-]+"`
+	Slug      string    `json:"slug" require:"true" minLength:"1" maxLength:"80" pattern:"^[a-z0-9-]+$"`
 	IsPublic  bool      `json:"isPublic" require:"true"`
 }
 
 type UpdateNote struct {
 	UpdatedAt time.Time `json:"-" hidden:"true" readOnly:"true"`
 	Name      string    `json:"name" require:"true" minLength:"1" maxLength:"80"`
-	Slug      string    `json:"slug" require:"true" minLength:"1" maxLength:"80" pattern:"[a-z0-9-]+"`
+	Slug      string    `json:"slug" require:"true" minLength:"1" maxLength:"80" pattern:"^[a-z0-9-]+$"`
 }
