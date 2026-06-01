@@ -70,19 +70,24 @@ func (s NotesService) GetRecentNotes(currentUserID *uuid.UUID) ([]db.ValueWithSl
 }
 
 func (s NotesService) GetNotesByBookID(currentUserID *uuid.UUID, bookID uuid.UUID, deleted bool) ([]db.Note, error) {
-	tx := db.DB
+	var tx *gorm.DB
 	if deleted {
-		tx = tx.Unscoped()
-	}
-	tx = tx.
-		Preload("Book").
-		Joins("JOIN books ON books.id = notes.book_id").
-		Where(
-			db.DB.Where("books.id = ?", bookID),
-			db.DB.Where("owner_id = ? OR is_public = ?", currentUserID, true),
-		)
-	if deleted {
-		tx = tx.Where("notes.deleted_at IS NOT NULL")
+		tx = db.DB.Unscoped().
+			Preload("Book").
+			Joins("JOIN books ON books.id = notes.book_id").
+			Where(
+				db.DB.Where("books.id = ?", bookID),
+				db.DB.Where("owner_id = ?", currentUserID),
+				db.DB.Where("notes.deleted_at IS NOT NULL"),
+			)
+	} else {
+		tx = db.DB.
+			Preload("Book").
+			Joins("JOIN books ON books.id = notes.book_id").
+			Where(
+				db.DB.Where("books.id = ?", bookID),
+				db.DB.Where("owner_id = ? OR is_public = ?", currentUserID, true),
+			)
 	}
 	var notes []db.Note
 	return notes, dbErrorToServiceError(tx.Find(&notes).Error)
