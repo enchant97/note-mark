@@ -23,9 +23,9 @@ func Entrypoint(appVersion string) error {
 			{
 				Name:  "serve",
 				Usage: "run the api server",
-				Action: func(ctx *cli.Context) error {
-					return commandServe(appConfig)
-				},
+			Action: func(ctx *cli.Context) error {
+				return commandServe(appConfig, appVersion)
+			},
 			},
 			{
 				Name:  "clean",

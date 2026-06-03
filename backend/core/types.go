@@ -57,6 +57,7 @@ type OidcProviderInfo struct {
 }
 
 type ServerInfo struct {
+	Version                   string            `json:"version"`
 	MinSupportedVersion       string            `json:"minSupportedVersion"`
 	AllowInternalSignup       bool              `json:"allowInternalSignup"`
 	AllowInternalLogin        bool              `json:"allowInternalLogin"`

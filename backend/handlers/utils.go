@@ -18,7 +18,8 @@ import (
 
 func SetupHandlers(
 	appConfig config.AppConfig,
-	storage_backend storage.StorageController) (http.Handler, error) {
+	storage_backend storage.StorageController,
+	appVersion string) (http.Handler, error) {
 	mux := chi.NewRouter()
 	mux.Use(func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +48,7 @@ func SetupHandlers(
 		strings.HasPrefix(appConfig.PublicUrl, "https://"),
 	)
 	api.UseMiddleware(authProvider.ProviderMiddleware)
-	SetupMiscHandler(api, appConfig)
+	SetupMiscHandler(api, appConfig, appVersion)
 	SetupAuthHandler(api, appConfig, authProvider)
 	SetupUsersHandler(api, appConfig, authProvider)
 	SetupBooksHandler(api, authProvider)

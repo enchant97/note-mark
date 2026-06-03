@@ -14,7 +14,7 @@ import (
 	"github.com/enchant97/note-mark/backend/storage"
 )
 
-func commandServe(appConfig config.AppConfig) error {
+func commandServe(appConfig config.AppConfig, appVersion string) error {
 	// Connect to storage backend
 	storage_backend := storage.DiskController{}.New(appConfig.DataPath)
 	if err := storage_backend.Setup(); err != nil {
@@ -25,7 +25,7 @@ func commandServe(appConfig config.AppConfig) error {
 	if err := db.InitDB(appConfig.DB); err != nil {
 		return err
 	}
-	if mux, err := handlers.SetupHandlers(appConfig, storage_backend); err != nil {
+	if mux, err := handlers.SetupHandlers(appConfig, storage_backend, appVersion); err != nil {
 		return err
 	} else {
 		// Start server

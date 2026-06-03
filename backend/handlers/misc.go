@@ -8,9 +8,10 @@ import (
 	"github.com/enchant97/note-mark/backend/core"
 )
 
-func SetupMiscHandler(api huma.API, appConfig config.AppConfig) {
+func SetupMiscHandler(api huma.API, appConfig config.AppConfig, appVersion string) {
 	miscHandler := MiscHandler{
 		AppConfig: appConfig,
+		Version:   appVersion,
 	}
 	huma.Get(api, "/api/info", miscHandler.GetServerInfo)
 }
@@ -21,6 +22,7 @@ type GetServerInfoOutput struct {
 
 type MiscHandler struct {
 	AppConfig config.AppConfig
+	Version   string
 }
 
 func (h MiscHandler) GetServerInfo(ctx context.Context, input *struct{}) (*GetServerInfoOutput, error) {
@@ -34,6 +36,7 @@ func (h MiscHandler) GetServerInfo(ctx context.Context, input *struct{}) (*GetSe
 	}
 	return &GetServerInfoOutput{
 		Body: core.ServerInfo{
+			Version:                   h.Version,
 			MinSupportedVersion:       "0.17.0",
 			AllowInternalSignup:       h.AppConfig.EnableInternalSignup,
 			AllowInternalLogin:        h.AppConfig.EnableInternalLogin,
