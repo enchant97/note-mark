@@ -132,4 +132,21 @@
     .breadcrumb-disabled:hover {
         @apply no-underline cursor-not-allowed;
     }
+
+    .note-mark-copy-code {
+        @apply absolute top-2 right-2 px-2 py-1 rounded-field text-xs;
+        @apply bg-base-100/80 text-base-content border border-base-content/20;
+        @apply opacity-0 transition-opacity duration-150;
+        @apply cursor-pointer;
+    }
+
+    pre:hover .note-mark-copy-code,
+    .note-mark-copy-code:focus,
+    .note-mark-copy-code.is-copied {
+        @apply opacity-100;
+    }
+
+    .note-mark-copy-code.is-copied {
+        @apply bg-success/20 border-success/40;
+    }
 }
