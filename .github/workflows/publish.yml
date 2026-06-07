@@ -53,6 +53,13 @@ jobs:
         with:
           name: built-frontend
           path: ./frontend/dist
+      - name: Get app version
+        id: version
+        run: |
+          TAG=$(git tag --points-at HEAD 2>/dev/null | head -n1 || true)
+          SHORT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)
+          VERSION="${TAG:-unknown}-${SHORT_SHA}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v6
@@ -85,3 +92,5 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}

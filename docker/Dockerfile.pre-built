@@ -10,7 +10,7 @@ FROM golang:1.25 as builder
     COPY ./backend .
 
     RUN go tool sqlc generate
-    RUN CGO_ENABLED=0 go build -o /note-mark
+    RUN CGO_ENABLED=0 go build -ldflags "-X github.com/enchant97/note-mark/backend.Version=$VERSION" -o /note-mark
 
 FROM gcr.io/distroless/static-debian12
 
