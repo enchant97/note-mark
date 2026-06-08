@@ -17,7 +17,7 @@ identity_providers:
       - client_id: note-mark # must match OIDC__CLIENT_ID
         client_name: Note Mark
         redirect_uris: # replace with the url of your Note Mark instance
-          - 'https://{note-mark-domain:port}/oidc-callback'
+          - 'https://{note-mark-domain:port}/auth/oidc-callback'
         public: true
         authorization_policy: 'two_factor' # can also be 'one_factor'
         require_pkce: true

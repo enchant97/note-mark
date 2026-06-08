@@ -20,7 +20,7 @@ https://{provider-domain:port}/application/o/{note-mark}/
 Redirect/Callback URL:
 
 ```
-https://{note-mark-domain:port}/oidc-callback
+https://{note-mark-domain:port}/auth/oidc-callback
 ```
 
 Optional:
