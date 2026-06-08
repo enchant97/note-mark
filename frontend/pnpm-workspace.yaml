@@ -4,3 +4,6 @@ allowBuilds:
   wasm-pack: true
 
 minimumReleaseAge: 2880
+
+minimumReleaseAgeExclude:
+  - '@tailwindcss/typography@0.5.20'
