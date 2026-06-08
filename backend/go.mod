@@ -1,6 +1,6 @@
 module github.com/enchant97/note-mark/backend
 
-go 1.25.4
+go 1.26.0
 
 require (
 	github.com/adrg/frontmatter v0.2.0
