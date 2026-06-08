@@ -5,4 +5,4 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    target-branch: next
+    target-branch: main

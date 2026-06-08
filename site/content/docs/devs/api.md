@@ -8,4 +8,4 @@ Note Mark features a REST API for communicating between the frontend and backend
 - OpenAPI JSON: `http://{IP:PORT}/api/openapi.json`
 - OpenAPI YAML: `http://{IP:PORT}/api/openapi.yaml`
 
-This API could be used by a third-party app however, in pre V1 versions the API functionality may change without notice.
+This API could be used by a third-party app however, API functionality may change (check release notes).

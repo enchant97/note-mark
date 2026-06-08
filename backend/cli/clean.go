@@ -1,75 +1,57 @@
 package cli
 
 import (
-	"log"
+	"context"
+	"database/sql"
+	"log/slog"
 
-	"github.com/enchant97/note-mark/backend/config"
+	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/db"
 	"github.com/enchant97/note-mark/backend/storage"
-	"gorm.io/gorm"
+	"github.com/enchant97/note-mark/backend/tree"
+	"golang.org/x/sync/errgroup"
 )
 
-func commandClean(appConfig config.AppConfig) error {
-	// Connect to storage backend
-	storage_backend := storage.DiskController{}.New(appConfig.DataPath)
-	if err := storage_backend.Setup(); err != nil {
-		return err
-	}
-	defer storage_backend.TearDown()
-	// Connect to database
-	if err := db.InitDB(appConfig.DB); err != nil {
-		return err
-	}
-
-	log.Println("starting clean-up, this may take some time...")
-
-	// Delete Notes & Contents
-	log.Println("cleaning-up notes...")
-	var results []db.Note
-	if err := db.DB.Unscoped().
-		Preload("Book").
-		Joins("JOIN books ON books.id = notes.book_id").
-		Where("notes.deleted_at IS NOT NULL OR books.deleted_at IS NOT NULL").
-		Select("notes.id").
-		FindInBatches(&results, 1, func(tx *gorm.DB, batch int) error {
-			for _, result := range results {
-				if err := tx.Transaction(func(tx *gorm.DB) error {
-					if err := tx.Unscoped().Delete(&db.NoteAsset{}, "note_id = ?", result.ID).Error; err != nil {
-						return err
-					}
-					if err := tx.Unscoped().Delete(&result).Error; err != nil {
-						return err
-					}
-					if err := storage_backend.DeleteNote(result.ID); err != nil {
-						return err
-					}
-					return nil
-				}); err != nil {
+func commandCleanUsers(dao *db.DAO, sc storage.StorageController) error {
+	for {
+		users, err := dao.Queries.AdminGetDeletedUsers(context.Background(), 4)
+		if err != nil {
+			return err
+		}
+		if len(users) == 0 {
+			return nil
+		}
+		var wg errgroup.Group
+		for _, user := range users {
+			wg.Go(func() error {
+				slog.Info("delete user", "username", user.Username)
+				tx, err := dao.DB.BeginTx(context.Background(), &sql.TxOptions{})
+				if err != nil {
 					return err
 				}
-			}
-			return nil
-		}).Error; err != nil {
-		return err
+				q := dao.Queries.WithTx(tx)
+				defer tx.Rollback()
+				if err := q.AdminDeleteUser(context.Background(), user.Uid); err != nil {
+					return err
+				}
+				if err := sc.DeleteUser(core.Username(user.Username)); err != nil {
+					return err
+				}
+				return tx.Commit()
+			})
+		}
+		if err := wg.Wait(); err != nil {
+			return err
+		}
 	}
+}
 
-	log.Println("cleaning-up books...")
-	// Delete Note Books
-	if err := db.DB.Unscoped().
-		Where("deleted_at IS NOT NULL").
-		Delete(&db.Book{}).Error; err != nil {
-		return err
-	}
-
-	log.Println("cleaning-up users...")
-	// Delete Users
-	if err := db.DB.Unscoped().
-		Where("deleted_at IS NOT NULL").
-		Delete(&db.User{}).Error; err != nil {
-		return err
-	}
-
-	log.Println("clean-up done")
-
-	return nil
+func commandCleanTrash(
+	sc storage.StorageController,
+	tree tree.TreeController,
+) error {
+	return sc.DiscoverUsers(func(username core.Username) error {
+		slog.Info("delete trash for user", "username", username)
+		return tree.DeleteNode(username, ".trash")
+	})
 }

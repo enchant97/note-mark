@@ -6,21 +6,18 @@ Note Mark is a lighting fast and minimal; web-based Markdown notes app. Featurin
 Like what you hear? Take a look below:
 
 ## Showcase
-[![Preview Image Showing App](/preview.webp)](/preview.webp)
+![Preview Image Showing App](/preview.webp)
 
 ## Demo Video
-[![Demo Video](https://img.youtube.com/vi/rwL99Ac5g98/0.jpg)](https://youtu.be/rwL99Ac5g98 "Demo Video")
-
-<https://youtu.be/rwL99Ac5g98>
+V1 demo and install video is WIP. See part of [migration video](https://youtu.be/NI46L4p7gqc?t=398) to see brief demo.
 
 ## Features
 - Markdown (GitHub Flavored Markdown, see spec [here](https://github.github.com/gfm/))
-- HTML sanitisation, minimizing XSS attacks
 - Mobile Friendly
 - Friendly URLs for cleaner links
 - Dark & Light Theme
-- Notebook Sharing
-- Custom flat-file based storage system
+- Note Sharing
+- Stores data in a standard file/folder system
 - Multiple views for a note (rendered, plain)
 - Lighting fast editor with shortcuts
 - Upload and attach assets

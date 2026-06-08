@@ -10,6 +10,6 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 4
 
-[frontend/**{.html,.js,.jsx,.ts,.tsx}]
+[frontend/**{.html,.js,.jsx,.ts,.tsx,.json}]
 indent_style = space
 indent_size = 2

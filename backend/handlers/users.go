@@ -7,26 +7,37 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/enchant97/note-mark/backend/config"
-	"github.com/enchant97/note-mark/backend/db"
+	"github.com/enchant97/note-mark/backend/core"
 	"github.com/enchant97/note-mark/backend/middleware"
 	"github.com/enchant97/note-mark/backend/services"
 )
 
 func SetupUsersHandler(
 	api huma.API,
+	service services.UsersService,
 	appConfig config.AppConfig,
-	authProvider middleware.AuthDetailsProvider,
+	authProvider *middleware.AuthDetailsProvider,
 ) {
 	userHandler := UsersHandler{
-		AppConfig:    appConfig,
-		AuthProvider: authProvider,
+		service:      service,
+		appConfig:    appConfig,
+		authProvider: authProvider,
 	}
 	huma.Register(api, huma.Operation{
 		Method:        http.MethodPost,
 		Path:          "/api/users",
 		DefaultStatus: http.StatusCreated,
+		Tags:          []string{"Users"},
+		Summary:       "Create a user",
+		OperationID:   "CreateUser",
 	}, userHandler.PostCreateUser)
-	huma.Get(api, "/api/slug/{username}", userHandler.GetUserByUsername)
+	huma.Register(api, huma.Operation{
+		Method:      http.MethodGet,
+		Path:        "/api/users/{username}",
+		Tags:        []string{"Users"},
+		Summary:     "Get user by username",
+		OperationID: "GetUserByUsername",
+	}, userHandler.GetUserByUsername)
 	huma.Register(api, huma.Operation{
 		Method: http.MethodGet,
 		Path:   "/api/users/search",
@@ -37,53 +48,66 @@ func SetupUsersHandler(
 				return huma.Middlewares{authProvider.AuthRequiredMiddleware}
 			}
 		}(),
+		Security: func() []map[string][]string {
+			if appConfig.EnableAnonymousUserSearch {
+				return []map[string][]string{}
+			}
+			return defaultSecurityOp
+		}(),
+		Tags:        []string{"Users"},
+		Summary:     "Search for username",
+		OperationID: "SearchForUsername",
 	}, userHandler.GetSearchForUser)
 	huma.Register(api, huma.Operation{
-		Method:      http.MethodGet,
-		Path:        "/api/users/me",
-		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
-	}, userHandler.GetCurrentUser)
-	huma.Register(api, huma.Operation{
 		Method:      http.MethodPut,
-		Path:        "/api/users/me",
+		Path:        "/api/users/{username}",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		Security:    defaultSecurityOp,
+		Tags:        []string{"Users"},
+		Summary:     "Update user by username",
+		OperationID: "UpdateUserByUsername",
 	}, userHandler.PutCurrentUser)
 	huma.Register(api, huma.Operation{
 		Method:      http.MethodPut,
-		Path:        "/api/users/me/password",
+		Path:        "/api/users/{username}/password",
 		Middlewares: huma.Middlewares{authProvider.AuthRequiredMiddleware},
+		Security:    defaultSecurityOp,
+		Tags:        []string{"Users"},
+		Summary:     "Update user password by username",
+		OperationID: "UpdateUserPasswordByUsername",
 	}, userHandler.PutCurrentUserPassword)
 }
 
 type UsersHandler struct {
-	services.UsersService
-	AppConfig    config.AppConfig
-	AuthProvider middleware.AuthDetailsProvider
+	service      services.UsersService
+	appConfig    config.AppConfig
+	authProvider *middleware.AuthDetailsProvider
 }
 
 type PostCreateUserInput struct {
-	Body db.CreateUser
+	Body core.CreateUserWithPassword
 }
 
 type PostCreateUserOutput struct {
-	Body db.User
+	Body core.User
 }
 
 type GetUserOutput struct {
-	Body db.User
+	Body core.User
 }
 
 type GetUserByUsername struct {
-	Username string `path:"username"`
-	Include  string `query:"include" enum:"books,notes"`
+	UsernamePath
 }
 
 type PutUserInput struct {
-	Body db.UpdateUser
+	GetUserByUsername
+	Body core.UpdateUser
 }
 
 type PutUserPasswordInput struct {
-	Body db.UpdateUserPassword
+	GetUserByUsername
+	Body core.UpdateUserPassword
 }
 
 type GetSearchForUserInput struct {
@@ -94,14 +118,17 @@ type GetSearchForUserOutput struct {
 	Body []string
 }
 
-func (h UsersHandler) PostCreateUser(ctx context.Context, input *PostCreateUserInput) (*PostCreateUserOutput, error) {
-	if user, err := h.UsersService.CreateUser(h.AppConfig, input.Body); err != nil {
-		if errors.Is(err, services.UserSignupDisabledError) {
+func (h UsersHandler) PostCreateUser(
+	ctx context.Context,
+	input *PostCreateUserInput,
+) (*PostCreateUserOutput, error) {
+	if user, err := h.service.CreateUserWithPassword(input.Body); err != nil {
+		if errors.Is(err, core.ErrFeatureDisabled) {
 			return nil, huma.Error403Forbidden("user signup has been disabled by the administrator")
-		} else if errors.Is(err, services.ConflictError) {
+		} else if errors.Is(err, core.ErrConflict) {
 			return nil, huma.Error409Conflict("user with that username already exists")
 		} else {
-			return nil, err
+			return nil, toGenericHTTPError(err)
 		}
 	} else {
 		return &PostCreateUserOutput{
@@ -110,32 +137,15 @@ func (h UsersHandler) PostCreateUser(ctx context.Context, input *PostCreateUserI
 	}
 }
 
-func (h UsersHandler) GetCurrentUser(ctx context.Context, input *struct{}) (*GetUserOutput, error) {
-	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
-	userID := authDetails.GetAuthenticatedUser().UserID
-	if user, err := h.UsersService.GetUserProfileByID(userID); err != nil {
-		return nil, err
-	} else {
-		return &GetUserOutput{
-			Body: user,
-		}, nil
-	}
-}
-
-func (h UsersHandler) GetUserByUsername(ctx context.Context, input *GetUserByUsername) (*GetUserOutput, error) {
-	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
-	optionalUserID := authDetails.GetOptionalUserID()
-	includeBooks := input.Include == "books" || input.Include == "notes"
-	includeNotes := input.Include == "notes"
-	if user, err := h.UsersService.GetUserByUsername(
-		optionalUserID,
-		input.Username,
-		includeBooks,
-		includeNotes); err != nil {
-		if errors.Is(err, services.NotFoundError) {
-			return nil, huma.Error404NotFound("user does not exist or you do not have access")
+func (h UsersHandler) GetUserByUsername(
+	ctx context.Context,
+	input *GetUserByUsername,
+) (*GetUserOutput, error) {
+	if user, err := h.service.GetUserByUsername(string(input.Username)); err != nil {
+		if errors.Is(err, core.ErrNotFound) {
+			return nil, huma.Error404NotFound("user does not exist")
 		} else {
-			return nil, err
+			return nil, toGenericHTTPError(err)
 		}
 	} else {
 		return &GetUserOutput{
@@ -144,36 +154,50 @@ func (h UsersHandler) GetUserByUsername(ctx context.Context, input *GetUserByUse
 	}
 }
 
-func (h UsersHandler) PutCurrentUser(ctx context.Context, input *PutUserInput) (*struct{}, error) {
-	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
-	userID := authDetails.GetAuthenticatedUser().UserID
-	if err := h.UsersService.UpdateUserProfile(userID, input.Body); err != nil {
-		return nil, err
+func (h UsersHandler) PutCurrentUser(
+	ctx context.Context,
+	input *PutUserInput,
+) (*struct{}, error) {
+	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
+	currentUsername := authDetails.MustGetAuthenticatedUser().Username
+	if currentUsername != string(input.Username) {
+		return nil, huma.Error403Forbidden("you do not have permission to update another users account")
+	}
+	if err := h.service.UpdateUserByUsername(string(input.Username), input.Body); err != nil {
+		return nil, toGenericHTTPError(err)
 	} else {
 		return nil, nil
 	}
 }
 
-func (h UsersHandler) PutCurrentUserPassword(ctx context.Context, input *PutUserPasswordInput) (*struct{}, error) {
-	if !h.AppConfig.EnableInternalLogin {
-		return nil, huma.Error403Forbidden("password changes have been disabled by the administrator")
+func (h UsersHandler) PutCurrentUserPassword(
+	ctx context.Context,
+	input *PutUserPasswordInput,
+) (*struct{}, error) {
+	authDetails, _ := h.authProvider.TryGetAuthDetails(ctx)
+	currentUsername := authDetails.MustGetAuthenticatedUser().Username
+	if currentUsername != string(input.Username) {
+		return nil, huma.Error403Forbidden("you do not have permission to update another users account")
 	}
-	authDetails, _ := h.AuthProvider.TryGetAuthDetails(ctx)
-	userID := authDetails.GetAuthenticatedUser().UserID
-	if err := h.UsersService.UpdateUserPassword(userID, input.Body); err != nil {
-		if errors.Is(err, services.UserPasswordInvalid) {
+	if err := h.service.UpdateUserPasswordByUsername(string(input.Username), input.Body); err != nil {
+		if errors.Is(err, core.ErrFeatureDisabled) {
+			return nil, huma.Error403Forbidden("password changes have been disabled by the administrator")
+		} else if errors.Is(err, core.ErrInvalidCredentials) {
 			return nil, huma.Error403Forbidden("current password invalid")
 		} else {
-			return nil, err
+			return nil, toGenericHTTPError(err)
 		}
 	} else {
 		return nil, nil
 	}
 }
 
-func (h UsersHandler) GetSearchForUser(ctx context.Context, input *GetSearchForUserInput) (*GetSearchForUserOutput, error) {
-	if users, err := h.UsersService.GetSearchForUser(input.Username); err != nil {
-		return nil, err
+func (h UsersHandler) GetSearchForUser(
+	ctx context.Context,
+	input *GetSearchForUserInput,
+) (*GetSearchForUserOutput, error) {
+	if users, err := h.service.GetUsernameSearch(input.Username); err != nil {
+		return nil, toGenericHTTPError(err)
 	} else {
 		return &GetSearchForUserOutput{
 			Body: users,

@@ -2,6 +2,8 @@ package middleware
 
 import (
 	"context"
+	"errors"
+	"log"
 	"net/http"
 	"strings"
 
@@ -17,13 +19,20 @@ const (
 
 type AuthDetailsProvider struct {
 	api       huma.API
+	dao       *db.DAO
 	jwtSecret []byte
 	usesHTTPS bool
 }
 
-func (p AuthDetailsProvider) New(api huma.API, jwtSecret []byte, usesHTTPS bool) AuthDetailsProvider {
+func (p AuthDetailsProvider) New(
+	api huma.API,
+	dao *db.DAO,
+	jwtSecret []byte,
+	usesHTTPS bool,
+) AuthDetailsProvider {
 	return AuthDetailsProvider{
 		api:       api,
+		dao:       dao,
 		jwtSecret: jwtSecret,
 		usesHTTPS: usesHTTPS,
 	}
@@ -42,25 +51,38 @@ func (p AuthDetailsProvider) ProviderMiddleware(ctx huma.Context, next func(huma
 		} else {
 			authValue = strings.TrimPrefix(authHeader, "Bearer ")
 		}
-		if user, err := core.ParseAuthenticationToken(authValue, p.jwtSecret); err != nil {
+		// process chosen token
+		if userUID, err := core.ParseAuthenticationToken(authValue, p.jwtSecret); err != nil {
+			// token could not be parsed
 			if cookieErr == nil {
 				p.clearSessionCookie(ctx)
 			}
 			huma.WriteErr(p.api, ctx, http.StatusUnauthorized, "invalid authentication token given")
 			return
 		} else {
-			if allowed, err := db.CanUserAuthenticate(user.UserID); err != nil {
-				return
-			} else if !allowed {
-				if cookieErr == nil {
-					p.clearSessionCookie(ctx)
+			// token parsed, now validate user is still valid
+			// TODO add in-memory caching to this query with ttl
+			if user, err := p.dao.Queries.GetUserByUid(context.Background(), userUID); err != nil {
+				if errors.Is(core.WrapDbError(err), core.ErrNotFound) {
+					if cookieErr == nil {
+						p.clearSessionCookie(ctx)
+					}
+					huma.WriteErr(p.api, ctx, http.StatusUnauthorized, "invalid authentication token given")
+				} else {
+					log.Panicln(err)
 				}
-				huma.WriteErr(p.api, ctx, http.StatusUnauthorized, "invalid authentication token given")
+				return
+			} else {
+				ctx = huma.WithValue(
+					ctx,
+					AuthDetailsProviderContextKey,
+					core.AuthenticationDetails{}.New(&core.AuthenticatedUser{
+						UserUID:  user.Uid,
+						Username: user.Username,
+					}))
+				next(ctx)
 				return
 			}
-			ctx = huma.WithValue(ctx, AuthDetailsProviderContextKey, core.AuthenticationDetails{}.New(&user))
-			next(ctx)
-			return
 		}
 	}
 	ctx = huma.WithValue(ctx, AuthDetailsProviderContextKey, core.AuthenticationDetails{}.New(nil))
@@ -88,39 +110,31 @@ func (p AuthDetailsProvider) TryGetAuthDetails(ctx context.Context) (core.Authen
 	return v, ok
 }
 
-func (p *AuthDetailsProvider) clearSessionCookie(ctx huma.Context) {
-	cookie := http.Cookie{
+func (p *AuthDetailsProvider) getEmptyAuthCooke() http.Cookie {
+	return http.Cookie{
 		HttpOnly: true,
 		Secure:   p.usesHTTPS,
 		Name:     AuthSessionTokenCookieName,
-		Value:    "",
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
-		MaxAge:   0,
 	}
+}
+
+func (p *AuthDetailsProvider) clearSessionCookie(ctx huma.Context) {
+	cookie := p.CreateClearSessionCookie()
 	ctx.AppendHeader("Set-Cookie", cookie.String())
 }
 
 func (p *AuthDetailsProvider) CreateSessionCookie(token core.AccessToken) http.Cookie {
-	return http.Cookie{
-		HttpOnly: true,
-		Secure:   p.usesHTTPS,
-		Name:     AuthSessionTokenCookieName,
-		Value:    token.AccessToken,
-		Path:     "/",
-		SameSite: http.SameSiteStrictMode,
-		MaxAge:   int(token.ExpiresIn),
-	}
+	cookie := p.getEmptyAuthCooke()
+	cookie.Value = token.AccessToken
+	cookie.MaxAge = int(token.ExpiresIn)
+	return cookie
 }
 
 func (p *AuthDetailsProvider) CreateClearSessionCookie() http.Cookie {
-	return http.Cookie{
-		HttpOnly: true,
-		Secure:   p.usesHTTPS,
-		Name:     AuthSessionTokenCookieName,
-		Value:    "",
-		Path:     "/",
-		SameSite: http.SameSiteStrictMode,
-		MaxAge:   0,
-	}
+	cookie := p.getEmptyAuthCooke()
+	cookie.Value = ""
+	cookie.MaxAge = 0
+	return cookie
 }

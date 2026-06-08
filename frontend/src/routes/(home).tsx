@@ -1,16 +1,13 @@
-import { A, Navigate, useNavigate } from '@solidjs/router';
-import { Component, Show } from 'solid-js';
+import { A, Navigate } from '@solidjs/router';
+import { Show } from 'solid-js';
 import { useModal } from '~/contexts/ModalProvider';
-import UserSearchModal from '~/components/modals/user_search';
-import RecentNotes from '~/components/recent_notes';
-import Header from '~/components/header';
-import Icon from '~/components/icon';
+import UserSearchModal from '~/components/modals/UserSearch';
+import Header from '~/components/Header';
+import Icon from '~/components/Icon';
 import { useSession } from '~/contexts/SessionProvider';
-import Api from '~/core/api';
 
-const Home: Component = () => {
-  const navigate = useNavigate()
-  const { isAuthenticated, apiInfo, userInfo, setIsAuthenticated } = useSession()
+export default function Home() {
+  const { apiInfo, userInfo } = useSession()
   const { setModal, clearModal } = useModal()
 
   const openUserSearchModal = () => {
@@ -23,7 +20,7 @@ const Home: Component = () => {
   }
 
   return (
-    <Show when={userInfo() === undefined} fallback={<Navigate href={`/${userInfo()?.username}`} />}>
+    <Show when={(userInfo() ?? null) === null} fallback={<Navigate href={`/${userInfo()?.preferred_username}`} />}>
       <div class="min-h-screen">
         <Header disableDrawerToggle={true} />
         <div class="p-6 mx-6">
@@ -33,20 +30,11 @@ const Home: Component = () => {
               <h1 class="text-5xl font-bold">Note Mark</h1>
               <p class="py-6">Lighting Fast & Minimal Markdown Note Taking App.</p>
               <div class="justify-center" classList={{ 'join': apiInfo()?.enableAnonymousUserSearch }}>
-                <Show when={isAuthenticated()} fallback={
-                  <A
-                    class="join-item btn"
-                    href="/login"
-                  >Login</A>
-                }>
-                  <button
-                    class="join-item btn" onclick={async () => {
-                      await Api.getLogout()
-                      setIsAuthenticated(false)
-                      navigate("/login")
-                    }}>Re-Login</button>
-                </Show>
-                {userInfo() && <A class="btn join-item btn-outline" href={`/${userInfo()?.username}`}>My Notes</A>}
+                <A
+                  class="join-item btn"
+                  href="/auth/login"
+                >Login</A>
+                {userInfo() && <A class="btn join-item btn-outline" href={`/${userInfo()?.preferred_username}`}>My Notes</A>}
                 {apiInfo()?.enableAnonymousUserSearch && <button
                   onclick={() => openUserSearchModal()}
                   class="btn join-item"
@@ -56,18 +44,10 @@ const Home: Component = () => {
                   Find User
                 </button>}
               </div>
-              <div class="max-w-lg mx-auto">
-                <div class="mx-4 my-4">
-                  <h2 class="text-lg font-bold text-center">Recent Notes</h2>
-                  <RecentNotes />
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </div>
     </Show>
   );
-};
-
-export default Home;
+}

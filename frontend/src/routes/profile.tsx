@@ -1,28 +1,33 @@
-import type { Component } from 'solid-js';
 import { A } from '@solidjs/router';
-import UpdateUserModal from '~/components/modals/edit_user';
-import UpdateUserPasswordModal from '~/components/modals/new_password';
+import UpdateUserModal from '~/components/modals/UpdateUser';
+import UpdateUserPasswordModal from '~/components/modals/UpdateUserPassword';
 import { useModal } from '~/contexts/ModalProvider';
 import { User } from '~/core/types';
-import Icon from '~/components/icon';
-import Header from '~/components/header';
+import Icon from '~/components/Icon';
+import Header from '~/components/Header';
 import { useSession } from '~/contexts/SessionProvider';
 
-const Profile: Component = () => {
+export default function Profile() {
   const { setModal, clearModal } = useModal()
-  const { apiInfo, userInfo, setUserInfo } = useSession()
+  const { apiInfo, userInfo, refetchUserInfo } = useSession()
 
   const onUpdateProfileClick = () => {
+    // TODO request actual user info (to get modTime, etc...)
+    const user = userInfo()
     setModal({
       component: UpdateUserModal,
       props: {
         onClose: (newUser?: User) => {
           if (newUser !== undefined) {
-            setUserInfo(newUser)
+            refetchUserInfo()
           }
           clearModal()
         },
-        user: userInfo(),
+        user: {
+          uid: user?.sub,
+          username: user?.preferred_username,
+          name: user?.name,
+        },
       },
     })
   }
@@ -44,7 +49,7 @@ const Profile: Component = () => {
         <div class="flex max-w-md mx-auto">
           <div class="card-body">
             <h1 class="text-4xl text-center font-bold mb-4">My Profile</h1>
-            <div>username: {userInfo()?.username}</div>
+            <div>username: {userInfo()?.preferred_username}</div>
             <div class="mb-2">full-name: {userInfo()?.name || ""}</div>
             <div class="join">
               <button
@@ -61,7 +66,7 @@ const Profile: Component = () => {
             </div>
             <A
               class="btn btn-wide mx-auto mt-4"
-              href={`/${userInfo()?.username}`}
+              href={`/${userInfo()?.preferred_username}`}
             >
               <Icon name="home" />
               Back Home
@@ -72,5 +77,3 @@ const Profile: Component = () => {
     </div>
   );
 };
-
-export default Profile;

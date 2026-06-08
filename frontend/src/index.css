@@ -9,15 +9,15 @@
 
 @plugin "daisyui/theme" {
     name: "light";
-    --color-primary: #2a76b7;
-    --radius-box: var(--radius-xl);
+    --color-primary: oklch(0.55 0.12 248);
+    --radius-box: var(--radius-3xl);
     --radius-field: var(--radius-xl);
 }
 
 @plugin "daisyui/theme" {
     name: "dark";
     --color-base-content: oklch(82% .02 264.4);
-    --color-primary: #235886;
+    --color-primary: oklch(0.43 0.12 248);
     --radius-box: var(--radius-3xl);
     --radius-field: var(--radius-xl);
 }
@@ -53,10 +53,18 @@
 
     .tn-tree-node-expand-btn {
         @apply btn btn-square btn-xs shadow-glass;
+
+        svg {
+            @apply duration-300;
+        }
     }
 
     .tn-active {
-        @apply bg-primary;
+        @apply bg-primary dark:text-base-content text-base-300;
+    }
+
+    .tn-tree li[aria-expanded="true"] .tn-tree-node-expand-btn svg {
+        @apply rotate-90;
     }
 
     .split {

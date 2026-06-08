@@ -1,6 +1,6 @@
 import { Component, Show, createContext, createEffect, createSignal, onMount, useContext } from "solid-js"
 import { Dynamic, Portal } from "solid-js/web"
-import { optionExpect } from "~/core/core"
+import { optionExpect } from "~/core/helpers"
 
 type ModalProps<P = {}> = {
   component: Component

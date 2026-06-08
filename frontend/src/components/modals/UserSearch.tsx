@@ -1,0 +1,69 @@
+import { Component, For, Show, createResource, createSignal } from "solid-js";
+import { A } from "@solidjs/router";
+import BaseModal from "./Base";
+import Api from "~/core/api";
+import { apiErrorIntoToast, useToast } from "~/contexts/ToastProvider";
+import Icon from "~/components/Icon";
+import AlertBox from "../AlertBox";
+
+type UserSearchModalProps = {
+  onClose: () => void
+}
+
+const UserSearchModal: Component<UserSearchModalProps> = (props) => {
+  const { pushToast } = useToast()
+  const [username, setUsername] = createSignal("")
+
+  const sanitisedUsername = () => username().replaceAll(/[^A-Za-z0-9]/g, "")
+
+  const [users] = createResource(sanitisedUsername, async (username) => {
+    if (!username) return
+    try {
+      let resp = await Api.searchForUsername(username)
+      return resp
+    } catch (err) {
+      pushToast(apiErrorIntoToast(err, "searching for users"))
+    }
+  })
+
+  return (
+    <BaseModal title="Find User">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Search By Username</legend>
+        <label class="input validator">
+          <Icon name="user" />
+          Username
+          <input
+            value={username()}
+            oninput={(ev) => setUsername(ev.currentTarget.value)}
+            type="text"
+            placeholder="e.g. leo"
+            pattern="[A-Za-z0-9]+"
+            required
+          />
+        </label>
+      </fieldset>
+      <ul class="my-4 menu gap-2 p-2 overflow-y-auto h-40 max-h-40 lg:h-80 lg:max-h-80 w-full">
+        <For each={users()}>
+          {user => <li><A class="btn justify-start" onclick={() => props.onClose()} href={`/${user}`}>{user}</A></li>}
+        </For>
+      </ul>
+      <Show when={users.error}>{err =>
+        <AlertBox content={err()} level="error" />
+      }</Show>
+      <div class="modal-action">
+        <button
+          onclick={() => props.onClose()}
+          class="btn"
+          disabled={users.loading}
+          type="button"
+        >
+          {users.loading && <span class="loading loading-spinner"></span>}
+          Close
+        </button>
+      </div>
+    </BaseModal>
+  )
+}
+
+export default UserSearchModal
