@@ -3,6 +3,12 @@ title: Migrate From V0.19
 ---
 This guide is aimed at admins wishing to migrate data from V0.19 of Note Mark to V1. New users can skip this guide.
 
+Watch the official video, for a complete walk-through:
+
+[![Migration Video](https://img.youtube.com/vi/NI46L4p7gqc/0.jpg)](https://youtu.be/NI46L4p7gqc "Migration Video")
+
+<https://youtu.be/NI46L4p7gqc>
+
 This guide will assume you have a working V0.19 app and working V1 app and they are following the official install method.
 
 ## 1 - Export From V0.19

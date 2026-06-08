@@ -9,7 +9,7 @@ Like what you hear? Take a look below:
 ![Preview Image Showing App](/preview.webp)
 
 ## Demo Video
-WIP
+V1 demo and install video is WIP. See part of [migration video](https://youtu.be/NI46L4p7gqc?t=398) to see brief demo.
 
 ## Features
 - Markdown (GitHub Flavored Markdown, see spec [here](https://github.github.com/gfm/))
