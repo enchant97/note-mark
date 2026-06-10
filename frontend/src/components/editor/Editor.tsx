@@ -245,7 +245,7 @@ export default function Editor(props: EditorProps) {
     <>
       <div
         ref={(el) => toolbarElement = el}
-        class="flex gap-4 w-full py-2"
+        class="flex gap-4 w-full py-2 bg-base-100"
         classList={{
           "fixed": stickyToolbar(),
           "top-2": stickyToolbar(),
@@ -254,7 +254,7 @@ export default function Editor(props: EditorProps) {
           "px-2": stickyToolbar(),
         }}
       >
-        <menu class="menu menu-horizontal gap-4 shadow-glass backdrop-glass min-w-fit">
+        <menu class="menu menu-horizontal gap-4 backdrop-glass min-w-fit">
           <ul class="menu-horizontal gap-2 flex-nowrap items-center">
             <li><label>Auto Save<span class="toggle toggle-sm">
               <input
@@ -283,7 +283,7 @@ export default function Editor(props: EditorProps) {
             </button></li>
           </ul>
         </menu>
-        <menu class="menu menu-horizontal flex-nowrap gap-4 shadow-glass backdrop-glass overflow-x-auto max-sm:hidden">
+        <menu class="menu menu-horizontal flex-nowrap gap-4 backdrop-glass overflow-x-auto max-sm:hidden">
           <ul class="menu-horizontal gap-2 flex-nowrap">
             <li><button
               class="btn btn-sm btn-square"
@@ -411,7 +411,7 @@ export default function Editor(props: EditorProps) {
             </button></li>
           </ul>
         </menu>
-        <menu class="menu menu-horizontal gap-4 shadow-glass backdrop-glass ml-auto">
+        <menu class="menu menu-horizontal gap-4 backdrop-glass ml-auto">
           <ul class="menu-horizontal gap-2 flex-nowrap ml-auto items-center">
             <li><label>Vim<span class="toggle toggle-sm">
               <input
@@ -429,7 +429,7 @@ export default function Editor(props: EditorProps) {
           </ul>
         </menu>
       </div>
-      <div class="shadow-glass rounded-box p-2" ref={(el) => editorDiv = el}></div>
+      <div class="rounded-box p-2" ref={(el) => editorDiv = el}></div>
     </>
   )
 }

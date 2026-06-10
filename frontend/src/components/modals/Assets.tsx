@@ -95,7 +95,7 @@ export default function AssetsModal(props: {
   }, { name: "onDeleteSubmission" })
   return (
     <BaseModal title="Assets">
-      <form class="shadow-glass rounded-box p-4 my-2" action={createAssetAction.with({
+      <form class="rounded-box p-4 my-2" action={createAssetAction.with({
         username: props.currentUsername,
         parentSlug: props.currentParentSlug,
       })} method="post" enctype="multipart/form-data">
@@ -136,14 +136,14 @@ export default function AssetsModal(props: {
           Upload
         </button>
       </form>
-      <div class="shadow-glass rounded-box p-4 my-2">
+      <div class="rounded-box p-4 my-2">
         <span class="text-md font-bold">Existing Assets</span>
         <ul class="list gap-2">
           <For each={currentAssetList()}>
             {asset => {
               const assetSlug = asset.fullSlug!.split("/").pop()!
               return (
-                <li class="list-row bg-base-100 rounded-box shadow-glass items-center">
+                <li class="list-row bg-base-100 rounded-box items-center">
                   <div><Icon name="file" /></div>
                   <div>{asset.fullSlug!.split("/").pop()}</div>
                   <div class="join">

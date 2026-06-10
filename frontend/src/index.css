@@ -10,6 +10,9 @@
 @plugin "daisyui/theme" {
     name: "light";
     --color-primary: oklch(0.55 0.12 248);
+    --color-base-100: #ffffff;
+    --color-base-200: #f4f5fa;
+    --color-base-300: oklch(87% 0 0);
     --radius-box: var(--radius-3xl);
     --radius-field: var(--radius-xl);
 }
@@ -24,17 +27,9 @@
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-@utility shadow-glass {
-    box-shadow: inset -1px 1px 3px 0 rgba(0, 0, 0, 0.2), 0px 0px 5px 0px rgba(0, 0, 0, 0.1);
-
-    @variant dark {
-        box-shadow: inset -1px 1px 3px 0 rgba(255, 255, 255, 0.3), 0px 0px 5px 0px rgba(0, 0, 0, 0.4);
-    }
-}
-
 @layer base {
     body {
-        @apply bg-base-100 text-base-content;
+        @apply bg-base-200 text-base-content;
     }
 }
 
@@ -52,7 +47,7 @@
     }
 
     .tn-tree-node-expand-btn {
-        @apply btn btn-square btn-xs shadow-glass;
+        @apply btn btn-square btn-xs;
 
         svg {
             @apply duration-300;
@@ -71,7 +66,7 @@
         @apply flex gap-4;
 
         .gutter {
-            @apply hover:bg-base-300 duration-300 shadow-glass rounded-box cursor-ew-resize;
+            @apply hover:bg-base-300 duration-300 rounded-box cursor-ew-resize;
         }
     }
 
@@ -105,20 +100,14 @@
         }
 
         img {
-            @apply shadow-glass rounded-box;
+            @apply rounded-box;
         }
     }
 
     .input {
-        @apply w-full shadow-glass;
+        @apply w-full;
     }
 
-    .btn,
-    .card,
-    .menu,
-    .select {
-        @apply shadow-glass;
-    }
 
     .menu,
     .navbar {

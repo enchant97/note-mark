@@ -6,7 +6,7 @@ type BaseModalProps = ParentProps & {
 
 export default function BaseModal(props: BaseModalProps) {
   return (
-    <div class="modal-box backdrop-glass shadow-glass">
+    <div class="modal-box backdrop-glass">
       <h3 class="font-bold text-lg">{props.title}</h3>
       {props.children}
     </div>

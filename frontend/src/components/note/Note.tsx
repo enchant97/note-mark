@@ -46,7 +46,7 @@ const EditorSplitScreen: Component<{ noteProps: NoteProps, isFullscreen: Accesso
           isFullscreen={isFullscreen}
         />
       </div>
-      <div ref={(el) => renderedElement = el} class="shadow-glass rounded-box p-2 w-full max-h-[90vh] overflow-y-scroll">
+      <div ref={(el) => renderedElement = el} class="rounded-box p-2 w-full max-h-[90vh] overflow-y-scroll">
         <NoteViewRendered noteEngine={noteProps.noteEngine} />
       </div>
     </div>
@@ -93,7 +93,7 @@ export default function Note(props: NoteProps) {
         "min-h-screen": isFullscreen(),
       }}
     >
-      <div class="flex justify-between shadow-glass rounded-box p-1.5">
+      <div class="flex justify-between rounded-box p-1.5 bg-base-100">
         <div role="tablist" class="tabs tabs-box bg-base-100">
           <button
             onclick={() => {

@@ -42,7 +42,7 @@ export default function ContentSearchModal(props: {
         <Suspense fallback={<LoadingSpin />}>
           <For each={searchResult()}>
             {item => (
-              <li class="shadow-glass rounded-box bg-base-100">
+              <li class="rounded-box bg-base-100">
                 <button onClick={() => props.onClose(item)}><Icon name="file" />{item.title}</button>
               </li>
             )}

@@ -72,7 +72,7 @@ export default function Header(props: { disableDrawerToggle?: boolean }) {
 
   return (
     <div class="sticky top-2 z-10 px-2">
-      <div class="navbar backdrop-glass shadow-glass">
+      <div class="navbar backdrop-glass">
         <Show when={!props.disableDrawerToggle}>
           <label for="main-drawer" class="lg:hidden btn btn-square btn-ghost shadow">
             <Icon name="menu" />

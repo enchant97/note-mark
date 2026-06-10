@@ -4,7 +4,7 @@ export default function AlertBox(props: {
 }) {
   return (
     // class="alert-info alert-success alert-warning alert-error"
-    <div role="alert" class={`alert alert-${props.level || "info"} alert-soft shadow-glass`}>
+    <div role="alert" class={`alert alert-${props.level || "info"} alert-soft`}>
       <span>
         {props.content instanceof Error
           ? props.content.message

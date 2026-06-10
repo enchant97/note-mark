@@ -31,7 +31,7 @@ export default function AccessControlEditor(props: {
           value={1}
         />
       </label>
-      <div class="rounded-box bg-base-100 shadow-glass">
+      <div class="rounded-box bg-base-100">
         <div class="flex gap-2 p-4 items-center">
           <label class="input">
             Username

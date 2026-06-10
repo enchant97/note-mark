@@ -43,7 +43,7 @@ export default function User() {
   }
 
   return (
-    <div class="py-6 mt-6 flex flex-col gap-4 max-w-md mx-auto text-center">
+    <div class="card py-6 mt-6 flex flex-col gap-4 max-w-md mx-auto text-center">
       <h1 class="text-4xl font-bold text-center">{params.username}'s Area</h1>
       <div class="text-center">
         <div class="join">

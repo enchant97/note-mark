@@ -46,7 +46,7 @@ export default function Profile() {
     <div class="min-h-screen">
       <Header disableDrawerToggle={true} />
       <div class="p-6 mx-6">
-        <div class="flex max-w-md mx-auto">
+        <div class="card max-w-md mx-auto">
           <div class="card-body">
             <h1 class="text-4xl text-center font-bold mb-4">My Profile</h1>
             <div>username: {userInfo()?.preferred_username}</div>

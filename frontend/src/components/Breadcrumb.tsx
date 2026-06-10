@@ -9,7 +9,7 @@ export default function Breadcrumb(props: { class?: string, username: string, fu
   }
   const slugParts = () => props.fullSlug.split("/")
   return (
-    <div class={"p-2 text-sm breadcrumbs shadow-glass rounded-box flex" + extraClass()}>
+    <div class={"p-2 text-sm breadcrumbs rounded-box flex bg-base-100" + extraClass()}>
       <ul>
         <li>
           <A

@@ -197,8 +197,8 @@ function NoteNode() {
   }
 
   return (
-    <div class="flex flex-col gap-4 mt-6">
-      <div class="flex gap-4 flex-col sm:flex-row">
+    <div class="flex flex-col gap-4 mt-6 bg-base-100 p-4 rounded-box">
+      <div class="flex gap-4 flex-col sm:flex-row bg-base-100">
         <menu class="menu menu-horizontal">
           <Show when={hasWritePermission()}>
             <li>
