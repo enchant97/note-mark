@@ -63,7 +63,7 @@
         @apply bg-primary dark:text-base-content text-base-300;
     }
 
-    .tn-tree li[aria-expanded="true"] .tn-tree-node-expand-btn svg {
+    .tn-tree li[aria-expanded="true"]>.tn-tree-node .tn-tree-node-expand-btn svg {
         @apply rotate-90;
     }
 
