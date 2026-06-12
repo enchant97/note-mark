@@ -53,13 +53,21 @@ export function insertNode(nodeTree: NodeTree, nodeEntry: NodeEntry) {
     delete currentNode["children"]
     delete currentNode["frontmatter"]
   }
+  return currentNode
 }
 
 /**
  * In-memory rename of a node, also updating frontmatter
  */
 export function renameNode(nodeTree: NodeTree, currentFullSlug: string, nodeEntry: NodeEntry) {
-  insertNode(nodeTree, nodeEntry)
+  let currentNode = tryGetNode(nodeTree, currentFullSlug)
+  if (currentNode == null) {
+    throw new Error("node does not exist")
+  }
+  let newNode = insertNode(nodeTree, nodeEntry)
+  if (currentNode.type === "note") {
+    Object.assign(newNode, { children: currentNode.children })
+  }
   deleteNode(nodeTree, currentFullSlug)
 }
 

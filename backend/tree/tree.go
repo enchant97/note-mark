@@ -100,7 +100,7 @@ func (tc *TreeController) WriteNoteNode(
 	if err != nil {
 		return err
 	}
-	if err := tc.insertNodeIntoMemory(username, core.NodeEntry{
+	if _, err := tc.insertNodeEntryIntoMemory(username, core.NodeEntry{
 		FullSlug: fullSlug,
 		Type:     core.NoteNode,
 		ModTime:  time.Now(),
@@ -121,7 +121,7 @@ func (tc *TreeController) WriteAssetNode(
 	if err := tc.sc.WriteAssetNode(username, string(fullSlug), r); err != nil {
 		return err
 	}
-	if err := tc.insertNodeIntoMemory(username, core.NodeEntry{
+	if _, err := tc.insertNodeEntryIntoMemory(username, core.NodeEntry{
 		FullSlug: fullSlug,
 		Type:     core.AssetNode,
 		ModTime:  time.Now(),
@@ -142,7 +142,7 @@ func (tc *TreeController) UpdateNoteNodeFrontmatter(
 	if err := tc.sc.UpdateNoteNodeFrontmatter(username, string(fullSlug), newFrontmatter); err != nil {
 		return err
 	}
-	if err := tc.insertNodeIntoMemory(username, core.NodeEntry{
+	if _, err := tc.insertNodeEntryIntoMemory(username, core.NodeEntry{
 		FullSlug: fullSlug,
 		Type:     core.NoteNode,
 		ModTime:  time.Now(),
@@ -199,12 +199,14 @@ func (tc *TreeController) RenameNode(
 		frontmatter = node.FrontMatter
 	}
 	// update in-memory tree
-	if err := tc.insertNodeIntoMemory(username, core.NodeEntry{
+	if newNode, err := tc.insertNodeEntryIntoMemory(username, core.NodeEntry{
 		FullSlug: newFullSlug,
 		Type:     node.Type,
 		ModTime:  time.Now(),
 	}, frontmatter); err != nil {
 		return err
+	} else {
+		newNode.Children = node.Children
 	}
 	if err := tc.tryDeleteFromMemory(username, currentFullSlug); err != nil {
 		return err
@@ -384,18 +386,20 @@ func (tc *TreeController) ingestFromStorage(username core.Username) error {
 			}
 			frontmatter = fm
 		}
-		return tc.insertNodeIntoMemory(username, nodeEntry, frontmatter)
+		_, err := tc.insertNodeEntryIntoMemory(username, nodeEntry, frontmatter)
+		return err
 	})
 }
 
 // Insert a node into in-memory tree.
+// Returning a reference to the created node or an error.
 //
 // Assumes tree mutex has been locked for writing.
-func (tc *TreeController) insertNodeIntoMemory(
+func (tc *TreeController) insertNodeEntryIntoMemory(
 	username core.Username,
 	nodeEntry core.NodeEntry,
 	frontmatter core.FrontMatter,
-) error {
+) (*core.Node, error) {
 	var currentTree core.NodeTree
 	// handle username path
 	if tree, exists := tc.tree[username]; exists {
@@ -451,7 +455,7 @@ func (tc *TreeController) insertNodeIntoMemory(
 	} else {
 		currentNode.NoteNodeFields = nil
 	}
-	return nil
+	return currentNode, nil
 }
 
 // get a node into in-memory tree, if one exists.
