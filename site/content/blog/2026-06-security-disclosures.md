@@ -12,7 +12,7 @@ Fixed by ensuring slugs cannot have path separators, also restricted the usernam
 - affected versions: `>= 0.6.0`
 - patched versions: `0.19.5`
 - cwe: `CWE-20` `CWE-22`
-- cve: ``
+- cve: `CVE-2026-50553`
 - score: `High`
 - credit:
     - [@tonghuaroot](https://github.com/tonghuaroot) (reporter)
@@ -27,7 +27,7 @@ Fixed by adjusting queries.
 - affected versions: `>= 0.6.0`
 - patched versions: `0.19.5`
 - cwe: `CWE-200` `CWE-285`
-- cve: ``
+- cve: `CVE-2026-50554`
 - score: `5.3/10`
 - credit:
     - [@Yunkaiwjs](https://github.com/Yunkaiwjs) (reporter)

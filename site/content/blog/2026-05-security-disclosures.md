@@ -12,7 +12,7 @@ Fixed by ensuring export features sanitise asset names and prevent any new asset
 - affected versions: `>= 0.13.0`
 - patched versions: `0.19.4`
 - cwe: `CWE-20` `CWE-22`
-- cve: ``
+- cve: `CVE-2026-44522`
 - score: `8.6/10`
 - credit: [@rvizx](https://github.com/rvizx) (reporter)
 - more info: <https://github.com/enchant97/note-mark/security/advisories/GHSA-g49p-4qxj-88v3>
@@ -27,7 +27,7 @@ Fixed by preventing startup when the secret is too short.
 - affected versions: `>= 0.6.0`
 - patched versions: `0.19.4`
 - cwe: `CWE-326` `CWE-345`
-- cve: ``
+- cve: `CVE-2026-44523`
 - score: `10/10`
 - credit: [@osageling](https://github.com/osageling) (reporter)
 - more info: <https://github.com/enchant97/note-mark/security/advisories/GHSA-q6mh-rqwh-g786>
