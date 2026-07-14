@@ -33,9 +33,12 @@ export default function Profile() {
   }
 
   const onUpdatePasswordClick = () => {
+    const user = userInfo()
+    if (!user) { return }
     setModal({
       component: UpdateUserPasswordModal,
       props: {
+        username: user.preferred_username,
         onClose: clearModal,
       },
     },
