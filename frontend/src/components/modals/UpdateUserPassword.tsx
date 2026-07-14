@@ -1,56 +1,52 @@
-import { createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import BaseModal from './Base';
-import { apiErrorIntoToast, ToastType, useToast } from '~/contexts/ToastProvider';
-import Api, { HttpErrors } from '~/core/api';
+import Api from '~/core/api';
+import { action, useSubmission } from '@solidjs/router';
+import { createEffect, Show } from 'solid-js';
+import AlertBox from '../AlertBox';
 
-type UpdateUserPasswordModalProps = {
-  username: string
-  onClose: () => void
-}
+const updateUserPasswordAction = action(async (where: { username: string }, formData: FormData) => {
+  const existingPassword = formData.get("existingPassword")?.toString()
+  const newPassword = formData.get("newPassword")?.toString()
+  if (existingPassword === undefined || newPassword === undefined) {
+    throw "invalid form data"
+  }
+  await Api.updateUserPassword(where.username, {
+    existingPassword,
+    newPassword,
+  })
+  return {
+    ok: true,
+  } as const
+})
 
-export default function UpdateUserPasswordModal(props: UpdateUserPasswordModalProps) {
-  const { pushToast } = useToast()
+export default function UpdateUserPasswordModal(props: {
+  username: string,
+  onClose: () => void,
+}) {
   const [form, setForm] = createStore({
     existingPassword: "",
     newPassword: "",
     newPasswordConfirm: "",
   })
-  const [loading, setLoading] = createSignal(false)
-
-  const passwordsMatch = () => form.newPassword === form.newPasswordConfirm
-
-  const onSubmit = async (ev: Event) => {
-    ev.preventDefault()
-    setLoading(true)
-    try {
-      await Api.updateUserPassword(props.username, {
-        existingPassword: form.existingPassword,
-        newPassword: form.newPassword,
-      })
+  const submission = useSubmission(updateUserPasswordAction)
+  createEffect(() => {
+    if (submission.result?.ok) {
       props.onClose()
-    } catch (err) {
-      if (err.status === HttpErrors.Forbidden) {
-        pushToast({
-          message: "existing password not accepted, did you type it correctly?",
-          type: ToastType.ERROR,
-        })
-      } else {
-        pushToast(apiErrorIntoToast(err, "updating new password"))
-      }
-    } finally {
-      setLoading(false)
     }
-  }
-
+  })
+  const passwordsMatch = () => form.newPassword === form.newPasswordConfirm
   return (
     <BaseModal title="Update Password">
-      <form onsubmit={onSubmit}>
+      <form action={updateUserPasswordAction.with({
+        username: props.username,
+      })} method="post">
         <fieldset class="fieldset">
           <legend class="fieldset-legend">Password details</legend>
           <label class="input validator">
             Current Password
             <input
+              name="existingPassword"
               oninput={(ev) => setForm({
                 existingPassword: ev.currentTarget.value,
               })}
@@ -64,6 +60,7 @@ export default function UpdateUserPasswordModal(props: UpdateUserPasswordModalPr
           <label class="input validator">
             New Password
             <input
+              name="newPassword"
               oninput={(ev) => setForm({
                 newPassword: ev.currentTarget.value,
               })}
@@ -77,6 +74,7 @@ export default function UpdateUserPasswordModal(props: UpdateUserPasswordModalPr
           <label class="input validator">
             Confirm New Password
             <input
+              name="newPasswordConfirm"
               oninput={(ev) => setForm({
                 newPasswordConfirm: ev.currentTarget.value,
               })}
@@ -89,11 +87,14 @@ export default function UpdateUserPasswordModal(props: UpdateUserPasswordModalPr
             />
           </label>
         </fieldset>
+        <Show when={submission.error}>{err =>
+          <AlertBox content={err()} level="error" />
+        }</Show>
         <div class="modal-action">
           <button
             class="btn btn-primary"
-            disabled={!passwordsMatch() || loading()}
-            classList={{ loading: loading() }}
+            disabled={!passwordsMatch() || submission.pending}
+            classList={{ loading: submission.pending }}
             type="submit">
             Save
           </button>
