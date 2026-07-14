@@ -36,6 +36,13 @@
     body {
         @apply bg-base-100 text-base-content;
     }
+
+    /* fixes IOS auto-zoom on editor selection */
+    @media screen and (max-width: 768px) {
+        .ͼ1.cm-editor {
+            font-size: 1rem !important;
+        }
+    }
 }
 
 @layer components {
