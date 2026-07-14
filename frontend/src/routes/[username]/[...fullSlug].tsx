@@ -228,7 +228,7 @@ function NoteNode() {
               Assets
             </button></li>
           </Show>
-          <li><details class="dropdown">
+          <li><details class="dropdown dropdown-end">
             <summary><Icon name="more-horizontal" /></summary>
             <ul class="p-2 menu dropdown-content z-1 w-52 backdrop-glass">
               <li><button

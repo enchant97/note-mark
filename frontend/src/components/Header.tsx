@@ -11,7 +11,7 @@ function ThemeSwitcher() {
   )
 
   return (
-    <details class="dropdown">
+    <details class="dropdown dropdown-end">
       <summary class="btn flex gap-2">
         <Icon name="sun" />
         <Icon name="moon" />
