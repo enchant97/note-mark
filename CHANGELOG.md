@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-10-02
+### Fixes
+- security vulnerability GHSA-6p2v-mc83-63wr; Users with write access can rename notes into locations where they only have read access
+### Changed
+- bump deps
+
 ## [1.1.0] - 2026-09-01
 ### Fixes
 - security vulnerability GHSA-4937-wfv8-7crc; No username validation on OIDC username

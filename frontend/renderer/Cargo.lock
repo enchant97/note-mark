@@ -349,7 +349,7 @@ dependencies = [
 
 [[package]]
 name = "renderer"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "pulldown-cmark",
  "serde",
