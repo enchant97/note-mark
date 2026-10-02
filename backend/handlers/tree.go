@@ -346,7 +346,7 @@ func (h TreeHandler) PostRenameNode(
 	} else if nodeType != core.NoteNode {
 		return nil, huma.Error422UnprocessableEntity("invalid slug")
 	}
-	// access control check
+	// access control check for source
 	if acMode, err := h.service.GetAvailableNodeAccessControlMode(
 		&authenticatedUser,
 		input.Username,
@@ -370,6 +370,17 @@ func (h TreeHandler) PostRenameNode(
 	}
 	if nodeType != newNodeType {
 		return nil, huma.Error422UnprocessableEntity("invalid slug")
+	}
+	// access control check for destination
+	if acMode, err := h.service.GetAvailableNodeAccessControlMode(
+		&authenticatedUser,
+		input.Username,
+		sanitizedNewSlug,
+		true,
+	); err != nil {
+		return nil, toGenericHTTPError(err)
+	} else if acMode == nil || *acMode != core.AccessControlWriteMode {
+		return nil, huma.Error403Forbidden("you don't have permission")
 	}
 	return nil, toGenericHTTPError(
 		h.service.RenameNode(input.Username, sanitizedSlug, sanitizedNewSlug),
